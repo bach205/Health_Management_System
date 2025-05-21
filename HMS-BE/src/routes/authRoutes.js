@@ -14,9 +14,16 @@ Router.post('/login', (req, res) => {
 // Định nghĩa route /register
 // Router.post('/register', authValidation.createNew)
 //Debug
-Router.post('/register', (req, res, next) => {
-  console.log('Register route hit') // Debug
-  authValidation.createNew(req, res, next)
+// Router.post('/register', (req, res, next) => {
+//   console.log('Register route hit') // Debug
+//   authValidation.createNew(req, res, next)
+// })
+//Final
+Router.post('/register', authValidation.createNew, (req, res) => {
+  console.log('Register handler called') // Debug
+  res.status(StatusCodes.OK).json({
+    message: 'User registration successful'
+  })
 })
 
 export const authRoutes = Router
