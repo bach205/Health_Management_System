@@ -1,9 +1,10 @@
 // eslint-disable-next-line no-console
-import { connect_db } from '../src/config/mongodb.js'
-import { env } from '../src/config/environment.js';
-import customParseFormat from "dayjs/plugin/customParseFormat.js";
-import dayjs from "dayjs";
-dayjs.extend(customParseFormat);
+import { connect_db } from '~/config/mongodb.js'
+import { env } from '~/config/environment.js'
+import customParseFormat from 'dayjs/plugin/customParseFormat.js'
+
+import dayjs from 'dayjs'
+dayjs.extend(customParseFormat)
 
 import express from 'express'
 
@@ -25,7 +26,7 @@ const START_SERVER = () => {
 //IIFE: Invoke function
 (async () => {
   try {
-    await connect_db();
+    await connect_db()
     START_SERVER()
   } catch (error) {
     console.log(error)
