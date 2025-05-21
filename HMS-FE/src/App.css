@@ -1,42 +1,56 @@
+body {
+  margin: 0;
+  padding: 0;
+}
+* {
+  scroll-behavior: smooth;
+}
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  min-height: 100vh;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
+/*
+for css vars only.
+these values are automatically known in all stylesheets.
+the :root statement itself is only included in the common stylesheet.
+this file is not processed by postcss when imported into the postcss-custom-properties plugin,
+so only write standard css!
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
+NOTE: for old browsers, will need to restart watcher after changing a variable
+*/
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
+/* fullcalendar css */
+:root {
+  --fc-small-font-size: 0.85em;
+  --fc-page-bg-color: #fff;
+  --fc-neutral-bg-color: rgba(30, 120, 181, 0.3);
+  --fc-neutral-text-color: #808080;
+  --fc-border-color: #ddd;
 
-.card {
-  padding: 2em;
-}
+  --fc-button-text-color: #fff;
+  --fc-button-bg-color: #107fee;
+  --fc-button-border-color: #0268cd;
+  --fc-button-hover-bg-color: #0d487f;
+  --fc-button-hover-border-color: #1171ca;
+  --fc-button-active-bg-color: #1680e3;
+  --fc-button-active-border-color: #1b81e0;
 
-.read-the-docs {
-  color: #888;
+  --fc-event-bg-color: #0e6ecd;
+  --fc-event-border-color: #3788d8;
+  --fc-event-text-color: #fff;
+  --fc-event-selected-overlay-color: rgba(3, 70, 187, 0.621);
+
+  --fc-more-link-bg-color: #d0d0d0;
+  --fc-more-link-text-color: inherit;
+
+  --fc-event-resizer-thickness: 8px;
+  --fc-event-resizer-dot-total-width: 8px;
+  --fc-event-resizer-dot-border-width: 1px;
+
+  --fc-non-business-color: rgba(215, 215, 215, 0.3);
+  --fc-bg-event-color: rgb(143, 223, 130);
+  --fc-bg-event-opacity: 0.3;
+  --fc-highlight-color: rgba(188, 232, 241, 0.3);
+  --fc-today-bg-color: rgba(255, 220, 40, 0.15);
+  --fc-now-indicator-color: red;
 }
