@@ -1,15 +1,11 @@
 import express from 'express'
-import { StatusCodes } from 'http-status-codes'
 import { authValidation } from '../validations/authValidation.js'
+import { authController } from '../controllers/authController.js'
 
 const Router = express.Router()
 
 // Định nghĩa route /login
-Router.post('/login', (req, res) => {
-  res.status(StatusCodes.OK).json({
-    message: 'Log in successfully!'
-  })
-})
+Router.post('/login', authValidation.checkLogin, authController.login)
 
 // Định nghĩa route /register
 // Router.post('/register', authValidation.createNew)
@@ -19,11 +15,6 @@ Router.post('/login', (req, res) => {
 //   authValidation.createNew(req, res, next)
 // })
 //Final
-Router.post('/register', authValidation.createNew, (req, res) => {
-  console.log('Register handler called') // Debug
-  res.status(StatusCodes.OK).json({
-    message: 'User registration successful'
-  })
-})
+Router.post('/register', authValidation.createNew, authController.register)
 
 export const authRoutes = Router

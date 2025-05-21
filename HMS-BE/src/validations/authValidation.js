@@ -40,6 +40,34 @@ const createNew = async (req, res, next) => {
   }
 }
 
+const checkLogin = async (req, res, next) => {
+  const loginCondition = Joi.object({
+    phone: Joi.string().required().min(10).max(11),
+    password: Joi.string()
+      .required()
+      .min(6)
+      .max(16)
+      .trim(true)
+      .strict()
+  })
+
+  try {
+    console.log('Login request body:', req.body)
+    await loginCondition.validateAsync(req.body, { abortEarly: false })
+    next()
+  } catch (error) {
+    console.log('Login validation error:', error)
+    const errorMessage = error.details
+      ? error.details.map((err) => err.message).join(', ')
+      : error.message
+
+    res.status(StatusCodes.UNPROCESSABLE_ENTITY).json({
+      errors: errorMessage
+    })
+  }
+}
+
 export const authValidation = {
-  createNew
+  createNew,
+  checkLogin
 }
