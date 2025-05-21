@@ -1,9 +1,11 @@
 // eslint-disable-next-line no-console
-import { CONNECT_DB, CLOSE_DB } from '~/config/mongodb'
-import exitHook from 'async-exit-hook'
-import { env } from '~/config/environment'
+import { connect_db } from '../src/config/mongodb.js'
+import { env } from '../src/config/environment.js';
+import customParseFormat from "dayjs/plugin/customParseFormat.js";
+import dayjs from "dayjs";
+dayjs.extend(customParseFormat);
 
-const express = require('express')
+import express from 'express'
 
 const START_SERVER = () => {
 
@@ -15,18 +17,15 @@ const START_SERVER = () => {
   })
 
   app.listen(env.APP_PORT, env.APP_HOST, () => {
-    console.log(`Hello ${env.AUTHOR}, I am running at http://${ env.APP_HOST }:${ env.APP_PORT }/`)
+    console.log(`Hello ${env.AUTHOR}, I am running at http://${env.APP_HOST}:${env.APP_PORT}/`)
   })
 
-  exitHook(() => {
-    CLOSE_DB()
-  })
 }
 
 //IIFE: Invoke function
 (async () => {
   try {
-    await CONNECT_DB()
+    await connect_db();
     START_SERVER()
   } catch (error) {
     console.log(error)
