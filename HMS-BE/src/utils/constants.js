@@ -1,4 +1,14 @@
-const dayjs = require("dayjs");
+import dayjs from "dayjs";
+
+const PASSWORD_DEFAULT = "123456";
+const adminAccountDefault = {
+    password: PASSWORD_DEFAULT,
+    activeStatus: true,
+    userType: "admin",
+    email: "admin@gmail.com",
+    fullName: "Admin",
+    gender: "male",
+};
 
 const MIN_HOUR_DAY = 8;
 const MAX_HOUR_DAY = 16;
@@ -59,7 +69,7 @@ const formatedDateTimeISO = (date, format = null) => {
 
 
 
-module.exports = {
+export {
     generateTimeSlots,
     getToday,
     formatedDate,
@@ -70,6 +80,6 @@ module.exports = {
     FORMAT_DATE_TIME,
     FORMAT_DATE,
     formatedDateTimeISO,
-
+    adminAccountDefault
 
 };

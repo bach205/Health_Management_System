@@ -1,29 +1,17 @@
-import { env } from '~/config/environment'
-import { ServerApiVersion, MongoClient } from 'mongodb'
+import { connect } from "mongoose";
+import { env } from "../config/environment.js"
 
-let testingDatabaseInstance = null
+const dbConnectionString = env.MONGODB_URI;
 
-const mongoClientInstance = new MongoClient(env.MONGODB_URI, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true
-  }
-})
-
-export const CONNECT_DB = async () => {
-  await mongoClientInstance.connect()
-  testingDatabaseInstance = mongoClientInstance.db(env.DATABASE_NAME)
-}
-
-export const CLOSE_DB = async () => {
-  await mongoClientInstance.close()
-}
-
-
-export const GET_DB = () => {
-  if (!testingDatabaseInstance) {
-    throw new Error('Database not connected')
-  }
-  return testingDatabaseInstance
+export const connect_db = async () => {
+  connect(dbConnectionString, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+    .then(() => {
+      console.log("Database Connected");
+    })
+    .catch((e) => {
+      console.log("Database Connection Error");
+    });
 }

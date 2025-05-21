@@ -29,4 +29,4 @@ const AppointmentSchema = Schema({
 
 const Appointment = model("appointment", AppointmentSchema);
 
-module.exports = { Appointment };
+export { Appointment };
