@@ -1,5 +1,6 @@
 const dayjs = require("dayjs");
 const { Schema, model } = require("mongoose");
+const { FORMAT_DATE_TIME } = require("../utils/constants");
 
 const AppointmentSchema = Schema({
     patientId: { require: true, type: Schema.Types.ObjectId, ref: "user" },
