@@ -1,3 +1,5 @@
+export const API_URL = "http://localhost:5000";
+
 export const TYPE_EMPLOYEE = {
   admin: "admin",
   user: "user",
