@@ -1,0 +1,275 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int         @id @default(autoincrement())
+  email        String      @unique
+  password     String?
+  full_name    String?
+  phone        String?
+  role         Role
+  sso_provider SsoProvider @default(local)
+  is_active    Boolean     @default(true)
+  created_at   DateTime    @default(now())
+  updated_at   DateTime    @updatedAt
+
+  doctor             Doctor?
+  workSchedules      WorkSchedule[]
+  examinationOrders  ExaminationOrder[]  @relation("DoctorExaminationOrder")
+  primaryRecords     ExaminationRecord[] @relation("PrimaryDoctor")
+  createdRecords     ExaminationRecord[] @relation("CreatedByUser")
+  examinationDetails ExaminationDetail[]
+
+  @@map("users")
+}
+
+enum Role {
+  doctor
+  nurse
+  receptionist
+  admin
+}
+
+enum SsoProvider {
+  google
+  facebook
+  local
+}
+
+model Patient {
+  id              Int       @id @default(autoincrement())
+  full_name       String
+  date_of_birth   DateTime?
+  gender          Gender?
+  phone           String?
+  address         String?
+  identity_number String?
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+
+  examinationOrders ExaminationOrder[]
+  records           ExaminationRecord[]
+  queues            Queue[]
+  payments          Payment[]
+  balance           PaymentBalance?
+
+  @@map("patients")
+}
+
+enum Gender {
+  male
+  female
+  other
+}
+
+model Clinic {
+  id          Int     @id @default(autoincrement())
+  name        String
+  description String?
+
+  workSchedules      WorkSchedule[]
+  fromOrders         ExaminationOrder[]  @relation("FromClinic")
+  toOrders           ExaminationOrder[]  @relation("ToClinic")
+  examinationDetails ExaminationDetail[]
+  queues             Queue[]
+
+  @@map("clinics")
+}
+
+model Doctor {
+  user_id   Int     @id
+  specialty String?
+  bio       String?
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("doctors")
+}
+
+model Shift {
+  id         Int       @id @default(autoincrement())
+  name       String?
+  start_time DateTime?
+  end_time   DateTime?
+
+  workSchedules WorkSchedule[]
+
+  @@map("shifts")
+}
+
+model WorkSchedule {
+  id        Int      @id @default(autoincrement())
+  user_id   Int
+  clinic_id Int
+  work_date DateTime
+  shift_id  Int
+
+  user   User   @relation(fields: [user_id], references: [id])
+  clinic Clinic @relation(fields: [clinic_id], references: [id])
+  shift  Shift  @relation(fields: [shift_id], references: [id])
+
+  @@map("work_schedules")
+}
+
+model ExaminationOrder {
+  id             Int      @id @default(autoincrement())
+  doctor_id      Int
+  patient_id     Int
+  from_clinic_id Int
+  to_clinic_id   Int
+  total_cost     Decimal  @default(0.00)
+  created_at     DateTime @default(now())
+
+  doctor     User    @relation("DoctorExaminationOrder", fields: [doctor_id], references: [id])
+  patient    Patient @relation(fields: [patient_id], references: [id])
+  fromClinic Clinic  @relation("FromClinic", fields: [from_clinic_id], references: [id])
+  toClinic   Clinic  @relation("ToClinic", fields: [to_clinic_id], references: [id])
+
+  @@map("examination_orders")
+}
+
+model ExaminationRecord {
+  id                 Int      @id @default(autoincrement())
+  patient_id         Int
+  symptoms           String?
+  primary_doctor_id  Int?
+  final_diagnosis    String?
+  created_by_user_id Int?
+  created_at         DateTime @default(now())
+  updated_at         DateTime @updatedAt
+
+  patient            Patient             @relation(fields: [patient_id], references: [id])
+  primaryDoctor      User?               @relation("PrimaryDoctor", fields: [primary_doctor_id], references: [id])
+  createdByUser      User?               @relation("CreatedByUser", fields: [created_by_user_id], references: [id])
+  examinationDetails ExaminationDetail[]
+  prescriptions      Prescription[]
+  invoiceItems       InvoiceItem[]
+  queues             Queue[]
+  payments           Payment[]
+
+  @@map("examination_records")
+}
+
+model ExaminationDetail {
+  id          Int               @id @default(autoincrement())
+  record_id   Int
+  clinic_id   Int
+  doctor_id   Int
+  result      String?
+  note        String?
+  examined_at DateTime?
+  status      ExaminationStatus @default(pending)
+
+  record ExaminationRecord @relation(fields: [record_id], references: [id])
+  clinic Clinic            @relation(fields: [clinic_id], references: [id])
+  doctor User              @relation(fields: [doctor_id], references: [id])
+
+  @@map("examination_details")
+}
+
+enum ExaminationStatus {
+  pending
+  in_progress
+  done
+  cancelled
+}
+
+model Queue {
+  id                Int         @id @default(autoincrement())
+  patient_id        Int
+  clinic_id         Int
+  record_id         Int?
+  status            QueueStatus @default(waiting)
+  priority          Int         @default(0)
+  registered_online Boolean     @default(false)
+  qr_code           String?
+  called_at         DateTime?
+  created_at        DateTime    @default(now())
+
+  patient Patient            @relation(fields: [patient_id], references: [id])
+  clinic  Clinic             @relation(fields: [clinic_id], references: [id])
+  record  ExaminationRecord? @relation(fields: [record_id], references: [id])
+
+  @@map("queues")
+}
+
+enum QueueStatus {
+  waiting
+  in_progress
+  done
+  skipped
+}
+
+model Prescription {
+  id         Int      @id @default(autoincrement())
+  record_id  Int
+  created_at DateTime @default(now())
+
+  record ExaminationRecord  @relation(fields: [record_id], references: [id])
+  items  PrescriptionItem[]
+
+  @@map("prescriptions")
+}
+
+model PrescriptionItem {
+  id              Int     @id @default(autoincrement())
+  prescription_id Int
+  medicine_name   String
+  dosage          String?
+  frequency       String?
+  duration        String?
+  note            String?
+
+  prescription Prescription @relation(fields: [prescription_id], references: [id])
+
+  @@map("prescription_items")
+}
+
+model Payment {
+  id           Int            @id @default(autoincrement())
+  patient_id   Int
+  record_id    Int?
+  amount       Decimal
+  method       PaymentMethod?
+  payment_time DateTime       @default(now())
+  note         String?
+  is_refund    Boolean        @default(false)
+
+  patient Patient            @relation(fields: [patient_id], references: [id])
+  record  ExaminationRecord? @relation(fields: [record_id], references: [id])
+
+  @@map("payments")
+}
+
+enum PaymentMethod {
+  cash
+  card
+  bank_transfer
+  e_wallet
+}
+
+model PaymentBalance {
+  patient_id Int      @id
+  balance    Decimal  @default(0.00)
+  updated_at DateTime @updatedAt
+
+  patient Patient @relation(fields: [patient_id], references: [id])
+
+  @@map("payment_balances")
+}
+
+model InvoiceItem {
+  id          Int      @id @default(autoincrement())
+  record_id   Int
+  description String?
+  amount      Decimal
+  created_at  DateTime @default(now())
+
+  record ExaminationRecord @relation(fields: [record_id], references: [id])
+}
