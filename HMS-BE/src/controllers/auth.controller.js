@@ -2,19 +2,21 @@ const { CREATED, OK } = require("../core/success.response");
 const AuthService = require("../services/auth.service");
 
 class AuthController {
-    static async register(req, res) {
+    async register(req, res){
+        const result = await AuthService.register(req.body);
         return new CREATED({
             message: "Register successfully",
-            metadata: await AuthService.register(req.body)
+            metadata: result
         }).send(res)
     }
 
-    static async login(req, res) {
+    async login(req, res){
+        const result = await AuthService.login(req.body);
         return new OK({
             message: "Login successfully",
-            metadata: await AuthService.login(req.body)
+            metadata: result
         }).send(res)
     }
 }
 
-module.exports = AuthController;
+module.exports =  new AuthController();
