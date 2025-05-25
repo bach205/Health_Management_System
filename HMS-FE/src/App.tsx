@@ -9,6 +9,7 @@ import MainLayout from "@/layouts/MainLayout";
 import DashboardLayout from "@/layouts/DashboardLayout";
 import { Fragment } from "react/jsx-runtime";
 import Queue from "@/pages/Queue";
+import AdminDashboard from "./pages/Admin/AdminDashboard";
 
 function App() {
   return (
@@ -65,6 +66,11 @@ const PrivateRoutes = [
   {
     path: "/queues",
     element: <Queue />,
+    layout: DashboardLayout,
+  },
+  {
+    path: "/admin/dashboard",
+    element: <AdminDashboard />,
     layout: DashboardLayout,
   },
 ];

@@ -10,7 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@ant-design/v5-patch-for-react-19": "^1.0.3",
     "@tailwindcss/vite": "^4.1.7",
+    "antd": "^5.25.2",
+    "axios": "^1.9.0",
     "lucide-react": "^0.511.0",
     "motion": "^12.12.2",
     "react": "^19.1.0",
