@@ -5,7 +5,7 @@ const registerSchema = Joi.object({
     password: Joi.string().min(6).required(),
     full_name: Joi.string().required(),
     phone: Joi.string().pattern(/^[0-9]{10}$/).optional(),
-    role: Joi.string().valid('doctor', 'nurse', 'receptionist', 'admin').required()
+    role: Joi.string().valid('patient').default('patient') // Chỉ cho phép role patient
 });
 
 const loginSchema = Joi.object({
