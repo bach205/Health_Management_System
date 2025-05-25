@@ -8,6 +8,7 @@ import { Authentication } from "@/Authentication";
 import MainLayout from "@/layouts/MainLayout";
 import DashboardLayout from "@/layouts/DashboardLayout";
 import { Fragment } from "react/jsx-runtime";
+import Queue from "@/pages/Queue";
 
 function App() {
   return (
@@ -27,7 +28,7 @@ function App() {
             path={route.path}
             element={
               <Authentication allowedRoles={["admin", "staff", "doctor"]}>
-                {route.element}
+                <route.layout>{route.element}</route.layout>
               </Authentication>
             }
           />
@@ -59,6 +60,11 @@ const PrivateRoutes = [
   {
     path: "/dashboard",
     element: <Dashboard />,
+    layout: DashboardLayout,
+  },
+  {
+    path: "/queues",
+    element: <Queue />,
     layout: DashboardLayout,
   },
 ];
