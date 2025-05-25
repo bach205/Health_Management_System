@@ -34,6 +34,7 @@ enum Role {
   nurse
   receptionist
   admin
+  patient
 }
 
 enum SsoProvider {
