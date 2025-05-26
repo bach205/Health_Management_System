@@ -19,11 +19,12 @@ const ModalCreateUser = ({  isVisible, handleOk, handleCancel, form }: IProps) =
     { value: "cardiology", label: "Tim mạch" },
     { value: "dermatology", label: "Da liễu" },
   ];
+  
     const [specialty, setSpecialty] = useState<string>("internal");
 
     const [isShowSpecialty, setIsShowSpecialty] = useState(false);
 
-    const handleUserTypeChange = (value: EmployeeType) => {
+    const handleroleChange = (value: EmployeeType) => {
         setIsShowSpecialty(value === 'doctor');
     };
 
@@ -39,7 +40,7 @@ const ModalCreateUser = ({  isVisible, handleOk, handleCancel, form }: IProps) =
         >
             <Form name="addDoctorForm" form={form} labelCol={{ span: 6 }} wrapperCol={{ span: 16 }} style={{ marginTop: 20 }} initialValues={{ gender: "male", }} >
 
-                <Form.Item label="Họ tên" name="fullName" rules={[{ required: true, message: "Vui lòng nhập họ tên!", },]} >
+                <Form.Item label="Họ tên" name="full_name" rules={[{ required: true, message: "Vui lòng nhập họ tên!", },]} >
                     <Input placeholder="Họ tên bác sĩ" />
                 </Form.Item>
 
@@ -59,7 +60,7 @@ const ModalCreateUser = ({  isVisible, handleOk, handleCancel, form }: IProps) =
                     </Select>
                 </Form.Item>
                 <Form.Item label="Khoa" name="specialty" valuePropName="specialty" rules={[{ required: true, message: "Chuyên khoa" }]} >
-                    {/* <Select value={'doctor'} onChange={handleUserTypeChange}>
+                    {/* <Select value={'doctor'} onChange={handleroleChange}>
                         <Select.Option value="doctor">Bác sĩ</Select.Option>
                     </Select> */}
                     <Select
@@ -73,7 +74,7 @@ const ModalCreateUser = ({  isVisible, handleOk, handleCancel, form }: IProps) =
                     <Input placeholder="Địa chỉ" />
                 </Form.Item>
 
-                <Form.Item name="birthday" label="Ngày sinh" >
+                <Form.Item name="date_of_birth" label="Ngày sinh" >
                     <DatePicker format="DD/MM/YYYY" placeholder="Ngày sinh" maxDate={dayjs().subtract(18, "year") as any} />
                 </Form.Item>
 

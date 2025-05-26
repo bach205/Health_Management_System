@@ -107,9 +107,9 @@ const AdminDoctorDashboard = () => {
     },
     {
       title: "Họ tên",
-      dataIndex: "fullName",
+      dataIndex: "full_name",
       width: 170,
-      key: "fullName",
+      key: "full_name",
     },
 
     {
@@ -151,24 +151,24 @@ const AdminDoctorDashboard = () => {
       title: "Ngày sinh",
       width: 170,
       ellipsis: true,
-      dataIndex: "birthday",
-      key: "birthday",
-      render: (birthday: any) => (
+      dataIndex: "date_of_birth",
+      key: "date_of_birth",
+      render: (date_of_birth: any) => (
         <Typography.Text>
-          {dayjs(birthday).format("DD/MM/YYYY")} -{" "}
-          {dayjs().diff(birthday, "year")} tuổi
+          {dayjs(date_of_birth).format("DD/MM/YYYY")} -{" "}
+          {dayjs().diff(date_of_birth, "year")} tuổi
         </Typography.Text>
       ),
     },
     {
       width: 150,
       title: "Trạng thái",
-      dataIndex: "activeStatus",
-      key: "activeStatus",
-      render: (_: any, { activeStatus }: IDoctor) => (
+      dataIndex: "is_active",
+      key: "is_active",
+      render: (_: any, { is_active }: IDoctor) => (
         <>
-          <Tag color={activeStatus ? "green" : "red"}>
-            {activeStatus ? "Đang hoạt động" : "Đã khóa"}
+          <Tag color={is_active ? "green" : "red"}>
+            {is_active ? "Đang hoạt động" : "Đã khóa"}
           </Tag>
         </>
       ),
@@ -183,9 +183,9 @@ const AdminDoctorDashboard = () => {
       key: "action",
       render: (_: any, record: IDoctor) => (
         <Space size="small">
-          <Tooltip title={record?.activeStatus ? "Bạn muốn cấm tài khoản ?" : "Bạn muốn hủy cấm tài khoản?"} >
+          <Tooltip title={record?.is_active ? "Bạn muốn cấm tài khoản ?" : "Bạn muốn hủy cấm tài khoản?"} >
             <Popconfirm
-              title={record?.activeStatus ? "Cấm tài khoản?" : "Bỏ cấm tài khoản?"}
+              title={record?.is_active ? "Cấm tài khoản?" : "Bỏ cấm tài khoản?"}
               description="Bạn chắc chắn muốn thực hiện hành động này?"
               onConfirm={() => handleStatus(record)}
               okText="Xác nhận"
@@ -193,11 +193,11 @@ const AdminDoctorDashboard = () => {
             >
               <Button
                 type="text"
-                icon={<Ban size={17.5} style={{ color: record?.activeStatus ? undefined : 'red' }} />}
+                icon={<Ban size={17.5} style={{ color: record?.is_active ? undefined : 'red' }} />}
               />
             </Popconfirm>
           </Tooltip>
-          {record?.userType === TYPE_EMPLOYEE.user ? null : (
+          {record?.role === TYPE_EMPLOYEE.user ? null : (
             <Tooltip title="Chỉnh sửa thông tin">
               <Button
                 type="text"
@@ -232,10 +232,10 @@ const AdminDoctorDashboard = () => {
     try {
       // console.log(record)
       setSelectedUser(record);
-      // setIsShowSpecialty(record.userType === TYPE_EMPLOYEE.doctor);
+      // setIsShowSpecialty(record.role === TYPE_EMPLOYEE.doctor);
       formUpdate.setFieldsValue({
         ...record,
-        birthday: dayjs(record.birthday),
+        date_of_birth: dayjs(record.date_of_birth),
       });
       setIsUpdateVisible(true);
     } catch (error) {
@@ -248,7 +248,7 @@ const AdminDoctorDashboard = () => {
 
   };
 
-  const handleResetPassword = (_id :string) => {
+  const handleResetPassword = (_id: string) => {
     console.log(_id)
   }
 
@@ -374,7 +374,7 @@ const AdminDoctorDashboard = () => {
       </Flex>
 
       {/* user table */}
-      <Table rowKey={"_id"}
+      <Table rowKey={"id"}
         loading={loading}
         columns={columns}
         dataSource={users}

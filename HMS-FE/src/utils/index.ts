@@ -5,27 +5,27 @@ export const TYPE_EMPLOYEE = {
 };
 
 export interface IUserBase {
-  _id: string;                       
-  fullName: string;                
+  id: string;                       
+  full_name: string;                
   email: string;                   
   phone: string;                   
   password: string;           
   gender: "male" | "female";       
-  birthday: string;            
-  userType: "admin" | "doctor" | "patient";  
+  date_of_birth: string;            
+  role: "admin" | "doctor" | "patient";  
   address: string;                
-  ssoProvider?: "google" | "facebook" | "local";  
-  activeStatus: boolean;                         
+  sso_provider?: "google" | "facebook" | "local";  
+  is_active: boolean;                         
 }
 
 export interface IDoctor extends IUserBase {
-  userType: "doctor";                 
-  specialty: string;             
+  role: "doctor";                 
+  specialty: string; // Khoa     
   bio?: string;                  
 }
 
 export interface IPatient extends IUserBase {
-  userType: "patient";
+  role: "patient";
   identityNumber: string;        
 }
 

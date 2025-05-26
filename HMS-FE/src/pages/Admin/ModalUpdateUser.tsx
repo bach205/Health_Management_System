@@ -31,7 +31,7 @@ const ModalUpdateUser = ({ isVisible, handleOk, handleCancel, form }: IProps) =>
         >
             <Form name="addUserForm" form={form} labelCol={{ span: 6 }} wrapperCol={{ span: 16 }} style={{ marginTop: 20 }} initialValues={{ gender: "male", }} >
 
-                <Form.Item label="Họ tên" name="fullName" rules={[{ required: true, message: "Vui lòng nhập họ tên!", },]} >
+                <Form.Item label="Họ tên" name="full_name" rules={[{ required: true, message: "Vui lòng nhập họ tên!", },]} >
                     <Input placeholder="Họ tên bác sĩ" />
                 </Form.Item>
 
@@ -45,7 +45,7 @@ const ModalUpdateUser = ({ isVisible, handleOk, handleCancel, form }: IProps) =>
                 </Form.Item>
 
                 <Form.Item label="Khoa" name="specialty" valuePropName="specialty" rules={[{ required: true, message: "Chuyên khoa" }]} >
-                    {/* <Select onChange={handleUserTypeChange}>
+                    {/* <Select onChange={handleroleChange}>
                         <Select.Option value="doctor">Bác sĩ</Select.Option>
                         <Select.Option value="nurse">Y tá</Select.Option>
                         <Select.Option value="pharmacist">Dược sĩ</Select.Option>
@@ -68,15 +68,13 @@ const ModalUpdateUser = ({ isVisible, handleOk, handleCancel, form }: IProps) =>
                 <Form.Item name="address" label="Địa chỉ">
                     <Input placeholder="Địa chỉ" />
                 </Form.Item>
-                <Form.Item name="birthday" label="Ngày sinh"  >
+                <Form.Item name="date_of_birth" label="Ngày sinh"  >
                     <DatePicker format="DD/MM/YYYY" placeholder="Ngày sinh" maxDate={dayjs().subtract(18, "year") as any} />
                 </Form.Item>
-
 
                 <Form.Item name="bio" label="Tiểu sử">
                     <Input placeholder="Tiểu sử bác sĩ" />
                 </Form.Item>
-
             </Form>
         </Modal>
     );
