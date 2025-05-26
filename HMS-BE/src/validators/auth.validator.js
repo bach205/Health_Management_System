@@ -32,9 +32,26 @@ const updatePatientFullInfoSchema = Joi.object({
   }).required(),
 });
 
+const forgetPasswordSchema = Joi.object({
+  email: Joi.string().email().required(),
+});
+
+const resetPasswordSchema = Joi.object({
+  token: Joi.string().required(),
+  newPassword: Joi.string().min(6).required(),
+  confirmPassword: Joi.string()
+    .valid(Joi.ref("newPassword"))
+    .required()
+    .messages({
+      "any.only": "Passwords do not match",
+    }),
+});
+
 module.exports = {
   registerSchema,
   loginSchema,
   updatePatientSchema,
   updatePatientFullInfoSchema,
+  forgetPasswordSchema,
+  resetPasswordSchema,
 };

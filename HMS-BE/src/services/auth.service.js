@@ -3,6 +3,8 @@ const { registerSchema, loginSchema } = require("../validators/auth.validator");
 const prisma = require("../config/prisma");
 const bcrypt = require("bcrypt");
 const { generateToken } = require("../helper/jwt");
+const jwt = require("jsonwebtoken");
+const nodemailer = require("nodemailer");
 
 class AuthService {
   async register(userData) {
@@ -211,6 +213,122 @@ class AuthService {
     });
 
     return { user: updatedUser, patient: updatedPatient };
+  }
+
+  async forgetPassword(email) {
+    // Kiểm tra user có tồn tại không
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      throw new BadRequestError("User not found");
+    }
+
+    // Tạo reset token
+    const resetToken = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
+
+    // Tạo transporter với cấu hình email
+    const transporter = nodemailer.createTransport({
+      host: process.env.EMAIL_HOST,
+      port: 587, // Port mặc định cho TLS
+      secure: false, // false cho TLS
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD,
+      },
+    });
+
+    // Tạo nội dung email
+    const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+    const mailOptions = {
+      from: process.env.EMAIL_FROM,
+      to: user.email,
+      subject: "Reset Your Password - HMS",
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #2c3e50;">Password Reset Request</h2>
+          <p>Hello ${user.full_name || "there"},</p>
+          <p>We received a request to reset your password. Click the button below to reset it:</p>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${resetLink}" 
+               style="background-color: #3498db; color: white; padding: 12px 24px; 
+                      text-decoration: none; border-radius: 4px; display: inline-block;">
+              Reset Password
+            </a>
+          </div>
+          <p style="color: #7f8c8d; font-size: 14px;">
+            This link will expire in 1 hour.<br>
+            If you didn't request this, please ignore this email or contact support if you have concerns.
+          </p>
+          <hr style="border: 1px solid #eee; margin: 20px 0;">
+          <p style="color: #95a5a6; font-size: 12px;">
+            This is an automated message, please do not reply to this email.
+          </p>
+        </div>
+      `,
+    };
+
+    try {
+      // Gửi email
+      await transporter.sendMail(mailOptions);
+
+      // Trong môi trường development, trả về token để test
+      if (process.env.NODE_ENV === "development") {
+        return {
+          message: "Reset password link has been sent to your email",
+          resetToken, // Chỉ trả về trong môi trường development
+        };
+      }
+
+      return {
+        message: "Reset password link has been sent to your email",
+      };
+    } catch (error) {
+      console.error("Error sending email:", error);
+      throw new BadRequestError("Failed to send reset password email");
+    }
+  }
+
+  async resetPassword(token, newPassword) {
+    try {
+      // Verify token
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const userId = decoded.userId;
+
+      // Kiểm tra user có tồn tại không
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+      });
+
+      if (!user) {
+        throw new BadRequestError("User not found");
+      }
+
+      // Hash password mới
+      const hashedPassword = await bcrypt.hash(
+        newPassword,
+        parseInt(process.env.BCRYPT_SALT_ROUNDS)
+      );
+
+      // Cập nhật password
+      await prisma.user.update({
+        where: { id: userId },
+        data: { password: hashedPassword },
+      });
+
+      return { message: "Password has been reset successfully" };
+    } catch (error) {
+      if (
+        error.name === "JsonWebTokenError" ||
+        error.name === "TokenExpiredError"
+      ) {
+        throw new BadRequestError("Invalid or expired reset token");
+      }
+      throw error;
+    }
   }
 }
 
