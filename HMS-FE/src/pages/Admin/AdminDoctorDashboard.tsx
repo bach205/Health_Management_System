@@ -5,18 +5,19 @@ import { colorOfType, PASSWORD_DEFAULT, TYPE_EMPLOYEE, TYPE_EMPLOYEE_STR, type E
 import { getDoctors } from "../../api/doctor";
 import ModalCreateUser from "./ModalCreateUser";
 import ModalUpdateUser from "./ModalUpdateUser";
+import dayjs from "dayjs";
 
 interface IPagination {
   total: number;
   pageSize: number;
   current: number;
-
 }
+
 const items = [
   {
     key: '1',
     label: (
-      <a target="_blank" rel="noopener noreferrer" href="https://www.antgroup.com">
+      <a target="_blank" rel="noopener noreferrer" href="">
         1st menu item
       </a>
     ),
@@ -24,7 +25,7 @@ const items = [
   {
     key: '2',
     label: (
-      <a target="_blank" rel="noopener noreferrer" href="https://www.aliyun.com">
+      <a target="_blank" rel="noopener noreferrer" href="">
         2nd menu item (disabled)
       </a>
     ),
@@ -33,7 +34,7 @@ const items = [
   {
     key: '3',
     label: (
-      <a target="_blank" rel="noopener noreferrer" href="https://www.luohanacademy.com">
+      <a target="_blank" rel="noopener noreferrer" href="">
         3rd menu item (disabled)
       </a>
     ),
@@ -45,13 +46,15 @@ const items = [
     label: 'a danger item',
   },
 ];
-const AdminDashboard = () => {
+
+
+const AdminDoctorDashboard = () => {
   const [isCreateVisible, setIsCreateVisible] = useState<boolean>(false);
   const [isUpdateVisible, setIsUpdateVisible] = useState<boolean>(false);
 
   const [formCreate] = Form.useForm();
   const [formUpdate] = Form.useForm();
-
+  // console.log(formUpdate)
   const [selectedUser, setSelectedUser] = useState<IDoctor>({} as IDoctor);
   const [users, setUsers] = useState<IDoctor[]>([]);
 
@@ -96,6 +99,7 @@ const AdminDashboard = () => {
       width: 170,
       key: "fullName",
     },
+
     {
       width: 90,
       ellipsis: true,
@@ -112,11 +116,37 @@ const AdminDashboard = () => {
       dataIndex: "phone",
       key: "phone",
     },
+
+    {
+      width: 150,
+      title: "Khoa",
+      dataIndex: "specialty",
+      key: "specialty",
+    },
     {
       width: 150,
       title: "Địa chỉ",
       dataIndex: "address",
       key: "address",
+    },
+    {
+      width: 200,
+      title: "Tiểu sử",
+      dataIndex: "bio",
+      key: "bio",
+    },
+    {
+      title: "Ngày sinh",
+      width: 170,
+      ellipsis: true,
+      dataIndex: "birthday",
+      key: "birthday",
+      render: (birthday: any) => (
+        <Typography.Text>
+          {dayjs(birthday).format("DD/MM/YYYY")} -{" "}
+          {dayjs().diff(birthday, "year")} tuổi
+        </Typography.Text>
+      ),
     },
     {
       width: 150,
@@ -193,7 +223,7 @@ const AdminDashboard = () => {
       // setIsShowSpecialty(record.userType === TYPE_EMPLOYEE.doctor);
       formUpdate.setFieldsValue({
         ...record,
-        // birthday: dayjs(record.birthday),
+        birthday: dayjs(record.birthday),
       });
       setIsUpdateVisible(true);
     } catch (error) {
@@ -206,11 +236,13 @@ const AdminDashboard = () => {
 
   };
 
-  const handleResetPassword = async (id: string) => {
+  const handleResetPassword = ({ _id }: IDoctor) => {
+    console.log(_id)
+  }
 
-  };
 
   useEffect(() => {
+    // console.log('call use')
     const fetchData = async () => {
       try {
         setLoading(true);
@@ -225,7 +257,7 @@ const AdminDashboard = () => {
       }
     }
     fetchData();
-  }, []);
+  }, [keyword, reload]);
 
   const handleCreateCancel = () => {
     setIsCreateVisible(false);
@@ -240,6 +272,8 @@ const AdminDashboard = () => {
       const values = await formCreate.validateFields();
       // gọi API thêm
       console.log("Create:", values);
+      notification.success({ message: "Tạo tài khoản thành công" });
+
       setIsCreateVisible(false);
     } catch (error) {
       console.log(error);
@@ -251,6 +285,8 @@ const AdminDashboard = () => {
       const values = await formUpdate.validateFields();
       // gọi API cập nhật
       console.log("Update:", values);
+      notification.success({ message: "Cập nhật tài khoản thành công" });
+
       setIsUpdateVisible(false);
     } catch (error) {
       console.log(error);
@@ -292,61 +328,41 @@ const AdminDashboard = () => {
           </Button>
         </Flex>
 
-        <Button type="primary" icon={<CirclePlus height={15} />} onClick={() => setIsCreateVisible(true)} >
+        <Button type="primary" icon={<CirclePlus size={16} />} onClick={() => setIsCreateVisible(true)} >
           Thêm bác sĩ
         </Button>
       </Flex>
       <Flex gap={10} justify="space-between" style={{ marginBottom: 10 }}>
-        <Flex gap={10}>
-          {/* <Tooltip title="Lọc theo">
-            <Dropdown placement="bottomLeft" menu={{ items }}>
-              <Button type="primary" onClick={() => setReload(!reload)}>
-                <Space>
-                  <Filter size={17.5} style={{ height: '20px' }}></Filter>
-                </Space>
-              </Button>
-            </Dropdown>
-          </Tooltip> */}
-          <Form.Item label="Lọc theo" style={{ width: '200px' }} name="specialty" valuePropName="specialty" >
-            <Select
-              defaultValue="all"
-              style={{ width: 120 }}
-              // onChange={handleChange}
-              options={[
-                { value: 'all', label: 'Khoa' },
-                { value: 'lucy', label: 'Lucy' },
-                { value: 'Yiminghe', label: 'yiminghe' },
-                { value: 'disabled', label: 'Disabled', disabled: true },
-              ]}
-            />
-          </Form.Item>
-          <Form.Item label="Sắp xếp" style={{ width: '200px' }} name="sort" valuePropName="sort" >
-            <Select
-              defaultValue="all"
-              style={{ width: 120 }}
-              // onChange={handleChange}
-              options={[
-                { value: 'all', label: 'Khoa' },
-                { value: 'lucy', label: 'Lucy' },
-                { value: 'Yiminghe', label: 'yiminghe' },
-                { value: 'disabled', label: 'Disabled', disabled: true },
-              ]}
-            />
-          </Form.Item>
-          {/* <Tooltip title="Lọc theo">
-            <Dropdown placement="bottomLeft" menu={{ items }}>
-              <Button type="primary" onClick={() => setReload(!reload)}>
-                <Space>
-                  <ArrowUpDown size={17.5} style={{ height: '20px' }}></ArrowUpDown>
-                </Space>
-              </Button>
-            </Dropdown>
-          </Tooltip> */}
-
-          {/* <Button type="primary" onClick={() => setReload(!reload)}>
-            <Search size={17.5} />
-          </Button> */}
-        </Flex>
+        <Form>
+          <Flex gap={10}>
+            <Form.Item label="Lọc theo khoa" style={{ width: '200px' }} name="specialty" valuePropName="specialty" >
+              <Select style={{ width: 120 }}
+                // onChange={handleChange}
+                value={'all'}
+                options={[
+                  { value: 'all', label: 'Khoa' },
+                  { value: 'lucy', label: 'Lucy' },
+                  { value: 'Yiminghe', label: 'yiminghe' },
+                  { value: 'disabled', label: 'Disabled', disabled: true },
+                ]}
+              />
+            </Form.Item>
+            <Form.Item label="Sắp xếp theo" style={{ width: '200px' }} name="sort" valuePropName="sort" >
+              <Select
+                value={"all"}
+                style={{ width: 120 }}
+                // onChange={handleChange}
+                options={[
+                  { value: 'stt', label: 'STT' },
+                  { value: 'all', label: 'Tên A-Z' },
+                  { value: 'lucy', label: 'Lucy' },
+                  { value: 'Yiminghe', label: 'yiminghe' },
+                  { value: 'disabled', label: 'Disabled', disabled: true },
+                ]}
+              />
+            </Form.Item>
+          </Flex>
+        </Form>
       </Flex>
 
       {/* user table */}
@@ -365,4 +381,4 @@ const AdminDashboard = () => {
   );
 }
 
-export default AdminDashboard;
+export default AdminDoctorDashboard;

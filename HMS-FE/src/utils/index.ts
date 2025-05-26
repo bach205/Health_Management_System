@@ -5,32 +5,30 @@ export const TYPE_EMPLOYEE = {
 };
 
 export interface IUserBase {
-  _id: string;
-  fullName: string;
-  email: string;
-  phone: string;
-  password: string;
-  activeStatus: boolean;
-  gender: string;
+  _id: string;                       
+  fullName: string;                
+  email: string;                   
+  phone: string;                   
+  password: string;           
+  gender: "male" | "female";       
+  birthday: string;            
+  userType: "admin" | "doctor" | "patient";  
+  address: string;                
+  ssoProvider?: "google" | "facebook" | "local";  
+  activeStatus: boolean;                         
 }
 
 export interface IDoctor extends IUserBase {
-  userType: "doctor";
-  specialty: string;
+  userType: "doctor";                 
+  specialty: string;             
+  bio?: string;                  
 }
 
-export interface IUser {
-  _id: string;
-  fullName: string;
-  email: string;
-  phone: string;
-  password: string;
-  activeStatus: boolean;
-  userType: EmployeeType;
-  birthday: string;
-  address: string;
-  gender: string;
+export interface IPatient extends IUserBase {
+  userType: "patient";
+  identityNumber: string;        
 }
+
 
 export type EmployeeType = keyof typeof TYPE_EMPLOYEE;
 

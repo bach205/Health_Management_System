@@ -21,7 +21,7 @@ export const getDoctors = async (body: any) => {
                 birthday: "2025-05-14T17:00:00.000Z",
                 address: "aa",
                 gender: "male",
-                specialty: "general"
+                specialty: "Khám bệnh "
             },
             {
                 _id: "000000000000000000000002",
@@ -34,7 +34,7 @@ export const getDoctors = async (body: any) => {
                 birthday: "2025-05-14T17:00:00.000Z",
                 address: "aa",
                 gender: "male",
-                specialty: "general"
+                specialty: "Khám bệnh "
             },
             {
                 _id: "000000000000000000000003",
@@ -47,7 +47,7 @@ export const getDoctors = async (body: any) => {
                 birthday: "2025-05-14T17:00:00.000Z",
                 address: "aa",
                 gender: "male",
-                specialty: "general"
+                specialty: "Khám bệnh "
             },
             {
                 _id: "000000000000000000000004",
@@ -60,7 +60,7 @@ export const getDoctors = async (body: any) => {
                 birthday: "2025-05-14T17:00:00.000Z",
                 address: "aa",
                 gender: "male",
-                specialty: "general"
+                specialty: "Khám bệnh "
             },
             {
                 _id: "000000000000000000000005",
@@ -73,7 +73,7 @@ export const getDoctors = async (body: any) => {
                 birthday: "2025-05-14T17:00:00.000Z",
                 address: "aa",
                 gender: "male",
-                specialty: "general"
+                specialty: "Khám bệnh "
             },
             {
                 _id: "000000000000000000000006",
@@ -86,7 +86,7 @@ export const getDoctors = async (body: any) => {
                 birthday: "2025-05-14T17:00:00.000Z",
                 address: "aa",
                 gender: "male",
-                specialty: "general"
+                specialty: "Khám bệnh "
             },
             {
                 _id: "000000000000000000000007",
@@ -99,7 +99,7 @@ export const getDoctors = async (body: any) => {
                 birthday: "2025-05-14T17:00:00.000Z",
                 address: "aa",
                 gender: "male",
-                specialty: "general"
+                specialty: "Khám bệnh "
             },
             {
                 _id: "000000000000000000000008",
@@ -112,7 +112,7 @@ export const getDoctors = async (body: any) => {
                 birthday: "2025-05-14T17:00:00.000Z",
                 address: "aa",
                 gender: "male",
-                specialty: "general"
+                specialty: "Khám bệnh "
             },
             {
                 _id: "000000000000000000000009",
@@ -125,7 +125,7 @@ export const getDoctors = async (body: any) => {
                 birthday: "2025-05-14T17:00:00.000Z",
                 address: "aa",
                 gender: "male",
-                specialty: "general"
+                specialty: "Khám bệnh "
             },
             {
                 _id: "000000000000000000000010",
@@ -138,7 +138,7 @@ export const getDoctors = async (body: any) => {
                 birthday: "2025-05-14T17:00:00.000Z",
                 address: "aa",
                 gender: "male",
-                specialty: "general"
+                specialty: "Khám bệnh "
             },
             {
                 _id: "000000000000000000000011",
@@ -151,7 +151,7 @@ export const getDoctors = async (body: any) => {
                 birthday: "2025-05-14T17:00:00.000Z",
                 address: "aa",
                 gender: "male",
-                specialty: "general"
+                specialty: "Khám bệnh "
             }
         ]
     };
