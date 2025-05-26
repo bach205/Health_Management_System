@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Breadcrumb, Table, Typography, Tag, Space, Flex, Button, Modal, Form, Input, Select, notification, Tooltip, DatePicker, Avatar, Popconfirm, Dropdown, } from "antd";
-import { ArrowUpDown, Ban, CirclePlus, RefreshCcw, RotateCcw, Search, User, UserRoundPen } from "lucide-react";
+import { ArrowUpDown, Ban, CirclePlus, Filter, RefreshCcw, RotateCcw, Search, User, UserRoundPen } from "lucide-react";
 import { colorOfType, PASSWORD_DEFAULT, TYPE_EMPLOYEE, TYPE_EMPLOYEE_STR, type EmployeeType, type IDoctor } from "../../utils";
 import { getDoctors } from "../../api/doctor";
 import ModalCreateUser from "./ModalCreateUser";
@@ -142,12 +142,18 @@ const AdminDashboard = () => {
       render: (_: any, record: IDoctor) => (
         <Space size="small">
           <Tooltip title={record?.activeStatus ? "Bạn muốn cấm tài khoản ?" : "Bạn muốn hủy cấm tài khoản?"} >
-            <Button type="text"
-              onClick={() => handleStatus(record)}
-              icon={
-                record?.activeStatus ? <Ban size={17.5} /> : <Ban size={17.5} style={{ color: 'red' }} />
-              }
-            ></Button>
+            <Popconfirm
+              title={record?.activeStatus ? "Cấm tài khoản?" : "Bỏ cấm tài khoản?"}
+              description="Bạn chắc chắn muốn thực hiện hành động này?"
+              onConfirm={() => handleStatus(record)}
+              okText="Xác nhận"
+              cancelText="Hủy"
+            >
+              <Button
+                type="text"
+                icon={<Ban size={17.5} style={{ color: record?.activeStatus ? undefined : 'red' }} />}
+              />
+            </Popconfirm>
           </Tooltip>
           {record?.userType === TYPE_EMPLOYEE.user ? null : (
             <Tooltip title="Chỉnh sửa thông tin">
@@ -270,7 +276,7 @@ const AdminDashboard = () => {
       {/* filter bar */}
       <Flex gap={10} justify="space-between" style={{ marginBottom: 10 }}>
         <Flex gap={10}>
-          <Tooltip title="Khôi phục">
+          <Tooltip title="Hủy lọc">
             <Button onClick={handleSearch}>
               <RefreshCcw size={17.5} />
             </Button>
@@ -287,12 +293,47 @@ const AdminDashboard = () => {
         </Flex>
 
         <Button type="primary" icon={<CirclePlus height={15} />} onClick={() => setIsCreateVisible(true)} >
-          Thêm nhân viên
+          Thêm bác sĩ
         </Button>
       </Flex>
       <Flex gap={10} justify="space-between" style={{ marginBottom: 10 }}>
         <Flex gap={10}>
-          <Tooltip title="Lọc theo">
+          {/* <Tooltip title="Lọc theo">
+            <Dropdown placement="bottomLeft" menu={{ items }}>
+              <Button type="primary" onClick={() => setReload(!reload)}>
+                <Space>
+                  <Filter size={17.5} style={{ height: '20px' }}></Filter>
+                </Space>
+              </Button>
+            </Dropdown>
+          </Tooltip> */}
+          <Form.Item label="Lọc theo" style={{ width: '200px' }} name="specialty" valuePropName="specialty" >
+            <Select
+              defaultValue="all"
+              style={{ width: 120 }}
+              // onChange={handleChange}
+              options={[
+                { value: 'all', label: 'Khoa' },
+                { value: 'lucy', label: 'Lucy' },
+                { value: 'Yiminghe', label: 'yiminghe' },
+                { value: 'disabled', label: 'Disabled', disabled: true },
+              ]}
+            />
+          </Form.Item>
+          <Form.Item label="Sắp xếp" style={{ width: '200px' }} name="sort" valuePropName="sort" >
+            <Select
+              defaultValue="all"
+              style={{ width: 120 }}
+              // onChange={handleChange}
+              options={[
+                { value: 'all', label: 'Khoa' },
+                { value: 'lucy', label: 'Lucy' },
+                { value: 'Yiminghe', label: 'yiminghe' },
+                { value: 'disabled', label: 'Disabled', disabled: true },
+              ]}
+            />
+          </Form.Item>
+          {/* <Tooltip title="Lọc theo">
             <Dropdown placement="bottomLeft" menu={{ items }}>
               <Button type="primary" onClick={() => setReload(!reload)}>
                 <Space>
@@ -300,11 +341,11 @@ const AdminDashboard = () => {
                 </Space>
               </Button>
             </Dropdown>
-          </Tooltip>
+          </Tooltip> */}
 
-          <Button type="primary" onClick={() => setReload(!reload)}>
+          {/* <Button type="primary" onClick={() => setReload(!reload)}>
             <Search size={17.5} />
-          </Button>
+          </Button> */}
         </Flex>
       </Flex>
 

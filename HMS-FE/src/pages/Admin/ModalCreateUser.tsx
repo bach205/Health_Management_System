@@ -16,14 +16,14 @@ const ModalCreateUser = ({ isVisible, handleOk, handleCancel, form }: IProps) =>
 
     return (
         <Modal open={isVisible}
-            title={"Thêm nhân viên"}
+            title={"Thêm bác sĩ"}
             onOk={handleOk}
             okText={"Thêm"}
             cancelText="Hủy"
             onCancel={handleCancel}
             destroyOnHidden
         >
-            <Form name="addUserForm" form={form} labelCol={{ span: 6 }} wrapperCol={{ span: 16 }} style={{ marginTop: 20 }} initialValues={{ gender: "male", }} >
+            <Form name="addDoctorForm" form={form} labelCol={{ span: 6 }} wrapperCol={{ span: 16 }} style={{ marginTop: 20 }} initialValues={{ gender: "male", }} >
 
                 <Form.Item label="Họ tên" name="fullName" rules={[{ required: true, message: "Vui lòng nhập họ tên!", },]} >
                     <Input />
@@ -44,9 +44,9 @@ const ModalCreateUser = ({ isVisible, handleOk, handleCancel, form }: IProps) =>
                     </Select>
                 </Form.Item>
 
-                <Form.Item name="address" label="Địa chỉ">
+                {/* <Form.Item name="address" label="Địa chỉ">
                     <Input placeholder="Địa chỉ" />
-                </Form.Item>
+                </Form.Item> */}
 
                 <Form.Item label="Số điện thoại" name="phone"
                     rules={[{ required: true, message: "Vui lòng nhập số điện thoại" }, { pattern: new RegExp(/^\d{10,12}$/), message: "Số điện thoại không hợp lệ!", },]}
@@ -54,22 +54,27 @@ const ModalCreateUser = ({ isVisible, handleOk, handleCancel, form }: IProps) =>
                     <Input />
                 </Form.Item>
 
-                <Form.Item label="Chức vụ" name="userType" rules={[{ required: true, message: "Chọn Chức vụ!" }]} >
+
+                <Form.Item name="bio" label="Tiểu sử">
+                    <Input placeholder="Tiểu sử" />
+                </Form.Item>
+
+                {/* <Form.Item label="Chức vụ" name="userType" rules={[{ required: true, message: "Chọn Chức vụ!" }]} >
                     <Select onChange={handleUserTypeChange}>
                         <Select.Option value="doctor">Bác sĩ</Select.Option>
                         <Select.Option value="nurse">Y tá</Select.Option>
                         <Select.Option value="pharmacist">Dược sĩ</Select.Option>
                     </Select>
                 </Form.Item>
-                {isShowSpecialty && (
-                    <Form.Item label="Specialty" name="specialty" valuePropName="specialty" rules={[{ required: true, message: "Chuyên khoa" }]} >
-                        <Select onChange={handleUserTypeChange}>
-                            <Select.Option value="doctor">Bác sĩ</Select.Option>
-                            <Select.Option value="nurse">Y tá</Select.Option>
-                            <Select.Option value="pharmacist">Dược sĩ</Select.Option>
-                        </Select>
-                    </Form.Item>
-                )}
+                {isShowSpecialty && ( */}
+                <Form.Item label="Khoa" name="specialty" valuePropName="specialty" rules={[{ required: true, message: "Chuyên khoa" }]} >
+                    <Select onChange={handleUserTypeChange}>
+                        <Select.Option value="doctor">Bác sĩ</Select.Option>
+                        <Select.Option value="nurse">Y tá</Select.Option>
+                        <Select.Option value="pharmacist">Dược sĩ</Select.Option>
+                    </Select>
+                </Form.Item>
+                {/* )} */}
             </Form>
         </Modal>
     );
