@@ -8,8 +8,18 @@ interface IProps {
     handleOk: () => void,
     handleCancel: () => void,
     form: FormInstance
+    // specialtyOptions: any
 }
-const ModalCreateUser = ({ isVisible, handleOk, handleCancel, form }: IProps) => {
+const ModalCreateUser = ({  isVisible, handleOk, handleCancel, form }: IProps) => {
+      
+  const specialtyOptions = [
+    { value: "internal", label: "Nội khoa" },
+    { value: "surgery", label: "Ngoại khoa" },
+    { value: "pediatrics", label: "Nhi khoa" },
+    { value: "cardiology", label: "Tim mạch" },
+    { value: "dermatology", label: "Da liễu" },
+  ];
+    const [specialty, setSpecialty] = useState<string>("internal");
 
     const [isShowSpecialty, setIsShowSpecialty] = useState(false);
 
@@ -48,10 +58,16 @@ const ModalCreateUser = ({ isVisible, handleOk, handleCancel, form }: IProps) =>
                         <Select.Option value="female">Nữ</Select.Option>
                     </Select>
                 </Form.Item>
-               <Form.Item label="Khoa" name="specialty" valuePropName="specialty" rules={[{ required: true, message: "Chuyên khoa" }]} >
-                    <Select value={'doctor'} onChange={handleUserTypeChange}>
+                <Form.Item label="Khoa" name="specialty" valuePropName="specialty" rules={[{ required: true, message: "Chuyên khoa" }]} >
+                    {/* <Select value={'doctor'} onChange={handleUserTypeChange}>
                         <Select.Option value="doctor">Bác sĩ</Select.Option>
-                    </Select>
+                    </Select> */}
+                    <Select
+                        style={{ width: 120 }}
+                        value={specialty}
+                        onChange={(value) => setSpecialty(value)}
+                        options={specialtyOptions}
+                    />
                 </Form.Item>
                 <Form.Item name="address" label="Địa chỉ">
                     <Input placeholder="Địa chỉ" />
@@ -66,7 +82,7 @@ const ModalCreateUser = ({ isVisible, handleOk, handleCancel, form }: IProps) =>
                     <Input placeholder="Tiểu sử bác sĩ" />
                 </Form.Item>
 
- 
+
 
             </Form>
         </Modal>

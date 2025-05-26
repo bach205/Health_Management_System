@@ -159,6 +159,7 @@ export const getDoctors = async (body: any) => {
     // return instance.post(`${BASE_URL}`, body);
     return data;
 };
+
 export const updateDoctor = (doctor: IDoctor) => {
     return instance.put(`${BASE_URL}/update/${doctor._id}`, doctor);
 };

@@ -52,6 +52,18 @@ const AdminDoctorDashboard = () => {
   const [isCreateVisible, setIsCreateVisible] = useState<boolean>(false);
   const [isUpdateVisible, setIsUpdateVisible] = useState<boolean>(false);
 
+  const specialtyOptions = [
+    { value: "all", label: "Tất cả khoa" },
+    { value: "internal", label: "Nội khoa" },
+    { value: "surgery", label: "Ngoại khoa" },
+    { value: "pediatrics", label: "Nhi khoa" },
+    { value: "cardiology", label: "Tim mạch" },
+    { value: "dermatology", label: "Da liễu" },
+  ];
+
+  const [specialty, setSpecialty] = useState<string>("all");
+  const [sort, setSort] = useState<string>("stt");
+
   const [formCreate] = Form.useForm();
   const [formUpdate] = Form.useForm();
   // console.log(formUpdate)
@@ -236,7 +248,7 @@ const AdminDoctorDashboard = () => {
 
   };
 
-  const handleResetPassword = ({ _id }: IDoctor) => {
+  const handleResetPassword = (_id :string) => {
     console.log(_id)
   }
 
@@ -306,7 +318,7 @@ const AdminDoctorDashboard = () => {
   return (
     <div>
       <Typography.Title>
-        Quản lý người dùng
+        Quản lý bác sĩ
       </Typography.Title>
 
       {/* filter bar */}
@@ -335,29 +347,25 @@ const AdminDoctorDashboard = () => {
       <Flex gap={10} justify="space-between" style={{ marginBottom: 10 }}>
         <Form>
           <Flex gap={10}>
-            <Form.Item label="Lọc theo khoa" style={{ width: '200px' }} name="specialty" valuePropName="specialty" >
-              <Select style={{ width: 120 }}
-                // onChange={handleChange}
-                value={'all'}
-                options={[
-                  { value: 'all', label: 'Khoa' },
-                  { value: 'lucy', label: 'Lucy' },
-                  { value: 'Yiminghe', label: 'yiminghe' },
-                  { value: 'disabled', label: 'Disabled', disabled: true },
-                ]}
+            <Form.Item label="Lọc theo khoa" style={{ width: '220px' }} name="specialty" valuePropName="specialty" >
+              <Select
+                style={{ width: 120 }}
+                value={specialty}
+                onChange={(value) => setSpecialty(value)}
+                options={specialtyOptions}
               />
             </Form.Item>
-            <Form.Item label="Sắp xếp theo" style={{ width: '200px' }} name="sort" valuePropName="sort" >
+            <Form.Item label="Sắp xếp" style={{ width: '220px' }} name="sort" valuePropName="sort" >
               <Select
-                value={"all"}
                 style={{ width: 120 }}
-                // onChange={handleChange}
+                value={sort}
+                onChange={(value) => setSort(value)}
                 options={[
-                  { value: 'stt', label: 'STT' },
-                  { value: 'all', label: 'Tên A-Z' },
-                  { value: 'lucy', label: 'Lucy' },
-                  { value: 'Yiminghe', label: 'yiminghe' },
-                  { value: 'disabled', label: 'Disabled', disabled: true },
+                  { value: "stt", label: "STT" },
+                  { value: "name_asc", label: "Tên A-Z" },
+                  { value: "name_desc", label: "Tên Z-A" },
+                  { value: "created_at_desc", label: "Mới nhất" },
+                  { value: "created_at_asc", label: "Cũ nhất" },
                 ]}
               />
             </Form.Item>

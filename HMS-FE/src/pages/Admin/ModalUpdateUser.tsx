@@ -6,18 +6,22 @@ interface IProps {
     isVisible: boolean,
     handleOk: () => void,
     handleCancel: () => void,
-    form: FormInstance
+    form: FormInstance,
+    // specialtyOptions: any
 }
 const ModalUpdateUser = ({ isVisible, handleOk, handleCancel, form }: IProps) => {
-    const [isShowSpecialty, setIsShowSpecialty] = useState(false);
+    const [specialty, setSpecialty] = useState<string>("internal");
 
-    const handleUserTypeChange = (value: EmployeeType) => {
-        setIsShowSpecialty(value === 'doctor');
-    };
-    
+    const specialtyOptions = [
+        { value: "internal", label: "Nội khoa" },
+        { value: "surgery", label: "Ngoại khoa" },
+        { value: "pediatrics", label: "Nhi khoa" },
+        { value: "cardiology", label: "Tim mạch" },
+        { value: "dermatology", label: "Da liễu" },
+    ];
     return (
         <Modal open={isVisible}
-            title={"Cập nhật bác sĩ"}
+            title={"Cập nhật bác sĩ"} 
             onOk={handleOk}
             okText={"Cập nhật"}
             cancelText="Hủy"
@@ -41,12 +45,19 @@ const ModalUpdateUser = ({ isVisible, handleOk, handleCancel, form }: IProps) =>
                 </Form.Item>
 
                 <Form.Item label="Khoa" name="specialty" valuePropName="specialty" rules={[{ required: true, message: "Chuyên khoa" }]} >
-                    <Select onChange={handleUserTypeChange}>
+                    {/* <Select onChange={handleUserTypeChange}>
                         <Select.Option value="doctor">Bác sĩ</Select.Option>
                         <Select.Option value="nurse">Y tá</Select.Option>
                         <Select.Option value="pharmacist">Dược sĩ</Select.Option>
-                    </Select>
+                    </Select> */}
+                    <Select
+                        style={{ width: 120 }}
+                        value={specialty}
+                        onChange={(value) => setSpecialty(value)}
+                        options={specialtyOptions}
+                    />
                 </Form.Item>
+
                 <Form.Item name="gender" label="Giới tính" rules={[{ required: true, message: "Vui lòng giới tính!" }]} >
                     <Select style={{ width: 100 }}>
                         <Select.Option value="male">Nam</Select.Option>
