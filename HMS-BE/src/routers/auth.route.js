@@ -6,9 +6,31 @@ const validate = require("../middlewares/validate");
 const authController = require("../controllers/auth.controller");
 const authRouter = express.Router();
 
-authRouter.post("/login", validate({ body: loginSchema }), asyncHandler(AuthController.login), authController.login);
+authRouter.post(
+  "/login",
+  validate({ body: loginSchema }),
+  asyncHandler(AuthController.login),
+  authController.login
+);
 
-authRouter.post("/register", validate({ body: registerSchema }), asyncHandler(AuthController.register), authController.register);
+authRouter.post(
+  "/register",
+  validate({ body: registerSchema }),
+  asyncHandler(AuthController.register),
+  authController.register
+);
+
+authRouter.put(
+  "/update-patient",
+  asyncHandler(AuthController.updatePatientFullInfo),
+  authController.updatePatientFullInfo
+);
+
+authRouter.post(
+  "/logout",
+  asyncHandler(AuthController.logout),
+  authController.logout
+);
 
 // Ví dụ check authen bên trong router
 // authRouter.get("/users", authenticateToken, authorizeRoles("admin"), asyncHandler(AuthController.getUsers));
