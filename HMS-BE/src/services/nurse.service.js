@@ -20,7 +20,6 @@ class NurseService {
                 'gender',
                 'date_of_birth',
                 'address',
-                'department'
             ];
 
             for (const field of requiredFields) {
@@ -67,7 +66,6 @@ class NurseService {
                     date_of_birth: value.date_of_birth,
                     role: "nurse",
                     address: value.address,
-                    department: value.department,
                     bio: value.bio,
                     is_active: true,
                     sso_provider: "local"
@@ -86,15 +84,13 @@ class NurseService {
 
     updateNurse = async (nurseId, updateData) => {
         try {
+            nurseId = parseInt(nurseId, 10);
             // Check if nurse exists
             const existingNurse = await prisma.user.findUnique({
                 where: { id: nurseId }
             });
             if (!existingNurse) {
                 throw new BadRequestError("Nurse not found");
-            }
-            if (existingNurse.role !== "nurse") {
-                throw new BadRequestError("User is not a nurse");
             }
 
             // Check for empty fields in update data
@@ -105,7 +101,6 @@ class NurseService {
                 'gender',
                 'date_of_birth',
                 'address',
-                'department'
             ];
 
             for (const field of requiredFields) {
@@ -140,19 +135,27 @@ class NurseService {
                 }
             }
 
-            // Update nurse
+            // Create update data object with only changed fields
+            const updateFields = {};
+            for (const field of requiredFields) {
+                if (updateData[field] && updateData[field] !== existingNurse[field]) {
+                    updateFields[field] = value[field];
+                }
+            }
+
+            if (new Date(value["date_of_birth"]).getTime() === new Date(existingNurse["date_of_birth"]).getTime()) {
+                delete updateFields["date_of_birth"];
+            }
+
+            // If no fields to update, return existing nurse
+            if (Object.keys(updateFields).length === 0) {
+                throw new BadRequestError("No changes to update");
+            }
+
+            // Update nurse with only changed fields
             const updatedNurse = await prisma.user.update({
                 where: { id: nurseId },
-                data: {
-                    full_name: value.full_name,
-                    email: value.email,
-                    phone: value.phone,
-                    gender: value.gender,
-                    date_of_birth: value.date_of_birth,
-                    address: value.address,
-                    department: value.department,
-                    bio: value.bio
-                },
+                data: updateFields
             });
 
             if (!updatedNurse) {
