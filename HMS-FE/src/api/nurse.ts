@@ -1,42 +1,38 @@
-import type { IDoctor } from "../utils";
+import type { IDoctor, IUserBase } from "../utils";
 import instance from "./mainRequest";
 
-const BASE_URL = "doctor";
+const BASE_URL = "nurse";
 
-export const createDoctor = (doctor: IDoctor) => {
-    return instance.post(`${BASE_URL}/create`, doctor);
+export const createNurse = (nurse: IUserBase) => {
+    return instance.post(`${BASE_URL}/create`, nurse);
 };
 
-export const getDoctors = async (body: any) => {
-    const data: { users: IDoctor[] } = {
+export const getNurses = async (body: any) => {
+    const data: { users: IUserBase[] } = {
         users: [
             {
                 id: "000000000000000000000001",
                 full_name: "Nguyễn văn A",
-                email: "bacsi1@gmail.com",
+                email: "yta1@gmail.com",
                 phone: "9999999999",
                 password: "$2b$09$xnB.y1uRcrrPQaGOgF3OZuUMeEQL1AgwPLDNcb55.N0k0j3n73h5e",
                 is_active: true,
                 role: "doctor",
                 date_of_birth: "1990-05-14T17:00:00.000Z",
                 address: "Hà Nội",
-                bio:'10 năm kinh nghiệm',
                 gender: "male",
-                specialty: "Nội khoa"
             },
             {
                 id: "000000000000000000000002",
                 full_name: "Nguyễn văn B",
-                email: "bacsi2@gmail.com",
+                email: "yta2@gmail.com",
                 phone: "9999999999",
                 password: "$2b$09$xnB.y1uRcrrPQaGOgF3OZuUMeEQL1AgwPLDNcb55.N0k0j3n73h5e",
                 is_active: true,
                 role: "doctor",
                 date_of_birth: "1990-05-14T17:00:00.000Z",
                 address: "TP Hồ Chí Minh",
-                bio:'10 năm kinh nghiệm',
                 gender: "male",
-                specialty: "Ngoại khoa"
             },
 
         ]
@@ -46,10 +42,10 @@ export const getDoctors = async (body: any) => {
     return data;
 };
 
-export const updateDoctor = (doctor: IDoctor) => {
-    return instance.put(`${BASE_URL}/update/${doctor.id}`, doctor);
+export const updateNurse = (nurse: IDoctor) => {
+    return instance.put(`${BASE_URL}/update/${nurse.id}`, nurse);
 };
 
-export const getDoctorById = (id: string) => {
+export const getNurseById = (id: string) => {
     return instance.get(`${BASE_URL}/${id}`);
 };

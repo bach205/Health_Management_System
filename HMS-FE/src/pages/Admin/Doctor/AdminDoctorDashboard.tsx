@@ -1,85 +1,23 @@
-import { useEffect, useState } from "react";
-import { Breadcrumb, Table, Typography, Tag, Space, Flex, Button, Modal, Form, Input, Select, notification, Tooltip, DatePicker, Avatar, Popconfirm, Dropdown, } from "antd";
-import { ArrowUpDown, Ban, CirclePlus, Filter, RefreshCcw, RotateCcw, Search, User, UserRoundPen } from "lucide-react";
-import { colorOfType, PASSWORD_DEFAULT, TYPE_EMPLOYEE, TYPE_EMPLOYEE_STR, type EmployeeType, type IDoctor } from "../../utils";
-import { getDoctors } from "../../api/doctor";
-import ModalCreateUser from "./ModalCreateUser";
-import ModalUpdateUser from "./ModalUpdateUser";
+import { useState } from "react";
+import { Table, Tag, Space, Flex, Button, Form, Input, Select, notification, Tooltip, Popconfirm, } from "antd";
+import { Ban, CirclePlus, Eye, RefreshCcw, RotateCcw, Search, UserRoundPen } from "lucide-react";
+import { PASSWORD_DEFAULT, specialtyOptions, TYPE_EMPLOYEE_STR, type IDoctor } from "../../../utils";
+import ModalCreateUser from "../../../components/modal/ModalCreateUser";
+import ModalUpdateUser from "../../../components/modal/ModalUpdateUser";
 import dayjs from "dayjs";
-
-interface IPagination {
-  total: number;
-  pageSize: number;
-  current: number;
-}
-
-const items = [
-  {
-    key: '1',
-    label: (
-      <a target="_blank" rel="noopener noreferrer" href="">
-        1st menu item
-      </a>
-    ),
-  },
-  {
-    key: '2',
-    label: (
-      <a target="_blank" rel="noopener noreferrer" href="">
-        2nd menu item (disabled)
-      </a>
-    ),
-    disabled: true,
-  },
-  {
-    key: '3',
-    label: (
-      <a target="_blank" rel="noopener noreferrer" href="">
-        3rd menu item (disabled)
-      </a>
-    ),
-    disabled: true,
-  },
-  {
-    key: '4',
-    danger: true,
-    label: 'a danger item',
-  },
-];
-
+import { useDoctorList } from "../../../hooks/useDoctorList";
+import ModalViewUser from "../../../components/modal/ModalViewUser";
 
 const AdminDoctorDashboard = () => {
   const [isCreateVisible, setIsCreateVisible] = useState<boolean>(false);
   const [isUpdateVisible, setIsUpdateVisible] = useState<boolean>(false);
+  const [isViewVisible, setIsViewVisible] = useState<boolean>(false);
 
-  const specialtyOptions = [
-    { value: "all", label: "Tất cả khoa" },
-    { value: "internal", label: "Nội khoa" },
-    { value: "surgery", label: "Ngoại khoa" },
-    { value: "pediatrics", label: "Nhi khoa" },
-    { value: "cardiology", label: "Tim mạch" },
-    { value: "dermatology", label: "Da liễu" },
-  ];
-
-  const [specialty, setSpecialty] = useState<string>("all");
-  const [sort, setSort] = useState<string>("stt");
+  const filterOptions = [{ value: "all", label: "Tất cả" }, ...specialtyOptions]
 
   const [formCreate] = Form.useForm();
   const [formUpdate] = Form.useForm();
-  // console.log(formUpdate)
-  const [selectedUser, setSelectedUser] = useState<IDoctor>({} as IDoctor);
-  const [users, setUsers] = useState<IDoctor[]>([]);
-
-  const [reload, setReload] = useState<boolean>(false);
-
-  const [pagination, setPagination] = useState<IPagination>({
-    total: 0,
-    pageSize: 10,
-    current: 1,
-  });
-
-  const [loading, setLoading] = useState(true);
-  const [keyword, setKeyword] = useState("");
+  const [formView] = Form.useForm();
 
   // Table column
   const columns: any = [
@@ -87,22 +25,15 @@ const AdminDoctorDashboard = () => {
       title: "STT",
       dataIndex: "index",
       key: "index",
-      width: 70,
+      width: 60,
       align: "center" as const,
       render: (_: any, __: any, index: number) => index + 1,
-    },
-    {
-      title: "Ảnh",
-      // dataIndex: "photo",
-      width: 60,
-      // key: "photo",
-      render: (photo: any) => <Avatar size={32} icon={<User />} />,
     },
     {
       title: "Email",
       dataIndex: "email",
       key: "email",
-      width: 200,
+      width: 150,
       ellipsis: true,
     },
     {
@@ -130,35 +61,10 @@ const AdminDoctorDashboard = () => {
     },
 
     {
-      width: 150,
+      width: 100,
       title: "Khoa",
       dataIndex: "specialty",
       key: "specialty",
-    },
-    {
-      width: 150,
-      title: "Địa chỉ",
-      dataIndex: "address",
-      key: "address",
-    },
-    {
-      width: 200,
-      title: "Tiểu sử",
-      dataIndex: "bio",
-      key: "bio",
-    },
-    {
-      title: "Ngày sinh",
-      width: 170,
-      ellipsis: true,
-      dataIndex: "date_of_birth",
-      key: "date_of_birth",
-      render: (date_of_birth: any) => (
-        <Typography.Text>
-          {dayjs(date_of_birth).format("DD/MM/YYYY")} -{" "}
-          {dayjs().diff(date_of_birth, "year")} tuổi
-        </Typography.Text>
-      ),
     },
     {
       width: 150,
@@ -178,11 +84,39 @@ const AdminDoctorDashboard = () => {
       title: "Hành động",
       fixed: "right",
       align: "center",
-      width: 150,
+      width: 160,
       ellipsis: true,
       key: "action",
       render: (_: any, record: IDoctor) => (
         <Space size="small">
+          <Tooltip title="Xem thông tin">
+            <Button
+              type="text"
+              onClick={() => handleView(record)}
+              icon={<Eye size={17.5} />}
+            ></Button>
+          </Tooltip>
+          {record?.role === TYPE_EMPLOYEE_STR.patient ? null : (
+            <Tooltip title="Chỉnh sửa thông tin">
+              <Button
+                type="text"
+                onClick={() => handleEdit(record)}
+                icon={<UserRoundPen size={17.5} />}
+              ></Button>
+            </Tooltip>
+          )}
+
+          <Popconfirm
+            title="Khôi phục mật khẩu"
+            description={"Mật khẩu sẽ được khôi phục về mặc định là " + PASSWORD_DEFAULT}
+            onConfirm={() => handleResetPassword(record.id)}
+            okText="Xác nhận"
+            cancelText="Hủy"
+          >
+            <Tooltip title="Khôi phục mật khẩu mặc định" placement="topRight">
+              <Button type="text" icon={<RotateCcw size={17.5} />}></Button>
+            </Tooltip>
+          </Popconfirm>
           <Tooltip title={record?.is_active ? "Bạn muốn cấm tài khoản ?" : "Bạn muốn hủy cấm tài khoản?"} >
             <Popconfirm
               title={record?.is_active ? "Cấm tài khoản?" : "Bỏ cấm tài khoản?"}
@@ -197,41 +131,33 @@ const AdminDoctorDashboard = () => {
               />
             </Popconfirm>
           </Tooltip>
-          {record?.role === TYPE_EMPLOYEE.user ? null : (
-            <Tooltip title="Chỉnh sửa thông tin">
-              <Button
-                type="text"
-                onClick={() => handleEdit(record)}
-                icon={<UserRoundPen size={17.5} />}
-              ></Button>
-            </Tooltip>
-          )}
-
-          <Popconfirm
-            title="Khôi phục mật khẩu"
-            description={"Mật khẩu sẽ được khôi phục về mặc định là " + PASSWORD_DEFAULT}
-            onConfirm={() => handleResetPassword(record._id)}
-            okText="Xác nhận"
-            cancelText="Hủy"
-          >
-            <Tooltip title="Khôi phục mật khẩu mặc định" placement="topRight">
-              <Button type="text" icon={<RotateCcw size={17.5} />}></Button>
-            </Tooltip>
-          </Popconfirm>
         </Space>
       ),
     },
   ];
 
+  // is active
   const handleStatus = async (record: IDoctor) => {
-
+    console.log(record)
   };
 
-  const handleEdit = async (record: IDoctor) => {
-    console.log(record)
+  const handleView = async (record: IDoctor) => {
+    // console.log(record)
     try {
-      // console.log(record)
-      setSelectedUser(record);
+      // setIsShowSpecialty(record.role === TYPE_EMPLOYEE.doctor);
+      formView.setFieldsValue({
+        ...record,
+        date_of_birth: dayjs(record.date_of_birth),
+      });
+      setIsViewVisible(true);
+    } catch (error) {
+      console.log(error);
+      notification.error({ message: "Có lỗi xảy ra" });
+    }
+  };
+  const handleEdit = async (record: IDoctor) => {
+    // console.log(record)
+    try {
       // setIsShowSpecialty(record.role === TYPE_EMPLOYEE.doctor);
       formUpdate.setFieldsValue({
         ...record,
@@ -244,32 +170,10 @@ const AdminDoctorDashboard = () => {
     }
   };
 
-  const handleOk = () => {
-
-  };
-
-  const handleResetPassword = (_id: string) => {
-    console.log(_id)
+  const handleResetPassword = (id: string) => {
+    console.log(id)
   }
 
-
-  useEffect(() => {
-    // console.log('call use')
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const data = await getDoctors({})
-        console.log(data)
-        setUsers(data?.users);
-
-        setLoading(false);
-      } catch (error) {
-        console.log(error)
-        setLoading(false);
-      }
-    }
-    fetchData();
-  }, [keyword, reload]);
 
   const handleCreateCancel = () => {
     setIsCreateVisible(false);
@@ -278,7 +182,12 @@ const AdminDoctorDashboard = () => {
   const handleUpdateCancel = () => {
     setIsUpdateVisible(false);
   };
+  const handleViewCancel = () => {
+    setIsViewVisible(false);
+  };
 
+
+  //Submit create doctor
   const handleCreateOk = async () => {
     try {
       const values = await formCreate.validateFields();
@@ -292,6 +201,7 @@ const AdminDoctorDashboard = () => {
     }
   };
 
+  //Submit update doctor
   const handleUpdateOk = async () => {
     try {
       const values = await formUpdate.validateFields();
@@ -305,27 +215,24 @@ const AdminDoctorDashboard = () => {
     }
   };
 
-  const handleSearch = () => {
+  // custom hook
+  const {
+    users, loading, keyword, reload, specialty, sort, pagination,
+    setKeyword, setReload, setSpecialty, setSort, handleTableChange,
+  } = useDoctorList();
 
-  };
-
-  const handleTableChange = (e: any) => {
-    console.log(e)
-    // console.log(e.pagi)
-    setPagination({ ...e.pagi })
-  };
 
   return (
     <div>
-      <Typography.Title>
+      <p className="text-indigo-600!">
         Quản lý bác sĩ
-      </Typography.Title>
+      </p>
 
       {/* filter bar */}
       <Flex gap={10} justify="space-between" style={{ marginBottom: 10 }}>
         <Flex gap={10}>
           <Tooltip title="Hủy lọc">
-            <Button onClick={handleSearch}>
+            <Button onClick={() => setReload(!reload)}>
               <RefreshCcw size={17.5} />
             </Button>
           </Tooltip>
@@ -352,7 +259,7 @@ const AdminDoctorDashboard = () => {
                 style={{ width: 120 }}
                 value={specialty}
                 onChange={(value) => setSpecialty(value)}
-                options={specialtyOptions}
+                options={filterOptions}
               />
             </Form.Item>
             <Form.Item label="Sắp xếp" style={{ width: '220px' }} name="sort" valuePropName="sort" >
@@ -380,10 +287,12 @@ const AdminDoctorDashboard = () => {
         dataSource={users}
         pagination={pagination}
         onChange={(e: any) => { handleTableChange(e) }}
-        scroll={{ x: 1300, y: 500 }}
+        scroll={{ x: 1000, y: 500 }}
       />
-      <ModalCreateUser form={formCreate} handleOk={handleCreateOk} isVisible={isCreateVisible} handleCancel={handleCreateCancel}></ModalCreateUser>
-      <ModalUpdateUser form={formUpdate} handleOk={handleUpdateOk} isVisible={isUpdateVisible} handleCancel={handleUpdateCancel}></ModalUpdateUser>
+
+      <ModalCreateUser role="doctor" form={formCreate} handleOk={handleCreateOk} isVisible={isCreateVisible} handleCancel={handleCreateCancel}></ModalCreateUser>
+      <ModalUpdateUser role="doctor" form={formUpdate} handleOk={handleUpdateOk} isVisible={isUpdateVisible} handleCancel={handleUpdateCancel}></ModalUpdateUser>
+      <ModalViewUser role="doctor" form={formView} isVisible={isViewVisible} handleCancel={handleViewCancel}></ModalViewUser>
 
     </div>
   );
