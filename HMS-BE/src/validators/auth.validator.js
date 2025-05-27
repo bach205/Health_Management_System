@@ -32,9 +32,31 @@ const updatePatientFullInfoSchema = Joi.object({
   }).required(),
 });
 
+const createDoctorSchema = Joi.object({
+  full_name: Joi.string().required(),
+  email: Joi.string().email().required(),
+  phone: Joi.string().pattern(/^[0-9]{10}$/).required(),
+  password: Joi.string().min(6).required(),
+  gender: Joi.string().valid("male", "female").required(),
+  date_of_birth: Joi.string().required(),
+  address: Joi.string().required(),
+  specialty: Joi.string().required(),
+  bio: Joi.string().optional(),
+});
+const createNurseSchema = Joi.object({
+  full_name: Joi.string().required(),
+  email: Joi.string().email().required(),
+  phone: Joi.string().pattern(/^[0-9]{10}$/).required(),
+  password: Joi.string().min(6).required(),
+  gender: Joi.string().valid("male", "female").required(),
+  date_of_birth: Joi.string().required(),
+  address: Joi.string().required(),
+});
 module.exports = {
   registerSchema,
   loginSchema,
   updatePatientSchema,
   updatePatientFullInfoSchema,
+  createDoctorSchema,
+  createNurseSchema,
 };
