@@ -29,6 +29,19 @@ class NurseController {
             })
         }
     }
+    banNurse = async (req, res) => {
+        try {
+            const result = await NurseService.banNurse(req.params.id);
+            return new OK({
+                message: "Ban nurse successfully",
+                metadata: result,
+            }).send(res);
+        } catch (error) {
+            return res.status(error.status).json({
+                message: error.message,
+            })
+        }
+    }
 }
 
 module.exports = new NurseController();

@@ -167,6 +167,38 @@ class NurseService {
             throw new BadRequestError(error.message);
         }
     }
+
+    banNurse = async (nurseId) => {
+        try {
+            nurseId = parseInt(nurseId, 10);
+            // Check if nurse exists
+            const existingNurse = await prisma.user.findUnique({
+                where: { id: nurseId }
+            });
+            if (!existingNurse) {
+                throw new BadRequestError("Nurse not found");
+            }
+            if (existingNurse.role !== "nurse") {
+                throw new BadRequestError("User is not a nurse");
+            }
+
+            // Toggle is_active status
+            const updatedNurse = await prisma.user.update({
+                where: { id: nurseId },
+                data: {
+                    is_active: false
+                }
+            });
+
+            if (!updatedNurse) {
+                throw new BadRequestError("There is some error in updating nurse status, please try again!");
+            }
+
+            return updatedNurse;
+        } catch (error) {
+            throw new BadRequestError(error.message);
+        }
+    }
 }
 
 module.exports = new NurseService();
