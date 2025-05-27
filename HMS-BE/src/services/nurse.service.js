@@ -1,12 +1,68 @@
 const { BadRequestError } = require("../core/error.response");
 const prisma = require("../config/prisma");
-const { createNurseSchema } = require("../validators/auth.validator");
+const { createNurseSchema, updateNurseSchema } = require("../validators/auth.validator");
 const bcrypt = require("bcrypt");
 
 class NurseService {
-    async findAllNurse() {
-        const users = await prisma.user.findMany();
-        return users;
+    async findAllNurse(query) {
+        try {
+            const { keyword = '', sort = 'stt' } = query;
+
+            // Build where clause for search
+            const whereClause = {
+                role: "nurse",
+                OR: keyword ? [
+                    { full_name: { contains: keyword } }
+                ] : undefined
+            };
+
+            // Build orderBy clause for sorting
+            let orderBy = {};
+            switch (sort) {
+                case 'name_asc':
+                    orderBy = { full_name: 'asc' };
+                    break;
+                case 'name_desc':
+                    orderBy = { full_name: 'desc' };
+                    break;
+                case 'created_at_desc':
+                    orderBy = { created_at: 'desc' };
+                    break;
+                case 'created_at_asc':
+                    orderBy = { created_at: 'asc' };
+                    break;
+                default: // 'stt'
+                    orderBy = { id: 'asc' };
+            }
+
+            console.log('Search params:', { keyword, sort, whereClause }); // Debug log
+
+            const nurses = await prisma.user.findMany({
+                where: whereClause,
+                select: {
+                    id: true,
+                    full_name: true,
+                    email: true,
+                    phone: true,
+                    gender: true,
+                    date_of_birth: true,
+                    address: true,
+                    is_active: true,
+                    created_at: true,
+                    updated_at: true
+                },
+                orderBy: orderBy
+            });
+
+            if (!nurses) {
+                throw new BadRequestError("Error fetching nurses");
+            }
+
+            return nurses;
+        } catch (error) {
+            console.error('Error in findAllNurse:', error); // Debug log
+            throw new BadRequestError(error.message);
+        }
     }
 
     createNurse = async (nurseData) => {
@@ -18,8 +74,6 @@ class NurseService {
                 'phone',
                 'password',
                 'gender',
-                'date_of_birth',
-                'address',
             ];
 
             for (const field of requiredFields) {
@@ -63,9 +117,9 @@ class NurseService {
                     phone: value.phone,
                     password: hashedPassword,
                     gender: value.gender,
-                    date_of_birth: value.date_of_birth,
+                    date_of_birth: value.date_of_birth || null,
                     role: "nurse",
-                    address: value.address,
+                    address: value.address || null,
                     bio: value.bio,
                     is_active: true,
                     sso_provider: "local"
@@ -110,7 +164,7 @@ class NurseService {
             }
 
             // Validate input data using Joi schema
-            const { error, value } = createNurseSchema.validate(updateData, { abortEarly: false });
+            const { error, value } = updateNurseSchema.validate(updateData, { abortEarly: false });
             if (error) {
                 throw new BadRequestError(error.details.map(detail => detail.message).join(', '));
             }
@@ -164,6 +218,7 @@ class NurseService {
 
             return updatedNurse;
         } catch (error) {
+            console.log(error)
             throw new BadRequestError(error.message);
         }
     }
@@ -186,7 +241,7 @@ class NurseService {
             const updatedNurse = await prisma.user.update({
                 where: { id: nurseId },
                 data: {
-                    is_active: false
+                    is_active: !existingNurse.is_active
                 }
             });
 
@@ -195,6 +250,42 @@ class NurseService {
             }
 
             return updatedNurse;
+        } catch (error) {
+            throw new BadRequestError(error.message);
+        }
+    }
+
+    resetPassword = async (nurseId) => {
+        try {
+            // Check if nurse exists
+            const nurse = await prisma.user.findUnique({
+                where: { id: parseInt(nurseId, 10) }
+            });
+            if (!nurse) {
+                throw new Error("Nurse not found");
+            }
+
+            // Update password to default
+            const defaultPassword = "123456"; // Default password
+            const hashedPassword = await bcrypt.hash(defaultPassword, 10);
+
+            const updatedNurse = await prisma.user.update({
+                where: { id: parseInt(nurseId, 10) },
+                data: {
+                    password: hashedPassword
+                }
+            });
+
+            if (!updatedNurse) {
+                throw new BadRequestError("There is some error in resetting password, please try again!");
+            }
+
+            return {
+                status: 200,
+                data: {
+                    message: "Reset password successfully"
+                }
+            };
         } catch (error) {
             throw new BadRequestError(error.message);
         }
