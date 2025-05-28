@@ -122,9 +122,14 @@ const ModalCreateUser = ({ role, isVisible, handleOk, handleCancel, form }: IPro
           />
         </Form.Item>
 
-        <Form.Item name="create_password" label="Tạo mật khẩu" valuePropName="checked">
+        <Form.Item
+          name="create_password"
+          label="Mật khẩu"
+          valuePropName="checked"
+          tooltip="Nếu không chọn, hệ thống sẽ tự động tạo mật khẩu default"
+        >
           <Checkbox onChange={(e) => setShowPasswordFields(e.target.checked)}>
-            Tạo mật khẩu ngay
+            Tạo mật khẩu tùy chỉnh
           </Checkbox>
         </Form.Item>
 
