@@ -21,25 +21,16 @@ export interface IUserBase {
 
 export interface IDoctor extends IUserBase {
   role: "doctor";
-<<<<<<< HEAD
-  specialty: string; // Khoa     
-  bio?: string;
-=======
   doctor: {
     specialty?: string; // Khoa
     bio?: string;
   }
->>>>>>> master
 }
 
 
 export interface IPatient extends IUserBase {
   role: "patient";
-<<<<<<< HEAD
-  identityNumber: string;
-=======
   identity_number?: string;
->>>>>>> master
 }
 
 

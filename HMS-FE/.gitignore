@@ -23,4 +23,4 @@ dist-ssr
 *.sln
 *.sw?
 .env
-package-loc.json
+package-lock.json

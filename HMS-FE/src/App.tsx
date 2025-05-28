@@ -6,7 +6,7 @@ import Register from "@/pages/Register";
 import Dashboard from "@/pages/Dashboard";
 import { Authentication } from "@/Authentication";
 import MainLayout from "@/layouts/MainLayout";
-import DashboardLayout from "@/layouts/DashboardLayout";
+
 import { Fragment } from "react/jsx-runtime";
 import Queue from "@/pages/Queue";
 import AdminDoctorDashboard from "./pages/Admin/Doctor/AdminDoctorDashboard";
@@ -16,6 +16,8 @@ import customParseFormat from "dayjs/plugin/customParseFormat";
 import plugin from "dayjs/plugin/updateLocale";
 import AdminNurseDashboard from "./pages/Admin/Nurse/AdminNurseDashboard";
 import MyProfile from "./pages/Profile/MyProfile";
+import DashboardLayout from "./layouts/DashboardLayout/index.tsx";
+import ShiftCalendar from "./pages/Staff/ShiftCalendar.tsx";
 dayjs.extend(plugin);
 dayjs.updateLocale("en", {
   weekStart: 1,
@@ -71,6 +73,7 @@ const PublicRoutes = [
     element: <MyProfile />,
     layout: MainLayout,
   },
+
 ];
 
 const PrivateRoutes = [
@@ -97,6 +100,16 @@ const PrivateRoutes = [
   {
     path: "/queues",
     element: <Queue />,
+    layout: DashboardLayout,
+  },
+  {
+    path: "/admin/shifts",
+    element: <ShiftCalendar />,
+    layout: DashboardLayout,
+  },
+  {
+    path: "/staff/shifts",
+    element: <ShiftCalendar />,
     layout: DashboardLayout,
   },
 ];

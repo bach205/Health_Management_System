@@ -16,7 +16,7 @@ const AdminNurseDashboard = () => {
   const [isUpdateVisible, setIsUpdateVisible] = useState<boolean>(false);
   const [isViewVisible, setIsViewVisible] = useState<boolean>(false);
   const filterOptions = [{ value: "all", label: "Tất cả" }, ...specialtyOptions]
-
+  
   const [formCreate] = Form.useForm();
   const [formUpdate] = Form.useForm();
   const [formView] = Form.useForm();
@@ -71,7 +71,7 @@ const AdminNurseDashboard = () => {
       render: (_: any, { is_active }: IUserBase) => (
         <>
           <Tag color={is_active ? "green" : "red"}>
-            {is_active ? "Bình thường" : "Bị ban"}
+            {is_active ? "Đang hoạt động" : "Đã khóa"}
           </Tag>
         </>
       ),
@@ -114,9 +114,9 @@ const AdminNurseDashboard = () => {
               <Button type="text" icon={<RotateCcw size={17.5} />}></Button>
             </Tooltip>
           </Popconfirm>
-          <Tooltip title={record?.is_active ? "Bạn muốn cấm tài khoản ?" : "Bạn muốn hủy cấm tài khoản?"} >
+          <Tooltip title={record?.is_active ? "Bạn muốn khóa tài khoản ?" : "Bạn muốn mở khóa tài khoản?"} >
             <Popconfirm
-              title={record?.is_active ? "Cấm tài khoản?" : "Bỏ cấm tài khoản?"}
+              title={record?.is_active ? "Khóa tài khoản?" : "Mở khóa tài khoản?"}
               description="Bạn chắc chắn muốn thực hiện hành động này?"
               onConfirm={() => handleStatus(record)}
               okText="Xác nhận"
@@ -183,7 +183,7 @@ const AdminNurseDashboard = () => {
     }
   };
 
-  const handleResetPassword = async (id: string) => {
+  const handleResetPassword = async (id: number) => {
     try {
       const result = await resetPassword(id);
       if (result.status >= 200 && result.status < 300) {
@@ -216,7 +216,7 @@ const AdminNurseDashboard = () => {
       if (!values.create_password) {
         values.password = PASSWORD_DEFAULT;
       }
-      let result = await createNurse(values);
+      const result = await createNurse(values);
       if (result.status >= 200 && result.status < 300) {
         notification.success({ message: result.data.message });
         setReload(!reload);
@@ -236,7 +236,7 @@ const AdminNurseDashboard = () => {
     try {
       const values = await formUpdate.validateFields();
       console.log(values);
-      let result = await updateNurse(curNurseId, values);
+      const result = await updateNurse(curNurseId, values);
       if (result.status >= 200 && result.status < 300) {
         notification.success({ message: result.data.message });
         setReload(!reload);

@@ -26,6 +26,7 @@ export const useDoctorList = () => {
                     searchKey: keyword,
                     specialty: specialty,
                     sortBy: sort,
+                    isActive,
                     skip: (pagination.current - 1) * pagination.pageSize,
                     limit: pagination.pageSize,
                 }
@@ -40,7 +41,7 @@ export const useDoctorList = () => {
             }
         }
         fetchData();
-    }, [keyword, reload, pagination, specialty, sort]);
+    }, [keyword, reload, pagination, specialty, sort, isActive]);
 
     const handleTableChange = (pagination: IPagination) => {
         setPagination(pagination);

@@ -1,10 +1,13 @@
 import { IMAGE_CONST } from "@/constants/image.const";
-import { Bell } from "lucide-react";
+import { Bell, Menu } from "lucide-react";
 
-const Topbar = () => {
+const Topbar = ({ isCollapsed, setCollapsed }: { isCollapsed: boolean; setCollapsed: (isCollapsed: boolean) => void }) => {
   return (
     <div className="flex items-center justify-between p-4 bg-white sticky top-0 z-20">
-      <div className="ml-5">
+      <div className="ml-5 flex gap-5">
+        <button onClick={() => setCollapsed(!isCollapsed)}>
+          <Menu className="w-5 h-5" />
+        </button>
         <Bell
           className="w-5 h-5"
           style={{
