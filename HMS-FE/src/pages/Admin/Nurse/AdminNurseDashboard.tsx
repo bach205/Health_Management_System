@@ -259,7 +259,7 @@ const AdminNurseDashboard = () => {
   } = useNurseList();
   const handleAbortFilter = () => {
     setReload(!reload);
-    setSort("STT");
+    setSort("name_asc");
     setKeyword("");
   }
 

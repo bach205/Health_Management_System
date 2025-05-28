@@ -1,7 +1,7 @@
 import type { IUserBase } from "../types/index.type.ts";
 import instance from "./instance.ts";
 
-const BASE_URL = "/nurse";
+const BASE_URL = "api/v1/nurse";
 
 export const createNurse = async (nurse: IUserBase) => {
     return await instance.post(`${BASE_URL}/create`, nurse);

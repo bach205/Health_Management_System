@@ -13,7 +13,7 @@ export const useNurseList = () => {
     const [loading, setLoading] = useState<boolean>(true);
     const [keyword, setKeyword] = useState<string>("");
     const [reload, setReload] = useState<boolean>(false);
-    const [sort, setSort] = useState<string>("stt");
+    const [sort, setSort] = useState<string>("name_asc");
 
     const [pagination, setPagination] = useState<IPagination>({
         total: 0,
@@ -28,7 +28,7 @@ export const useNurseList = () => {
                 setLoading(true);
                 console.log(keyword)
                 const data = await getAllNurse({ keyword: keyword, sort: sort })
-                // console.log(data)
+                console.log(data)
                 setUsers(data?.data.metadata);
 
                 setLoading(false);

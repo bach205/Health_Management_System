@@ -15,6 +15,7 @@ import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import plugin from "dayjs/plugin/updateLocale";
 import AdminNurseDashboard from "./pages/Admin/Nurse/AdminNurseDashboard";
+import MyProfile from "./pages/Profile/MyProfile";
 dayjs.extend(plugin);
 dayjs.updateLocale("en", {
   weekStart: 1,
@@ -64,6 +65,11 @@ const PublicRoutes = [
   {
     path: "/register",
     element: <Register />,
+  },
+  {
+    path: "/my-profile",
+    element: <MyProfile />,
+    layout: MainLayout,
   },
 ];
 

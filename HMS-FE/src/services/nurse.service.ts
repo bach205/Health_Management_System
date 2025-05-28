@@ -1,9 +1,13 @@
 import type { IUserBase } from "../types/index.type";
 import instance from "../api/mainRequest";
+import { PASSWORD_DEFAULT } from "../constants/user.const";
 
-const BASE_URL = "nurse";
+const BASE_URL = "api/v1/nurse";
 
 export const createNurse = (nurse: IUserBase) => {
+    if (!nurse.password) {
+        nurse.password = PASSWORD_DEFAULT;
+    }
     return instance.post(`${BASE_URL}/create`, nurse);
 };
 

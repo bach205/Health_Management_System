@@ -1,55 +1,32 @@
 import type { IDoctor } from "../types/index.type";
 import instance from "../api/mainRequest";
-
-const BASE_URL = "doctor";
+import { PASSWORD_DEFAULT } from "../constants/user.const";
+const BASE_URL = "api/v1/doctor";
 
 export const createDoctor = (doctor: IDoctor) => {
+    if (!doctor.password) {
+        doctor.password = PASSWORD_DEFAULT;
+    }
+    console.log(doctor)
     return instance.post(`${BASE_URL}/create`, doctor);
 };
 
-export const getDoctors = async (body: any) => {
-    const data: { users: IDoctor[] } = {
-        users: [
-            {
-                id: "000000000000000000000001",
-                full_name: "Nguyễn văn A",
-                email: "bacsi1@gmail.com",
-                phone: "9999999999",
-                password: "$2b$09$xnB.y1uRcrrPQaGOgF3OZuUMeEQL1AgwPLDNcb55.N0k0j3n73h5e",
-                is_active: true,
-                role: "doctor",
-                date_of_birth: "1990-05-14T17:00:00.000Z",
-                address: "Hà Nội",
-                bio: '10 năm kinh nghiệm',
-                gender: "male",
-                specialty: "Nội khoa"
-            },
-            {
-                id: "000000000000000000000002",
-                full_name: "Nguyễn văn B",
-                email: "bacsi2@gmail.com",
-                phone: "9999999999",
-                password: "$2b$09$xnB.y1uRcrrPQaGOgF3OZuUMeEQL1AgwPLDNcb55.N0k0j3n73h5e",
-                is_active: true,
-                role: "doctor",
-                date_of_birth: "1990-05-14T17:00:00.000Z",
-                address: "TP Hồ Chí Minh",
-                bio: '10 năm kinh nghiệm',
-                gender: "male",
-                specialty: "Ngoại khoa"
-            },
-
-        ]
-    };
-
-    // return instance.post(`${BASE_URL}`, body);
-    return data;
+export const getDoctors = async (searchOptions: any) => {
+    return instance.post(`${BASE_URL}`, searchOptions);
 };
 
 export const updateDoctor = (doctor: IDoctor) => {
-    return instance.put(`${BASE_URL}/update/${doctor.id}`, doctor);
+    return instance.post(`${BASE_URL}/update`, doctor);
 };
 
-export const getDoctorById = (id: string) => {
+export const getDoctorById = (id: number) => {
     return instance.get(`${BASE_URL}/${id}`);
+};
+
+export const updateStatus = (id: number, status: boolean) => {
+    return instance.post(`${BASE_URL}/update-status/`, { id, isActive: status });
+};
+
+export const updatePassword = (id: number, password: string) => {
+    return instance.post(`${BASE_URL}/update-password/`, { id, password });
 };

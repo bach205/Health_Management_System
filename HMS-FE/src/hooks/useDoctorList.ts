@@ -1,12 +1,7 @@
 import { useEffect, useState } from "react";
 import { getDoctors } from "../services/doctor.service";
-import type { IDoctor } from "../types/index.type";
+import type { IDoctor, IPagination } from "../types/index.type";
 
-export interface IPagination {
-    total: number;
-    pageSize: number;
-    current: number;
-}
 
 export const useDoctorList = () => {
     const [users, setUsers] = useState<IDoctor[]>([]);
@@ -14,8 +9,8 @@ export const useDoctorList = () => {
     const [keyword, setKeyword] = useState<string>("");
     const [reload, setReload] = useState<boolean>(false);
     const [specialty, setSpecialty] = useState<string>("all");
-    const [sort, setSort] = useState<string>("stt");
-
+    const [sort, setSort] = useState<string>("newest");
+    const [isActive, setIsActive] = useState<string>("all");
     const [pagination, setPagination] = useState<IPagination>({
         total: 0,
         pageSize: 10,
@@ -23,14 +18,21 @@ export const useDoctorList = () => {
     });
 
     useEffect(() => {
-        // console.log('call use')
         const fetchData = async () => {
             try {
                 setLoading(true);
-                const data = await getDoctors({})
-                // console.log(data)
-                setUsers(data?.users);
 
+                const searchOptions = {
+                    searchKey: keyword,
+                    specialty: specialty,
+                    sortBy: sort,
+                    skip: (pagination.current - 1) * pagination.pageSize,
+                    limit: pagination.pageSize,
+                }
+
+                const res = await getDoctors(searchOptions)
+                console.log('res: ', res)
+                setUsers(res.data.metadata.doctors);
                 setLoading(false);
             } catch (error) {
                 console.log(error)
@@ -38,7 +40,7 @@ export const useDoctorList = () => {
             }
         }
         fetchData();
-    }, [keyword, reload]);
+    }, [keyword, reload, pagination, specialty, sort]);
 
     const handleTableChange = (pagination: IPagination) => {
         setPagination(pagination);
@@ -57,6 +59,8 @@ export const useDoctorList = () => {
         setSort,
         pagination,
         setPagination,
+        isActive,
+        setIsActive,
         handleTableChange,
     };
 };

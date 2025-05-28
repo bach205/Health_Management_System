@@ -14,7 +14,6 @@ interface IProps {
 
 const ModalUpdateUser = ({ role, isVisible, handleOk, handleCancel, form }: IProps) => {
   const [specialty, setSpecialty] = useState<string>("internal");
-
   return (
     <Modal
       open={isVisible}
@@ -74,7 +73,6 @@ const ModalUpdateUser = ({ role, isVisible, handleOk, handleCancel, form }: IPro
             <Form.Item
               label="Khoa"
               name="specialty"
-              rules={[{ required: true, message: "Vui lòng chọn chuyên khoa!" }]}
             >
               <Select
                 style={{ width: 120 }}
@@ -95,23 +93,17 @@ const ModalUpdateUser = ({ role, isVisible, handleOk, handleCancel, form }: IPro
           rules={[{ required: true, message: "Vui lòng chọn giới tính!" }]}
         >
           <Select style={{ width: 100 }}>
-            <Select.Option value="male">Nam</Select.Option>
-            <Select.Option value="female">Nữ</Select.Option>
+            <Select.Option value="male"><span className="text-black">Nam</span></Select.Option>
+            <Select.Option value="female"><span className="text-black">Nữ</span></Select.Option>
           </Select>
         </Form.Item>
 
-        <Form.Item
-          name="address"
-          label="Địa chỉ"
-          rules={[
-            { max: 200, message: "Địa chỉ không được vượt quá 200 ký tự!" }
-          ]}
-        >
-          <Input placeholder="Địa chỉ" maxLength={200} />
+        <Form.Item name="address" label="Địa chỉ">
+          <Input placeholder="Địa chỉ" />
         </Form.Item>
 
         <Form.Item name="date_of_birth" label="Ngày sinh">
-          <DatePicker format="DD/MM/YYYY" placeholder="Ngày sinh" maxDate={dayjs().subtract(18, "year") as any} />
+          <DatePicker format="DD/MM/YYYY" placeholder="Ngày sinh" minDate={dayjs().subtract(100, "year") as any} maxDate={dayjs().subtract(18, "year") as any} />
         </Form.Item>
       </Form>
     </Modal>

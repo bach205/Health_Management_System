@@ -34,6 +34,23 @@ class AuthController {
       metadata: {},
     }).send(res);
   }
+
+  async forgetPassword(req, res) {
+    const result = await AuthService.forgetPassword(req.body.email);
+    return new OK({
+      message: result.message,
+      metadata: { resetToken: result.resetToken },
+    }).send(res);
+  }
+
+  async resetPassword(req, res) {
+    const { token, newPassword } = req.body;
+    const result = await AuthService.resetPassword(token, newPassword);
+    return new OK({
+      message: result.message,
+      metadata: {},
+    }).send(res);
+  }
 }
 
 module.exports = new AuthController();

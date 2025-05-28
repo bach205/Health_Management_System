@@ -1,10 +1,10 @@
-import Header from "@/layouts/MainLayout/Header";
-import Footer from "@/layouts/MainLayout/Footer";
+import Footer from "./Footer";
+import Navbar from "./Navbar";
 
 const MainLayout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className="flex flex-col min-h-screen w-full">
-      <Header />
+    <div className="container">
+      <Navbar />
       <div className="flex-grow">{children}</div>
       <Footer />
     </div>

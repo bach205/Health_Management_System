@@ -13,7 +13,6 @@ interface IProps {
 
 const ModalViewUser = ({ role, isVisible, handleCancel, form }: IProps) => {
   const [specialty, setSpecialty] = useState<string>("internal");
-
   return (
     <Modal
       open={isVisible}
@@ -73,9 +72,9 @@ const ModalViewUser = ({ role, isVisible, handleCancel, form }: IProps) => {
           label="Giới tính"
           rules={[{ required: true, message: "Vui lòng chọn giới tính!" }]}
         >
-          <Select className="text-black!" style={{ width: 100 }}>
-            <Select.Option className="text-black!" value="male">Nam</Select.Option>
-            <Select.Option className="text-black!" value="female">Nữ</Select.Option>
+          <Select style={{ width: 100 }}>
+            <Select.Option value="male"><span className="text-black">Nam</span></Select.Option>
+            <Select.Option value="female"><span className="text-black">Nữ</span></Select.Option>
           </Select>
         </Form.Item>
 
@@ -91,8 +90,14 @@ const ModalViewUser = ({ role, isVisible, handleCancel, form }: IProps) => {
                 style={{ width: 120 }}
                 value={specialty}
                 onChange={(value) => setSpecialty(value)}
-                options={specialtyOptions}
-              />
+              >
+                {specialtyOptions.map((option) => (
+                  <Select.Option key={option.value} value={option.value}>
+                    <span className="text-black">{option.label}</span>
+                  </Select.Option>
+                ))}
+              </Select>
+
             </Form.Item>
 
             <Form.Item

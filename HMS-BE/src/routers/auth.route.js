@@ -1,7 +1,12 @@
 const express = require("express");
 const AuthController = require("../controllers/auth.controller");
 const asyncHandler = require("../helper/asyncHandler");
-const { registerSchema, loginSchema } = require("../validators/auth.validator");
+const {
+  registerSchema,
+  loginSchema,
+  forgetPasswordSchema,
+  resetPasswordSchema,
+} = require("../validators/auth.validator");
 const validate = require("../middlewares/validate");
 const authController = require("../controllers/auth.controller");
 const authRouter = express.Router();
@@ -30,6 +35,20 @@ authRouter.post(
   "/logout",
   asyncHandler(AuthController.logout),
   authController.logout
+);
+
+authRouter.post(
+  "/forget-password",
+  validate({ body: forgetPasswordSchema }),
+  asyncHandler(AuthController.forgetPassword),
+  authController.forgetPassword
+);
+
+authRouter.post(
+  "/reset-password",
+  validate({ body: resetPasswordSchema }),
+  asyncHandler(AuthController.resetPassword),
+  authController.resetPassword
 );
 
 // Ví dụ check authen bên trong router

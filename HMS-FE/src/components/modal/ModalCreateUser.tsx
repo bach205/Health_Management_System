@@ -3,6 +3,7 @@ import { useState } from "react";
 import { specialtyOptions, TYPE_EMPLOYEE_STR } from "../../constants/user.const";
 import type { IUserBase } from "../../types/index.type";
 import dayjs from "dayjs";
+// import dayjs from "dayjs";
 
 interface IProps {
   isVisible: boolean;
@@ -78,8 +79,8 @@ const ModalCreateUser = ({ role, isVisible, handleOk, handleCancel, form }: IPro
           rules={[{ required: true, message: "Vui lòng chọn giới tính!" }]}
         >
           <Select style={{ width: 100 }}>
-            <Select.Option value="male">Nam</Select.Option>
-            <Select.Option value="female">Nữ</Select.Option>
+            <Select.Option value="male"><span className="text-black">Nam</span></Select.Option>
+            <Select.Option value="female"><span className="text-black">Nữ</span></Select.Option>
           </Select>
         </Form.Item>
 
@@ -88,7 +89,7 @@ const ModalCreateUser = ({ role, isVisible, handleOk, handleCancel, form }: IPro
             <Form.Item
               label="Khoa"
               name="specialty"
-              rules={[{ required: true, message: "Vui lòng chọn chuyên khoa!" }]}
+            // rules={[{ required: true, message: "Vui lòng chọn chuyên khoa!" }]}
             >
               <Select
                 style={{ width: 120 }}
@@ -104,14 +105,8 @@ const ModalCreateUser = ({ role, isVisible, handleOk, handleCancel, form }: IPro
           </>
         )}
 
-        <Form.Item
-          name="address"
-          label="Địa chỉ"
-          rules={[
-            { max: 200, message: "Địa chỉ không được vượt quá 200 ký tự!" }
-          ]}
-        >
-          <Input placeholder="Địa chỉ" maxLength={200} />
+        <Form.Item name="address" label="Địa chỉ">
+          <Input placeholder="Địa chỉ" />
         </Form.Item>
 
         <Form.Item name="date_of_birth" label="Ngày sinh">

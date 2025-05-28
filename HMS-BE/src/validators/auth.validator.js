@@ -32,17 +32,6 @@ const updatePatientFullInfoSchema = Joi.object({
   }).required(),
 });
 
-const createDoctorSchema = Joi.object({
-  full_name: Joi.string().required(),
-  email: Joi.string().email().required(),
-  phone: Joi.string().pattern(/^[0-9]{10}$/).required(),
-  password: Joi.string().min(6).required(),
-  gender: Joi.string().valid("male", "female").required(),
-  date_of_birth: Joi.string().required(),
-  address: Joi.string().required(),
-  specialty: Joi.string().required(),
-  bio: Joi.string().optional(),
-});
 const createNurseSchema = Joi.object({
   full_name: Joi.string().required(),
   email: Joi.string().email().required(),
@@ -58,12 +47,54 @@ const updateNurseSchema = Joi.object({
   date_of_birth: Joi.string().required(),
   address: Joi.string().required(),
 });
+const forgetPasswordSchema = Joi.object({
+  email: Joi.string().email().required(),
+});
+
+const resetPasswordSchema = Joi.object({
+  token: Joi.string().required(),
+  newPassword: Joi.string().min(6).required(),
+  confirmPassword: Joi.string()
+    .valid(Joi.ref("newPassword"))
+    .required()
+    .messages({
+      "any.only": "Passwords do not match",
+    }),
+});
+
+const createDoctorSchema = Joi.object({
+  full_name: Joi.string().required(),
+  email: Joi.string().email().required(),
+  phone: Joi.string().pattern(/^[0-9]{10}$/).optional(),
+  password: Joi.string().min(6).required(),
+  gender: Joi.string().valid("male", "female").required(),
+  date_of_birth: Joi.string().optional(),
+  address: Joi.string().optional(),
+  specialty: Joi.string().optional(),
+  bio: Joi.string().optional(),
+});
+
+const updateDoctorSchema = Joi.object({
+  id: Joi.number().required(),
+  full_name: Joi.string().trim().min(1).optional(),
+  email: Joi.string().email().required(),
+  phone: Joi.string().optional().pattern(/^[0-9]{10}$/).allow(null, ''),
+  gender: Joi.string().valid("male", "female").required(),
+  date_of_birth: Joi.date().optional().allow(null, ''),
+  address: Joi.string().optional().allow(null, ''),
+  specialty: Joi.string().optional().allow(null, ''),
+  bio: Joi.string().optional().allow(null, ''),
+});
+
 module.exports = {
   registerSchema,
   loginSchema,
   updatePatientSchema,
   updatePatientFullInfoSchema,
-  createDoctorSchema,
   createNurseSchema,
   updateNurseSchema,
+  forgetPasswordSchema,
+  resetPasswordSchema,
+  createDoctorSchema,
+  updateDoctorSchema,
 };
