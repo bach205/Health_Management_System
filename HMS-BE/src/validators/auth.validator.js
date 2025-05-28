@@ -43,7 +43,7 @@ const resetPasswordSchema = Joi.object({
     .valid(Joi.ref("newPassword"))
     .required()
     .messages({
-      "any.only": "Passwords do not match",
+      "any.only": "Mật khẩu không khớp nhau",
     }),
 });
 
