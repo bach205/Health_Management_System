@@ -9,6 +9,17 @@ import MainLayout from "@/layouts/MainLayout";
 import DashboardLayout from "@/layouts/DashboardLayout";
 import { Fragment } from "react/jsx-runtime";
 import Queue from "@/pages/Queue";
+import AdminDoctorDashboard from "./pages/Admin/Doctor/AdminDoctorDashboard";
+import dayjs from "dayjs";
+// import updateLocale from "dayjs/plugin/updateLocale";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+import plugin from "dayjs/plugin/updateLocale";
+import AdminNurseDashboard from "./pages/Admin/Nurse/AdminNurseDashboard";
+dayjs.extend(plugin);
+dayjs.updateLocale("en", {
+  weekStart: 1,
+});
+dayjs.extend(customParseFormat);
 
 function App() {
   return (
@@ -58,8 +69,23 @@ const PublicRoutes = [
 
 const PrivateRoutes = [
   {
-    path: "/dashboard",
+    path: "/admin/",
     element: <Dashboard />,
+    layout: DashboardLayout,
+  },
+  {
+    path: "/admin/dashboard",
+    element: <Dashboard />,
+    layout: DashboardLayout,
+  },
+  {
+    path: "/admin/doctors",
+    element: <AdminDoctorDashboard />,
+    layout: DashboardLayout,
+  },
+  {
+    path: "/admin/nurses",
+    element: <AdminNurseDashboard />,
     layout: DashboardLayout,
   },
   {

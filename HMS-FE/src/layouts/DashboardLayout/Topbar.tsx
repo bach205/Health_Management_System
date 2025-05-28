@@ -3,7 +3,7 @@ import { Bell } from "lucide-react";
 
 const Topbar = () => {
   return (
-    <div className="flex items-center justify-between p-4 bg-white sticky top-0">
+    <div className="flex items-center justify-between p-4 bg-white sticky top-0 z-20">
       <div className="ml-5">
         <Bell
           className="w-5 h-5"
