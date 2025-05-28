@@ -7,7 +7,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       <Sidebar />
       <div className="flex-1 overflow-y-auto">
         <Topbar />
-        <div className="px-24 pt-10 rounded-t-3xl shadow-md bg-[#F4F7FB]">
+        <div className="px-12 pt-10 rounded-t-3xl shadow-md bg-[#F4F7FB] min-h-full">
           {children}
         </div>
       </div>

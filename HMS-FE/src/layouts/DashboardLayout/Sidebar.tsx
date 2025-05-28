@@ -23,7 +23,7 @@ const Sidebar = () => {
           <Hospital className="w-8 h-8" />
         </div>
         <span className="text-xl font-semibold text-indigo-600">Hospital</span>
-      </div>
+      </div>  
 
       {SIDEBAR_ITEMS.map((sidebar) => (
         <div key={sidebar.id} className="mb-4">
@@ -92,19 +92,25 @@ const SIDEBAR_ITEMS = [
         id: "users",
         label: "Quản lý người dùng",
         icon: <Users className="w-4 h-4" />,
-        href: "/users",
+        href: "/admin/users",
       },
       {
         id: "patients",
         label: "Quản lý bệnh nhân",
         icon: <FileUser className="w-4 h-4" />,
-        href: "/patients",
+        href: "/admin/patients",
       },
       {
         id: "doctors",
         label: "Quản lý bác sĩ",
         icon: <User className="w-4 h-4" />,
-        href: "/doctors",
+        href: "/admin/doctors",
+      },
+      {
+        id: "nurses",
+        label: "Quản lý y tá",
+        icon: <User className="w-4 h-4" />,
+        href: "/admin/nurses",
       },
     ],
   },
@@ -132,4 +138,5 @@ const SIDEBAR_ITEMS = [
       },
     ],
   },
+  
 ];
