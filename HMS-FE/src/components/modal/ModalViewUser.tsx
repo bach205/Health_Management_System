@@ -72,9 +72,9 @@ const ModalViewUser = ({ role, isVisible, handleCancel, form }: IProps) => {
           label="Giới tính"
           rules={[{ required: true, message: "Vui lòng chọn giới tính!" }]}
         >
-          <Select  style={{ width: 100 }}>
-            <Select.Option  value="male"><span className="text-black">Nam</span></Select.Option>
-            <Select.Option  value="female"><span className="text-black">Nữ</span></Select.Option>
+          <Select style={{ width: 100 }}>
+            <Select.Option value="male"><span className="text-black">Nam</span></Select.Option>
+            <Select.Option value="female"><span className="text-black">Nữ</span></Select.Option>
           </Select>
         </Form.Item>
 

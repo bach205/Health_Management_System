@@ -177,7 +177,7 @@ const AdminDoctorDashboard = () => {
       // if (!record.date_of_birth) {
       //   record.date_of_birth = dayjs().subtract(18, "year").toString();
       // }
-      setCurrentUser(record);    
+      setCurrentUser(record);
       formUpdate.setFieldsValue({
         ...record,
         date_of_birth: record.date_of_birth ? dayjs(record.date_of_birth) : null,

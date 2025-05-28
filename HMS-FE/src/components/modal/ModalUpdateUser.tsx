@@ -32,33 +32,40 @@ const ModalUpdateUser = ({ role, isVisible, handleOk, handleCancel, form }: IPro
         labelCol={{ span: 6 }}
         wrapperCol={{ span: 16 }}
         style={{ marginTop: 20 }}
-        initialValues={{ gender: "male"}}
+        initialValues={{ gender: "male" }}
       >
         <Form.Item
           label="Họ tên"
           name="full_name"
-          rules={[{ required: true, message: "Vui lòng nhập họ tên!" }]}
+          rules={[
+            { required: true, message: "Vui lòng nhập họ tên!" },
+            { max: 25, message: "Họ tên không được vượt quá 25 ký tự!" }
+          ]}
         >
-          <Input placeholder={`Họ tên ${TYPE_EMPLOYEE_STR[role]}`} />
+          <Input placeholder={`Họ tên ${TYPE_EMPLOYEE_STR[role]}`} maxLength={25} />
         </Form.Item>
 
         <Form.Item
           label="Email"
           name="email"
-          rules={[{ required: true, type: "email", message: "Vui lòng nhập đúng format email!" }]}
+          rules={[
+            { required: true, type: "email", message: "Vui lòng nhập đúng format email!" },
+            { max: 50, message: "Email không được vượt quá 50 ký tự!" }
+          ]}
         >
-          <Input disabled={true} placeholder={`Email ${TYPE_EMPLOYEE_STR[role]}`} />
+          <Input placeholder={`Email ${TYPE_EMPLOYEE_STR[role]}`} maxLength={50} />
         </Form.Item>
 
         <Form.Item
           label="Số điện thoại"
           name="phone"
           rules={[
-            // { required: true, message: "Vui lòng nhập số điện thoại!" },
-            { pattern: new RegExp(/^\d{10}$/), message: "Số điện thoại không hợp lệ!" }
+            { required: true, message: "Vui lòng nhập số điện thoại!" },
+            { pattern: new RegExp(/^\d{10,12}$/), message: "Số điện thoại không hợp lệ!" },
+            { max: 20, message: "Số điện thoại không được vượt quá 20 ký tự!" }
           ]}
         >
-          <Input placeholder={`Số điện thoại ${TYPE_EMPLOYEE_STR[role]}`} />
+          <Input placeholder={`Số điện thoại ${TYPE_EMPLOYEE_STR[role]}`} maxLength={20} />
         </Form.Item>
 
         {role === "doctor" && (

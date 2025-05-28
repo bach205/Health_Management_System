@@ -34,38 +34,43 @@ const ModalCreateUser = ({ role, isVisible, handleOk, handleCancel, form }: IPro
         labelCol={{ span: 6 }}
         wrapperCol={{ span: 16 }}
         style={{ marginTop: 20 }}
-        initialValues={{ gender: "male"}}
+        initialValues={{ gender: "male" }}
       >
         <Form.Item
           label="Họ tên"
           name="full_name"
-          rules={[{ required: true, message: "Vui lòng nhập họ tên!" }]}
+          rules={[
+            { required: true, message: "Vui lòng nhập họ tên!" },
+            { max: 25, message: "Họ tên không được vượt quá 25 ký tự!" }
+          ]}
         >
-          <Input placeholder={`Họ tên ${TYPE_EMPLOYEE_STR[role]}`} />   
+          <Input placeholder={`Họ tên ${TYPE_EMPLOYEE_STR[role]}`} maxLength={25} />
         </Form.Item>
 
         <Form.Item
           label="Email"
           name="email"
           rules={[
-            { required: true, type: "email", message: "Vui lòng nhập đúng format email!" },
+            { required: true, type: "email", message: "Vui lòng nhập đúng format!" },
+            { max: 50, message: "Email không được vượt quá 50 ký tự!" }
           ]}
         >
-          <Input placeholder={`Email ${TYPE_EMPLOYEE_STR[role]}`} />
+          <Input placeholder={`Email ${TYPE_EMPLOYEE_STR[role]}`} maxLength={50} />
         </Form.Item>
 
         <Form.Item
           label="Số điện thoại"
           name="phone"
           rules={[
-            // { required: true, message: "Vui lòng nhập số điện thoại!" },
+            { required: true, message: "Vui lòng nhập số điện thoại!" },
             {
-              pattern: /^\d{10}$/,
+              pattern: /^\d{10,12}$/,
               message: "Số điện thoại không hợp lệ!",
             },
+            { max: 20, message: "Số điện thoại không được vượt quá 20 ký tự!" }
           ]}
         >
-          <Input placeholder={`Số điện thoại ${TYPE_EMPLOYEE_STR[role]}`} />
+          <Input placeholder={`Số điện thoại ${TYPE_EMPLOYEE_STR[role]}`} maxLength={20} />
         </Form.Item>
 
         <Form.Item
@@ -84,7 +89,7 @@ const ModalCreateUser = ({ role, isVisible, handleOk, handleCancel, form }: IPro
             <Form.Item
               label="Khoa"
               name="specialty"
-              // rules={[{ required: true, message: "Vui lòng chọn chuyên khoa!" }]}
+            // rules={[{ required: true, message: "Vui lòng chọn chuyên khoa!" }]}
             >
               <Select
                 style={{ width: 120 }}
@@ -109,13 +114,17 @@ const ModalCreateUser = ({ role, isVisible, handleOk, handleCancel, form }: IPro
             format="DD/MM/YYYY"
             placeholder="Ngày sinh"
             maxDate={dayjs().subtract(18, "year") as any}
-            minDate={dayjs().subtract(100, "year") as any}
           />
         </Form.Item>
 
-        <Form.Item name="create_password" label="Tạo mật khẩu" valuePropName="checked">
+        <Form.Item
+          name="create_password"
+          label="Mật khẩu"
+          valuePropName="checked"
+          tooltip="Nếu không chọn, hệ thống sẽ tự động tạo mật khẩu default"
+        >
           <Checkbox onChange={(e) => setShowPasswordFields(e.target.checked)}>
-            Tạo mật khẩu ngay
+            Tạo mật khẩu tùy chỉnh
           </Checkbox>
         </Form.Item>
 

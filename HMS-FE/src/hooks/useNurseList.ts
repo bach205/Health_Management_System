@@ -1,15 +1,19 @@
 import { useEffect, useState } from "react";
-import { getNurses } from "../services/nurse.service";
-import type { IPagination, IUserBase } from "../types/index.type";
+import { getAllNurse } from "../api/nurse.ts";
+import type { IUserBase } from "../types/index.type";
 
-
+export interface IPagination {
+    total: number;
+    pageSize: number;
+    current: number;
+}
 
 export const useNurseList = () => {
     const [users, setUsers] = useState<IUserBase[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [keyword, setKeyword] = useState<string>("");
     const [reload, setReload] = useState<boolean>(false);
-    const [sort, setSort] = useState<string>("stt");
+    const [sort, setSort] = useState<string>("name_asc");
 
     const [pagination, setPagination] = useState<IPagination>({
         total: 0,
@@ -22,9 +26,10 @@ export const useNurseList = () => {
         const fetchData = async () => {
             try {
                 setLoading(true);
-                const data = await getNurses({})
-                // console.log(data)
-                setUsers(data?.users);
+                console.log(keyword)
+                const data = await getAllNurse({ keyword: keyword, sort: sort })
+                console.log(data)
+                setUsers(data?.data.metadata);
 
                 setLoading(false);
             } catch (error) {
@@ -33,7 +38,7 @@ export const useNurseList = () => {
             }
         }
         fetchData();
-    }, [keyword, reload]);
+    }, [reload]);
 
     const handleTableChange = (pagination: IPagination) => {
         setPagination(pagination);

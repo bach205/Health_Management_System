@@ -16,12 +16,12 @@ export const useDoctorList = () => {
         pageSize: 10,
         current: 1,
     });
-    
+
     useEffect(() => {
         const fetchData = async () => {
             try {
                 setLoading(true);
-                
+
                 const searchOptions = {
                     searchKey: keyword,
                     specialty: specialty,
