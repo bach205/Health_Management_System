@@ -1,10 +1,15 @@
-import Button from "@/components/ui/Button";
+
+import Banner from "../../layouts/MainLayout/Banner";
+import Header from "../../layouts/MainLayout/Header";
+import SpecialityMenu from "../../layouts/MainLayout/SpecialityMenu";
+
 
 const Home = () => {
   return (
-    <div>
-      <h1>Home</h1>
-      <Button>Click me</Button>
+    <div className="container flex flex-col justify-self-center">
+      <Header />
+      <SpecialityMenu />
+      <Banner />
     </div>
   );
 };

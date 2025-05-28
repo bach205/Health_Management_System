@@ -1,12 +1,8 @@
 import { useEffect, useState } from "react";
-import { getNurses } from "../api/nurse";
-import type { IUserBase } from "../utils";
+import { getNurses } from "../services/nurse.service";
+import type { IPagination, IUserBase } from "../types/index.type";
 
-export interface IPagination {
-    total: number;
-    pageSize: number;
-    current: number;
-}
+
 
 export const useNurseList = () => {
     const [users, setUsers] = useState<IUserBase[]>([]);

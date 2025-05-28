@@ -1,23 +1,26 @@
 import { useState } from "react";
 import { Table, Tag, Space, Flex, Button, Form, Input, Select, notification, Tooltip, Popconfirm } from "antd";
 import { Ban, CirclePlus, Eye, RefreshCcw, RotateCcw, Search, UserRoundPen } from "lucide-react";
-import { PASSWORD_DEFAULT, specialtyOptions, TYPE_EMPLOYEE_STR, type IDoctor } from "../../../utils";
+import { specialtyOptions, TYPE_EMPLOYEE_STR, PASSWORD_DEFAULT } from "../../../constants/user.const";
 import ModalCreateUser from "../../../components/modal/ModalCreateUser";
 import ModalUpdateUser from "../../../components/modal/ModalUpdateUser";
 import dayjs from "dayjs";
 import ModalViewUser from "../../../components/modal/ModalViewUser";
 import { useNurseList } from "../../../hooks/useNurseList";
+import UserListTitle from "../../../components/ui/UserListTitle";
+import type { IDoctor, IUserBase } from "../../../types/index.type";
+import { updateNurse } from "../../../services/nurse.service";
 
 const AdminNurseDashboard = () => {
   const [isCreateVisible, setIsCreateVisible] = useState<boolean>(false);
   const [isUpdateVisible, setIsUpdateVisible] = useState<boolean>(false);
   const [isViewVisible, setIsViewVisible] = useState<boolean>(false);
+  const [currentUser, setCurrentUser] = useState<IUserBase | null>(null);
   const filterOptions = [{ value: "all", label: "Tất cả" }, ...specialtyOptions]
 
   const [formCreate] = Form.useForm();
   const [formUpdate] = Form.useForm();
   const [formView] = Form.useForm();
-
   // Table column
   const columns: any = [
     {
@@ -150,9 +153,8 @@ const AdminNurseDashboard = () => {
   };
 
   const handleEdit = async (record: IDoctor) => {
-    console.log(record)
     try {
-      // setIsShowSpecialty(record.role === TYPE_EMPLOYEE.doctor);
+      setCurrentUser(record);
       formUpdate.setFieldsValue({
         ...record,
         date_of_birth: dayjs(record.date_of_birth),
@@ -164,7 +166,7 @@ const AdminNurseDashboard = () => {
     }
   };
 
-  const handleResetPassword = (id: string) => {
+  const handleResetPassword = (id: number) => {
     console.log(id)
   }
 
@@ -175,6 +177,7 @@ const AdminNurseDashboard = () => {
 
   const handleUpdateCancel = () => {
     setIsUpdateVisible(false);
+    setCurrentUser(null);
   };
 
   const handleViewCancel = () => {
@@ -184,8 +187,10 @@ const AdminNurseDashboard = () => {
   const handleCreateOk = async () => {
     try {
       const values = await formCreate.validateFields();
-      // gọi API thêm
+      // gọi API thêm 
       console.log("Create:", values);
+      console.log("formCreate: ", formCreate.getFieldsValue())
+
       notification.success({ message: "Tạo tài khoản thành công" });
 
       setIsCreateVisible(false);
@@ -194,17 +199,30 @@ const AdminNurseDashboard = () => {
     }
   };
 
-  //Submit update doctor
+  //Submit update nurse
   const handleUpdateOk = async () => {
     try {
       const values = await formUpdate.validateFields();
-      // gọi API cập nhật
-      console.log("Update:", values);
-      notification.success({ message: "Cập nhật tài khoản thành công" });
+      if (!currentUser?.id) {
+        notification.error({ message: "Không tìm thấy thông tin y tá" });
+        return;
+      }
 
+      // Gọi API cập nhật với id
+      const updatedNurse = {
+        ...values,
+        id: currentUser.id,
+      };
+
+      // await updateNurse(updatedNurse);
+      console.log("updatedNurse: ", updatedNurse)
+      notification.success({ message: "Cập nhật tài khoản thành công" });
       setIsUpdateVisible(false);
+      setCurrentUser(null);
+      setReload(!reload); 
     } catch (error) {
       console.log(error);
+      notification.error({ message: "Cập nhật thất bại" });
     }
   };
 
@@ -217,9 +235,7 @@ const AdminNurseDashboard = () => {
 
   return (
     <div>
-      <p className="text-indigo-600!">
-        Quản lý y tá
-      </p>
+      <UserListTitle title="y tá" />
 
       {/* filter bar */}
       <Flex gap={10} justify="space-between" style={{ marginBottom: 10 }}>

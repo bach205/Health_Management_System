@@ -1,6 +1,7 @@
 import { DatePicker, Form, Input, Modal, Select, type FormInstance } from "antd";
 import { useState } from "react";
-import { specialtyOptions, type IUserBase, TYPE_EMPLOYEE_STR } from "../../utils";
+import { specialtyOptions, TYPE_EMPLOYEE_STR } from "../../constants/user.const";
+import type { IUserBase } from "../../types/index.type";
 import dayjs from "dayjs";
 
 interface IProps {
@@ -8,12 +9,11 @@ interface IProps {
   handleOk: () => void;
   handleCancel: () => void;
   form: FormInstance;
-  role: IUserBase["role"]; 
+  role: IUserBase["role"];
 }
 
 const ModalUpdateUser = ({ role, isVisible, handleOk, handleCancel, form }: IProps) => {
   const [specialty, setSpecialty] = useState<string>("internal");
-
   return (
     <Modal
       open={isVisible}
@@ -24,7 +24,7 @@ const ModalUpdateUser = ({ role, isVisible, handleOk, handleCancel, form }: IPro
       onCancel={handleCancel}
       destroyOnHidden
       centered
-      
+
     >
       <Form
         name="updateUserForm"
@@ -32,7 +32,7 @@ const ModalUpdateUser = ({ role, isVisible, handleOk, handleCancel, form }: IPro
         labelCol={{ span: 6 }}
         wrapperCol={{ span: 16 }}
         style={{ marginTop: 20 }}
-        initialValues={{ gender: "male" }}
+        initialValues={{ gender: "male"}}
       >
         <Form.Item
           label="Họ tên"
@@ -47,15 +47,15 @@ const ModalUpdateUser = ({ role, isVisible, handleOk, handleCancel, form }: IPro
           name="email"
           rules={[{ required: true, type: "email", message: "Vui lòng nhập đúng format email!" }]}
         >
-          <Input placeholder={`Email ${TYPE_EMPLOYEE_STR[role]}`} />
+          <Input disabled={true} placeholder={`Email ${TYPE_EMPLOYEE_STR[role]}`} />
         </Form.Item>
 
         <Form.Item
           label="Số điện thoại"
           name="phone"
           rules={[
-            { required: true, message: "Vui lòng nhập số điện thoại!" },
-            { pattern: new RegExp(/^\d{10,12}$/), message: "Số điện thoại không hợp lệ!" }
+            // { required: true, message: "Vui lòng nhập số điện thoại!" },
+            { pattern: new RegExp(/^\d{10}$/), message: "Số điện thoại không hợp lệ!" }
           ]}
         >
           <Input placeholder={`Số điện thoại ${TYPE_EMPLOYEE_STR[role]}`} />
@@ -66,7 +66,6 @@ const ModalUpdateUser = ({ role, isVisible, handleOk, handleCancel, form }: IPro
             <Form.Item
               label="Khoa"
               name="specialty"
-              rules={[{ required: true, message: "Vui lòng chọn chuyên khoa!" }]}
             >
               <Select
                 style={{ width: 120 }}
@@ -87,8 +86,8 @@ const ModalUpdateUser = ({ role, isVisible, handleOk, handleCancel, form }: IPro
           rules={[{ required: true, message: "Vui lòng chọn giới tính!" }]}
         >
           <Select style={{ width: 100 }}>
-            <Select.Option value="male">Nam</Select.Option>
-            <Select.Option value="female">Nữ</Select.Option>
+            <Select.Option value="male"><span className="text-black">Nam</span></Select.Option>
+            <Select.Option value="female"><span className="text-black">Nữ</span></Select.Option>
           </Select>
         </Form.Item>
 
@@ -97,7 +96,7 @@ const ModalUpdateUser = ({ role, isVisible, handleOk, handleCancel, form }: IPro
         </Form.Item>
 
         <Form.Item name="date_of_birth" label="Ngày sinh">
-          <DatePicker format="DD/MM/YYYY" placeholder="Ngày sinh" maxDate={dayjs().subtract(18, "year") as any} />
+          <DatePicker format="DD/MM/YYYY" placeholder="Ngày sinh" minDate={dayjs().subtract(100, "year") as any} maxDate={dayjs().subtract(18, "year") as any} />
         </Form.Item>
       </Form>
     </Modal>
