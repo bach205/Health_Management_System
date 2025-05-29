@@ -16,25 +16,25 @@ clinicRouter.get("/:id", asyncHandler(ClinicController.getClinicById));
 
 // Protected routes (admin only)
 clinicRouter.post(
-  "/",
+  "/create",
   authenticate,
-  authorize("admin"),
+  // authorize("admin"),
   validate({ body: createClinicSchema }),
   asyncHandler(ClinicController.createClinic)
 );
 
 clinicRouter.put(
-  "/:id",
+  "/update/:id", 
   authenticate,
-  authorize("admin"),
+  // authorize("admin"),
   validate({ body: updateClinicSchema }),
   asyncHandler(ClinicController.updateClinic)
 );
 
 clinicRouter.delete(
-  "/:id",
+  "/delete/:id",
   authenticate,
-  authorize("admin"),
+  // authorize("admin"),
   asyncHandler(ClinicController.deleteClinic)
 );
 

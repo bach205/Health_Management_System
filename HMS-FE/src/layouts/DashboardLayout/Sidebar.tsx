@@ -82,7 +82,6 @@ const SidebarItem = ({
 
 export default Sidebar;
 
-
 const SIDEBAR_ITEMS = [
   {
     id: 1,
@@ -103,8 +102,20 @@ const SIDEBAR_ITEMS = [
       {
         id: "users",
         label: "Quản lý người dùng",
-        icon: <Users size={20} className="w-4 h-4" />,
+        icon: <Users className="w-4 h-4" />,
         href: "/admin/users",
+      },
+      {
+        id: "workschedule",
+        label: "Lịch làm việc",
+        icon: <Calendar className="w-4 h-4" />,
+        href: "/workschedule",
+      },
+      {
+        id: "shift",
+        label: "Quản lý ca làm việc",
+        icon: <Calendar className="w-4 h-4" />,
+        href: "/shift",
       },
       {
         id: "patients",
@@ -124,29 +135,10 @@ const SIDEBAR_ITEMS = [
         icon: <User className="w-4 h-4" />,
         href: "/admin/nurses",
       },
-      {
-        id: "shifts",
-        label: "Quản lý ca làm việc",
-        icon: <Calendar className="w-4 h-4" />,
-        href: "/admin/shifts",
-      },
-    ],
-  }
-  ,
-  {
-    id: 3,
-    label: "Nhân viên",
-    items: [
-      {
-        id: "shifts",
-        label: "Lịch làm việc",
-        icon: <Calendar className="w-4 h-4" />,
-        href: "/staff/shifts",
-      },
     ],
   },
   {
-    id: 4,
+    id: 3,
     label: "Phòng khám",
     items: [
       {
@@ -169,5 +161,4 @@ const SIDEBAR_ITEMS = [
       },
     ],
   },
-
 ];

@@ -14,7 +14,7 @@ const workScheduleRouter = express.Router();
 workScheduleRouter.get(
   "/",
   authenticate,
-  authorize(["admin", "doctor", "nurse"]),
+  // authorize(["admin", "doctor", "nurse"]),
   asyncHandler(workScheduleController.getWorkSchedules)
 );
 
@@ -22,7 +22,7 @@ workScheduleRouter.get(
 workScheduleRouter.get(
   "/:id",
   authenticate,
-  authorize(["admin", "doctor", "nurse"]),
+  // authorize(["admin", "doctor", "nurse"]),
   asyncHandler(workScheduleController.getWorkScheduleById)
 );
 
@@ -30,7 +30,7 @@ workScheduleRouter.get(
 workScheduleRouter.post(
   "/",
   authenticate,
-  authorize(["admin"]),
+  // authorize(["admin"]),
   validate({ body: createWorkScheduleSchema }),
   asyncHandler(workScheduleController.createWorkSchedule)
 );
@@ -39,7 +39,7 @@ workScheduleRouter.post(
 workScheduleRouter.put(
   "/:id",
   authenticate,
-  authorize(["admin"]),
+  // authorize(["admin"]),
   validate({ body: updateWorkScheduleSchema }),
   asyncHandler(workScheduleController.updateWorkSchedule)
 );
@@ -48,7 +48,7 @@ workScheduleRouter.put(
 workScheduleRouter.delete(
   "/:id",
   authenticate,
-  authorize(["admin"]),
+  // authorize(["admin"]),
   asyncHandler(workScheduleController.deleteWorkSchedule)
 );
 

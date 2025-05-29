@@ -1,10 +1,13 @@
 // src/store/authStore.ts
 import { create } from "zustand";
 
-export type Role = "admin" | "staff" | "doctor" | "customer";
+export type Role = "admin" | "nurse" | "doctor" | "customer" | "patient";
+
+const isAuth = localStorage.getItem("isAuth") === "true" ? true : false;
+const userD = localStorage.getItem("user");
 
 interface AuthState {
-  isAuthenticated: boolean;
+  isAuthenticated: boolean | false;
   user: {
     id: string;
     name: string;
@@ -15,18 +18,18 @@ interface AuthState {
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
-  isAuthenticated: true,
-  user: {
-    id: "1",
-    name: "John Doe",
-    role: "admin",
-  },
-  login: (user, token) => {
-    set({ isAuthenticated: true, user });
+  isAuthenticated: isAuth,
+  user: userD ? JSON.parse(userD) : null,
+  login: (userData, token) => {
+    set(() => ({isAuthenticated:true ,user : userData}));
     localStorage.setItem("token", token);
+    localStorage.setItem("user", JSON.stringify(userData));
+    localStorage.setItem("isAuth", "true");
   },
   logout: () => {
     set({ isAuthenticated: false, user: null });
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    localStorage.setItem("isAuth", "false");
   },
 }));

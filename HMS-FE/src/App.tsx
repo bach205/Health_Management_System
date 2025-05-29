@@ -1,24 +1,26 @@
 import "./App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Login from "@/pages/Login";
-import Register from "@/pages/Register";
-import Dashboard from "@/pages/Dashboard";
-import { Authentication } from "@/Authentication";
-// import MainLayout from "@/layouts/MainLayout";
+import Home from "./pages/Home";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Dashboard from "./pages/Dashboard";
+import { Authentication } from "./Authentication";
+import MainLayout from "./layouts/MainLayout";
+import DashboardLayout from "./layouts/DashboardLayout";
 import { Fragment } from "react/jsx-runtime";
-import Queue from "@/pages/Queue";
+import Queue from "./pages/Queue";
 import AdminDoctorDashboard from "./pages/Admin/Doctor/AdminDoctorDashboard";
 import dayjs from "dayjs";
 // import updateLocale from "dayjs/plugin/updateLocale";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import plugin from "dayjs/plugin/updateLocale";
 import AdminNurseDashboard from "./pages/Admin/Nurse/AdminNurseDashboard";
+import Unauthorized from "./pages/Unauthorized";
+import AdminClinicDashboard from "./pages/Admin/Clinic/AdminClinicDashboard";
+import Workschedule from "./pages/Workschedule/Workschedule";
+import ShiftManager from "./pages/Shift/Shift";
 import MyProfile from "./pages/Profile/MyProfile";
-import DashboardLayout from "./layouts/DashboardLayout/index.tsx";
-import Home from "./pages/Home/index.tsx";
-import MainLayout from "./layouts/MainLayout/index.tsx";
-import NotFound from "./pages/NotFound.tsx";
-import UnauthorizedPage from "./pages/UnauthorizedPage.tsx";
+import NotFound from "./pages/NotFound";
 dayjs.extend(plugin);
 dayjs.updateLocale("en", {
   weekStart: 1,
@@ -42,7 +44,7 @@ function App() {
           <Route
             path={route.path}
             element={
-              <Authentication allowedRoles={["admin", "staff", "doctor"]}>
+              <Authentication allowedRoles={["admin", "nurse", "doctor", "patient"]}>
                 <route.layout>{route.element}</route.layout>
               </Authentication>
             }
@@ -50,7 +52,7 @@ function App() {
 
         ))}
 
-        <Route path="unauthorize" element={<UnauthorizedPage />} />
+        <Route path="unauthorize" element={<Unauthorized />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
@@ -68,23 +70,35 @@ const PublicRoutes = [
   {
     path: "/login",
     element: <Login />,
+    layout: MainLayout,
   },
   {
     path: "/register",
     element: <Register />,
+    layout: MainLayout,
+  },
+  
+  {
+    path: "/unauthorized",
+    element:<Unauthorized />
   },
   {
     path: "/my-profile",
     element: <MyProfile />,
     layout: MainLayout,
   },
-
 ];
 
 const PrivateRoutes = [
+  
   {
     path: "/admin/",
     element: <Dashboard />,
+    layout: DashboardLayout,
+  },
+  {
+    path: "/workschedule",
+    element: <Workschedule />,
     layout: DashboardLayout,
   },
   {
@@ -103,8 +117,18 @@ const PrivateRoutes = [
     layout: DashboardLayout,
   },
   {
+    path: "/rooms",
+    element: <AdminClinicDashboard />,
+    layout: DashboardLayout,
+  },
+  {
     path: "/queues",
     element: <Queue />,
+    layout: DashboardLayout,
+  },
+  {
+    path: "/shift",
+    element: <ShiftManager />,
     layout: DashboardLayout,
   },
 ];

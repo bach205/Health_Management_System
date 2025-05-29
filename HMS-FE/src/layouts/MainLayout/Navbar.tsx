@@ -1,23 +1,25 @@
 import React, { useState } from "react";
 import { assets } from "../../assets/assets.ts";
 import { NavLink, useNavigate } from "react-router-dom";
-
+import { useAuthStore } from "../../store/authStore.ts";
+import useAuth from "../../hooks/useAuth.ts"
 const Navbar: React.FC = () => {
   const navigate = useNavigate();
   const [showMenu, setShowMenu] = useState<boolean>(false);
-  const [token, setToken] = useState<boolean>(true);
-
+  const { isAuthenticated } = useAuthStore();
+  const auth = useAuth();
   return (
-    <div className="flex items-center justify-between text-sm py-4 px-5 mb-5 border-b border-b-gray-400">
-      <div className="flex-1">
-        <img
-          onClick={() => navigate("/")}
-          className="w-44 cursor-pointer"
-          src={assets.logo}
-          alt="logo"
-        />
-      </div>
-      <ul className="flex-1 hidden md:flex justify-center items-start gap-5 font-medium">
+    
+    <div className="flex items-center justify-between text-sm py-4 mb-5 border-b border-b-gray-400">
+      <img
+        onClick={() => {
+          navigate("/");
+        }}
+        className="w-44 cursor-pointer"
+        src={assets.logo}
+        alt="logo"
+      />
+      <ul className="hidden md:flex items-start gap-5 font-medium">
         <NavLink to="/">
           <li className="py-1 font-bold">Trang Chủ</li>
           <hr className="border-none outline-none h-0.5 bg-primary w-3/5 m-auto hidden" />
@@ -35,8 +37,8 @@ const Navbar: React.FC = () => {
           <hr className="border-none outline-none h-0.5 bg-primary w-3/5 m-auto hidden" />
         </NavLink>
       </ul>
-      <div className="flex-1 flex items-center gap-4 justify-end">
-        {token ? (
+      <div className="flex items-center gap-4">
+        {isAuthenticated ? (
           <div className="flex items-center gap-2 cursor-pointer group relative">
             <img
               className="w-8 rounded-full"
@@ -59,7 +61,7 @@ const Navbar: React.FC = () => {
                   Lịch hẹn của tôi
                 </p>
                 <p
-                  onClick={() => setToken(false)}
+                  onClick={() => auth.handleLogout()}
                   className="hover:text-black cursor-pointer"
                 >
                   Đăng xuất
@@ -83,8 +85,9 @@ const Navbar: React.FC = () => {
         />
         {/*-------Mobile Menu------------*/}
         <div
-          className={`${showMenu ? "fixed w-full" : "h-0 w-0"
-            } md:hidden right-0 top-0 bottom-0 z-20 overflow-hidden bg-white transition-all'`}
+          className={`${
+            showMenu ? "fixed w-full" : "h-0 w-0"
+          } md:hidden right-0 top-0 bottom-0 z-20 overflow-hidden bg-white transition-all'`}
         >
           <div className="flex items-center justify-between px-5 py-6">
             <img className="w-36" src={assets.logo} alt="logo" />

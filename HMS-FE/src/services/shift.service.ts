@@ -1,49 +1,30 @@
-import type { IShift } from "../types/index.type";
-import instance from "../api/mainRequest";
-const BASE_URL = "api/v1/shifts";
+import  mainRequest from "../api/mainRequest";
 
-export const createShift = (shift: IShift) => {
-    return instance.post(`${BASE_URL}/`, shift);
+const baseURL = `api/v1/shifts`;
+
+export const getShiftService = async () => {
+  const response = await mainRequest.get(`${baseURL}/`);
+  return response;
 };
 
-export const getShifts = async () => {
-    return instance.get(`${BASE_URL}`);
+export const createShiftService = async (body : object) => {
+  const data = JSON.stringify(body);  
+  const response = await mainRequest.post(`${baseURL}`, data);
+
+  return response;
 };
 
-export const updateShift = (shift: IShift, id: number) => {
-    console.log('shift: ', shift)
-    return instance.put(`${BASE_URL}/${id}`, shift);
+export const updateShiftService = async (body : object, id : string | undefined) => {
+  const data = JSON.stringify(body);  
+  const response = await mainRequest.put(`${baseURL}/${id}`, data);
+
+  return response;
 };
 
-export const getShiftById = (id: number) => {
-    return instance.get(`${BASE_URL}/${id}`);
+export const deteleShiftService = async (id : string | undefined) => {  
+  const response = await mainRequest.delete(`${baseURL}/${id}`);
+
+  return response;
 };
 
-export const deleteShift = (id: number) => {
-    return instance.delete(`${BASE_URL}/${id}`);
-};
 
-// shiftRouter.post(
-//     "/",
-//     authenticate,
-//     authorize(["admin"]),
-//     validate({ body: createShiftSchema }),
-//     asyncHandler(shiftController.createShift)
-//   );
-  
-//   // Update shift (admin only)
-//   shiftRouter.put(
-//     "/:id",
-//     authenticate,
-//     authorize(["admin"]),
-//     validate({ body: updateShiftSchema }),
-//     asyncHandler(shiftController.updateShift)
-//   );
-  
-//   // Delete shift (admin only)
-//   shiftRouter.delete(
-//     "/:id",
-//     authenticate,
-//     authorize(["admin"]),
-//     asyncHandler(shiftController.deleteShift)
-//   );

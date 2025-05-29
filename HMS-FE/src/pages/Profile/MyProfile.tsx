@@ -5,7 +5,6 @@ import dayjs from "dayjs";
 import type { IPatient } from "../../types/index.type";
 import { assets } from "../../assets/assets";
 import { updateProfile } from "../../services/patient.service";
-
 const MyProfile: React.FC = () => {
   const [userData, setUserData] = useState<IPatient>({} as IPatient);
   useEffect(() => {

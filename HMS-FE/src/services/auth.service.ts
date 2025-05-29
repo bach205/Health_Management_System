@@ -1,9 +1,17 @@
-import mainRequest from "@/api/mainRequest";
+import  mainRequest from "../api/mainRequest";
 
-export const loginService = async (email: string, password: string) => {
-  const response = await mainRequest.post("/auth/login", {
-    email,
-    password,
-  });
-  return response.data;
+const baseURL = `/api/v1/auth`;
+
+export const registerService = async (body : object) => {
+  const data = JSON.stringify(body);  
+  const response = await mainRequest.post(`${baseURL}/register`, data);
+
+  return response;
+};
+
+export const loginService = async (body : object) => {
+  const data = JSON.stringify(body);
+  const response = await mainRequest.post(`${baseURL}/login`, data);
+ 
+  return response;
 };

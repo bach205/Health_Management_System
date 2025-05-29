@@ -1,23 +1,31 @@
-import { loginService } from "@/services/auth.service";
-import { useAuthStore } from "@/store/authStore";
+
+import { loginService } from "../services/auth.service";
+import { useAuthStore } from "../store/authStore";
 import { toast } from "react-toastify";
+
+interface userdata {
+  email : String,
+  password : String
+}
 
 const useAuth = () => {
   const { login, logout } = useAuthStore();
-
-  const handleLogin = async (email: string, password: string) => {
+  
+  const handleLogin = async (user : userdata) => {
+    let status = null;
     try {
-      const response = await loginService(email, password);
-
+      const response = await loginService(user);
       if (response.status === 200) {
-        login(response.data.user, response.data.token);
+        login(response.data.metadata.user, response.data.metadata.accessToken);      
         toast.success("Đăng nhập thành công");
+        return response.data.metadata.user.role;
       } else {
-        toast.error(response.data.message || "Đăng nhập thất bại");
+        toast.error("Đăng nhập thất bại");
       }
     } catch (error: any) {
-      toast.error(error.response.data.message || "Đã có lỗi xảy ra");
+      toast.error("Đăng nhập thất bại");
     }
+   
   };
 
   const handleLogout = () => {
