@@ -1,5 +1,7 @@
-import Footer from "./Footer";
-import Navbar from "./Navbar";
+import Footer from "./Footer.tsx";
+import Navbar from "./Navbar.tsx";
+
+
 
 const MainLayout = ({ children }: { children: React.ReactNode }) => {
   return (

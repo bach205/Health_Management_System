@@ -1,12 +1,10 @@
 import "./App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Home from "@/pages/Home";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
 import Dashboard from "@/pages/Dashboard";
 import { Authentication } from "@/Authentication";
-import MainLayout from "@/layouts/MainLayout";
-
+// import MainLayout from "@/layouts/MainLayout";
 import { Fragment } from "react/jsx-runtime";
 import Queue from "@/pages/Queue";
 import AdminDoctorDashboard from "./pages/Admin/Doctor/AdminDoctorDashboard";
@@ -17,7 +15,8 @@ import plugin from "dayjs/plugin/updateLocale";
 import AdminNurseDashboard from "./pages/Admin/Nurse/AdminNurseDashboard";
 import MyProfile from "./pages/Profile/MyProfile";
 import DashboardLayout from "./layouts/DashboardLayout/index.tsx";
-import AdminShiftDashboard from "./pages/Admin/Shift/AdminShiftDashboard.tsx";
+import Home from "./pages/Home/index.tsx";
+import MainLayout from "./layouts/MainLayout/index.tsx";
 dayjs.extend(plugin);
 dayjs.updateLocale("en", {
   weekStart: 1,
@@ -100,11 +99,6 @@ const PrivateRoutes = [
   {
     path: "/queues",
     element: <Queue />,
-    layout: DashboardLayout,
-  },
-  {
-    path: "/admin/shifts",
-    element: <AdminShiftDashboard />,
     layout: DashboardLayout,
   },
 ];

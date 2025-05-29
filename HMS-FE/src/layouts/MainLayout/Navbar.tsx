@@ -8,34 +8,34 @@ const Navbar: React.FC = () => {
   const [token, setToken] = useState<boolean>(true);
 
   return (
-    <div className="flex items-center justify-between text-sm py-4 mb-5 px-10 border-b border-b-gray-400">
-      <div className="flex-1 ">
+    <div className="flex items-center justify-between text-sm py-4 px-5 mb-5 border-b border-b-gray-400">
+      <div className="flex-1">
         <img
           onClick={() => navigate("/")}
-          className="w-44 cursor-pointer "
+          className="w-44 cursor-pointer"
           src={assets.logo}
           alt="logo"
         />
       </div>
-      <ul className="hidden justify-center md:flex items-start gap-5 font-medium flex-1">
+      <ul className="flex-1 hidden md:flex justify-center items-start gap-5 font-medium">
         <NavLink to="/">
-          <li className="py-1 font-medium">Trang Chủ</li>
+          <li className="py-1 font-bold">Trang Chủ</li>
           <hr className="border-none outline-none h-0.5 bg-primary w-3/5 m-auto hidden" />
         </NavLink>
         <NavLink to="/doctors">
-          <li className="py-1 font-medium">Bác Sĩ</li>
+          <li className="py-1 font-bold">Bác Sĩ</li>
           <hr className="border-none outline-none h-0.5 bg-primary w-3/5 m-auto hidden" />
         </NavLink>
         <NavLink to="/about">
-          <li className="py-1 font-medium">Về Chúng Tôi</li>
+          <li className="py-1 font-bold">Về Chúng Tôi</li>
           <hr className="border-none outline-none h-0.5 bg-primary w-3/5 m-auto hidden" />
         </NavLink>
         <NavLink to="/contact">
-          <li className="py-1 font-medium">Liên Hệ</li>
+          <li className="py-1 font-bold">Liên Hệ</li>
           <hr className="border-none outline-none h-0.5 bg-primary w-3/5 m-auto hidden" />
         </NavLink>
       </ul>
-      <div className="flex items-center gap-4 flex-1 justify-end">
+      <div className="flex-1 flex items-center gap-4 justify-end">
         {token ? (
           <div className="flex items-center gap-2 cursor-pointer group relative">
             <img

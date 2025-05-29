@@ -1,4 +1,3 @@
-
 import Banner from "../../layouts/MainLayout/Banner";
 import Header from "../../layouts/MainLayout/Header";
 import SpecialityMenu from "../../layouts/MainLayout/SpecialityMenu";
