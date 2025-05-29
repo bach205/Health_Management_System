@@ -17,7 +17,7 @@ import plugin from "dayjs/plugin/updateLocale";
 import AdminNurseDashboard from "./pages/Admin/Nurse/AdminNurseDashboard";
 import MyProfile from "./pages/Profile/MyProfile";
 import DashboardLayout from "./layouts/DashboardLayout/index.tsx";
-import ShiftCalendar from "./pages/Staff/ShiftCalendar.tsx";
+import AdminShiftDashboard from "./pages/Admin/Shift/AdminShiftDashboard.tsx";
 dayjs.extend(plugin);
 dayjs.updateLocale("en", {
   weekStart: 1,
@@ -104,12 +104,7 @@ const PrivateRoutes = [
   },
   {
     path: "/admin/shifts",
-    element: <ShiftCalendar />,
-    layout: DashboardLayout,
-  },
-  {
-    path: "/staff/shifts",
-    element: <ShiftCalendar />,
+    element: <AdminShiftDashboard />,
     layout: DashboardLayout,
   },
 ];

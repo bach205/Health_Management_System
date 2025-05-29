@@ -35,18 +35,20 @@ const updatePatientFullInfoSchema = Joi.object({
 const createNurseSchema = Joi.object({
   full_name: Joi.string().required(),
   email: Joi.string().email().required(),
-  phone: Joi.string().pattern(/^[0-9]{10}$/).required(),
+  phone: Joi.string().pattern(/^[0-9]{10}$/).optional().allow(null, ''),
   password: Joi.string().min(6).required(),
   gender: Joi.string().valid("male", "female").required(),
 });
+
 const updateNurseSchema = Joi.object({
   full_name: Joi.string().required(),
   email: Joi.string().email().required(),
-  phone: Joi.string().pattern(/^[0-9]{10}$/).required(),
+  phone: Joi.string().pattern(/^[0-9]{10}$/).optional().allow(null, ''),
   gender: Joi.string().valid("male", "female").required(),
-  date_of_birth: Joi.string().required(),
-  address: Joi.string().required(),
+  date_of_birth: Joi.string().optional().allow(null, ''),
+  address: Joi.string().optional().allow(null, ''),
 });
+
 const forgetPasswordSchema = Joi.object({
   email: Joi.string().email().required(),
 });
@@ -58,25 +60,25 @@ const resetPasswordSchema = Joi.object({
     .valid(Joi.ref("newPassword"))
     .required()
     .messages({
-      "any.only": "Passwords do not match",
+      "any.only": "Mật khẩu không khớp nhau",
     }),
 });
 
 const createDoctorSchema = Joi.object({
   full_name: Joi.string().required(),
   email: Joi.string().email().required(),
-  phone: Joi.string().pattern(/^[0-9]{10}$/).optional(),
+  phone: Joi.string().pattern(/^[0-9]{10}$/).optional().allow(null, ''),
   password: Joi.string().min(6).required(),
   gender: Joi.string().valid("male", "female").required(),
-  date_of_birth: Joi.string().optional(),
-  address: Joi.string().optional(),
-  specialty: Joi.string().optional(),
-  bio: Joi.string().optional(),
+  date_of_birth: Joi.string().optional().allow(null, ''),
+  address: Joi.string().optional().allow(null, ''),
+  specialty: Joi.string().optional().allow(null, ''),
+  bio: Joi.string().optional().allow(null, ''),
 });
 
 const updateDoctorSchema = Joi.object({
   id: Joi.number().required(),
-  full_name: Joi.string().trim().min(1).optional(),
+  full_name: Joi.string().trim().min(1).required(),
   email: Joi.string().email().required(),
   phone: Joi.string().optional().pattern(/^[0-9]{10}$/).allow(null, ''),
   gender: Joi.string().valid("male", "female").required(),

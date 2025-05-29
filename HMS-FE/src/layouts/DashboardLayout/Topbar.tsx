@@ -1,5 +1,5 @@
-import { IMAGE_CONST } from "@/constants/image.const";
 import { Bell, Menu } from "lucide-react";
+import { IMAGE_CONST } from "../../constants/image.const";
 
 const Topbar = ({ isCollapsed, setCollapsed }: { isCollapsed: boolean; setCollapsed: (isCollapsed: boolean) => void }) => {
   return (

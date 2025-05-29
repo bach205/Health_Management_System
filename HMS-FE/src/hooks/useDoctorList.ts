@@ -41,7 +41,7 @@ export const useDoctorList = () => {
             }
         }
         fetchData();
-    }, [keyword, reload, pagination, specialty, sort, isActive]);
+    }, [ reload, pagination, specialty, sort, isActive]);
 
     const handleTableChange = (pagination: IPagination) => {
         setPagination(pagination);

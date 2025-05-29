@@ -1,5 +1,5 @@
 import instance from "../api/mainRequest";
-const BASE_URL = "api/v1/patient";
+const BASE_URL = "api/v1/patients";
 
 export const updateProfile = (patient: any) => {
     return instance.post(`${BASE_URL}/update-profile`, patient);

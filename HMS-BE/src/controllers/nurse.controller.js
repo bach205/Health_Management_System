@@ -5,10 +5,10 @@ class NurseController {
         try {
             const result = await NurseService.findAllNurse(req.query);
             if (!result) return res.status(400).json({
-                message: "there is something error when create nurse"
+                message: "Có lỗi trong quá trình lấy tất cả tài khoản, vui lòng thử lại!"
             })
             return new OK({
-                message: "Get all nurse successfully",
+                message: "Lấy tất cả tài khoản thành công",
                 metadata: result
             }).send(res);
         } catch (error) {
@@ -22,10 +22,10 @@ class NurseController {
         try {
             const result = await NurseService.createNurse(req.body);
             if (!result) return res.status(400).json({
-                message: "there is something error when create nurse"
+                message: "Có lỗi trong quá trình tạo tài khoản, vui lòng thử lại!"
             })
             return new CREATED({
-                message: "Create nurse successfully",
+                message: "Tạo tài khoản thành công",
             }).send(res);
         } catch (error) {
             return res.status(error.status).json({
@@ -37,7 +37,7 @@ class NurseController {
         try {
             const result = await NurseService.updateNurse(req.params.id, req.body);
             return new OK({
-                message: "Update nurse successfully",
+                message: "Cập nhật tài khoản thành công",
                 metadata: result,
             }).send(res);
         } catch (error) {
@@ -50,7 +50,7 @@ class NurseController {
         try {
             const result = await NurseService.banNurse(req.params.id);
             return new OK({
-                message: result.is_active ? "Unban nurse successfully" : "Ban nurse successfully",
+                message: result.is_active ? "Mở khóa tài khoản thành công" : "Khóa tài khoản thành công",
                 metadata: result,
             }).send(res);
         } catch (error) {

@@ -5,6 +5,7 @@ export interface IPagination {
   current: number;
 }
 
+
 export interface IUserBase {
   id: number;
   full_name: string;
@@ -27,6 +28,12 @@ export interface IDoctor extends IUserBase {
   }
 }
 
+export interface IShift {
+  id: number;
+  name: string;
+  start_time: string;
+  end_time: string;
+}
 
 export interface IPatient extends IUserBase {
   role: "patient";

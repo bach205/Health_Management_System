@@ -93,7 +93,7 @@ class DoctorService {
         }
     }
 
-    getDoctors = async (pagination) => {
+    getDoctors = async (pagination = {}) => {
         function sort(sortBy) {
             if (sortBy === "newest") {
                 return {
@@ -115,8 +115,8 @@ class DoctorService {
                 }
             }
         }
-        const { searchKey, specialty, sortBy, skip, limit, isActive } = pagination;
-        console.log(searchKey, specialty, sortBy, skip, limit, isActive)
+        const { searchKey = "", specialty = "", sortBy = "newest", skip = 0, limit = 10, isActive = "all" } = pagination;
+        // console.log(searchKey, specialty, sortBy, skip, limit, isActive)
         try {
             const whereClause = {
                 AND: [
@@ -189,7 +189,12 @@ class DoctorService {
             }
 
             // Check if email already exists
-
+            const user = await prisma.user.findUnique({
+                where: { email: value.email }
+            });
+            if (user && user.id !== value.id) {
+                throw new BadRequestError("Email đã tồn tại");
+            }
 
 
             // Update user + doctor

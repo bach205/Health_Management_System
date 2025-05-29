@@ -11,6 +11,8 @@ import { specialtyOptions, TYPE_EMPLOYEE_STR, PASSWORD_DEFAULT, sortOptions } fr
 import type { IDoctor } from "../../../types/index.type";
 import UserListTitle from "../../../components/ui/UserListTitle";
 import { createDoctor, updateDoctor, updatePassword, updateStatus } from "../../../services/doctor.service";
+import ModalCreateDoctor from "../../../components/modal/ModalCreateDoctor";
+import ModalUpdateDoctor from "../../../components/modal/ModalUpdateDoctor";
 
 const AdminDoctorDashboard = () => {
   const [isCreateVisible, setIsCreateVisible] = useState<boolean>(false);
@@ -71,7 +73,7 @@ const AdminDoctorDashboard = () => {
       key: "doctor",
       render: (record: any) => {
 
-        return record && record.specialty && record.specialty.length > 0 ? record.specialty : 'Không xác định';
+        return record && record.specialty && record.specialty.length > 0 ? specialtyOptions.find(option => option.value === record.specialty)?.label : 'Không xác định';
       },
     },
     {
@@ -198,7 +200,11 @@ const AdminDoctorDashboard = () => {
       setReload(!reload);
     } catch (error: any) {
       console.log(error);
-      notification.error({ message: error.message });
+      if (error?.response?.data) {
+        notification.error({ message: error.response.data.message });
+      } else {
+        notification.error({ message: "Có lỗi xảy ra" });
+      }
     }
   }
 
@@ -217,17 +223,25 @@ const AdminDoctorDashboard = () => {
   //Submit create doctor
   const handleCreateOk = async () => {
     try {
+      // const values = await formCreate.validateFields();
       const values = await formCreate.validateFields();
-      await createDoctor(values);
+      const createValue = {
+        ...values,
+      }
+      delete createValue.create_password;
+      delete createValue.confirm_password;
+      await createDoctor(createValue);
       notification.success({ message: "Tạo tài khoản thành công" });
       setReload(!reload);
       setIsCreateVisible(false);
     } catch (error: any) {
-      console.log(error);
-      if (error?.errorFields?.length > 0) {
+      console.log("error", error)
+      if (error?.response?.data) {
+        notification.error({ message: error.response.data.message });
+      } else if (error?.errorFields?.length > 0) {
         notification.error({ message: error.errorFields[0].errors[0] });
       } else {
-        notification.error({ message: error.message });
+        notification.error({ message: "Có lỗi xảy ra" });
       }
     }
   };
@@ -236,7 +250,6 @@ const AdminDoctorDashboard = () => {
   const handleUpdateOk = async () => {
     try {
       const values = await formUpdate.validateFields();
-      // console.log(currentUser)
       if (!currentUser?.id) {
         notification.error({ message: "Không tìm thấy thông tin bác sĩ" });
         return;
@@ -253,10 +266,12 @@ const AdminDoctorDashboard = () => {
       setIsUpdateVisible(false);
     } catch (error: any) {
       console.log(error);
-      if (error?.errorFields?.length > 0) {
+      if (error?.response?.data) {
+        notification.error({ message: error.response.data.message });
+      } else if (error?.errorFields?.length > 0) {
         notification.error({ message: error.errorFields[0].errors[0] });
       } else {
-        notification.error({ message: error.message });
+        notification.error({ message: "Có lỗi xảy ra" });
       }
     }
   };
@@ -343,8 +358,8 @@ const AdminDoctorDashboard = () => {
         scroll={{ x: 1000, y: 500 }}
       />
 
-      <ModalCreateUser role="doctor" form={formCreate} handleOk={handleCreateOk} isVisible={isCreateVisible} handleCancel={handleCreateCancel}></ModalCreateUser>
-      <ModalUpdateUser role="doctor" form={formUpdate} handleOk={handleUpdateOk} isVisible={isUpdateVisible} handleCancel={handleUpdateCancel}></ModalUpdateUser>
+      <ModalCreateDoctor role="doctor" form={formCreate} handleOk={handleCreateOk} isVisible={isCreateVisible} handleCancel={handleCreateCancel}></ModalCreateDoctor>
+      <ModalUpdateDoctor role="doctor" form={formUpdate} handleOk={handleUpdateOk} isVisible={isUpdateVisible} handleCancel={handleUpdateCancel}></ModalUpdateDoctor>
       <ModalViewUser role="doctor" form={formView} isVisible={isViewVisible} handleCancel={handleViewCancel}></ModalViewUser>
 
     </div>

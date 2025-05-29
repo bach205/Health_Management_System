@@ -126,7 +126,7 @@ const SIDEBAR_ITEMS = [
       },
       {
         id: "shifts",
-        label: "Quản lý lịch làm việc",
+        label: "Quản lý ca làm việc",
         icon: <Calendar className="w-4 h-4" />,
         href: "/admin/shifts",
       },

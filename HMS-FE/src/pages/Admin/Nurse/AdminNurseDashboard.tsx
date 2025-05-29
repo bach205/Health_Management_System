@@ -140,7 +140,7 @@ const AdminNurseDashboard = () => {
       // setIsShowSpecialty(record.role === TYPE_EMPLOYEE.doctor);
       formView.setFieldsValue({
         ...record,
-        date_of_birth: dayjs(record.date_of_birth),
+        date_of_birth: record.date_of_birth ? dayjs(record.date_of_birth) : null,
       });
       setIsViewVisible(true);
     } catch (error) {
@@ -154,7 +154,7 @@ const AdminNurseDashboard = () => {
       const result = await banNurse(record?.id);
       if (result.status >= 200 && result.status < 300) {
         notification.success({
-          message: record.is_active ? "Ban nurse successfully" : "Unban nurse successfully"
+          message: record.is_active ? "Khóa tài khoản thành công" : "Mở khóa tài khoản thành công"
         });
         setReload(!reload);
       } else if (result.status >= 400) {
@@ -173,7 +173,7 @@ const AdminNurseDashboard = () => {
       // setIsShowSpecialty(record.role === TYPE_EMPLOYEE.doctor);
       formUpdate.setFieldsValue({
         ...record,
-        date_of_birth: dayjs(record.date_of_birth),
+        date_of_birth: record.date_of_birth ? dayjs(record.date_of_birth) : null,
       });
       setCurNurseId(record.id);
       setIsUpdateVisible(true);

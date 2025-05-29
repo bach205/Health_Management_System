@@ -84,7 +84,7 @@ const ModalEditProfile = ({ isVisible, handleOk, handleCancel, form }: IProps) =
 
                 <Form.Item name="identity_number" label="Số CMND">
                     <Input placeholder="Số CMND" />
-                </Form.Item>
+                </Form.Item>    
 
          
             </Form>

@@ -1,7 +1,7 @@
 import type { IDoctor } from "../types/index.type";
 import instance from "../api/mainRequest";
 import { PASSWORD_DEFAULT } from "../constants/user.const";
-const BASE_URL = "api/v1/doctor";
+const BASE_URL = "api/v1/doctors";
 
 export const createDoctor = (doctor: IDoctor) => {
     if (!doctor.password) {
