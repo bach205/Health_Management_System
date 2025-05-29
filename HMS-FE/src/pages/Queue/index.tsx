@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import QueueTable from "../../components/doctor/QueueTable";
+=======
+import QueueTable from "@/components/doctor/QueueTable";
+>>>>>>> master
 
 const Queue = () => {
   return (

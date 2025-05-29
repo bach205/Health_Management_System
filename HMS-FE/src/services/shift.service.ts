@@ -1,6 +1,6 @@
 import  mainRequest from "../api/mainRequest";
 
-const baseURL = `http://localhost:8080/api/v1/shifts`;
+const baseURL = `api/v1/shifts`;
 
 export const getShiftService = async () => {
   const response = await mainRequest.get(`${baseURL}/`);

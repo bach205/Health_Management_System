@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { Link, useNavigate } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
 import { loginService } from "../../services/auth.service";
@@ -76,3 +77,10 @@ const Login = () => {
 };
 
 export default Login;
+=======
+const Login = () => {
+  return <div>Login</div>;
+};
+
+export default Login;
+>>>>>>> master

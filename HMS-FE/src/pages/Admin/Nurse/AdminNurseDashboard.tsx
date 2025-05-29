@@ -8,17 +8,19 @@ import dayjs from "dayjs";
 import ModalViewUser from "../../../components/modal/ModalViewUser";
 import { useNurseList } from "../../../hooks/useNurseList";
 import UserListTitle from "../../../components/ui/UserListTitle";
-import type { IDoctor } from "../../../types/index.type";
+import type { IUserBase } from "../../../types/index.type";
+import { createNurse, updateNurse, banNurse, resetPassword } from "../../../api/nurse.ts";
 
 const AdminNurseDashboard = () => {
   const [isCreateVisible, setIsCreateVisible] = useState<boolean>(false);
   const [isUpdateVisible, setIsUpdateVisible] = useState<boolean>(false);
   const [isViewVisible, setIsViewVisible] = useState<boolean>(false);
   const filterOptions = [{ value: "all", label: "Tất cả" }, ...specialtyOptions]
-
+  
   const [formCreate] = Form.useForm();
   const [formUpdate] = Form.useForm();
   const [formView] = Form.useForm();
+  const [curNurseId, setCurNurseId] = useState(0);
 
   // Table column
   const columns: any = [
@@ -66,7 +68,7 @@ const AdminNurseDashboard = () => {
       title: "Trạng thái",
       dataIndex: "is_active",
       key: "is_active",
-      render: (_: any, { is_active }: IDoctor) => (
+      render: (_: any, { is_active }: IUserBase) => (
         <>
           <Tag color={is_active ? "green" : "red"}>
             {is_active ? "Đang hoạt động" : "Đã khóa"}
@@ -82,7 +84,7 @@ const AdminNurseDashboard = () => {
       width: 160,
       ellipsis: true,
       key: "action",
-      render: (_: any, record: IDoctor) => (
+      render: (_: any, record: IUserBase) => (
         <Space size="small">
           <Tooltip title="Xem thông tin">
             <Button
@@ -95,7 +97,7 @@ const AdminNurseDashboard = () => {
             <Tooltip title="Chỉnh sửa thông tin">
               <Button
                 type="text"
-                onClick={() => handleEdit(record)}
+                onClick={() => { handleEdit(record) }}
                 icon={<UserRoundPen size={17.5} />}
               ></Button>
             </Tooltip>
@@ -112,9 +114,9 @@ const AdminNurseDashboard = () => {
               <Button type="text" icon={<RotateCcw size={17.5} />}></Button>
             </Tooltip>
           </Popconfirm>
-          <Tooltip title={record?.is_active ? "Bạn muốn cấm tài khoản ?" : "Bạn muốn hủy cấm tài khoản?"} >
+          <Tooltip title={record?.is_active ? "Bạn muốn khóa tài khoản ?" : "Bạn muốn mở khóa tài khoản?"} >
             <Popconfirm
-              title={record?.is_active ? "Cấm tài khoản?" : "Bỏ cấm tài khoản?"}
+              title={record?.is_active ? "Khóa tài khoản?" : "Mở khóa tài khoản?"}
               description="Bạn chắc chắn muốn thực hiện hành động này?"
               onConfirm={() => handleStatus(record)}
               okText="Xác nhận"
@@ -132,13 +134,13 @@ const AdminNurseDashboard = () => {
   ];
 
 
-  const handleView = async (record: IDoctor) => {
+  const handleView = async (record: IUserBase) => {
     // console.log(record)
     try {
       // setIsShowSpecialty(record.role === TYPE_EMPLOYEE.doctor);
       formView.setFieldsValue({
         ...record,
-        date_of_birth: dayjs(record.date_of_birth),
+        date_of_birth: record.date_of_birth ? dayjs(record.date_of_birth) : null,
       });
       setIsViewVisible(true);
     } catch (error) {
@@ -147,18 +149,33 @@ const AdminNurseDashboard = () => {
     }
   };
   // is active
-  const handleStatus = async (record: IDoctor) => {
-    console.log(record)
+  const handleStatus = async (record: IUserBase) => {
+    try {
+      const result = await banNurse(record?.id);
+      if (result.status >= 200 && result.status < 300) {
+        notification.success({
+          message: record.is_active ? "Khóa tài khoản thành công" : "Mở khóa tài khoản thành công"
+        });
+        setReload(!reload);
+      } else if (result.status >= 400) {
+        notification.error({ message: result.data.message });
+      }
+    } catch (error: any) {
+      console.log(error);
+      notification.error({
+        message: error.response?.data?.message || "Có lỗi xảy ra khi thực hiện thao tác"
+      });
+    }
   };
 
-  const handleEdit = async (record: IDoctor) => {
-    console.log(record)
+  const handleEdit = async (record: IUserBase) => {
     try {
       // setIsShowSpecialty(record.role === TYPE_EMPLOYEE.doctor);
       formUpdate.setFieldsValue({
         ...record,
-        date_of_birth: dayjs(record.date_of_birth),
+        date_of_birth: record.date_of_birth ? dayjs(record.date_of_birth) : null,
       });
+      setCurNurseId(record.id);
       setIsUpdateVisible(true);
     } catch (error) {
       console.log(error);
@@ -166,47 +183,72 @@ const AdminNurseDashboard = () => {
     }
   };
 
-  const handleResetPassword = (id: string) => {
-    console.log(id)
-  }
-
+  const handleResetPassword = async (id: number) => {
+    try {
+      const result = await resetPassword(id);
+      if (result.status >= 200 && result.status < 300) {
+        notification.success({ message: result.data.message });
+      } else if (result.status >= 400) {
+        notification.error({ message: result.data.message });
+      }
+    } catch (error: any) {
+      console.log(error);
+      notification.error({ message: error.response?.data?.message || "Có lỗi xảy ra" });
+    }
+  };
 
   const handleCreateCancel = () => {
     setIsCreateVisible(false);
   };
 
   const handleUpdateCancel = () => {
+    setCurNurseId(0);
     setIsUpdateVisible(false);
   };
 
   const handleViewCancel = () => {
     setIsViewVisible(false);
   }
-  //Submit create doctor
+  //Submit create nurse
   const handleCreateOk = async () => {
     try {
       const values = await formCreate.validateFields();
-      // gọi API thêm
-      console.log("Create:", values);
-      notification.success({ message: "Tạo tài khoản thành công" });
-
-      setIsCreateVisible(false);
-    } catch (error) {
+      if (!values.create_password) {
+        values.password = PASSWORD_DEFAULT;
+      }
+      const result = await createNurse(values);
+      if (result.status >= 200 && result.status < 300) {
+        notification.success({ message: result.data.message });
+        setReload(!reload);
+      } else if (result.status >= 400) {
+        notification.error({ message: result.data.message });
+      }
+    } catch (error: any) {
       console.log(error);
+      notification.error({ message: error.response.data.message });
+    } finally {
+      setIsCreateVisible(false);
     }
   };
 
-  //Submit update doctor
+  //Submit update nurse
   const handleUpdateOk = async () => {
     try {
       const values = await formUpdate.validateFields();
-      // gọi API cập nhật
-      console.log("Update:", values);
-      notification.success({ message: "Cập nhật tài khoản thành công" });
-
-      setIsUpdateVisible(false);
-    } catch (error) {
+      console.log(values);
+      const result = await updateNurse(curNurseId, values);
+      if (result.status >= 200 && result.status < 300) {
+        notification.success({ message: result.data.message });
+        setReload(!reload);
+      } else if (result.status >= 400) {
+        notification.error({ message: result.data.message });
+      }
+    } catch (error: any) {
       console.log(error);
+      notification.error({ message: error.response.data.message });
+    } finally {
+      setIsUpdateVisible(false);
+      setCurNurseId(0);
     }
   };
 
@@ -215,7 +257,11 @@ const AdminNurseDashboard = () => {
     users, loading, keyword, reload, pagination, sort,
     setKeyword, setReload, setSort, handleTableChange,
   } = useNurseList();
-
+  const handleAbortFilter = () => {
+    setReload(!reload);
+    setSort("name_asc");
+    setKeyword("");
+  }
 
   return (
     <div>
@@ -225,13 +271,13 @@ const AdminNurseDashboard = () => {
       <Flex gap={10} justify="space-between" style={{ marginBottom: 10 }}>
         <Flex gap={10}>
           <Tooltip title="Hủy lọc">
-            <Button onClick={() => setReload(!reload)}>
+            <Button onClick={() => handleAbortFilter()}>
               <RefreshCcw size={17.5} />
             </Button>
           </Tooltip>
           <Input
             value={keyword}
-            placeholder="Tìm kiếm"
+            placeholder="Tìm kiếm theo tên"
             onChange={(e) => setKeyword(e.target.value)}
             onPressEnter={() => setReload(!reload)}
           />
@@ -261,7 +307,6 @@ const AdminNurseDashboard = () => {
                 value={sort}
                 onChange={(value) => setSort(value)}
                 options={[
-                  { value: "stt", label: "STT" },
                   { value: "name_asc", label: "Tên A-Z" },
                   { value: "name_desc", label: "Tên Z-A" },
                   { value: "created_at_desc", label: "Mới nhất" },

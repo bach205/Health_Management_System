@@ -20,6 +20,7 @@ import AdminClinicDashboard from "./pages/Admin/Clinic/AdminClinicDashboard";
 import Workschedule from "./pages/Workschedule/Workschedule";
 import ShiftManager from "./pages/Shift/Shift";
 import MyProfile from "./pages/Profile/MyProfile";
+import NotFound from "./pages/NotFound";
 dayjs.extend(plugin);
 dayjs.updateLocale("en", {
   weekStart: 1,
@@ -48,7 +49,11 @@ function App() {
               </Authentication>
             }
           />
+
         ))}
+
+        <Route path="unauthorize" element={<Unauthorized />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   );

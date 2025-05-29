@@ -55,7 +55,7 @@ class NurseService {
             });
 
             if (!nurses) {
-                throw new BadRequestError("Error fetching nurses");
+                throw new BadRequestError("Có lỗi trong quá trình lấy tất cả tài khoản, vui lòng thử lại!");
             }
 
             return nurses;
@@ -71,38 +71,39 @@ class NurseService {
             const requiredFields = [
                 'full_name',
                 'email',
-                'phone',
+                // 'phone',
                 'password',
                 'gender',
             ];
-
+            console.log(1)
             for (const field of requiredFields) {
                 if (!nurseData[field] || nurseData[field].trim() === '') {
-                    throw new BadRequestError(`${field.replace('_', ' ')} cannot be empty`);
+                    throw new BadRequestError(`${field.replace('_', ' ')} không được để trống`);
                 }
             }
-
+            console.log(2)
             // Validate input data using Joi schema
             const { error, value } = createNurseSchema.validate(nurseData, { abortEarly: false });
             if (error) {
                 throw new BadRequestError(error.details.map(detail => detail.message).join(', '));
             }
+            console.log(value);
 
             // Check if email already exists
             const existingEmail = await prisma.user.findUnique({
                 where: { email: value.email }
             });
             if (existingEmail) {
-                throw new BadRequestError("Email already exists");
+                throw new BadRequestError("Email đã tồn tại");
             }
 
-            // Check if phone number already exists
-            const existingPhone = await prisma.user.findFirst({
-                where: { phone: value.phone }
-            });
-            if (existingPhone) {
-                throw new BadRequestError("Phone number already exists");
-            }
+            // // Check if phone number already exists
+            // const existingPhone = await prisma.user.findFirst({
+            //     where: { phone: value.phone }
+            // });
+            // if (existingPhone) {
+            //     throw new BadRequestError("Phone number already exists");
+            // }
 
             // Hash password
             const hashedPassword = await bcrypt.hash(
@@ -127,7 +128,7 @@ class NurseService {
             });
 
             if (!nurse) {
-                throw new BadRequestError("There is some error in creating nurse, please try again!");
+                throw new BadRequestError("Có lỗi trong quá trình tạo tài khoản, vui lòng thử lại!");
             }
 
             return nurse;
@@ -144,22 +145,22 @@ class NurseService {
                 where: { id: nurseId }
             });
             if (!existingNurse) {
-                throw new BadRequestError("Nurse not found");
+                throw new BadRequestError("Không tìm thấy tài khoản");
             }
 
             // Check for empty fields in update data
             const requiredFields = [
                 'full_name',
                 'email',
-                'phone',
+                // 'phone',
                 'gender',
-                'date_of_birth',
-                'address',
+                // 'date_of_birth',
+                // 'address',
             ];
 
             for (const field of requiredFields) {
                 if (updateData[field] && updateData[field].trim() === '') {
-                    throw new BadRequestError(`${field.replace('_', ' ')} cannot be empty`);
+                    throw new BadRequestError(`${field.replace('_', ' ')} không được để trống`);
                 }
             }
 
@@ -175,35 +176,75 @@ class NurseService {
                     where: { email: value.email }
                 });
                 if (existingEmail) {
-                    throw new BadRequestError("Email already exists");
+                    throw new BadRequestError("Email đã tồn tại");
                 }
             }
 
-            // Check if new phone number already exists (if phone is being updated)
-            if (updateData.phone && updateData.phone !== existingNurse.phone) {
-                const existingPhone = await prisma.user.findFirst({
-                    where: { phone: value.phone }
-                });
-                if (existingPhone) {
-                    throw new BadRequestError("Phone number already exists");
-                }
-            }
+            // // Check if new phone number already exists (if phone is being updated)
+            // if (updateData.phone && updateData.phone !== existingNurse.phone) {
+            //     const existingPhone = await prisma.user.findFirst({
+            //         where: { phone: value.phone }
+            //     });
+            //     if (existingPhone) {
+            //         throw new BadRequestError("Phone number already exists");
+            //     }
+            // }
 
             // Create update data object with only changed fields
             const updateFields = {};
-            for (const field of requiredFields) {
-                if (updateData[field] && updateData[field] !== existingNurse[field]) {
+            // for (const field of requiredFields) {
+            //     if (updateData[field] && updateData[field] !== existingNurse[field]) {
+            //         updateFields[field] = value[field];
+            //     }
+            // }
+            // console.log(updateData)
+            // console.log(existingNurse,existingNurse.date_of_birth)
+
+            const updatedfields = [
+                'full_name',
+                'email',
+                'gender',
+                'date_of_birth',
+                'address',
+                'phone',
+            ];
+            for (const field of updatedfields) {
+                if (field === 'date_of_birth' ) {
+                    // Special handling for date_of_birth
+                    if (updateData[field] !== undefined &&
+                        (updateData[field] === null || existingNurse[field] === null ||
+                            new Date(updateData[field]).getTime() !== new Date(existingNurse[field]).getTime())) {
+                        updateFields[field] = value[field];
+                    }
+                } else if (updateData[field] && updateData[field] !== existingNurse[field]) {
                     updateFields[field] = value[field];
                 }
-            }
+                if (field === 'address' ) {
+                    // Special handling for date_of_birth
+                    if (updateData[field] !== undefined &&
+                        (updateData[field] === null || existingNurse[field] === null ||
+                            new Date(updateData[field]).getTime() !== new Date(existingNurse[field]).getTime())) {
+                        updateFields[field] = value[field];
+                    }
+                } else if (updateData[field] && updateData[field] !== existingNurse[field]) {
+                    updateFields[field] = value[field];
+                }
+                if (field === 'phone' ) {
+                    // Special handling for date_of_birth
+                    if (updateData[field] !== undefined &&
+                        (updateData[field] === null || existingNurse[field] === null ||
+                            new Date(updateData[field]).getTime() !== new Date(existingNurse[field]).getTime())) {
+                        updateFields[field] = value[field];
+                    }
+                } else if (updateData[field] && updateData[field] !== existingNurse[field]) {
+                    updateFields[field] = value[field];
+                }
 
-            if (new Date(value["date_of_birth"]).getTime() === new Date(existingNurse["date_of_birth"]).getTime()) {
-                delete updateFields["date_of_birth"];
             }
 
             // If no fields to update, return existing nurse
             if (Object.keys(updateFields).length === 0) {
-                throw new BadRequestError("No changes to update");
+                throw new BadRequestError("Không có thay đổi nào để cập nhật");
             }
 
             // Update nurse with only changed fields
@@ -213,7 +254,7 @@ class NurseService {
             });
 
             if (!updatedNurse) {
-                throw new BadRequestError("There is some error in updating nurse, please try again!");
+                throw new BadRequestError("Có lỗi trong quá trình cập nhật tài khoản, vui lòng thử lại!");
             }
 
             return updatedNurse;
@@ -231,10 +272,10 @@ class NurseService {
                 where: { id: nurseId }
             });
             if (!existingNurse) {
-                throw new BadRequestError("Nurse not found");
+                throw new BadRequestError("Không tìm thấy tài khoản");
             }
             if (existingNurse.role !== "nurse") {
-                throw new BadRequestError("User is not a nurse");
+                throw new BadRequestError("Tài khoản không phải là bác sĩ");
             }
 
             // Toggle is_active status
@@ -246,7 +287,7 @@ class NurseService {
             });
 
             if (!updatedNurse) {
-                throw new BadRequestError("There is some error in updating nurse status, please try again!");
+                throw new BadRequestError("Có lỗi trong quá trình cập nhật trạng thái tài khoản, vui lòng thử lại!");
             }
 
             return updatedNurse;
@@ -262,7 +303,7 @@ class NurseService {
                 where: { id: parseInt(nurseId, 10) }
             });
             if (!nurse) {
-                throw new Error("Nurse not found");
+                throw new Error("Không tìm thấy tài khoản");
             }
 
             // Update password to default
@@ -277,13 +318,13 @@ class NurseService {
             });
 
             if (!updatedNurse) {
-                throw new BadRequestError("There is some error in resetting password, please try again!");
+                throw new BadRequestError("Có lỗi trong quá trình đặt lại mật khẩu, vui lòng thử lại!");
             }
 
             return {
                 status: 200,
                 data: {
-                    message: "Reset password successfully"
+                    message: "Đặt lại mật khẩu thành công"
                 }
             };
         } catch (error) {

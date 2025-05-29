@@ -93,7 +93,7 @@ class DoctorService {
         }
     }
 
-    getDoctors = async (pagination) => {
+    getDoctors = async (pagination = {}) => {
         function sort(sortBy) {
             if (sortBy === "newest") {
                 return {
@@ -189,7 +189,6 @@ class DoctorService {
             }
 
             // Check if email already exists
-
 
 
             // Update user + doctor

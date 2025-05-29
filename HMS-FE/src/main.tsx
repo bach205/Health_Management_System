@@ -5,7 +5,6 @@ import App from "./App.tsx";
 import { Bounce, ToastContainer } from "react-toastify";
 import '@ant-design/v5-patch-for-react-19';
 import { ConfigProvider } from "antd";
-
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ConfigProvider theme={{

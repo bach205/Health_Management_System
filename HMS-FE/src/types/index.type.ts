@@ -1,4 +1,10 @@
 import type { TYPE_EMPLOYEE } from "../constants/user.const";
+export interface IPagination {
+  total: number;
+  pageSize: number;
+  current: number;
+}
+
 
 export interface IUserBase {
   id: number;
@@ -13,11 +19,6 @@ export interface IUserBase {
   sso_provider?: "google" | "facebook" | "local";
   is_active: boolean;
 }
-export interface IPagination {
-  total: number;
-  pageSize: number;
-  current: number;
-}
 
 export interface IDoctor extends IUserBase {
   role: "doctor";
@@ -27,6 +28,12 @@ export interface IDoctor extends IUserBase {
   }
 }
 
+export interface IShift {
+  id: number;
+  name: string;
+  start_time: string;
+  end_time: string;
+}
 
 export interface IPatient extends IUserBase {
   role: "patient";
