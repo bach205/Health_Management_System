@@ -225,6 +225,7 @@ const AdminDoctorDashboard = () => {
     try {
       // const values = await formCreate.validateFields();
       const values = await formCreate.validateFields();
+      console.log(values);
       const createValue = {
         ...values,
       }

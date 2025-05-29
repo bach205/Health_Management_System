@@ -23,7 +23,9 @@ const Login = () => {
         password: password.trim(),
       };
       const data = await auth.handleLogin(values);
-      if(data === "loggedin") navigate("/");
+      console.log(data);
+      if(data === "patient") navigate("/");
+      if(data === "admin") navigate("/admin");
     };
 
      

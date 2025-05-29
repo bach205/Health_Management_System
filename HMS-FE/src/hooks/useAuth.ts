@@ -16,16 +16,16 @@ const useAuth = () => {
     try {
       const response = await loginService(user);
       if (response.status === 200) {
-        login(response.data.metadata.user, response.data.metadata.accessToken);
-        status = "loggedin";
+        login(response.data.metadata.user, response.data.metadata.accessToken);      
         toast.success("Đăng nhập thành công");
+        return response.data.metadata.user.role;
       } else {
         toast.error("Đăng nhập thất bại");
       }
     } catch (error: any) {
       toast.error("Đăng nhập thất bại");
     }
-    return status;
+   
   };
 
   const handleLogout = () => {

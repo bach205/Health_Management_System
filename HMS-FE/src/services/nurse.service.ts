@@ -1,25 +1,30 @@
-import type { IUserBase } from "../types/index.type";
-import instance from "../api/mainRequest";
-import { PASSWORD_DEFAULT } from "../constants/user.const";
+import type { IUserBase } from "../types/index.type.ts";
+import instance from "../api/mainRequest.ts";
 
 const BASE_URL = "api/v1/nurse";
 
-export const createNurse = (nurse: IUserBase) => {
-    if (!nurse.password) {
-        nurse.password = PASSWORD_DEFAULT;
-    }
-    return instance.post(`${BASE_URL}/create`, nurse);
+export const createNurse = async (nurse: IUserBase) => {
+    return await instance.post(`${BASE_URL}/create`, nurse);
 };
 
-export const getNurses = async (body: any) => {
+export const getAllNurse = async (params?: { keyword?: string; sort?: string }) => {
+    return await instance.get(`${BASE_URL}/`, { params });
+}
 
-    return instance.post(`${BASE_URL}`, body);
+export const updateNurse = async (id: number, nurse: IUserBase) => {
+    console.log(nurse)
+    return await instance.put(`${BASE_URL}/update/${id}`, nurse);
 };
 
-export const updateNurse = (nurse: IUserBase) => {
-    return instance.put(`${BASE_URL}/update/${nurse.id}`, nurse);
+export const getNurseById = async (id: string) => {
+    return await instance.get(`${BASE_URL}/${id}`);
 };
 
-export const getNurseById = (id: string) => {
-    return instance.get(`${BASE_URL}/${id}`);
+export const banNurse = async (id: string) => {
+    return await instance.put(`${BASE_URL}/ban/${id}`);
 };
+
+export const resetPassword = async (id: string) => {
+    return await instance.put(`${BASE_URL}/reset-password/${id}`);
+};
+

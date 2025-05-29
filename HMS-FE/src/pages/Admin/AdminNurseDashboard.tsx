@@ -217,6 +217,7 @@ const AdminNurseDashboard = () => {
         values.password = PASSWORD_DEFAULT;
       }
       let result = await createNurse(values);
+      console.log(result);
       if (result.status >= 200 && result.status < 300) {
         notification.success({ message: result.data.message });
         setReload(!reload);

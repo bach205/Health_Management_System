@@ -10,7 +10,7 @@ nurseRouter.put("/update/:id", async (req, res) => {
 nurseRouter.put("/ban/:id", async (req, res) => {
     return await NurseController.banNurse(req, res);
 });
-nurseRouter.get("/get-all-nurse", async (req, res) => {
+nurseRouter.get("/", async (req, res) => {
     return await NurseController.getAllNurse(req, res);
 })
 nurseRouter.put("/reset-password/:id", NurseController.resetPassword);

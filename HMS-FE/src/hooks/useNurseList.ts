@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getNurses } from "../services/nurse.service";
+import { getAllNurse } from "../services/nurse.service";
 import type { IUserBase } from "../types/index.type";
 
 export interface IPagination {
@@ -26,7 +26,7 @@ export const useNurseList = () => {
         const fetchData = async () => {
             try {
                 setLoading(true);
-                const data = await getNurses({})
+                const data = await getAllNurse({})
                 // console.log(data)
                 setUsers(data?.users);
 
