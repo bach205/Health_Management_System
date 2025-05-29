@@ -14,6 +14,9 @@ model User {
   full_name    String?
   phone        String?
   role         Role
+  address         String?
+  date_of_birth   DateTime?
+  gender          Gender?
   sso_provider SsoProvider @default(local)
   is_active    Boolean     @default(true)
   created_at   DateTime    @default(now())
@@ -45,11 +48,6 @@ enum SsoProvider {
 
 model Patient {
   id              Int       @id @default(autoincrement())
-  full_name       String
-  date_of_birth   DateTime?
-  gender          Gender?
-  phone           String?
-  address         String?
   identity_number String?
   created_at      DateTime  @default(now())
   updated_at      DateTime  @updatedAt

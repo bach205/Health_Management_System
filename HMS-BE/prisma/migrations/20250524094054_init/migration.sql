@@ -5,10 +5,7 @@ CREATE TABLE `users` (
     `password` VARCHAR(191) NULL,
     `full_name` VARCHAR(191) NULL,
     `phone` VARCHAR(191) NULL,
-    `gender` ENUM('male', 'female') NOT NULL,
-    `date_of_birth` DATE,
     `role` ENUM('doctor', 'nurse', 'receptionist', 'admin') NOT NULL,
-    `address` VARCHAR(191) null,
     `sso_provider` ENUM('google', 'facebook', 'local') NOT NULL DEFAULT 'local',
     `is_active` BOOLEAN NOT NULL DEFAULT true,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
@@ -21,9 +18,15 @@ CREATE TABLE `users` (
 -- CreateTable
 CREATE TABLE `patients` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `full_name` VARCHAR(191) NOT NULL,
+    `date_of_birth` DATETIME(3) NULL,
+    `gender` ENUM('male', 'female', 'other') NULL,
+    `phone` VARCHAR(191) NULL,
+    `address` VARCHAR(191) NULL,
     `identity_number` VARCHAR(191) NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
+
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -32,6 +35,7 @@ CREATE TABLE `clinics` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(191) NOT NULL,
     `description` VARCHAR(191) NULL,
+
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -40,6 +44,7 @@ CREATE TABLE `doctors` (
     `user_id` INTEGER NOT NULL,
     `specialty` VARCHAR(191) NULL,
     `bio` VARCHAR(191) NULL,
+
     PRIMARY KEY (`user_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 

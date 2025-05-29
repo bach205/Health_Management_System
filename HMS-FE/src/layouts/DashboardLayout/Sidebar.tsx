@@ -9,8 +9,7 @@ import {
   CalendarArrowDown,
 } from "lucide-react";
 import type { JSX } from "react";
-import { useLocation } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate} from "react-router-dom";
 
 const Sidebar = () => {
   const location = useLocation();
@@ -93,6 +92,18 @@ const SIDEBAR_ITEMS = [
         label: "Quản lý người dùng",
         icon: <Users className="w-4 h-4" />,
         href: "/admin/users",
+      },
+      {
+        id: "workschedule",
+        label: "Lịch làm việc",
+        icon: <Calendar className="w-4 h-4" />,
+        href: "/workschedule",
+      },
+      {
+        id: "shift",
+        label: "Quản lý ca làm việc",
+        icon: <Calendar className="w-4 h-4" />,
+        href: "/shift",
       },
       {
         id: "patients",

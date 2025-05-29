@@ -23,7 +23,7 @@ const ModalViewClinic= ({ isVisible, handleCancel, form, }: IProps) => {
     >
       <Form
         name="viewClinicForm"
-        
+        disabled
         form={form}
         labelCol={{ span: 6 }}
         wrapperCol={{ span: 16 }}

@@ -17,6 +17,8 @@ import plugin from "dayjs/plugin/updateLocale";
 import AdminNurseDashboard from "./pages/Admin/Nurse/AdminNurseDashboard";
 import Unauthorized from "./pages/Unauthorized";
 import AdminClinicDashboard from "./pages/Admin/Clinic/AdminClinicDashboard";
+import Workschedule from "./pages/Workschedule/Workschedule";
+import ShiftManager from "./pages/Shift/Shift";
 dayjs.extend(plugin);
 dayjs.updateLocale("en", {
   weekStart: 1,
@@ -69,6 +71,7 @@ const PublicRoutes = [
     element: <Register />,
     layout: MainLayout,
   },
+  
   {
     path: "/unauthorized",
     element:<Unauthorized />
@@ -76,9 +79,15 @@ const PublicRoutes = [
 ];
 
 const PrivateRoutes = [
+  
   {
     path: "/admin/",
     element: <Dashboard />,
+    layout: DashboardLayout,
+  },
+  {
+    path: "/workschedule",
+    element: <Workschedule />,
     layout: DashboardLayout,
   },
   {
@@ -104,6 +113,11 @@ const PrivateRoutes = [
   {
     path: "/queues",
     element: <Queue />,
+    layout: DashboardLayout,
+  },
+  {
+    path: "/shift",
+    element: <ShiftManager />,
     layout: DashboardLayout,
   },
 ];
