@@ -1,40 +1,41 @@
 {
-  "name": "hms-swp391",
+  "name": "server",
   "version": "1.0.0",
-  "type": "module",
-  "description": "backend nodejs",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon --exec babel-node src/server.js"
+    "lint": "eslint src --ext js --report-unused-disable-directives --max-warnings 0",
+    "clean": "rm -rf build && mkdir build",
+    "build-babel": "babel ./src -d ./build/src",
+    "build": "npm run clean && npm run build-babel",
+    "production": "npm run build && node ./build/src/app.js",
+    "dev": "nodemon server.js"
   },
-  "keywords": [
-    "fullstack",
-    "nodejs",
-    "express"
-  ],
+  "prisma": {
+    "schema": "prisma/schema.prisma"
+  },
   "author": "",
   "license": "ISC",
+  "description": "",
   "dependencies": {
-    "bcryptjs": "^2.4.3",
-    "body-parser": "^1.19.0",
+    "@prisma/client": "^6.8.2",
+    "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
-    "dotenv": "^8.2.0",
-    "ejs": "^3.1.5",
-    "express": "^4.17.1",
-    "lodash": "^4.17.21",
-    "mysql2": "^2.2.5",
-    "nodemailer": "6.6.3",
-    "react-loading-overlay": "1.0.1",
-    "sequelize": "^6.6.2",
-    "text-to-image": "^5.2.0",
-    "uuid": "8.3.2"
+    "dotenv": "^16.5.0",
+    "eslint": "^8.47.0",
+    "express": "^5.1.0",
+    "helmet": "^8.1.0",
+    "joi": "^17.13.3",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
+    "mysql": "^2.18.1",
+    "mysql2": "^3.14.1",
+    "nodemailer": "^7.0.3",
+    "nodemon": "^3.0.1",
+    "prisma": "^6.8.2"
   },
   "devDependencies": {
-    "@babel/core": "^7.12.10",
-    "@babel/node": "^7.12.10",
-    "@babel/preset-env": "^7.12.10",
-    "nodemon": "^2.0.7",
-    "sequelize-cli": "^6.2.0"
+    "@babel/core": "^7.27.1",
+    "@babel/node": "^7.27.1",
+    "@babel/preset-env": "^7.27.2"
   }
 }
