@@ -1,14 +1,13 @@
 import "./App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Home from "./pages/Home";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
+import Login from "./pages/Login/index";
+import Register from "./pages/Register/index";
 import Dashboard from "./pages/Dashboard";
 import { Authentication } from "./Authentication";
 import MainLayout from "./layouts/MainLayout";
 import DashboardLayout from "./layouts/DashboardLayout";
 import { Fragment } from "react/jsx-runtime";
-import Queue from "./pages/Queue";
+import Queue from "./pages/Queue/index";
 import AdminDoctorDashboard from "./pages/Admin/Doctor/AdminDoctorDashboard";
 import dayjs from "dayjs";
 // import updateLocale from "dayjs/plugin/updateLocale";
@@ -21,6 +20,7 @@ import Workschedule from "./pages/Workschedule/Workschedule";
 import ShiftManager from "./pages/Shift/Shift";
 import MyProfile from "./pages/Profile/MyProfile";
 import NotFound from "./pages/NotFound";
+import Home from "./pages/Home";
 dayjs.extend(plugin);
 dayjs.updateLocale("en", {
   weekStart: 1,

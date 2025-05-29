@@ -1,7 +1,6 @@
-<<<<<<< HEAD
 import { Link, useNavigate } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
-import { loginService } from "../../services/auth.service";
+
 import { useState } from "react";
 const Login = () => {
     let navigate = useNavigate();
@@ -77,10 +76,3 @@ const Login = () => {
 };
 
 export default Login;
-=======
-const Login = () => {
-  return <div>Login</div>;
-};
-
-export default Login;
->>>>>>> master

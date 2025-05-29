@@ -1,12 +1,6 @@
-<<<<<<< HEAD
 import { DEFAULT_PAGINATION } from "../constants/data.const";
 import type { IPagination } from "../types/app.type";
 import type { IQueue } from "../types/queue.type"; // Update the path if the file is named 'queue.ts', or correct as needed
-=======
-import { DEFAULT_PAGINATION } from "@/constants/data.const";
-import type { IPagination } from "@/types/app.type";
-import type { IQueue } from "@/types/queue.type";
->>>>>>> master
 import { create } from "zustand";
 
 interface QueueState {

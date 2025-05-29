@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import { Link, useNavigate } from "react-router-dom";
 
 import { registerService } from "../../services/auth.service";
@@ -121,10 +120,3 @@ const Register = () => {
 };
 
 export default Register;
-=======
-const index = () => {
-  return <div>index</div>;
-};
-
-export default index;
->>>>>>> master
