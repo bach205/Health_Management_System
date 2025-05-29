@@ -75,18 +75,19 @@ class NurseService {
                 'password',
                 'gender',
             ];
-
+            console.log(1)
             for (const field of requiredFields) {
                 if (!nurseData[field] || nurseData[field].trim() === '') {
                     throw new BadRequestError(`${field.replace('_', ' ')} không được để trống`);
                 }
             }
-
+            console.log(2)
             // Validate input data using Joi schema
             const { error, value } = createNurseSchema.validate(nurseData, { abortEarly: false });
             if (error) {
                 throw new BadRequestError(error.details.map(detail => detail.message).join(', '));
             }
+            console.log(value);
 
             // Check if email already exists
             const existingEmail = await prisma.user.findUnique({

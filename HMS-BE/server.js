@@ -1,6 +1,6 @@
 const app = require("./src/app");
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 8080;
 
 // connect to database
 const db = require("./src/config/dbconnect");
