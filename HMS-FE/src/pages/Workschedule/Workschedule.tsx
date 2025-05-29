@@ -47,10 +47,10 @@ const Workschedule = () => {
   const [editingRecord, setEditingRecord] = useState<WorkSchedule | null>(null);
   const [selectedRecord, setSelectedRecord] = useState<WorkSchedule | null>(null);
   const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
-
+  
   useEffect(() => {
     const fetchData = async () => {
-      try {
+ 
         const res = await getWorkSchedulesService();
         const user = await getDoctorService();
         const clinic = await getClinicService();
@@ -65,11 +65,9 @@ const Workschedule = () => {
           user_name: user.data.metadata.find((u: any) => u.id === item.user_id)?.name || '',
           shift_name: shift.data.data.find((s: any) => s.id === item.shift_id)?.name || '',
         }));
-
+        
         setData(enrichedData);
-      } catch (error) {
-        message.error('Không tải được dữ liệu lịch làm việc');
-      }
+    
     };
 
     fetchData();

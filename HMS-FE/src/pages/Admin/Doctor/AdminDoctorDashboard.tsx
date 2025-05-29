@@ -7,15 +7,18 @@ import ModalUpdateUser from "../../../components/modal/ModalUpdateUser";
 import dayjs from "dayjs";
 import { useDoctorList } from "../../../hooks/useDoctorList";
 import ModalViewUser from "../../../components/modal/ModalViewUser";
-import { specialtyOptions, TYPE_EMPLOYEE_STR, PASSWORD_DEFAULT } from "../../../constants/user.const";
+import { specialtyOptions, TYPE_EMPLOYEE_STR, PASSWORD_DEFAULT, sortOptions } from "../../../constants/user.const";
 import type { IDoctor } from "../../../types/index.type";
 import UserListTitle from "../../../components/ui/UserListTitle";
+import { createDoctor, updateDoctor, updatePassword, updateStatus } from "../../../services/doctor.service";
+import ModalCreateDoctor from "../../../components/modal/ModalCreateDoctor";
+import ModalUpdateDoctor from "../../../components/modal/ModalUpdateDoctor";
 
 const AdminDoctorDashboard = () => {
   const [isCreateVisible, setIsCreateVisible] = useState<boolean>(false);
   const [isUpdateVisible, setIsUpdateVisible] = useState<boolean>(false);
   const [isViewVisible, setIsViewVisible] = useState<boolean>(false);
-
+  const [currentUser, setCurrentUser] = useState<IDoctor | null>(null);
   const filterOptions = [{ value: "all", label: "Tất cả" }, ...specialtyOptions]
 
   const [formCreate] = Form.useForm();
@@ -64,10 +67,14 @@ const AdminDoctorDashboard = () => {
     },
 
     {
-      width: 100,
+      width: 120,
       title: "Khoa",
-      dataIndex: "specialty",
-      key: "specialty",
+      dataIndex: "doctor",
+      key: "doctor",
+      render: (record: any) => {
+
+        return record && record.specialty && record.specialty.length > 0 ? specialtyOptions.find(option => option.value === record.specialty)?.label : 'Không xác định';
+      },
     },
     {
       width: 150,
@@ -87,7 +94,7 @@ const AdminDoctorDashboard = () => {
       title: "Hành động",
       fixed: "right",
       align: "center",
-      width: 160,
+      width: 170,
       ellipsis: true,
       key: "action",
       render: (_: any, record: IDoctor) => (
@@ -120,9 +127,9 @@ const AdminDoctorDashboard = () => {
               <Button type="text" icon={<RotateCcw size={17.5} />}></Button>
             </Tooltip>
           </Popconfirm>
-          <Tooltip title={record?.is_active ? "Bạn muốn cấm tài khoản ?" : "Bạn muốn hủy cấm tài khoản?"} >
+          <Tooltip title={record?.is_active ? "Bạn muốn khóa tài khoản ?" : "Bạn muốn mở khóa tài khoản?"} >
             <Popconfirm
-              title={record?.is_active ? "Cấm tài khoản?" : "Bỏ cấm tài khoản?"}
+              title={record?.is_active ? "Khóa tài khoản?" : "Mở khóa tài khoản?"}
               description="Bạn chắc chắn muốn thực hiện hành động này?"
               onConfirm={() => handleStatus(record)}
               okText="Xác nhận"
@@ -141,16 +148,24 @@ const AdminDoctorDashboard = () => {
 
   // is active
   const handleStatus = async (record: IDoctor) => {
-    console.log(record)
+    try {
+      const res = await updateStatus(record.id, !record.is_active);
+      console.log(res)
+      notification.success({ message: "Khóa tài khoản thành công" });
+      setReload(!reload);
+    } catch (error) {
+      console.log(error);
+      notification.error({ message: "Có lỗi xảy ra" });
+    }
   };
 
   const handleView = async (record: IDoctor) => {
-    // console.log(record)
     try {
-      // setIsShowSpecialty(record.role === TYPE_EMPLOYEE.doctor);
       formView.setFieldsValue({
         ...record,
-        date_of_birth: dayjs(record.date_of_birth),
+        date_of_birth: record.date_of_birth ? dayjs(record.date_of_birth) : null,
+        specialty: record.doctor?.specialty,
+        bio: record.doctor?.bio
       });
       setIsViewVisible(true);
     } catch (error) {
@@ -158,13 +173,18 @@ const AdminDoctorDashboard = () => {
       notification.error({ message: "Có lỗi xảy ra" });
     }
   };
+
   const handleEdit = async (record: IDoctor) => {
-    // console.log(record)
     try {
-      // setIsShowSpecialty(record.role === TYPE_EMPLOYEE.doctor);
+      // if (!record.date_of_birth) {
+      //   record.date_of_birth = dayjs().subtract(18, "year").toString();
+      // }
+      setCurrentUser(record);
       formUpdate.setFieldsValue({
         ...record,
-        date_of_birth: dayjs(record.date_of_birth),
+        date_of_birth: record.date_of_birth ? dayjs(record.date_of_birth) : null,
+        bio: record.doctor?.bio,
+        specialty: record.doctor?.specialty,
       });
       setIsUpdateVisible(true);
     } catch (error) {
@@ -173,10 +193,20 @@ const AdminDoctorDashboard = () => {
     }
   };
 
-  const handleResetPassword = (id: string) => {
-    console.log(id)
+  const handleResetPassword = async (id: number) => {
+    try {
+      await updatePassword(id, PASSWORD_DEFAULT);
+      notification.success({ message: "Khôi phục mật khẩu thành công" });
+      setReload(!reload);
+    } catch (error: any) {
+      console.log(error);
+      if (error?.response?.data) {
+        notification.error({ message: error.response.data.message });
+      } else {
+        notification.error({ message: "Có lỗi xảy ra" });
+      }
+    }
   }
-
 
   const handleCreateCancel = () => {
     setIsCreateVisible(false);
@@ -193,14 +223,26 @@ const AdminDoctorDashboard = () => {
   //Submit create doctor
   const handleCreateOk = async () => {
     try {
+      // const values = await formCreate.validateFields();
       const values = await formCreate.validateFields();
-      // gọi API thêm
-      console.log("Create:", values);
+      const createValue = {
+        ...values,
+      }
+      delete createValue.create_password;
+      delete createValue.confirm_password;
+      await createDoctor(createValue);
       notification.success({ message: "Tạo tài khoản thành công" });
-
+      setReload(!reload);
       setIsCreateVisible(false);
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      console.log("error", error)
+      if (error?.response?.data) {
+        notification.error({ message: error.response.data.message });
+      } else if (error?.errorFields?.length > 0) {
+        notification.error({ message: error.errorFields[0].errors[0] });
+      } else {
+        notification.error({ message: "Có lỗi xảy ra" });
+      }
     }
   };
 
@@ -208,20 +250,43 @@ const AdminDoctorDashboard = () => {
   const handleUpdateOk = async () => {
     try {
       const values = await formUpdate.validateFields();
+      if (!currentUser?.id) {
+        notification.error({ message: "Không tìm thấy thông tin bác sĩ" });
+        return;
+      }
       // gọi API cập nhật
-      console.log("Update:", values);
+      const updatedDoctor = {
+        ...values,
+        id: currentUser.id,
+      };
+      await updateDoctor(updatedDoctor);
+      setReload(!reload);
       notification.success({ message: "Cập nhật tài khoản thành công" });
 
       setIsUpdateVisible(false);
-    } catch (error) {
+    } catch (error: any) {
       console.log(error);
+      if (error?.response?.data) {
+        notification.error({ message: error.response.data.message });
+      } else if (error?.errorFields?.length > 0) {
+        notification.error({ message: error.errorFields[0].errors[0] });
+      } else {
+        notification.error({ message: "Có lỗi xảy ra" });
+      }
     }
   };
 
+  const handleResetFilter = () => {
+    setKeyword("");
+    setSpecialty("all");
+    setSort("newest");
+    setIsActive("all");
+  }
+
   // custom hook
   const {
-    users, loading, keyword, reload, specialty, sort, pagination,
-    setKeyword, setReload, setSpecialty, setSort, handleTableChange,
+    users, loading, keyword, reload, specialty, sort, pagination, isActive,
+    setKeyword, setReload, setSpecialty, setSort, setIsActive, handleTableChange,
   } = useDoctorList();
 
 
@@ -229,12 +294,11 @@ const AdminDoctorDashboard = () => {
     <div>
       <UserListTitle title="bác sĩ" />
 
-
       {/* filter bar */}
       <Flex gap={10} justify="space-between" style={{ marginBottom: 10 }}>
         <Flex gap={10}>
           <Tooltip title="Hủy lọc">
-            <Button onClick={() => setReload(!reload)}>
+            <Button onClick={() => handleResetFilter()}>
               <RefreshCcw size={17.5} />
             </Button>
           </Tooltip>
@@ -266,16 +330,18 @@ const AdminDoctorDashboard = () => {
             </Form.Item>
             <Form.Item label="Sắp xếp" style={{ width: '220px' }} name="sort" valuePropName="sort" >
               <Select
-                style={{ width: 120 }}
+                style={{ width: 150 }}
                 value={sort}
                 onChange={(value) => setSort(value)}
-                options={[
-                  { value: "stt", label: "STT" },
-                  { value: "name_asc", label: "Tên A-Z" },
-                  { value: "name_desc", label: "Tên Z-A" },
-                  { value: "created_at_desc", label: "Mới nhất" },
-                  { value: "created_at_asc", label: "Cũ nhất" },
-                ]}
+                options={sortOptions}
+              />
+            </Form.Item>
+            <Form.Item label="Trạng thái" style={{ width: '220px' }} name="isActive" valuePropName="isActive" >
+              <Select
+                style={{ width: 100 }}
+                value={isActive}
+                onChange={(value) => setIsActive(value)}
+                options={[{ value: "all", label: "Tất cả" }, { value: true, label: "Hoạt động" }, { value: false, label: "Khóa" }]}
               />
             </Form.Item>
           </Flex>
@@ -292,8 +358,8 @@ const AdminDoctorDashboard = () => {
         scroll={{ x: 1000, y: 500 }}
       />
 
-      <ModalCreateUser role="doctor" form={formCreate} handleOk={handleCreateOk} isVisible={isCreateVisible} handleCancel={handleCreateCancel}></ModalCreateUser>
-      <ModalUpdateUser role="doctor" form={formUpdate} handleOk={handleUpdateOk} isVisible={isUpdateVisible} handleCancel={handleUpdateCancel}></ModalUpdateUser>
+      <ModalCreateDoctor role="doctor" form={formCreate} handleOk={handleCreateOk} isVisible={isCreateVisible} handleCancel={handleCreateCancel}></ModalCreateDoctor>
+      <ModalUpdateDoctor role="doctor" form={formUpdate} handleOk={handleUpdateOk} isVisible={isUpdateVisible} handleCancel={handleUpdateCancel}></ModalUpdateDoctor>
       <ModalViewUser role="doctor" form={formView} isVisible={isViewVisible} handleCancel={handleViewCancel}></ModalViewUser>
 
     </div>

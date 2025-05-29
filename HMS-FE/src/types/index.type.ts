@@ -1,7 +1,7 @@
 import type { TYPE_EMPLOYEE } from "../constants/user.const";
 
 export interface IUserBase {
-  id: string;
+  id: number;
   full_name: string;
   email: string;
   phone: string;
@@ -13,7 +13,25 @@ export interface IUserBase {
   sso_provider?: "google" | "facebook" | "local";
   is_active: boolean;
 }
+export interface IPagination {
+  total: number;
+  pageSize: number;
+  current: number;
+}
 
+export interface IDoctor extends IUserBase {
+  role: "doctor";
+  doctor: {
+    specialty?: string; // Khoa
+    bio?: string;
+  }
+}
+
+
+export interface IPatient extends IUserBase {
+  role: "patient";
+  identity_number?: string;
+}
 export interface IClinicBase {
   id : String,
   name : String,

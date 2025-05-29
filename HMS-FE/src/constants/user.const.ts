@@ -31,6 +31,12 @@ export const colorOfType = {
     patient: "yellow",
 };
 
+export const sortOptions = [
+    { value: "newest", label: "Gần đây" },
+    { value: "oldest", label: "Cũ nhất" },
+    { value: "name_asc", label: "Tên A-Z" },
+    { value: "name_desc", label: "Tên Z-A" },
+]
 export const specialtyOptions = [
     { value: "general", label: "Nội trú" },
     { value: "pediatrics", label: "Nhi khoa" },
@@ -41,9 +47,8 @@ export const specialtyOptions = [
     { value: "psychiatry", label: "Tâm thần học" },
     { value: "oncology", label: "Ung thư" },
     { value: "neurology", label: "Thần kinh học" },
-    { value: "other", label: "Đa khoa" }
+    { value: "other", label: "Đa khoa" },
+    { value: "", label: "Không có" }
 ];
-
-
 
 export const PASSWORD_DEFAULT = "123456";

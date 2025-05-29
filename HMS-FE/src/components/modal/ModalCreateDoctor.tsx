@@ -13,7 +13,7 @@ interface IProps {
   role: IUserBase["role"];
 }
 
-const ModalCreateUser = ({ role, isVisible, handleOk, handleCancel, form }: IProps) => {
+const ModalCreateDoctor = ({ role, isVisible, handleOk, handleCancel, form }: IProps) => {
   const [specialty, setSpecialty] = useState<string>("internal");
   const [showPasswordFields, setShowPasswordFields] = useState(false);
 
@@ -166,4 +166,4 @@ const ModalCreateUser = ({ role, isVisible, handleOk, handleCancel, form }: IPro
   );
 };
 
-export default ModalCreateUser;
+export default ModalCreateDoctor;

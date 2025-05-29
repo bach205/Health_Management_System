@@ -4,7 +4,6 @@ const baseURL = `http://localhost:8080/api/v1/shifts`;
 
 export const getShiftService = async () => {
   const response = await mainRequest.get(`${baseURL}/`);
-
   return response;
 };
 

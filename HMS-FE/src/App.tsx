@@ -19,6 +19,7 @@ import Unauthorized from "./pages/Unauthorized";
 import AdminClinicDashboard from "./pages/Admin/Clinic/AdminClinicDashboard";
 import Workschedule from "./pages/Workschedule/Workschedule";
 import ShiftManager from "./pages/Shift/Shift";
+import MyProfile from "./pages/Profile/MyProfile";
 dayjs.extend(plugin);
 dayjs.updateLocale("en", {
   weekStart: 1,
@@ -75,7 +76,12 @@ const PublicRoutes = [
   {
     path: "/unauthorized",
     element:<Unauthorized />
-  }
+  },
+  {
+    path: "/my-profile",
+    element: <MyProfile />,
+    layout: MainLayout,
+  },
 ];
 
 const PrivateRoutes = [

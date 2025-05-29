@@ -1,6 +1,6 @@
 import  mainRequest from "../api/mainRequest";
 
-const baseURL = `http://localhost:8080/api/v1/work-schedules`;
+const baseURL = `/api/v1/work-schedules`;
 
 export const getDoctorService = async () => {
   const response = await mainRequest.get(`http://localhost:8080/api/v1/doctor`);
@@ -9,8 +9,9 @@ export const getDoctorService = async () => {
 };
 
 export const getWorkSchedulesService = async () => {
-  const response = await mainRequest.get(`${baseURL}/`);
-
+  
+  const response = await mainRequest.get(`http://localhost:8080/api/v1/work-schedules`);
+  
   return response;
 };
 

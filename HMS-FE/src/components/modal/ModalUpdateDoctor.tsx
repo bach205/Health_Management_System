@@ -12,7 +12,7 @@ interface IProps {
   role: IUserBase["role"];
 }
 
-const ModalUpdateUser = ({ role, isVisible, handleOk, handleCancel, form }: IProps) => {
+const ModalUpdateDoctor = ({ role, isVisible, handleOk, handleCancel, form }: IProps) => {
   const [specialty, setSpecialty] = useState<string>("internal");
   return (
     <Modal
@@ -60,6 +60,7 @@ const ModalUpdateUser = ({ role, isVisible, handleOk, handleCancel, form }: IPro
           label="Số điện thoại"
           name="phone"
           rules={[
+            // { required: true, message: "Vui lòng nhập số điện thoại!" },
             { pattern: new RegExp(/^\d{10}$/), message: "Số điện thoại không hợp lệ!" },
             { max: 10, message: "Số điện thoại không được vượt quá 10 ký tự!" }
           ]}
@@ -109,4 +110,4 @@ const ModalUpdateUser = ({ role, isVisible, handleOk, handleCancel, form }: IPro
   );
 };
 
-export default ModalUpdateUser;
+export default ModalUpdateDoctor;
