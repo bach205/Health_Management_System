@@ -17,6 +17,8 @@ import MyProfile from "./pages/Profile/MyProfile";
 import DashboardLayout from "./layouts/DashboardLayout/index.tsx";
 import Home from "./pages/Home/index.tsx";
 import MainLayout from "./layouts/MainLayout/index.tsx";
+import NotFound from "./pages/NotFound.tsx";
+import UnauthorizedPage from "./pages/UnauthorizedPage.tsx";
 dayjs.extend(plugin);
 dayjs.updateLocale("en", {
   weekStart: 1,
@@ -45,7 +47,11 @@ function App() {
               </Authentication>
             }
           />
+
         ))}
+
+        <Route path="unauthorize" element={<UnauthorizedPage />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   );
