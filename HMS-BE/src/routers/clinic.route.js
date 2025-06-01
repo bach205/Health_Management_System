@@ -24,7 +24,7 @@ clinicRouter.post(
 );
 
 clinicRouter.put(
-  "/update/:id", 
+  "/update/:id",
   authenticate,
   // authorize("admin"),
   validate({ body: updateClinicSchema }),
@@ -36,6 +36,12 @@ clinicRouter.delete(
   authenticate,
   // authorize("admin"),
   asyncHandler(ClinicController.deleteClinic)
+);
+
+clinicRouter.get(
+  "/clinics-for-doctor",
+  authenticate,
+  asyncHandler(ClinicController.getAllClinicsForDoctor)
 );
 
 module.exports = clinicRouter;
