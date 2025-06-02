@@ -2,9 +2,11 @@
 import { useEffect } from "react";
 import { io } from "socket.io-client";
 
-const socket = io("http://localhost:3000", {
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8080";
+
+const socket = io(BACKEND_URL, {
   withCredentials: true,
-}); // thay bằng URL backend
+});
 
 export const useSocket = (
   roomId: string,
@@ -12,6 +14,8 @@ export const useSocket = (
   handler: (data: any) => void
 ) => {
   useEffect(() => {
+    if (!roomId) return;
+    
     socket.emit("joinRoom", roomId);
     socket.on(eventName, handler);
 

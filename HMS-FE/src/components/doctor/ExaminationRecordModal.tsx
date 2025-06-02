@@ -1,7 +1,7 @@
-import Modal from "@/components/ui/Modal";
+import Modal from "../../components/ui/Modal";
 import { useForm } from "react-hook-form";
-import TextFieldControl from "@/components/form/TextFieldControl";
-import mainRequest from "@/api/mainRequest";
+import TextFieldControl from "../../components/form/TextFieldControl";
+import mainRequest from "../../api/mainRequest";
 import { useState } from "react";
 import { toast } from "react-toastify";
 

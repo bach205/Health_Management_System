@@ -1,4 +1,4 @@
-import TextField from "@/components/ui/TextField";
+import TextField from "../../components/ui/TextField";
 import React from "react";
 import { Controller } from "react-hook-form";
 
@@ -8,6 +8,7 @@ interface TextFieldControlProps
   control: any;
   label?: string;
   helperText?: string;
+  rules?: any;
 }
 
 const TextFieldControl = ({
@@ -15,12 +16,14 @@ const TextFieldControl = ({
   control,
   label,
   helperText,
+  rules,
   ...props
 }: TextFieldControlProps) => {
   return (
     <Controller
       name={name}
       control={control}
+      rules={rules}
       render={({ field, fieldState }) => (
         <TextField
           {...field}

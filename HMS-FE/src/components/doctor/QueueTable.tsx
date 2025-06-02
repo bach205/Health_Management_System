@@ -1,16 +1,16 @@
-import { useQueueStore } from "@/store/queueStore";
+import { useQueueStore } from "../../store/queueStore";
 import { useEffect, useState, useRef } from "react";
-import { getClinics } from "@/services/clinic.service";
+import { getClinicService} from "../../services/clinic.service";
 import { toast } from "react-toastify";
-import useQueue from "@/hooks/useQueue";
-import { getQueueStatus } from "@/types/queue.type";
+import useQueue from "../../hooks/useQueue";
+import { getQueueStatus } from "../../types/queue.type";
 import ExaminationOrderModal from "./ExaminationOrderModal";
-import { useSocket } from "@/hooks/useSocket";
-import { updateQueueStatus } from "@/services/queue.service";
+import { useSocket } from "../../hooks/useSocket";
+import { updateQueueStatus } from "../../services/queue.service";
 import { Ellipsis } from "lucide-react";
 import ResultExaminationModal from "./ResultExaminationModal";
-import ExaminationRecordModal from "@/components/doctor/ExaminationRecordModal";
-import { useAuthStore } from "@/store/authStore";
+import ExaminationRecordModal from "../../components/doctor/ExaminationRecordModal";
+import { useAuthStore } from "../../store/authStore";
 
 const QueueTable = () => {
   const {
@@ -22,7 +22,7 @@ const QueueTable = () => {
     reset,
   } = useQueueStore();
   const [showResultModal, setShowResultModal] = useState(false);
-  const [clinics, setClinics] = useState([]);
+  const [clinics, setClinics] = useState<any[]>([]);
   const [selectedClinic, setSelectedClinic] = useState("");
   const { fetchQueue } = useQueue();
   const [showAssignModal, setShowAssignModal] = useState(false);
@@ -36,10 +36,11 @@ const QueueTable = () => {
   useEffect(() => {
     const fetchClinics = async () => {
       try {
-        const res = await getClinics();
-        setClinics(res.metadata || []);
-        if (res.metadata && res.metadata.length > 0) {
-          setSelectedClinic(res.metadata[0].id.toString());
+        const res = await getClinicService();
+        
+        setClinics(res.data?.metadata.clinics || []);
+        if (res.data?.metadata && res.data?.metadata.length > 0) {
+          setSelectedClinic(res.data?.metadata[0].id.toString());
         }
       } catch (error: any) {
         console.log(error);
@@ -51,7 +52,7 @@ const QueueTable = () => {
     fetchClinics();
   }, []);
 
-  useEffect(() => {
+  useEffect(() => {  
     if (selectedClinic) {
       fetchQueue(selectedClinic);
     } else {
@@ -59,15 +60,15 @@ const QueueTable = () => {
     }
   }, [selectedClinic]);
 
-  useSocket(
-    `clinic_${selectedClinic}`,
-    "queue:assigned",
-    (data: { clinicId: string | number }) => {
-      if (data.clinicId?.toString() === selectedClinic.toString()) {
-        fetchQueue(selectedClinic);
-      }
-    }
-  );
+  // useSocket(
+  //   `clinic_${selectedClinic}`,
+  //   "queue:assigned",
+  //   (data: { clinicId: string | number }) => {
+  //     if (data.clinicId?.toString() === selectedClinic.toString()) {
+  //       fetchQueue(selectedClinic);
+  //     }
+  //   }
+  // );
 
   useEffect(() => {
     const tableEl = document.getElementById("table-container");
@@ -289,7 +290,7 @@ const QueueTable = () => {
         open={showRecordModal}
         onClose={() => setShowRecordModal(false)}
         patientId={selectedPatient?.id}
-        doctorId={currentDoctorId}
+        doctorId={(Number)(currentDoctorId)}
         onSuccess={() => {
           setShowRecordModal(false);
           setSelectedPatient(null);
@@ -301,8 +302,8 @@ const QueueTable = () => {
         onClose={() => setShowResultModal(false)}
         patientId={selectedPatient?.id}
         clinicId={Number(selectedClinic)}
-        doctorId={currentDoctorId}
-        currentUserId={user?.id}
+        doctorId={(Number)(currentDoctorId)}
+        currentUserId={(Number)(user?.id)}
         onSuccess={() => {
           setShowResultModal(false);
           setSelectedPatient(null);
