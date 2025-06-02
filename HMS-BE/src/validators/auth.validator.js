@@ -28,7 +28,9 @@ const updatePatientFullInfoSchema = Joi.object({
       .pattern(/^[0-9]{10}$/)
       .optional(),
     gender: Joi.string().valid("male", "female", "other").optional(),
-    identity_number: Joi.string().required(),
+    identity_number: Joi.string()
+      .pattern(/^[0-9]{13}$/)
+      .optional(),
   }).required(),
 });
 

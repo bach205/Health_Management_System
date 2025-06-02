@@ -154,6 +154,27 @@ class AuthController {
       });
     }
   }
+
+  async getUserInfor(req, res) {
+    try {
+      // req.user đã được middleware authenticate gán khi xác thực token
+      const userId = req.user.id;
+      const user = await AuthService.getUserById(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      return res.status(200).json({
+        success: true,
+        user,
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: error.message || "Lấy thông tin người dùng thất bại",
+        error: error.name,
+      });
+    }
+  }
 }
 
 module.exports = new AuthController();

@@ -472,6 +472,28 @@ class AuthService {
       throw new BadRequestError(error.message);
     }
   }
+
+  async getUserById(userId) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        full_name: true,
+        phone: true,
+        role: true,
+        address: true,
+        gender: true,
+        date_of_birth: true,
+        sso_provider: true,
+        is_active: true,
+        created_at: true,
+        updated_at: true,
+        password: true,
+      },
+    });
+    return user;
+  }
 }
 
 module.exports = new AuthService();

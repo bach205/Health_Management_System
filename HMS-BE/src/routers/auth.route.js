@@ -12,6 +12,7 @@ const {
 const validate = require("../middlewares/validate");
 const authController = require("../controllers/auth.controller");
 const authRouter = express.Router();
+const { authenticate } = require("../middlewares/auth");
 
 authRouter.post(
   "/login",
@@ -65,6 +66,13 @@ authRouter.post(
   validate({ body: facebookLoginSchema }),
   asyncHandler(AuthController.facebookLogin),
   authController.facebookLogin
+);
+
+authRouter.get(
+  "/me",
+  authenticate,
+  asyncHandler(AuthController.getUserInfor),
+  authController.getUserInfor
 );
 
 // Ví dụ check authen bên trong router
