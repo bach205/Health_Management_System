@@ -114,6 +114,46 @@ class AuthController {
       });
     }
   }
+
+  async googleLogin(req, res) {
+    try {
+      const result = await AuthService.googleLogin(req.body);
+      return new OK({
+        message: "Đăng nhập bằng Google thành công",
+        metadata: {
+          user: result.user,
+          accessToken: result.accessToken,
+          refreshToken: result.refreshToken,
+        },
+      }).send(res);
+    } catch (error) {
+      return res.status(error.status || 400).json({
+        success: false,
+        message: error.message || "Đăng nhập bằng Google thất bại",
+        error: error.name,
+      });
+    }
+  }
+
+  async facebookLogin(req, res) {
+    try {
+      const result = await AuthService.facebookLogin(req.body);
+      return new OK({
+        message: "Đăng nhập bằng Facebook thành công",
+        metadata: {
+          user: result.user,
+          accessToken: result.accessToken,
+          refreshToken: result.refreshToken,
+        },
+      }).send(res);
+    } catch (error) {
+      return res.status(error.status || 400).json({
+        success: false,
+        message: error.message || "Đăng nhập bằng Facebook thất bại",
+        error: error.name,
+      });
+    }
+  }
 }
 
 module.exports = new AuthController();

@@ -35,19 +35,25 @@ const updatePatientFullInfoSchema = Joi.object({
 const createNurseSchema = Joi.object({
   full_name: Joi.string().required(),
   email: Joi.string().email().required(),
-  phone: Joi.string().pattern(/^[0-9]{10}$/).optional().allow(null, ''),
+  phone: Joi.string()
+    .pattern(/^[0-9]{10}$/)
+    .optional()
+    .allow(null, ""),
   password: Joi.string().min(6).required(),
   gender: Joi.string().valid("male", "female").required(),
-  address: Joi.string().optional().allow(null, ''),
+  address: Joi.string().optional().allow(null, ""),
 });
 
 const updateNurseSchema = Joi.object({
   full_name: Joi.string().required(),
   email: Joi.string().email().required(),
-  phone: Joi.string().pattern(/^[0-9]{10}$/).optional().allow(null, ''),
+  phone: Joi.string()
+    .pattern(/^[0-9]{10}$/)
+    .optional()
+    .allow(null, ""),
   gender: Joi.string().valid("male", "female").required(),
-  date_of_birth: Joi.string().optional().allow(null, ''),
-  address: Joi.string().optional().allow(null, ''),
+  date_of_birth: Joi.string().optional().allow(null, ""),
+  address: Joi.string().optional().allow(null, ""),
 });
 
 const forgetPasswordSchema = Joi.object({
@@ -68,25 +74,45 @@ const resetPasswordSchema = Joi.object({
 const createDoctorSchema = Joi.object({
   full_name: Joi.string().required(),
   email: Joi.string().email().required(),
-  phone: Joi.string().pattern(/^[0-9]{10}$/).optional().allow(null, ''),
+  phone: Joi.string()
+    .pattern(/^[0-9]{10}$/)
+    .optional()
+    .allow(null, ""),
   password: Joi.string().min(6).required(),
   gender: Joi.string().valid("male", "female").required(),
-  date_of_birth: Joi.string().optional().allow(null, ''),
-  address: Joi.string().optional().allow(null, ''),
-  specialty: Joi.string().optional().allow(null, ''),
-  bio: Joi.string().optional().allow(null, ''),
+  date_of_birth: Joi.string().optional().allow(null, ""),
+  address: Joi.string().optional().allow(null, ""),
+  specialty: Joi.string().optional().allow(null, ""),
+  bio: Joi.string().optional().allow(null, ""),
 });
 
 const updateDoctorSchema = Joi.object({
   id: Joi.number().required(),
   full_name: Joi.string().trim().min(1).required(),
   email: Joi.string().email().required(),
-  phone: Joi.string().optional().pattern(/^[0-9]{10}$/).allow(null, ''),
+  phone: Joi.string()
+    .optional()
+    .pattern(/^[0-9]{10}$/)
+    .allow(null, ""),
   gender: Joi.string().valid("male", "female").required(),
-  date_of_birth: Joi.date().optional().allow(null, ''),
-  address: Joi.string().optional().allow(null, ''),
-  specialty: Joi.string().optional().allow(null, ''),
-  bio: Joi.string().optional().allow(null, ''),
+  date_of_birth: Joi.date().optional().allow(null, ""),
+  address: Joi.string().optional().allow(null, ""),
+  specialty: Joi.string().optional().allow(null, ""),
+  bio: Joi.string().optional().allow(null, ""),
+});
+
+const googleLoginSchema = Joi.object({
+  token: Joi.string().required(),
+  email: Joi.string().email().required(),
+  full_name: Joi.string().required(),
+  picture: Joi.string().optional(),
+});
+
+const facebookLoginSchema = Joi.object({
+  token: Joi.string().required(),
+  email: Joi.string().email().required(),
+  full_name: Joi.string().required(),
+  picture: Joi.string().optional(),
 });
 
 module.exports = {
@@ -100,4 +126,6 @@ module.exports = {
   resetPasswordSchema,
   createDoctorSchema,
   updateDoctorSchema,
+  googleLoginSchema,
+  facebookLoginSchema,
 };

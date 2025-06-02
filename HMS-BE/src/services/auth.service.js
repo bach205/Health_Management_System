@@ -1,10 +1,17 @@
 const { BadRequestError } = require("../core/error.response");
-const { registerSchema, loginSchema } = require("../validators/auth.validator");
+const {
+  registerSchema,
+  loginSchema,
+  googleLoginSchema,
+  facebookLoginSchema,
+} = require("../validators/auth.validator");
 const prisma = require("../config/prisma");
 const bcrypt = require("bcrypt");
 const { generateToken } = require("../helper/jwt");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
+const { OAuth2Client } = require("google-auth-library");
+const axios = require("axios");
 
 class AuthService {
   async register(userData) {
@@ -328,6 +335,141 @@ class AuthService {
         throw new BadRequestError("Invalid or expired reset token");
       }
       throw error;
+    }
+  }
+
+  async googleLogin(googleData) {
+    // Validate input
+    const { error } = googleLoginSchema.validate(googleData);
+    if (error) {
+      throw new BadRequestError(error.details[0].message);
+    }
+
+    try {
+      // Verify Google token
+      const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+      const ticket = await client.verifyIdToken({
+        idToken: googleData.token,
+        audience: process.env.GOOGLE_CLIENT_ID,
+      });
+      const payload = ticket.getPayload();
+
+      if (payload.email !== googleData.email) {
+        throw new BadRequestError("Invalid Google token");
+      }
+
+      // Check if user exists
+      let user = await prisma.user.findUnique({
+        where: { email: googleData.email },
+      });
+
+      if (!user) {
+        // Create new user and patient
+        const result = await prisma.$transaction(async (prisma) => {
+          const newUser = await prisma.user.create({
+            data: {
+              email: googleData.email,
+              full_name: googleData.full_name,
+              role: "patient",
+              sso_provider: "google",
+              is_active: true,
+            },
+          });
+
+          const patient = await prisma.patient.create({
+            data: {},
+          });
+
+          return { user: newUser, patient };
+        });
+
+        user = result.user;
+      } else if (user.sso_provider !== "google") {
+        throw new BadRequestError(
+          "Email already registered with different provider"
+        );
+      }
+
+      // Generate tokens
+      const tokens = generateToken(user);
+
+      return {
+        user: {
+          id: user.id,
+          email: user.email,
+          full_name: user.full_name,
+          role: user.role,
+        },
+        ...tokens,
+      };
+    } catch (error) {
+      throw new BadRequestError(error.message);
+    }
+  }
+
+  async facebookLogin(facebookData) {
+    // Validate input
+    const { error } = facebookLoginSchema.validate(facebookData);
+    if (error) {
+      throw new BadRequestError(error.details[0].message);
+    }
+
+    try {
+      // Verify Facebook token
+      const response = await axios.get(
+        `https://graph.facebook.com/me?fields=id,email,name&access_token=${facebookData.token}`
+      );
+
+      if (response.data.email !== facebookData.email) {
+        throw new BadRequestError("Invalid Facebook token");
+      }
+
+      // Check if user exists
+      let user = await prisma.user.findUnique({
+        where: { email: facebookData.email },
+      });
+
+      if (!user) {
+        // Create new user and patient
+        const result = await prisma.$transaction(async (prisma) => {
+          const newUser = await prisma.user.create({
+            data: {
+              email: facebookData.email,
+              full_name: facebookData.full_name,
+              role: "patient",
+              sso_provider: "facebook",
+              is_active: true,
+            },
+          });
+
+          const patient = await prisma.patient.create({
+            data: {},
+          });
+
+          return { user: newUser, patient };
+        });
+
+        user = result.user;
+      } else if (user.sso_provider !== "facebook") {
+        throw new BadRequestError(
+          "Email already registered with different provider"
+        );
+      }
+
+      // Generate tokens
+      const tokens = generateToken(user);
+
+      return {
+        user: {
+          id: user.id,
+          email: user.email,
+          full_name: user.full_name,
+          role: user.role,
+        },
+        ...tokens,
+      };
+    } catch (error) {
+      throw new BadRequestError(error.message);
     }
   }
 }
