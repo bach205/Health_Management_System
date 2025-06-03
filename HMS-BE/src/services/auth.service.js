@@ -178,77 +178,43 @@ class AuthService {
       throw new BadRequestError("User not found");
     }
 
-    // Tạo reset token
-    const resetToken = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
-    });
-
-    // Tạo transporter với cấu hình email
-    const transporter = nodemailer.createTransport({
-      host: process.env.EMAIL_HOST,
-      port: 587, // Port mặc định cho TLS
-      secure: false, // false cho TLS
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD,
+    // Tạo reset token với thêm thông tin bảo mật
+    const resetToken = jwt.sign(
+      {
+        userId: user.id,
+        email: user.email,
+        timestamp: Date.now(),
+        purpose: "password_reset",
       },
-    });
-
-    // Tạo nội dung email
-    const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
-    const mailOptions = {
-      from: process.env.EMAIL_FROM,
-      to: user.email,
-      subject: "Reset Your Password - HMS",
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #2c3e50;">Password Reset Request</h2>
-          <p>Hello ${user.full_name || "there"},</p>
-          <p>We received a request to reset your password. Click the button below to reset it:</p>
-          <div style="text-align: center; margin: 30px 0;">
-            <a href="${resetLink}" 
-               style="background-color: #3498db; color: white; padding: 12px 24px; 
-                      text-decoration: none; border-radius: 4px; display: inline-block;">
-              Reset Password
-            </a>
-          </div>
-          <p style="color: #7f8c8d; font-size: 14px;">
-            This link will expire in 1 hour.<br>
-            If you didn't request this, please ignore this email or contact support if you have concerns.
-          </p>
-          <hr style="border: 1px solid #eee; margin: 20px 0;">
-          <p style="color: #95a5a6; font-size: 12px;">
-            This is an automated message, please do not reply to this email.
-          </p>
-        </div>
-      `,
-    };
-
-    try {
-      // Gửi email
-      await transporter.sendMail(mailOptions);
-
-      // Trong môi trường development, trả về token để test
-      if (process.env.NODE_ENV === "development") {
-        return {
-          message: "Reset password link has been sent to your email",
-          resetToken, // Chỉ trả về trong môi trường development
-        };
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "1h",
       }
+    );
 
-      return {
-        message: "Reset password link has been sent to your email",
-      };
-    } catch (error) {
-      console.error("Error sending email:", error);
-      throw new BadRequestError("Failed to send reset password email");
-    }
+    return {
+      message: "Reset password token generated successfully",
+      resetToken,
+    };
   }
 
   async resetPassword(token, newPassword) {
     try {
-      // Verify token
+      // Verify token và kiểm tra thông tin bảo mật
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+      // Kiểm tra mục đích của token
+      if (decoded.purpose !== "password_reset") {
+        throw new BadRequestError("Invalid token purpose");
+      }
+
+      // Kiểm tra thời gian tạo token (không cho phép token quá cũ)
+      const tokenAge = Date.now() - decoded.timestamp;
+      if (tokenAge > 3600000) {
+        // 1 hour in milliseconds
+        throw new BadRequestError("Token has expired");
+      }
+
       const userId = decoded.userId;
 
       // Kiểm tra user có tồn tại không
@@ -258,6 +224,11 @@ class AuthService {
 
       if (!user) {
         throw new BadRequestError("User not found");
+      }
+
+      // Kiểm tra email trong token có khớp với user không
+      if (user.email !== decoded.email) {
+        throw new BadRequestError("Invalid token");
       }
 
       // Hash password mới

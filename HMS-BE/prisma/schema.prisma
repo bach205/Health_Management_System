@@ -29,6 +29,7 @@ model User {
   primaryRecords     ExaminationRecord[] @relation("PrimaryDoctor")
   createdRecords     ExaminationRecord[] @relation("CreatedByUser")
   examinationDetails ExaminationDetail[]
+  passwordResetTokens PasswordResetToken[]
 
   @@map("users")
 }
@@ -274,4 +275,18 @@ model InvoiceItem {
   created_at  DateTime @default(now())
 
   record ExaminationRecord @relation(fields: [record_id], references: [id])
+}
+
+model PasswordResetToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  used      Boolean  @default(false)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([token])
+  @@index([userId])
 }
