@@ -14,7 +14,7 @@ model User {
   full_name    String?
   phone        String?
   role         Role
-  address         String?
+  address      String?
   date_of_birth   DateTime?
   gender          Gender?
   sso_provider SsoProvider @default(local)
@@ -22,6 +22,7 @@ model User {
   created_at   DateTime    @default(now())
   updated_at   DateTime    @updatedAt
 
+  patient            Patient?
   doctor             Doctor?
   workSchedules      WorkSchedule[]
   examinationOrders  ExaminationOrder[]  @relation("DoctorExaminationOrder")
@@ -47,10 +48,12 @@ enum SsoProvider {
 }
 
 model Patient {
-  id              Int       @id @default(autoincrement())
+  id              Int       @id
   identity_number String?
   created_at      DateTime  @default(now())
   updated_at      DateTime  @updatedAt
+
+  user            User      @relation(fields: [id], references: [id], onDelete: Cascade)
 
   examinationOrders ExaminationOrder[]
   records           ExaminationRecord[]

@@ -135,6 +135,65 @@ class QueueService {
     }
     return updated;
   }
+
+  // BỔ SUNG THÊM LOGIC: Check-in vào queue từ appointment
+  static async checkInFromAppointment({ appointment_id }) {
+    // 1. Lấy thông tin appointment
+    const appointment = await prisma.appointment.findUnique({
+      where: { id: appointment_id },
+    });
+    if (!appointment) throw new Error("Không tìm thấy lịch hẹn!");
+
+    // 2. Kiểm tra đã có queue cho appointment này chưa
+    const existingQueue = await prisma.queue.findFirst({
+      where: {
+        appointment_id,
+        status: { in: ["waiting", "in_progress"] },
+      },
+    });
+    if (existingQueue) throw new Error("Đã check-in vào hàng đợi!");
+
+    // 3. Tạo queue mới
+    const newQueue = await prisma.queue.create({
+      data: {
+        patient_id: appointment.patient_id,
+        clinic_id: appointment.clinic_id,
+        appointment_id: appointment.id,
+        status: "waiting",
+        priority: 0,
+      },
+      include: { patient: true },
+    });
+
+    // 4. Emit socket event nếu cần
+    const io = getIO();
+    if (io) {
+      io.to(`clinic_${appointment.clinic_id}`).emit("queue:checkin", {
+        patient: newQueue.patient,
+        queue: newQueue,
+        clinicId: appointment.clinic_id,
+      });
+    }
+    return newQueue;
+  }
+
+  // BỔ SUNG THÊM LOGIC: Huỷ queue khi huỷ appointment
+  static async cancelQueueByAppointment({ appointment_id }) {
+    // Tìm queue liên kết với appointment này và chưa done/skipped
+    const queue = await prisma.queue.findFirst({
+      where: {
+        appointment_id,
+        status: { in: ["waiting", "in_progress"] },
+      },
+    });
+    if (!queue) return null;
+    // Cập nhật trạng thái queue thành skipped
+    const updated = await prisma.queue.update({
+      where: { id: queue.id },
+      data: { status: "skipped" },
+    });
+    return updated;
+  }
 }
 
 module.exports = QueueService;

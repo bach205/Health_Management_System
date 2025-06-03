@@ -46,10 +46,7 @@ class AuthController {
   async updatePatientFullInfo(req, res) {
     try {
       const { userId, updateData } = req.body;
-      const result = await AuthService.updatePatientFullInfo(
-        userId,
-        updateData
-      );
+      const result = await AuthService.updatePatientInfo(userId, updateData);
       return new OK({
         message: "Cập nhật thông tin thành công",
         metadata: result,

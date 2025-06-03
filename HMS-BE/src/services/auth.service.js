@@ -127,34 +127,6 @@ class AuthService {
     return { message: "Logout successful" };
   }
 
-  async updatePatient(userId, identityNumber) {
-    // Kiểm tra user có tồn tại và có role patient không
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-    });
-    if (!user) {
-      throw new BadRequestError("User not found");
-    }
-    if (user.role !== "patient") {
-      throw new BadRequestError("User is not a patient");
-    }
-
-    // Tìm patient dựa trên userId (giả sử có liên kết user_id trong model Patient)
-    const patient = await prisma.patient.findFirst({
-      where: { user_id: userId },
-    });
-    if (!patient) {
-      throw new BadRequestError("Patient not found");
-    }
-
-    // Cập nhật identity_number
-    const updatedPatient = await prisma.patient.update({
-      where: { id: patient.id },
-      data: { identity_number: identityNumber },
-    });
-    return updatedPatient;
-  }
-
   async updatePatientInfo(userId, updateData) {
     // Kiểm tra user có tồn tại và có role patient không
     const user = await prisma.user.findUnique({
@@ -167,59 +139,33 @@ class AuthService {
       throw new BadRequestError("User is not a patient");
     }
 
-    // Cập nhật thông tin user
-    const updatedUser = await prisma.user.update({
-      where: { id: userId },
-      data: {
-        full_name: updateData.full_name,
-        email: updateData.email,
-        address: updateData.address,
-        phone: updateData.phone,
-        gender: updateData.gender,
-      },
-    });
-    return updatedUser;
-  }
+    // Cập nhật thông tin trong transaction để đảm bảo tính nhất quán
+    const result = await prisma.$transaction(async (prisma) => {
+      // Cập nhật thông tin user
+      const updatedUser = await prisma.user.update({
+        where: { id: userId },
+        data: {
+          full_name: updateData.full_name,
+          email: updateData.email,
+          address: updateData.address,
+          phone: updateData.phone,
+          gender: updateData.gender,
+          date_of_birth: updateData.date_of_birth,
+        },
+      });
 
-  async updatePatientFullInfo(userId, updateData) {
-    // Kiểm tra user có tồn tại và có role patient không
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-    });
-    if (!user) {
-      throw new BadRequestError("User not found");
-    }
-    if (user.role !== "patient") {
-      throw new BadRequestError("User is not a patient");
-    }
+      // Cập nhật thông tin patient (sử dụng cùng id với user)
+      const updatedPatient = await prisma.patient.update({
+        where: { id: userId },
+        data: {
+          identity_number: updateData.identity_number,
+        },
+      });
 
-    // Tìm patient dựa trên userId (giả sử có liên kết user_id trong model Patient)
-    const patient = await prisma.patient.findFirst({
-      where: { id: userId },
-    });
-    if (!patient) {
-      throw new BadRequestError("Patient not found");
-    }
-
-    // Cập nhật thông tin user
-    const updatedUser = await prisma.user.update({
-      where: { id: userId },
-      data: {
-        full_name: updateData.full_name,
-        email: updateData.email,
-        address: updateData.address,
-        phone: updateData.phone,
-        gender: updateData.gender,
-      },
+      return { user: updatedUser, patient: updatedPatient };
     });
 
-    // Cập nhật identity_number của patient
-    const updatedPatient = await prisma.patient.update({
-      where: { id: patient.id },
-      data: { identity_number: updateData.identity_number },
-    });
-
-    return { user: updatedUser, patient: updatedPatient };
+    return result;
   }
 
   async forgetPassword(email) {
