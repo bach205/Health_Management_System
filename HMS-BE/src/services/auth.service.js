@@ -289,6 +289,7 @@ class AuthService {
 
   async googleLogin(googleData) {
     // Validate input
+    
     const { error } = googleLoginSchema.validate(googleData);
     if (error) {
       throw new BadRequestError(error.details[0].message);
@@ -300,38 +301,30 @@ class AuthService {
       const ticket = await client.verifyIdToken({
         idToken: googleData.token,
         audience: process.env.GOOGLE_CLIENT_ID,
-      });
+      }).catch(() => {throw new BadRequestError("Google token verification failed. Token is invalid or expired.")});
       const payload = ticket.getPayload();
-
-      if (payload.email !== googleData.email) {
-        throw new BadRequestError("Invalid Google token");
-      }
-
       // Check if user exists
       let user = await prisma.user.findUnique({
-        where: { email: googleData.email },
+        where: { email: payload.email },
       });
-
       if (!user) {
         // Create new user and patient
         const result = await prisma.$transaction(async (prisma) => {
           const newUser = await prisma.user.create({
             data: {
-              email: googleData.email,
-              full_name: googleData.full_name,
+              email: payload.email,
+              full_name: payload.name,
               role: "patient",
               sso_provider: "google",
               is_active: true,
             },
           });
-
           const patient = await prisma.patient.create({
             data: {},
           });
 
           return { user: newUser, patient };
         });
-
         user = result.user;
       } else if (user.sso_provider !== "google") {
         throw new BadRequestError(
