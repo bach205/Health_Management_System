@@ -326,7 +326,9 @@ class AuthService {
           });
 
           const patient = await prisma.patient.create({
-            data: {},
+            data: {
+              id: newUser.id, // Set the patient id to match the user id
+            },
           });
 
           return { user: newUser, patient };
@@ -352,7 +354,11 @@ class AuthService {
         ...tokens,
       };
     } catch (error) {
-      throw new BadRequestError(error.message);
+      console.error("Google login error:", error);
+      if (error instanceof BadRequestError) {
+        throw error;
+      }
+      throw new BadRequestError("Failed to process Google login");
     }
   }
 
@@ -392,7 +398,9 @@ class AuthService {
           });
 
           const patient = await prisma.patient.create({
-            data: {},
+            data: {
+              id: newUser.id,
+            },
           });
 
           return { user: newUser, patient };
