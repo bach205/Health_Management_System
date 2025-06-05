@@ -192,10 +192,41 @@ class AuthService {
       }
     );
 
-    return {
-      message: "Reset password token generated successfully",
-      resetToken,
+    // Tạo transporter cho nodemailer
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD,
+      },
+    });
+
+    // Tạo nội dung email
+    const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: "Password Reset Request",
+      html: `
+        <h1>Password Reset Request</h1>
+        <p>Hello ${user.full_name || "there"},</p>
+        <p>We received a request to reset your password. Click the link below to reset your password:</p>
+        <a href="${resetLink}">Reset Password</a>
+        <p>This link will expire in 1 hour.</p>
+        <p>If you didn't request this, please ignore this email.</p>
+      `,
     };
+
+    // Gửi email
+    try {
+      await transporter.sendMail(mailOptions);
+      return {
+        message: "Reset password email sent successfully",
+        resetToken,
+      };
+    } catch (error) {
+      throw new BadRequestError("Failed to send reset password email");
+    }
   }
 
   async resetPassword(token, newPassword) {
