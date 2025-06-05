@@ -52,6 +52,7 @@ class AuthService {
       // Create patient
       const patient = await prisma.patient.create({
         data: {
+          id: user.id,
           identity_number: userData.identity_number || null,
         },
       });
