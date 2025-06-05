@@ -118,12 +118,12 @@ const AdminDoctorDashboard = () => {
 
           <Popconfirm
             title="Khôi phục mật khẩu"
-            description={"Mật khẩu sẽ được khôi phục về mặc định là " + PASSWORD_DEFAULT}
+            description={"Mật khẩu sẽ được khôi phục và được gửi về email" }
             onConfirm={() => handleResetPassword(record.id)}
             okText="Xác nhận"
             cancelText="Hủy"
           >
-            <Tooltip title="Khôi phục mật khẩu mặc định" placement="topRight">
+            <Tooltip title="Khôi phục mật khẩu" placement="topRight">
               <Button type="text" icon={<RotateCcw size={17.5} />}></Button>
             </Tooltip>
           </Popconfirm>
@@ -195,7 +195,7 @@ const AdminDoctorDashboard = () => {
 
   const handleResetPassword = async (id: number) => {
     try {
-      await updatePassword(id, PASSWORD_DEFAULT);
+      await updatePassword(id);
       notification.success({ message: "Khôi phục mật khẩu thành công" });
       setReload(!reload);
     } catch (error: any) {

@@ -30,3 +30,6 @@ export interface IQueue {
   called_at: string;
   created_at: string;
 }
+export const getQueueStatus = ()=>{
+
+}

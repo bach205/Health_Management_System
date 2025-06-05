@@ -76,11 +76,11 @@ const ModalCreateDoctor = ({ role, isVisible, handleOk, handleCancel, form }: IP
         <Form.Item
           name="gender"
           label="Giới tính"
-          rules={[{ required: true, message: "Vui lòng chọn giới tính!" }]}
         >
           <Select style={{ width: 100 }}>
             <Select.Option value="male"><span className="text-black">Nam</span></Select.Option>
             <Select.Option value="female"><span className="text-black">Nữ</span></Select.Option>
+            <Select.Option value="other"><span className="text-black">Khác</span></Select.Option>
           </Select>
         </Form.Item>
 
@@ -88,6 +88,7 @@ const ModalCreateDoctor = ({ role, isVisible, handleOk, handleCancel, form }: IP
           <>
             <Form.Item
               label="Khoa"
+              initialValue=""
               name="specialty"
             // rules={[{ required: true, message: "Vui lòng chọn chuyên khoa!" }]}
             >

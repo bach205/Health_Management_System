@@ -439,6 +439,11 @@ class AuthService {
         created_at: true,
         updated_at: true,
         password: true,
+        patient: {
+          select: {
+            identity_number: true,
+          },
+        },
       },
     });
     return user;
