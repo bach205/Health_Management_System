@@ -20,11 +20,12 @@ class AuthService {
     if (error) {
       throw new BadRequestError(error.details[0].message);
     }
-
+    console.log(userData);
     // Check if user exists
     const existingUser = await prisma.user.findUnique({
       where: { email: userData.email },
     });
+    console.log(existingUser);
 
     if (existingUser) {
       throw new BadRequestError("Email already registered");
@@ -294,7 +295,6 @@ class AuthService {
     if (error) {
       throw new BadRequestError(error.details[0].message);
     }
-
     try {
       // Verify Google token
       const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -432,6 +432,11 @@ class AuthService {
         created_at: true,
         updated_at: true,
         password: true,
+        patient:{
+          select: {
+            identity_number: true
+          }
+        }
       },
     });
     return user;
