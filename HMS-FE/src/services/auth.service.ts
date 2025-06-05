@@ -9,6 +9,12 @@ export const registerService = async (body: object) => {
   return response;
 };
 
+export const loginGoogleService = async (body: object) => {
+  const data = JSON.stringify(body);
+  const response = await mainRequest.post(`${baseURL}/google-login`, data);
+  return response;
+};
+
 export const loginService = async (body: object) => {
   const data = JSON.stringify(body);
   const response = await mainRequest.post(`${baseURL}/login`, data);

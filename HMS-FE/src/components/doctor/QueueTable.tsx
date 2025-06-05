@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 import useQueue from "../../hooks/useQueue";
 import { getQueueStatus } from "../../types/queue.type";
 import ExaminationOrderModal from "./ExaminationOrderModal";
-import { useSocket } from "../../hooks/useSocket";
+// import { useSocket } from "../../hooks/useSocket";
 import { updateQueueStatus } from "../../services/queue.service";
 import { Ellipsis } from "lucide-react";
 import ResultExaminationModal from "./ResultExaminationModal";
