@@ -17,7 +17,6 @@ const ExaminationOrderModal = ({
     setAssignClinicId("");
     onClose();
   };
-  console.log(patient);
 
   if (!patient) return null;
 

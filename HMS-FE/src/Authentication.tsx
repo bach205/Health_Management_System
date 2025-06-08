@@ -14,7 +14,6 @@ export const Authentication = ({
   if (!isAuthenticated || !user) {
     return <Navigate to="/login" replace />;
   }
-  console.log(user);
   if (!allowedRoles.includes(user.role)) {
     return <Navigate to="/unauthorized" replace />;
   }
