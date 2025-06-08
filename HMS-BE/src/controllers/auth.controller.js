@@ -46,10 +46,7 @@ class AuthController {
   async updatePatientFullInfo(req, res) {
     try {
       const { userId, updateData } = req.body;
-      const result = await AuthService.updatePatientFullInfo(
-        userId,
-        updateData
-      );
+      const result = await AuthService.updatePatientInfo(userId, updateData);
       return new OK({
         message: "Cập nhật thông tin thành công",
         metadata: result,
@@ -110,6 +107,67 @@ class AuthController {
       return res.status(error.status || 400).json({
         success: false,
         message: error.message || "Đặt lại mật khẩu thất bại",
+        error: error.name,
+      });
+    }
+  }
+
+  async googleLogin(req, res) {
+    try {
+      const result = await AuthService.googleLogin(req.body);
+      return new OK({
+        message: "Đăng nhập bằng Google thành công",
+        metadata: {
+          user: result.user,
+          accessToken: result.accessToken,
+          refreshToken: result.refreshToken,
+        },
+      }).send(res);
+    } catch (error) {
+      return res.status(error.status || 400).json({
+        success: false,
+        message: error.message || "Đăng nhập bằng Google thất bại",
+        error: error.name,
+      });
+    }
+  }
+
+  async facebookLogin(req, res) {
+    try {
+      const result = await AuthService.facebookLogin(req.body);
+      return new OK({
+        message: "Đăng nhập bằng Facebook thành công",
+        metadata: {
+          user: result.user,
+          accessToken: result.accessToken,
+          refreshToken: result.refreshToken,
+        },
+      }).send(res);
+    } catch (error) {
+      return res.status(error.status || 400).json({
+        success: false,
+        message: error.message || "Đăng nhập bằng Facebook thất bại",
+        error: error.name,
+      });
+    }
+  }
+
+  async getUserInfor(req, res) {
+    try {
+      // req.user đã được middleware authenticate gán khi xác thực token
+      const userId = req.user.id;
+      const user = await AuthService.getUserById(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      return res.status(200).json({
+        success: true,
+        user,
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: error.message || "Lấy thông tin người dùng thất bại",
         error: error.name,
       });
     }

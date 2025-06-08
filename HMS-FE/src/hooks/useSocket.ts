@@ -1,28 +1,29 @@
 // hooks/useSocket.ts
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { io } from "socket.io-client";
 
-const socket = io("http://localhost:3000", {
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8080";
+
+const socket = io(BACKEND_URL, {
   withCredentials: true,
-}); // thay bằng URL backend
+});
 
 export const useSocket = (
   roomId: string,
-  onNewPatient: (data: any) => void
+  eventName: string,
+  handler: (data: any) => void
 ) => {
-  const initialized = useRef(false);
-
   useEffect(() => {
-    if (!initialized.current) {
-      socket.emit("joinRoom", roomId);
-      socket.on("new-patient", onNewPatient);
-      initialized.current = true;
-    }
+    if (!roomId) return;
+    
+    socket.emit("joinRoom", roomId);
+    socket.on(eventName, handler);
 
     return () => {
-      socket.off("new-patient", onNewPatient);
+      socket.emit("leaveRoom", roomId);
+      socket.off(eventName, handler);
     };
-  }, [roomId, onNewPatient]);
+  }, [roomId, eventName, handler]);
 
   return socket;
 };

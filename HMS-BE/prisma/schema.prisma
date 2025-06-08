@@ -14,7 +14,7 @@ model User {
   full_name    String?
   phone        String?
   role         Role
-  address         String?
+  address      String?
   date_of_birth   DateTime?
   gender          Gender?
   sso_provider SsoProvider @default(local)
@@ -22,12 +22,14 @@ model User {
   created_at   DateTime    @default(now())
   updated_at   DateTime    @updatedAt
 
+  patient            Patient?
   doctor             Doctor?
   workSchedules      WorkSchedule[]
   examinationOrders  ExaminationOrder[]  @relation("DoctorExaminationOrder")
   primaryRecords     ExaminationRecord[] @relation("PrimaryDoctor")
   createdRecords     ExaminationRecord[] @relation("CreatedByUser")
   examinationDetails ExaminationDetail[]
+  passwordResetTokens PasswordResetToken[]
 
   @@map("users")
 }
@@ -47,10 +49,12 @@ enum SsoProvider {
 }
 
 model Patient {
-  id              Int       @id @default(autoincrement())
+  id              Int       @id
   identity_number String?
   created_at      DateTime  @default(now())
   updated_at      DateTime  @updatedAt
+
+  user            User      @relation(fields: [id], references: [id], onDelete: Cascade)
 
   examinationOrders ExaminationOrder[]
   records           ExaminationRecord[]
@@ -180,20 +184,22 @@ enum ExaminationStatus {
 }
 
 model Queue {
-  id                Int         @id @default(autoincrement())
+  id                Int       @id @default(autoincrement())
   patient_id        Int
   clinic_id         Int
   record_id         Int?
+  appointment_id    Int?      @unique
   status            QueueStatus @default(waiting)
-  priority          Int         @default(0)
-  registered_online Boolean     @default(false)
-  qr_code           String?
-  called_at         DateTime?
-  created_at        DateTime    @default(now())
+  priority          Int       @default(0)
+  registered_online Boolean   @default(false)
+  qr_code          String?
+  called_at        DateTime?
+  created_at       DateTime   @default(now()) @db.DateTime
 
-  patient Patient            @relation(fields: [patient_id], references: [id])
-  clinic  Clinic             @relation(fields: [clinic_id], references: [id])
-  record  ExaminationRecord? @relation(fields: [record_id], references: [id])
+  patient          Patient    @relation(fields: [patient_id], references: [id])
+  clinic           Clinic     @relation(fields: [clinic_id], references: [id])
+  record           ExaminationRecord? @relation(fields: [record_id], references: [id])
+  appointment      Appointment? @relation(fields: [appointment_id], references: [id])
 
   @@map("queues")
 }
@@ -271,4 +277,62 @@ model InvoiceItem {
   created_at  DateTime @default(now())
 
   record ExaminationRecord @relation(fields: [record_id], references: [id])
+}
+
+model PasswordResetToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  used      Boolean  @default(false)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([token])
+  @@index([userId])
+}
+
+model Appointment {
+  id              Int               @id @default(autoincrement())
+  patient_id      Int
+  clinic_id       Int
+  doctor_id       Int
+  appointment_date DateTime         @db.Date
+  appointment_time DateTime         @db.Time
+  status          AppointmentStatus @default(pending)
+  reason          String?          @db.Text
+  note            String?          @db.Text
+  created_at      DateTime         @default(now()) @db.DateTime
+  updated_at      DateTime         @updatedAt @db.DateTime
+
+  patient         Patient          @relation(fields: [patient_id], references: [id])
+  clinic          Clinic           @relation(fields: [clinic_id], references: [id])
+  doctor          User             @relation(fields: [doctor_id], references: [id])
+  queue           Queue?
+
+  @@map("appointments")
+}
+
+model AvailableSlot {
+  id            Int       @id @default(autoincrement())
+  doctor_id     Int
+  clinic_id     Int
+  slot_date     DateTime  @db.Date
+  start_time    DateTime  @db.Time
+  end_time      DateTime  @db.Time
+  is_available  Boolean   @default(true)
+  created_at    DateTime  @default(now()) @db.DateTime
+
+  doctor        User      @relation(fields: [doctor_id], references: [id])
+  clinic        Clinic    @relation(fields: [clinic_id], references: [id])
+
+  @@map("available_slots")
+}
+
+enum AppointmentStatus {
+  pending
+  confirmed
+  cancelled
+  completed
 }

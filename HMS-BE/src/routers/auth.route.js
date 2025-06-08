@@ -6,10 +6,13 @@ const {
   loginSchema,
   forgetPasswordSchema,
   resetPasswordSchema,
+  googleLoginSchema,
+  facebookLoginSchema,
 } = require("../validators/auth.validator");
 const validate = require("../middlewares/validate");
 const authController = require("../controllers/auth.controller");
 const authRouter = express.Router();
+const { authenticate } = require("../middlewares/auth");
 
 authRouter.post(
   "/login",
@@ -49,6 +52,27 @@ authRouter.post(
   validate({ body: resetPasswordSchema }),
   asyncHandler(AuthController.resetPassword),
   authController.resetPassword
+);
+
+authRouter.post(
+  "/google-login",
+  validate({ body: googleLoginSchema }),
+  asyncHandler(AuthController.googleLogin),
+  authController.googleLogin
+);
+
+authRouter.post(
+  "/facebook-login",
+  validate({ body: facebookLoginSchema }),
+  asyncHandler(AuthController.facebookLogin),
+  authController.facebookLogin
+);
+
+authRouter.get(
+  "/me",
+  authenticate,
+  asyncHandler(AuthController.getUserInfor),
+  authController.getUserInfor
 );
 
 // Ví dụ check authen bên trong router
