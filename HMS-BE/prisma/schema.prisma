@@ -30,6 +30,8 @@ model User {
   createdRecords     ExaminationRecord[] @relation("CreatedByUser")
   examinationDetails ExaminationDetail[]
   passwordResetTokens PasswordResetToken[]
+  appointments       Appointment[]
+  availableSlots     AvailableSlot[]
 
   @@map("users")
 }
@@ -61,6 +63,7 @@ model Patient {
   queues            Queue[]
   payments          Payment[]
   balance           PaymentBalance?
+  appointments      Appointment[]
 
   @@map("patients")
 }
@@ -81,6 +84,8 @@ model Clinic {
   toOrders           ExaminationOrder[]  @relation("ToClinic")
   examinationDetails ExaminationDetail[]
   queues             Queue[]
+  appointments       Appointment[]
+  availableSlots     AvailableSlot[]
 
   @@map("clinics")
 }
