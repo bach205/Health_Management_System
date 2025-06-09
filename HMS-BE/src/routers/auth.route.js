@@ -8,6 +8,7 @@ const {
   resetPasswordSchema,
   googleLoginSchema,
   facebookLoginSchema,
+  changePasswordSchema,
 } = require("../validators/auth.validator");
 const validate = require("../middlewares/validate");
 const authController = require("../controllers/auth.controller");
@@ -49,6 +50,7 @@ authRouter.post(
 
 authRouter.post(
   "/reset-password",
+  authenticate,
   validate({ body: resetPasswordSchema }),
   asyncHandler(AuthController.resetPassword),
   authController.resetPassword
