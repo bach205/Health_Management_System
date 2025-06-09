@@ -231,15 +231,15 @@ class AuthService {
     }
   }
 
-  async resetPassword(token, newPassword) {
+  async resetPassword(token, oldPassword, newPassword, confirmPassword) {
     try {
       // Verify token và kiểm tra thông tin bảo mật
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
       // Kiểm tra mục đích của token
-      if (decoded.purpose !== "password_reset") {
-        throw new BadRequestError("Invalid token purpose");
-      }
+      // if (!decoded.purpose || decoded.purpose !== "password_reset") {
+      //   throw new BadRequestError("Invalid token purpose");
+      // }
 
       // Kiểm tra thời gian tạo token (không cho phép token quá cũ)
       const tokenAge = Date.now() - decoded.timestamp;
@@ -248,7 +248,7 @@ class AuthService {
         throw new BadRequestError("Token has expired");
       }
 
-      const userId = decoded.userId;
+      const userId = decoded.id;
 
       // Kiểm tra user có tồn tại không
       const user = await prisma.user.findUnique({
@@ -264,6 +264,30 @@ class AuthService {
         throw new BadRequestError("Invalid token");
       }
 
+      // Kiểm tra mật khẩu cũ
+      const isValidOldPassword = await bcrypt.compare(
+        oldPassword,
+        user.password
+      );
+      if (!isValidOldPassword) {
+        throw new BadRequestError("Old password is incorrect");
+      }
+
+      // Kiểm tra mật khẩu mới không được trùng với mật khẩu cũ
+      const isSamePassword = await bcrypt.compare(newPassword, user.password);
+      if (isSamePassword) {
+        throw new BadRequestError(
+          "New password must be different from old password"
+        );
+      }
+
+      // Kiểm tra mật khẩu mới và xác nhận mật khẩu mới có khớp nhau không
+      if (newPassword !== confirmPassword) {
+        throw new BadRequestError(
+          "New password and confirm password do not match"
+        );
+      }
+
       // Hash password mới
       const hashedPassword = await bcrypt.hash(
         newPassword,
@@ -276,13 +300,14 @@ class AuthService {
         data: { password: hashedPassword },
       });
 
-      return { message: "Password has been reset successfully" };
+      return { message: "Password has been changed successfully" };
     } catch (error) {
-      if (
-        error.name === "JsonWebTokenError" ||
-        error.name === "TokenExpiredError"
-      ) {
-        throw new BadRequestError("Invalid or expired reset token");
+      console.error("Reset password error:", error);
+      if (error.name === "JsonWebTokenError") {
+        throw new BadRequestError("Invalid token");
+      }
+      if (error.name === "TokenExpiredError") {
+        throw new BadRequestError("Token has expired");
       }
       throw error;
     }

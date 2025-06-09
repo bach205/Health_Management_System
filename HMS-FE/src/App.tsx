@@ -91,12 +91,6 @@ const PublicRoutes = [
     path: "/unauthorized",
     element: <Unauthorized />
   },
-  {
-    path: "/my-profile",
-    element: <MyProfile />,
-    layout: MainLayout,
-  },
-
 ];
 
 interface PrivateRoute {

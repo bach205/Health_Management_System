@@ -97,16 +97,21 @@ class AuthController {
 
   async resetPassword(req, res) {
     try {
-      const { token, newPassword } = req.body;
-      const result = await AuthService.resetPassword(token, newPassword);
+      const { token, oldPassword, newPassword, confirmPassword } = req.body;
+      const result = await AuthService.resetPassword(
+        token,
+        oldPassword,
+        newPassword,
+        confirmPassword
+      );
       return new OK({
-        message: "Đặt lại mật khẩu thành công",
+        message: "Đổi mật khẩu thành công",
         metadata: {},
       }).send(res);
     } catch (error) {
       return res.status(error.status || 400).json({
         success: false,
-        message: error.message || "Đặt lại mật khẩu thất bại",
+        message: error.message || "Đổi mật khẩu thất bại",
         error: error.name,
       });
     }
