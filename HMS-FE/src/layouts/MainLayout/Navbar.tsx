@@ -76,7 +76,7 @@ const Navbar: React.FC = () => {
             onClick={() => navigate("/login")}
             className="bg-[#5f6fff] text-white px-8 py-3 rounded-full font-light hidden md:block hover:cursor-pointer hover:bg-[#5f6fffd5] transition-all duration-300"
           >
-            Tạo tài khoản
+            Đăng nhập
           </button>
         )}
         <img

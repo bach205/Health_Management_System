@@ -25,7 +25,7 @@ import MyAppointment from "./pages/Patient/MyAppointment";
 import Examination from "./pages/Doctor/Examination";
 import DoctorProfile from "./pages/Doctor/DoctorProfile";
 import type { Role } from "./store/authStore";
-import Resetpass from "./pages/ResetPassWord";
+import Resetpass from "./pages/ResetPassword";
 dayjs.extend(plugin);
 dayjs.updateLocale("en", {
   weekStart: 1,
