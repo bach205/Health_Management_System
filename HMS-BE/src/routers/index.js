@@ -6,12 +6,12 @@ const workScheduleRouter = require("./work-schedule.route");
 const shiftRouter = require("./shift.route");
 const nurseRouter = require("./nurse.route");
 const doctorRouter = require("./doctor.route");
-
+const appointmentRouter = require("./appointment.route");
 router.use("/nurse", nurseRouter);
 router.use("/doctor", doctorRouter);
 router.use("/auth", authRouter);
 router.use("/clinic", clinicRouter);
 router.use("/work-schedules", workScheduleRouter);
 router.use("/shifts", shiftRouter);
-
+router.use("/appointment", appointmentRouter);
 module.exports = router;

@@ -1,6 +1,6 @@
-import { DEFAULT_PAGINATION } from "@/constants/data.const";
-import type { IPagination } from "@/types/app.type";
-import type { IQueue } from "@/types/queue.type";
+import { DEFAULT_PAGINATION } from "../constants/data.const";
+import type { IPagination } from "../types/app.type";
+import type { IQueue } from "../types/queue.type";
 import { create } from "zustand";
 
 interface QueueState {

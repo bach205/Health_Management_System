@@ -5,7 +5,10 @@ CREATE TABLE `users` (
     `password` VARCHAR(191) NULL,
     `full_name` VARCHAR(191) NULL,
     `phone` VARCHAR(191) NULL,
-    `role` ENUM('doctor', 'nurse', 'receptionist', 'admin') NOT NULL,
+    `role` ENUM('doctor', 'nurse', 'receptionist', 'admin', 'patient') NOT NULL,
+    `address` VARCHAR(191) NULL,
+    `date_of_birth` DATETIME(3) NULL,
+    `gender` ENUM('male', 'female', 'other') NULL,
     `sso_provider` ENUM('google', 'facebook', 'local') NOT NULL DEFAULT 'local',
     `is_active` BOOLEAN NOT NULL DEFAULT true,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
@@ -17,12 +20,7 @@ CREATE TABLE `users` (
 
 -- CreateTable
 CREATE TABLE `patients` (
-    `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `full_name` VARCHAR(191) NOT NULL,
-    `date_of_birth` DATETIME(3) NULL,
-    `gender` ENUM('male', 'female', 'other') NULL,
-    `phone` VARCHAR(191) NULL,
-    `address` VARCHAR(191) NULL,
+    `id` INTEGER NOT NULL,
     `identity_number` VARCHAR(191) NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
@@ -182,6 +180,42 @@ CREATE TABLE `InvoiceItem` (
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+-- CreateTable
+CREATE TABLE `PasswordResetToken` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `token` VARCHAR(191) NOT NULL,
+    `userId` INTEGER NOT NULL,
+    `used` BOOLEAN NOT NULL DEFAULT false,
+    `expiresAt` DATETIME(3) NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    UNIQUE INDEX `PasswordResetToken_token_key`(`token`),
+    INDEX `PasswordResetToken_token_idx`(`token`),
+    INDEX `PasswordResetToken_userId_idx`(`userId`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `appointments` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `patient_id` INTEGER NOT NULL,
+    `clinic_id` INTEGER NOT NULL,
+    `doctor_id` INTEGER NOT NULL,
+    `appointment_date` DATETIME(3) NOT NULL,
+    `appointment_time` VARCHAR(191) NOT NULL,
+    `status` VARCHAR(191) NOT NULL DEFAULT 'pending',
+    `reason` VARCHAR(191) NULL,
+    `note` VARCHAR(191) NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- AddForeignKey
+ALTER TABLE `patients` ADD CONSTRAINT `patients_id_fkey` FOREIGN KEY (`id`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
 -- AddForeignKey
 ALTER TABLE `doctors` ADD CONSTRAINT `doctors_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
@@ -250,3 +284,15 @@ ALTER TABLE `payment_balances` ADD CONSTRAINT `payment_balances_patient_id_fkey`
 
 -- AddForeignKey
 ALTER TABLE `InvoiceItem` ADD CONSTRAINT `InvoiceItem_record_id_fkey` FOREIGN KEY (`record_id`) REFERENCES `examination_records`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `PasswordResetToken` ADD CONSTRAINT `PasswordResetToken_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `users`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `appointments` ADD CONSTRAINT `appointments_patient_id_fkey` FOREIGN KEY (`patient_id`) REFERENCES `patients`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `appointments` ADD CONSTRAINT `appointments_clinic_id_fkey` FOREIGN KEY (`clinic_id`) REFERENCES `clinics`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `appointments` ADD CONSTRAINT `appointments_doctor_id_fkey` FOREIGN KEY (`doctor_id`) REFERENCES `users`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;

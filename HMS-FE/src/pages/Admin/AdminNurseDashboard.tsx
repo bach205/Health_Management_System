@@ -151,7 +151,7 @@ const AdminNurseDashboard = () => {
   // is active
   const handleStatus = async (record: IUserBase) => {
     try {
-      const result = await banNurse(record?.id.toString());
+      const result = await banNurse(record?.id);
       if (result.status >= 200 && result.status < 300) {
         notification.success({
           message: record.is_active ? "Ban nurse successfully" : "Unban nurse successfully"

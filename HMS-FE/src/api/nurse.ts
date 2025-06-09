@@ -24,7 +24,7 @@ export const banNurse = async (id: number) => {
     return await instance.put(`${BASE_URL}/ban/${id}`);
 };
 
-export const resetPassword = async (id: number) => {
+export const resetPassword = async (id: string) => {
     return await instance.put(`${BASE_URL}/reset-password/${id}`);
 };
 

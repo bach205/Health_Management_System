@@ -1,5 +1,5 @@
 
-import { loginService } from "../services/auth.service";
+import { loginService, loginGoogleService } from "../services/auth.service";
 import { useAuthStore } from "../store/authStore";
 import { toast } from "react-toastify";
 
@@ -28,11 +28,28 @@ const useAuth = () => {
    
   };
 
+  const handleGoogleLogin = async (token : object) => {
+    let status = null;
+    try {
+      const response = await loginGoogleService(token);
+      if (response.status === 200) {
+        login(response.data.metadata.user, response.data.metadata.accessToken);      
+        toast.success("Đăng nhập thành công");
+        return response.data.metadata.user.role;
+      } else {
+        toast.error("Đăng nhập thất bại");
+      }
+    } catch (error: any) {
+      toast.error("Đăng nhập thất bại");
+    }
+   
+  };
+
   const handleLogout = () => {
     logout();
   };
 
-  return { handleLogin, handleLogout };
+  return { handleLogin, handleLogout,handleGoogleLogin };
 };
 
 export default useAuth;

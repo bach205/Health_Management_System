@@ -1,4 +1,4 @@
-import Modal from "@/components/ui/Modal";
+import Modal from "../../components/ui/Modal";
 import { useState } from "react";
 import { toast } from "react-toastify";
 
@@ -17,7 +17,6 @@ const ExaminationOrderModal = ({
     setAssignClinicId("");
     onClose();
   };
-  console.log(patient);
 
   if (!patient) return null;
 
@@ -72,7 +71,7 @@ const ExaminationOrderModal = ({
             onClick={async () => {
               setAssignLoading(true);
               try {
-                const mainRequest = (await import("@/api/mainRequest")).default;
+                const mainRequest = (await import("../../api/mainRequest")).default;
                 await mainRequest.post("/queues/queue-clinic/assign", {
                   patient_id: patient.id,
                   to_clinic_id: Number(assignClinicId),

@@ -3,7 +3,7 @@ import mainRequest from "../api/mainRequest";
 const BASE_URL = "api/v1/clinic";
 
 export const getClinicService = async () => {
-  const response = await mainRequest.get(`${BASE_URL}/`);
+  const response = await mainRequest.get(`${BASE_URL}`);
 
   return response;
 };

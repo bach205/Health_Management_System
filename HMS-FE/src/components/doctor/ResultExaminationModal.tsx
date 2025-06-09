@@ -1,11 +1,11 @@
-import Modal from "@/components/ui/Modal";
+import Modal from "../../components/ui/Modal";
 import { useForm } from "react-hook-form";
-import TextFieldControl from "@/components/form/TextFieldControl";
-import SelectFieldControl from "@/components/form/SelectFieldControl";
-import mainRequest from "@/api/mainRequest";
+import TextFieldControl from "../../components/form/TextFieldControl";
+import SelectFieldControl from "../../components/form/SelectFieldControl";
+import mainRequest from "../../api/mainRequest";
 import { useState, useEffect } from "react";
-import { getClinics } from "@/services/clinic.service";
 import { toast } from "react-toastify";
+import { getClinicService } from "../../services/clinic.service";
 
 const statusOptions = [
   { value: "pending", label: "Chờ khám" },
@@ -49,8 +49,8 @@ const ResultExaminationModal = ({
 
   useEffect(() => {
     if (open) {
-      getClinics().then((res) => {
-        setClinics(res.metadata || []);
+      getClinicService().then((res) => {
+        setClinics(res.data.metadata || []);
       });
     }
   }, [open]);

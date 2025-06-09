@@ -39,7 +39,7 @@ const Register = () => {
       phone: phone.trim(),
     };
     const data = await registerService(values);
-    if(data.data.message == 'Register successfully') {
+    if(data.data.message == 'Đăng ký thành công') {
       toast.success("Đăng ký thành công");
       navigate("/login");
     } else {
