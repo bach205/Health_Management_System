@@ -21,6 +21,10 @@ import ShiftManager from "./pages/Shift/Shift";
 import MyProfile from "./pages/Profile/MyProfile";
 import NotFound from "./pages/NotFound";
 import Home from "./pages/Home";
+import MyAppointment from "./pages/Patient/MyAppointment";
+import Examination from "./pages/Doctor/Examination";
+import DoctorProfile from "./pages/Doctor/DoctorProfile";
+import type { Role } from "./store/authStore";
 import Resetpass from "./pages/ResetPassWord";
 dayjs.extend(plugin);
 dayjs.updateLocale("en", {
@@ -45,7 +49,7 @@ function App() {
           <Route
             path={route.path}
             element={
-              <Authentication allowedRoles={["admin", "nurse", "doctor", "patient"]}>
+              <Authentication allowedRoles={route.allowedRoles || ["admin", "nurse", "doctor", "patient"]}>
                 <route.layout>{route.element}</route.layout>
               </Authentication>
             }
@@ -92,9 +96,16 @@ const PublicRoutes = [
     element: <MyProfile />,
     layout: MainLayout,
   },
+
 ];
 
-const PrivateRoutes = [
+interface PrivateRoute {
+  path: string;
+  element: React.ReactNode;
+  allowedRoles?: Role[];
+  layout: React.ComponentType<{ children: React.ReactNode }>;
+}
+const PrivateRoutes: PrivateRoute[] = [
 
   {
     path: "/admin/",
@@ -135,5 +146,29 @@ const PrivateRoutes = [
     path: "/shift",
     element: <ShiftManager />,
     layout: DashboardLayout,
+  },
+  {
+    path: "/my-appointments",
+    element: <MyAppointment />,
+    allowedRoles: ["patient"],
+    layout: MainLayout,
+  },
+  {
+    path: "/examination",
+    element: <Examination />,
+    // allowedRoles: ["doctor"],
+    layout: DashboardLayout,
+  },
+  {
+    path: "/doctor-profile",
+    element: <DoctorProfile />,
+    // allowedRoles: ["doctor"],
+    layout: DashboardLayout,
+  },
+  {
+    path: "/my-profile",
+    element: <MyProfile />,
+    allowedRoles: ["patient"],
+    layout: MainLayout,
   },
 ];

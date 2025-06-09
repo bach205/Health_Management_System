@@ -15,6 +15,13 @@ export const createClinicService = async (body: object) => {
   return response;
 };
 
+export const getClinics = async () => {
+  const response = await mainRequest.get(`${BASE_URL}/`);
+
+  return response;
+};
+
+
 export const updateClinicService = async (
   body: object,
   id: string | undefined

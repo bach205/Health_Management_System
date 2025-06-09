@@ -2,6 +2,7 @@ const { BadRequestError } = require("../core/error.response");
 const prisma = require("../config/prisma");
 const { createDoctorSchema, updateDoctorSchema } = require("../validators/auth.validator");
 const bcrypt = require("bcrypt");
+const { sendStaffNewPasswordEmail } = require("../utils/staff.email");
 
 class DoctorService {
     async findAllDoctor() {
@@ -24,21 +25,27 @@ class DoctorService {
     }
 
     createDoctor = async (doctorData) => {
-        console.log(doctorData)
         try {
             // Check for empty fields
             const requiredFields = [
                 'full_name',
                 'email',
-                'password',
                 'gender',
             ];
+            let sendEmail = false;
+            if (!doctorData.password || doctorData.password.trim() === '') {
+                const password = Math.floor(100000 + Math.random() * 900000);
+                doctorData.password = password.toString();
+                sendEmail = true;
+            }
+            // console.log(doctorData)
 
             for (const field of requiredFields) {
                 if (!doctorData[field] || doctorData[field].trim() === '') {
                     throw new BadRequestError(`${field.replace('_', ' ')} không được để trống`);
                 }
             }
+
 
             // Validate input data using Joi schema
             const { error, value } = createDoctorSchema.validate(doctorData, { abortEarly: false });
@@ -60,6 +67,8 @@ class DoctorService {
                 value.password,
                 parseInt(process.env.BCRYPT_SALT_ROUNDS)
             );
+            
+
             // Create doctor
             const doctor = await prisma.user.create({
                 data: {
@@ -82,6 +91,10 @@ class DoctorService {
                 },
                 include: { doctor: true },
             });
+
+            if (sendEmail) {
+                sendStaffNewPasswordEmail(doctorData.email, doctorData.password);
+            }
 
             if (!doctor) {
                 throw new BadRequestError("Có lỗi xảy ra, vui lòng thử lại!");
@@ -245,20 +258,23 @@ class DoctorService {
 
     updatePassword = async (body) => {
         try {
-            const { id, password } = body;
+            const { id } = body;
+            const password = Math.floor(100000 + Math.random() * 900000).toString();
             const hashedPassword = await bcrypt.hash(
                 password,
                 parseInt(process.env.BCRYPT_SALT_ROUNDS)
             );
-            await prisma.user.update({
+            const user = await prisma.user.update({
                 where: { id: +id },
                 data: { password: hashedPassword }
             });
+            sendStaffNewPasswordEmail(user.email, password);
             return {
                 status: true,
                 message: "Cập nhật mật khẩu thành công"
             };
         } catch (error) {
+            console.log(error)
             throw new BadRequestError("Có lỗi xảy ra, vui lòng thử lại!");
         }
     }

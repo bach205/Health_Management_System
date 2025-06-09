@@ -1,5 +1,6 @@
 import { Button, DatePicker, Form, Input, Modal, Select, type FormInstance } from "antd";
 import dayjs from "dayjs";
+import { useState } from "react";
 
 interface IProps {
     isVisible: boolean;
@@ -9,6 +10,9 @@ interface IProps {
 }
 
 const ModalEditProfile = ({ isVisible, handleOk, handleCancel, form }: IProps) => {
+
+    const [identityType, setIdentityType] = useState("citizen");
+    
     return (
         <Modal
             open={isVisible}
@@ -16,7 +20,7 @@ const ModalEditProfile = ({ isVisible, handleOk, handleCancel, form }: IProps) =
             onCancel={handleCancel}
             footer={[
                 <Button key="back" onClick={handleCancel}>
-                  
+
                     Hủy
                 </Button>,
                 <Button key="submit" type="primary" onClick={handleOk}>
@@ -37,17 +41,15 @@ const ModalEditProfile = ({ isVisible, handleOk, handleCancel, form }: IProps) =
                 <Form.Item
                     label="Họ tên"
                     name="full_name"
-                    rules={[{ required: true, message: "Vui lòng nhập họ tên!" }]}
                 >
-                    <Input placeholder={`Họ tên`} />
+                    <Input placeholder={`Họ tên`} maxLength={25} />
                 </Form.Item>
 
                 <Form.Item
                     label="Email"
                     name="email"
-                    rules={[{ required: true, type: "email", message:  "Vui lòng nhập đúng format email!" }]}
                 >
-                    <Input placeholder={`Email`} />
+                    <Input placeholder={`Email`} disabled />
                 </Form.Item>
 
                 <Form.Item
@@ -66,11 +68,12 @@ const ModalEditProfile = ({ isVisible, handleOk, handleCancel, form }: IProps) =
                 <Form.Item
                     name="gender"
                     label="Giới tính"
-                    rules={[{ required: true, message: "Vui lòng chọn giới tính!" }]}
+                    initialValue="male"
                 >
-                    <Select style={{ width: 100 }}>
+                    <Select style={{ width: 100 }} >
                         <Select.Option value="male"><span className="text-black">Nam</span></Select.Option>
                         <Select.Option value="female"><span className="text-black">Nữ</span></Select.Option>
+                        <Select.Option value="other"><span className="text-black">Khác</span></Select.Option>
                     </Select>
                 </Form.Item>
 
@@ -79,14 +82,37 @@ const ModalEditProfile = ({ isVisible, handleOk, handleCancel, form }: IProps) =
                 </Form.Item>
 
                 <Form.Item name="date_of_birth" label="Ngày sinh">
-                    <DatePicker format="DD/MM/YYYY" placeholder="Ngày sinh" minDate={dayjs().subtract(100, "year") as any} maxDate={dayjs().subtract(18, "year") as any} />
+                    <DatePicker format="DD/MM/YYYY" placeholder="Ngày sinh" maxDate={dayjs() } />
                 </Form.Item>
 
-                <Form.Item name="identity_number" label="Số CMND">
-                    <Input placeholder="Số CMND" />
-                </Form.Item>    
+                <Form.Item
+                    name="identity_type"
+                    label="Loại định danh"
+                    initialValue="citizen"
+                >
+                    <Select onChange={(value) => setIdentityType(value)} style={{ width: "100%" }}>
+                        <Select.Option value="citizen"><span className="text-black">Căn cước công dân</span></Select.Option>
+                        <Select.Option value="passport"><span className="text-black">Chứng minh nhân dân</span></Select.Option>
+                    </Select>
+                </Form.Item>
 
-         
+                {identityType === "citizen" ? (
+                    <Form.Item name="identity_number" label="Số CCCD"
+                    rules={[
+                        { pattern: new RegExp(/^\d{12}$/), message: "Số CCCD không hợp lệ!" }
+                    ]}
+                    >
+                        <Input placeholder="Số CCCD" maxLength={12} />
+                    </Form.Item>
+                ):(
+                    <Form.Item name="identity_number" label="Số CMND"
+                    rules={[
+                        { pattern: new RegExp(/^\d{12}$/), message: "Số CMND không hợp lệ!" }
+                    ]}
+                    >
+                        <Input placeholder="Số CMND" maxLength={12} />
+                    </Form.Item>
+                )}
             </Form>
         </Modal>
     );
