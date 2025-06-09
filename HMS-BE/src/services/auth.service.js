@@ -230,7 +230,7 @@ class AuthService {
     }
   }
 
-  async resetPassword(token, newPassword) {
+  async resetPassword(token, oldPassword, newPassword) {
     try {
       // Verify token và kiểm tra thông tin bảo mật
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -261,6 +261,23 @@ class AuthService {
       // Kiểm tra email trong token có khớp với user không
       if (user.email !== decoded.email) {
         throw new BadRequestError("Invalid token");
+      }
+
+      // Kiểm tra mật khẩu cũ
+      const isValidOldPassword = await bcrypt.compare(
+        oldPassword,
+        user.password
+      );
+      if (!isValidOldPassword) {
+        throw new BadRequestError("Old password is incorrect");
+      }
+
+      // Kiểm tra mật khẩu mới không được trùng với mật khẩu cũ
+      const isSamePassword = await bcrypt.compare(newPassword, user.password);
+      if (isSamePassword) {
+        throw new BadRequestError(
+          "New password must be different from old password"
+        );
       }
 
       // Hash password mới
