@@ -1,9 +1,9 @@
-import { Result, Button } from "antd";
+import { Result, Button, message } from "antd";
 import { Link } from "react-router-dom";
-import { toast } from "react-toastify";
+
 
 function Unauthorized() {
-    toast.error("You don't have permission to access this page");
+    message.error("Bạn không có quyền truy cập trang này.");
     return(
           <Result
             status="403"

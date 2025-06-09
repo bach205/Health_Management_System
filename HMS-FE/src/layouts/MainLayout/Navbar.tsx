@@ -3,6 +3,7 @@ import { assets } from "../../assets/assets.ts";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../store/authStore.ts";
 import useAuth from "../../hooks/useAuth.ts"
+import { User } from "lucide-react";
 const Navbar: React.FC = () => {
   const navigate = useNavigate();
   const [showMenu, setShowMenu] = useState<boolean>(false);
@@ -40,22 +41,23 @@ const Navbar: React.FC = () => {
       <div className="flex items-center gap-4">
         {isAuthenticated ? (
           <div className="flex items-center gap-2 cursor-pointer group relative">
-            <img
+            {/* <img
               className="w-8 rounded-full"
               src={assets.profile_pic}
               alt="hồ sơ cá nhân"
-            />
+            /> */}
+            <User className="w-6 h-6" ></User>
             <img className="w-2.5" src={assets.dropdown_icon} alt="mở rộng" />
             <div className="absolute top-0 right-0 pt-14 text-base font-medium text-gray-600 z-20 hidden group-hover:block">
               <div className="min-w-48 bg-stone-100 rounded flex flex-col gap-4 p-4">
                 <p
-                  onClick={() => navigate("my-profile")}
+                  onClick={() => navigate("/my-profile")}
                   className="hover:text-black cursor-pointer"
                 >
                   Hồ sơ của tôi
                 </p>
                 <p
-                  onClick={() => navigate("my-appointments")}
+                  onClick={() => navigate("/my-appointments")}
                   className="hover:text-black cursor-pointer"
                 >
                   Lịch hẹn của tôi

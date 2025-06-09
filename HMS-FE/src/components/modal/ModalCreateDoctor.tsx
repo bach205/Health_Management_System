@@ -76,11 +76,11 @@ const ModalCreateDoctor = ({ role, isVisible, handleOk, handleCancel, form }: IP
         <Form.Item
           name="gender"
           label="Giới tính"
-          rules={[{ required: true, message: "Vui lòng chọn giới tính!" }]}
         >
           <Select style={{ width: 100 }}>
             <Select.Option value="male"><span className="text-black">Nam</span></Select.Option>
             <Select.Option value="female"><span className="text-black">Nữ</span></Select.Option>
+            <Select.Option value="other"><span className="text-black">Khác</span></Select.Option>
           </Select>
         </Form.Item>
 
@@ -88,6 +88,7 @@ const ModalCreateDoctor = ({ role, isVisible, handleOk, handleCancel, form }: IP
           <>
             <Form.Item
               label="Khoa"
+              initialValue=""
               name="specialty"
             // rules={[{ required: true, message: "Vui lòng chọn chuyên khoa!" }]}
             >
@@ -128,19 +129,18 @@ const ModalCreateDoctor = ({ role, isVisible, handleOk, handleCancel, form }: IP
           </Checkbox>
         </Form.Item>
 
+        <Form.Item className={showPasswordFields ? "" : "hidden"}
+          label="Mật khẩu"
+          name="password"
+          rules={[
+            { required: showPasswordFields, message: "Vui lòng nhập mật khẩu!" },
+            { min: 6, message: "Mật khẩu phải có ít nhất 6 ký tự!" }
+          ]}
+        >
+          <Input.Password placeholder="Nhập mật khẩu" />
+        </Form.Item>
         {showPasswordFields && (
           <>
-            <Form.Item
-              label="Mật khẩu"
-              name="password"
-              rules={[
-                { required: true, message: "Vui lòng nhập mật khẩu!" },
-                { min: 6, message: "Mật khẩu phải có ít nhất 6 ký tự!" }
-              ]}
-            >
-              <Input.Password placeholder="Nhập mật khẩu" />
-            </Form.Item>
-
             <Form.Item
               label="Xác nhận"
               name="confirm_password"
