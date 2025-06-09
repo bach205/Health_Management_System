@@ -96,6 +96,7 @@ const MyProfile: React.FC = () => {
       const value = formPassword.getFieldsValue();
       const updateData = {
         token: localStorage.getItem("token"),
+        oldPassword: value.oldPassword,
         newPassword: value.newPassword,
         confirmPassword: value.confirmPassword,
       }
