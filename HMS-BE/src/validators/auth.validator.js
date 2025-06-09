@@ -119,8 +119,6 @@ const updateDoctorSchema = Joi.object({
 
 const googleLoginSchema = Joi.object({
   token: Joi.string().required(),
-  email: Joi.string().email().required(),
-  full_name: Joi.string().required(),
   picture: Joi.string().optional(),
 });
 

@@ -1,4 +1,4 @@
-import SelectField from "@/components/ui/SelectField";
+import SelectField from "../../components/ui/SelectField";
 import React from "react";
 import { Controller } from "react-hook-form";
 
@@ -9,6 +9,7 @@ interface SelectFieldControlProps
   label?: string;
   helperText?: string;
   options: { value: string | number; label: string }[];
+  rules : any;
 }
 
 const SelectFieldControl = ({
@@ -17,6 +18,7 @@ const SelectFieldControl = ({
   label,
   helperText,
   options,
+  rules,
   ...props
 }: SelectFieldControlProps) => {
   return (

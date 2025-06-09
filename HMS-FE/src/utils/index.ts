@@ -17,6 +17,8 @@ export interface IUserBase {
 export interface IDoctor extends IUserBase {
   userType: "doctor";
   specialty: string;
+  birthday : string;
+  address : string;
 }
 
 export interface IUser {

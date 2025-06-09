@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { getDoctors } from "../services/doctor.service";
 import type { IDoctor, IPagination } from "../types/index.type";
-
+import { message } from "antd";
 
 export const useDoctorList = () => {
     const [users, setUsers] = useState<IDoctor[]>([]);
@@ -28,19 +28,33 @@ export const useDoctorList = () => {
                     sortBy: sort,
                     skip: (pagination.current - 1) * pagination.pageSize,
                     limit: pagination.pageSize,
+                    isActive: isActive,
+
                 }
 
                 const res = await getDoctors(searchOptions)
                 console.log('res: ', res)
                 setUsers(res.data.metadata.doctors);
                 setLoading(false);
-            } catch (error) {
+            } catch (error: any) {
                 console.log(error)
+                if (error?.response?.data?.errors) {
+                    message.error(error.response.data.errors[0]);
+                }
+                else if (error?.errorFields?.length > 0) {
+                    message.error(error.errorFields[0].errors[0]);
+                }
+                else if (error?.response?.data?.message) {
+                    message.error(error.response.data.message);
+                }
+                else {
+                    message.error("Lỗi khi tải danh sách bác sĩ");
+                }
                 setLoading(false);
             }
         }
         fetchData();
-    }, [keyword, reload, pagination, specialty, sort]);
+    }, [reload, pagination, specialty, sort, isActive]);
 
     const handleTableChange = (pagination: IPagination) => {
         setPagination(pagination);
