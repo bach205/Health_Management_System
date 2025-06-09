@@ -25,6 +25,7 @@ import MyAppointment from "./pages/Patient/MyAppointment";
 import Examination from "./pages/Doctor/Examination";
 import DoctorProfile from "./pages/Doctor/DoctorProfile";
 import type { Role } from "./store/authStore";
+import Resetpass from "./pages/ResetPassWord";
 dayjs.extend(plugin);
 dayjs.updateLocale("en", {
   weekStart: 1,
@@ -81,10 +82,19 @@ const PublicRoutes = [
     element: <Register />,
     layout: MainLayout,
   },
-
+  {
+    path: "/forget-password",
+    element: <Resetpass />,
+    layout: MainLayout,
+  },
   {
     path: "/unauthorized",
     element: <Unauthorized />
+  },
+  {
+    path: "/my-profile",
+    element: <MyProfile />,
+    layout: MainLayout,
   },
 
 ];
