@@ -42,7 +42,7 @@ const ModalEditProfile = ({ isVisible, handleOk, handleCancel, form }: IProps) =
                     label="Họ tên"
                     name="full_name"
                 >
-                    <Input placeholder={`Họ tên`} />
+                    <Input placeholder={`Họ tên`} maxLength={25} />
                 </Form.Item>
 
                 <Form.Item

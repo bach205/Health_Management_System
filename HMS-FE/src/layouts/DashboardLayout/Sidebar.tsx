@@ -6,14 +6,14 @@ import {
   Users,
   Calendar,
   CalendarArrowDown,
+  ClipboardType,
 } from "lucide-react";
 import type { JSX } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
-const Sidebar = ({ isCollapsed }: { isCollapsed: boolean }) => {
+const Sidebar = ({ isCollapsed, role }: { isCollapsed: boolean, role: string }) => {
   const location = useLocation();
   const navigate = useNavigate();
-
   return (
     <aside
       className={`${isCollapsed ? "w-20" : "w-64"
@@ -30,27 +30,37 @@ const Sidebar = ({ isCollapsed }: { isCollapsed: boolean }) => {
         </div>
       </div>
 
-      {SIDEBAR_ITEMS.map((sidebar) => (
-        <div key={sidebar.id} className="mb-4">
-          {!isCollapsed && (
-            <p className="text-xs font-semibold text-gray-500 uppercase mb-3">
-              {sidebar.label}
-            </p>
-          )}
-          <div className="flex flex-col gap-1">
-            {sidebar.items.map((item) => (
-              <SidebarItem
-                key={item.id}
-                icon={item.icon}
-                label={item.label}
-                isActive={location.pathname === item.href}
-                onClick={() => navigate(item.href)}
-                isCollapsed={isCollapsed}
-              />
-            ))}
+      {SIDEBAR_ITEMS.map((sidebar) => {
+        // if (sidebar.label === "Quản lý" && role !== "admin") {
+        //     return null
+        // }
+
+        // if (sidebar.label === "Bác sĩ" && role !== "doctor") {
+        //   return <></>
+        // }
+
+        return (
+          <div key={sidebar.id} className="mb-4">
+            {!isCollapsed && (
+              <p className="text-xs font-semibold text-gray-500 uppercase mb-3">
+                {sidebar.label}
+              </p>
+            )}
+            <div className="flex flex-col gap-1">
+              {sidebar.items.map((item) => (
+                <SidebarItem
+                  key={item.id}
+                  icon={item.icon}
+                  label={item.label}
+                  isActive={location.pathname === item.href}
+                  onClick={() => navigate(item.href)}
+                  isCollapsed={isCollapsed}
+                />
+              ))}
+            </div>
           </div>
-        </div>
-      ))}
+        )
+      })}
     </aside>
   );
 };
@@ -160,5 +170,19 @@ const SIDEBAR_ITEMS = [
         href: "/queues",
       },
     ],
+
   },
+  {
+    id: 4,
+    label: "Bác sĩ",
+    items: [
+      {
+        id: "examination",
+        label: "Khám bệnh",
+        icon: <ClipboardType className="w-4 h-4" />,
+        href: "/examination",
+      },
+    ],
+  },
+
 ];

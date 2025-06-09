@@ -124,7 +124,7 @@ const MyProfile: React.FC = () => {
   return (
     <div className="max-w-lg flex mx-auto flex-col gap-2 text-sm">
 
-      <img className="w-36 rounded" src={assets.profile_pic} alt="profile" />
+      {/* <img className="w-36 rounded" src={assets.profile_pic} alt="profile" /> */}
 
       <p className="font-medium text-3xl text-neutral-800 mt-4">
         {profile.full_name || "Không có tên"}
@@ -168,14 +168,16 @@ const MyProfile: React.FC = () => {
             Cập nhật thông tin
           </button>
         </div>
-        <div className="mt-10">
-          <button
-            className="border cursor-pointer border-gray-500 px-8 py-2 rounded-full hover:bg-gray-500 hover:text-white transition-all"
+        { profile.sso_provider === "local" && (
+          <div className="mt-10">
+            <button
+              className="border cursor-pointer border-gray-500 px-8 py-2 rounded-full hover:bg-gray-500 hover:text-white transition-all"
             onClick={() => handleUpdatePassword()}
           >
             Thay đổi mật khẩu
           </button>
         </div>
+        )}
       </div>
       <ModalEditProfile isVisible={isVisibleProfile} handleOk={handleOkProfile} handleCancel={handleCancelProfile} form={formProfile} />
       <ModalEditPassword isVisible={isVisiblePassword} handleOk={handleOkPassword} handleCancel={handleCancelPassword} form={formPassword} />

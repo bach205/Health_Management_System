@@ -118,7 +118,7 @@ const AdminDoctorDashboard = () => {
 
           <Popconfirm
             title="Khôi phục mật khẩu"
-            description={"Mật khẩu sẽ được khôi phục và được gửi về email" }
+            description={"Mật khẩu sẽ được khôi phục và được gửi về email"}
             onConfirm={() => handleResetPassword(record.id)}
             okText="Xác nhận"
             cancelText="Hủy"
@@ -227,6 +227,7 @@ const AdminDoctorDashboard = () => {
       const values = await formCreate.validateFields();
       const createValue = {
         ...values,
+        password: values.password || "",
       }
       delete createValue.create_password;
       delete createValue.confirm_password;
