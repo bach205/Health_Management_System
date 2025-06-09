@@ -93,7 +93,7 @@ const Login = () => {
                 Đăng Ký
               </Link>
             </span>
-            <Link to="reset-pass" className="ms-12">Quên mật khẩu</Link>
+            <Link to="/forget-password" className="ms-12">Quên mật khẩu</Link>
           </p>
 
         </div>

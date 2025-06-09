@@ -21,6 +21,7 @@ import ShiftManager from "./pages/Shift/Shift";
 import MyProfile from "./pages/Profile/MyProfile";
 import NotFound from "./pages/NotFound";
 import Home from "./pages/Home";
+import Resetpass from "./pages/ResetPassWord";
 dayjs.extend(plugin);
 dayjs.updateLocale("en", {
   weekStart: 1,
@@ -77,10 +78,14 @@ const PublicRoutes = [
     element: <Register />,
     layout: MainLayout,
   },
-  
+  {
+    path: "/forget-password",
+    element: <Resetpass />,
+    layout: MainLayout,
+  },
   {
     path: "/unauthorized",
-    element:<Unauthorized />
+    element: <Unauthorized />
   },
   {
     path: "/my-profile",
@@ -90,7 +95,7 @@ const PublicRoutes = [
 ];
 
 const PrivateRoutes = [
-  
+
   {
     path: "/admin/",
     element: <Dashboard />,
