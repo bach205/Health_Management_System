@@ -1,4 +1,4 @@
-import { Col, Pagination, Row } from "antd";
+import { Col, Pagination, Row, Spin } from "antd";
 import React, { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { specialtyOptions } from "../../constants/user.const";
@@ -11,7 +11,7 @@ const AllDoctor: React.FC = () => {
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
     const {
-        users, specialty, pagination,
+        users, specialty, pagination, loading,
         setSpecialty, setPagination,
     } = useDoctorList();
 
@@ -20,11 +20,15 @@ const AllDoctor: React.FC = () => {
         if (speciality) {
             setSpecialty(speciality);
         }
-    }, []);
+    }, [searchParams]);
+
+    useEffect(() => {
+        setPagination({ ...pagination, current: 1, pageSize: 8 })
+    }, [])
     return (
         <div className="flex flex-col items-center sm:items-start">
             <p className="text-gray-600">Danh sách bác sĩ theo chuyên khoa.</p>
-            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5 mt-5">
+            <div className="flex w-full h-full flex-col sm:flex-row items-center sm:items-start gap-5 mt-5">
                 <button
                     className={`py-1 px-3 border rounded text-sm transition-all sm:hidden 
                         ${showFilter ? "bg-primary text-white" : ""}`}
@@ -48,37 +52,41 @@ const AllDoctor: React.FC = () => {
                         </p>
                     ))}
                 </div>
-                <Row className="w-full" gutter={[16, 16]} >
-                    {users.map((doctor, index) => (
-                        <Col span={24} md={12} lg={6}
-                            onClick={() => navigate(`/doctor/${doctor.id}`)}
-                            key={index}
-                        >
-                            <div className="border  border-blue-200 rounded-xl overflow-hidden cursor-pointer hover:translate-y-[-10px] transition-all duration-500">
-                                <div className="flex justify-center items-center bg-blue-50 ">
-                                    <img className="bg-blue-50 w-full" src={"https://placehold.jp/150x150.png"} alt={`Picture of ${doctor.full_name}`} />
-                                </div>
-                                <div className="p-4">
-                                    <div className="flex items-center gap-2 text-sm text-center text-green-500">
-                                        <p className="w-2 h-2 bg-green-500 rounded-full"></p>
-                                        <p>Available</p>
+                {loading ? <div className="text-center w-full"><Spin></Spin></div> :
+                    <Row className="w-full" gutter={[16, 16]} >
+                        {users.map((doctor, index) => (
+                            <Col span={24} md={12} lg={6}
+                                onClick={() => navigate(`/doctor/${doctor.id}`)}
+                                key={index}
+                            >
+                                <div className="border  border-blue-200 rounded-xl overflow-hidden cursor-pointer hover:translate-y-[-10px] transition-all duration-500">
+                                    <div className="flex justify-center items-center bg-blue-50 ">
+                                        <img className="bg-blue-50 w-full" src={"https://placehold.jp/150x150.png"} alt={`Picture of ${doctor.full_name}`} />
                                     </div>
-                                    <p className="text-gray-900 text-lg font-medium">{doctor.full_name}</p>
-                                    <p className="text-gray-600 text-sm">{doctor.specialty}</p>
+                                    <div className="p-4">
+                                        <div className="flex items-center gap-2 text-sm text-center text-green-500">
+                                            <p className="w-2 h-2 bg-green-500 rounded-full"></p>
+                                            <p>Available</p>
+                                        </div>
+                                        <p className="text-gray-900 text-lg font-medium">{doctor.full_name}</p>
+                                        <p className="text-gray-600 text-sm">{doctor.specialty}</p>
+                                    </div>
                                 </div>
-                            </div>
-                        </Col>
-                    ))}
-                    <Col span={24}>
-                        <Pagination
-                            className="flex justify-center"
-                            current={pagination.current}
-                            total={pagination.total}
-                            pageSize={8}
-                            onChange={(page, pageSize) => setPagination({ ...pagination, current: page, pageSize: pageSize })}
-                        />
-                    </Col>
-                </Row>
+                            </Col>
+                        ))}
+                        {users.length > 0 && (
+                            <Col span={24}>
+                                <Pagination
+                                    className="flex justify-center"
+                                    current={pagination.current}
+                                    total={pagination.total}
+                                    pageSize={8}
+                                    onChange={(page, pageSize) => setPagination({ ...pagination, current: page, pageSize: pageSize })}
+                                />
+                            </Col>
+                        )}
+                    </Row>
+                }
             </div>
         </div>
     );

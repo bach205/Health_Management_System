@@ -17,8 +17,6 @@ export const useDoctorList = () => {
         current: 1,
     });
 
-    const [total, setTotal] = useState<number>(0);
-
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -31,12 +29,12 @@ export const useDoctorList = () => {
                     skip: (pagination.current - 1) * pagination.pageSize,
                     limit: pagination.pageSize,
                     isActive: isActive,
-
                 }
 
                 const res = await getDoctors(searchOptions)
                 // console.log('res: ', res)
                 setUsers(res.data.metadata.doctors);
+                setPagination({ ...pagination, total: res.data.metadata.total })
                 setLoading(false);
             } catch (error: any) {
                 console.log(error)
@@ -56,7 +54,7 @@ export const useDoctorList = () => {
             }
         }
         fetchData();
-    }, [reload, pagination, specialty, sort, isActive]);
+    }, [reload, pagination.current, pagination.pageSize, specialty, sort, isActive]);
 
     const handleTableChange = (pagination: IPagination) => {
         setPagination(pagination);

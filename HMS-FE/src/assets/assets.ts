@@ -60,21 +60,6 @@ export const assets = {
     razorpay_logo
 }
 
-
-// export const specialtyOptions = [
-//     { value: "general", label: "Nội trú" },
-//     { value: "pediatrics", label: "Nhi khoa" },
-//     { value: "orthopedics", label: "Chỉnh hình" },
-//     { value: "dermatology", label: "Da liễu" },
-//     { value: "ophthalmology", label: "Mắt" },
-//     { value: "dentistry", label: "Nha khoa" },
-//     { value: "psychiatry", label: "Tâm thần học" },
-//     { value: "oncology", label: "Ung thư" },
-//     { value: "neurology", label: "Thần kinh học" },
-//     { value: "other", label: "Đa khoa" },
-//     { value: "", label: "Không có" }
-// ];
-
 export const specialityData = [
     {
         speciality: 'Nội trú',
