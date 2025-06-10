@@ -7,9 +7,9 @@ const Footer: React.FC = () => {
       <div className="flex flex-col sm:grid grid-cols-[3fr_1fr_1fr] gap-14 my-10 mt-40 text-sm">
         {/*---------------Left Section--------------------*/}
         <div>
-          <img className="mb-5 w-40" src={assets.logo} alt="logo" />
+          <img className="mb-5 w-40" src={assets.prjLogo} alt="logo" />
           <p className="w-full md:w-2/3 text-gray-600 leading-6">
-            Prescripto là nền tảng đặt lịch hẹn với bác sĩ đáng tin cậy. Chúng tôi cam kết mang đến trải nghiệm chăm sóc sức khỏe tốt nhất cho bạn và gia đình.
+            HMS là nền tảng đặt lịch hẹn với bác sĩ đáng tin cậy. Chúng tôi cam kết mang đến trải nghiệm chăm sóc sức khỏe tốt nhất cho bạn và gia đình.
           </p>
         </div>
         {/*---------------Center Section--------------------*/}

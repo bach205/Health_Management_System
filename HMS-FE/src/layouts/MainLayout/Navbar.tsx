@@ -1,26 +1,30 @@
 import React, { useState } from "react";
 import { assets } from "../../assets/assets.ts";
-import { NavLink, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../store/authStore.ts";
 import useAuth from "../../hooks/useAuth.ts"
 import { User } from "lucide-react";
+import logo from '../../assets/prjLogo.png'
 const Navbar: React.FC = () => {
   const navigate = useNavigate();
   const [showMenu, setShowMenu] = useState<boolean>(false);
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, user } = useAuthStore();
   const auth = useAuth();
   return (
-    
+
     <div className="flex items-center justify-between text-sm py-4 mb-5 border-b border-b-gray-400">
-      <img
-        onClick={() => {
-          navigate("/");
-        }}
-        className="w-44 cursor-pointer"
-        src={assets.logo}
-        alt="logo"
-      />
-      <ul className="hidden md:flex items-start gap-5 font-medium">
+      <div className="flex flex-1">
+        <img
+          onClick={() => {
+            navigate("/");
+          }}
+          className="w-44 cursor-pointer"
+          style={{ maxWidth: '150px' }}
+          src={logo}
+          alt="logo"
+        />
+      </div>
+      <ul className="hidden md:flex flex-1 items-start gap-5 font-medium justify-center ">
         <NavLink to="/">
           <li className="py-1 font-bold">Trang Chủ</li>
           <hr className="border-none outline-none h-0.5 bg-primary w-3/5 m-auto hidden" />
@@ -38,38 +42,45 @@ const Navbar: React.FC = () => {
           <hr className="border-none outline-none h-0.5 bg-primary w-3/5 m-auto hidden" />
         </NavLink>
       </ul>
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 flex-1 justify-end">
         {isAuthenticated ? (
           <div className="flex items-center gap-2 cursor-pointer group relative">
-            {/* <img
+            {user?.role === "patient" ? (
+              <>
+                {/* <img
               className="w-8 rounded-full"
               src={assets.profile_pic}
               alt="hồ sơ cá nhân"
             /> */}
-            <User className="w-6 h-6" ></User>
-            <img className="w-2.5" src={assets.dropdown_icon} alt="mở rộng" />
-            <div className="absolute top-0 right-0 pt-14 text-base font-medium text-gray-600 z-20 hidden group-hover:block">
-              <div className="min-w-48 bg-stone-100 rounded flex flex-col gap-4 p-4">
-                <p
-                  onClick={() => navigate("/my-profile")}
-                  className="hover:text-black cursor-pointer"
-                >
-                  Hồ sơ của tôi
-                </p>
-                <p
-                  onClick={() => navigate("/my-appointments")}
-                  className="hover:text-black cursor-pointer"
-                >
-                  Lịch hẹn của tôi
-                </p>
-                <p
-                  onClick={() => auth.handleLogout()}
-                  className="hover:text-black cursor-pointer"
-                >
-                  Đăng xuất
-                </p>
-              </div>
-            </div>
+                <User className="w-6 h-6" ></User>
+                <p>{user?.full_name}</p>
+                <img className="w-2.5" src={assets.dropdown_icon} alt="mở rộng" />
+                <div className="absolute top-0 right-0 pt-14 text-base font-medium text-gray-600 z-20 hidden group-hover:block">
+                  <div className="min-w-48 bg-stone-100 rounded flex flex-col gap-4 p-4">
+                    <p
+                      onClick={() => navigate("/my-profile")}
+                      className="hover:text-black cursor-pointer"
+                    >
+                      Hồ sơ của tôi
+                    </p>
+                    <p
+                      onClick={() => navigate("/my-appointments")}
+                      className="hover:text-black cursor-pointer"
+                    >
+                      Lịch hẹn của tôi
+                    </p>
+                    <p
+                      onClick={() => auth.handleLogout()}
+                      className="hover:text-black cursor-pointer"
+                    >
+                      Đăng xuất
+                    </p>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <Link to="/admin/dashboard">Quay lại trang làm việc</Link>
+            )}
           </div>
         ) : (
           <button
@@ -87,9 +98,8 @@ const Navbar: React.FC = () => {
         />
         {/*-------Mobile Menu------------*/}
         <div
-          className={`${
-            showMenu ? "fixed w-full" : "h-0 w-0"
-          } md:hidden right-0 top-0 bottom-0 z-20 overflow-hidden bg-white transition-all'`}
+          className={`${showMenu ? "fixed w-full" : "h-0 w-0"
+            } md:hidden right-0 top-0 bottom-0 z-20 overflow-hidden bg-white transition-all'`}
         >
           <div className="flex items-center justify-between px-5 py-6">
             <img className="w-36" src={assets.logo} alt="logo" />
@@ -113,6 +123,23 @@ const Navbar: React.FC = () => {
             <NavLink onClick={() => setShowMenu(false)} to="/contact">
               <p className="px-4 py-2 rounded inline-block">Liên Hệ</p>
             </NavLink>
+            {isAuthenticated ? (
+              <>
+                <NavLink onClick={() => setShowMenu(false)} to="/my-profile">
+                  <p className="px-4 py-2 rounded inline-block">Hồ sơ của tôi</p>
+                </NavLink>
+                <NavLink onClick={() => setShowMenu(false)} to="/my-appointments">
+                  <p className="px-4 py-2 rounded inline-block">Lịch hẹn của tôi</p>
+                </NavLink>
+                <NavLink onClick={() => setShowMenu(false)} to="/login">
+                  <p className="px-4 py-2 rounded inline-block">Đăng xuất</p>
+                </NavLink>
+              </>
+            ) : (
+              <NavLink onClick={() => setShowMenu(false)} to="/login">
+                <p className="px-4 py-2 rounded inline-block">Đăng nhập</p>
+              </NavLink>
+            )}
           </ul>
         </div>
       </div>

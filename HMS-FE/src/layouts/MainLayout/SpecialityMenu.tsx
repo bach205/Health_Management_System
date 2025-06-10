@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 interface SpecialityItem {
   speciality: string;
   image: string;
+  link: string;
 }
 
 const SpecialityMenu: React.FC = () => {
@@ -23,7 +24,7 @@ const SpecialityMenu: React.FC = () => {
             onClick={() => scrollTo(0, 0)}
             className="flex flex-col items-center text-xs cursor-pointer flex-shrink-0 hover:translate-y-[-10px] transition-all duration-500"
             key={index}
-            to={`/doctors/${item.speciality}`}
+            to={`/doctors?speciality=${item.link}`}
           >
             <img
               className="w-16 sm:w-24 mb-2"

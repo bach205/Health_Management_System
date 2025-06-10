@@ -17,6 +17,8 @@ export const useDoctorList = () => {
         current: 1,
     });
 
+    const [total, setTotal] = useState<number>(0);
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -33,7 +35,7 @@ export const useDoctorList = () => {
                 }
 
                 const res = await getDoctors(searchOptions)
-                console.log('res: ', res)
+                // console.log('res: ', res)
                 setUsers(res.data.metadata.doctors);
                 setLoading(false);
             } catch (error: any) {
