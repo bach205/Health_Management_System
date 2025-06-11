@@ -3,7 +3,7 @@ import { getDoctors } from "../services/doctor.service";
 import type { IDoctor, IPagination } from "../types/index.type";
 import { message } from "antd";
 
-export const useDoctorList = () => {
+export const useDoctorList = (initialPagination?: Partial<IPagination>) => {
     const [users, setUsers] = useState<IDoctor[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [keyword, setKeyword] = useState<string>("");
@@ -13,8 +13,8 @@ export const useDoctorList = () => {
     const [isActive, setIsActive] = useState<string>("all");
     const [pagination, setPagination] = useState<IPagination>({
         total: 0,
-        pageSize: 10,
-        current: 1,
+        pageSize: initialPagination?.pageSize || 10,
+        current: initialPagination?.current || 1,
     });
 
     useEffect(() => {
@@ -54,7 +54,7 @@ export const useDoctorList = () => {
             }
         }
         fetchData();
-    }, [reload, pagination.current, pagination.pageSize, specialty, sort, isActive]);
+    }, [reload, pagination.current, specialty, sort, isActive]);
 
     const handleTableChange = (pagination: IPagination) => {
         setPagination(pagination);

@@ -27,6 +27,8 @@ import DoctorProfile from "./pages/Doctor/DoctorProfile";
 import type { Role } from "./store/authStore";
 import Resetpass from "./pages/ResetPassWord";
 import AllDoctor from "./pages/Patient/AllDoctor";
+import About from "./pages/Patient/About";
+import Contact from "./pages/Patient/Contact";
 dayjs.extend(plugin);
 dayjs.updateLocale("en", {
   weekStart: 1,
@@ -97,6 +99,17 @@ const PublicRoutes = [
     element: <AllDoctor />,
     layout: MainLayout,
   },
+  {
+    path: "/about",
+    element: <About />,
+    layout: MainLayout,
+  },
+  {
+    path: "/contact",
+    element: <Contact />,
+    layout: MainLayout,
+  },
+  
 ];
 
 interface PrivateRoute {
