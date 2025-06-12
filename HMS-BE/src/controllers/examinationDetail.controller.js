@@ -2,9 +2,14 @@ const { OK } = require("../core/success.response");
 const ExaminationDetailService = require("../services/examinationDetail.service");
 
 class ExaminationDetailController {
-    static async create(req, res) {
-        const detail = await ExaminationDetailService.create(req.body);
-        return new OK({ message: "Tạo kết quả khám thành công", metadata: detail }).send(res);
+    // Tạo kết quả khám, đồng thời chuyển phòng nếu có chỉ định
+    static async create(req, res, next) {
+        try {
+            const detail = await ExaminationDetailService.create(req.body);
+            return new OK({ message: "Tạo kết quả khám thành công", metadata: detail }).send(res);
+        } catch (error) {
+            next(error);
+        }
     }
 
     static async update(req, res) {

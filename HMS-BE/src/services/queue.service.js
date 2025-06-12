@@ -1,7 +1,14 @@
 const prisma = require("../config/prisma");
 const { getIO } = require("../config/socket.js");
+const ExaminationRecordService = require("./examinationRecord.service");
 
 class QueueService {
+  /**
+   * Lấy danh sách queue của phòng khám
+   * @param {number} clinicId - ID phòng khám
+   * @param {Object} query - Thông tin phân trang
+   * @returns {Promise<Object>} Danh sách queue và thông tin phân trang
+   */
   static async getQueueClinic(clinicId, query) {
     const { pageNumber = 1, pageSize = 10 } = query;
 
@@ -9,6 +16,7 @@ class QueueService {
       throw new Error("Clinic ID is required");
     }
 
+    // 1. Kiểm tra phòng khám tồn tại
     const clinic = await prisma.clinic.findUnique({
       where: {
         id: Number(clinicId),
@@ -19,6 +27,10 @@ class QueueService {
       throw new Error("Clinic not found");
     }
 
+    // 2. Lấy danh sách queue theo thứ tự ưu tiên:
+    // - Ưu tiên theo priority của appointment (cao xuống thấp)
+    // - Nếu cùng priority thì ưu tiên theo thời gian đặt lịch (sớm lên trước)
+    // - Nếu không có appointment thì ưu tiên theo thời gian vào queue (sớm lên trước)
     const queueClinic = await prisma.queue.findMany({
       where: {
         clinic_id: Number(clinicId),
@@ -26,19 +38,20 @@ class QueueService {
           in: ["waiting", "in_progress"],
         },
       },
-
-      // Đoạn orderBy này sắp xếp các mục trong hàng đợi theo thứ tự:
-      // 1. Trước tiên theo 'priority' giảm dần, tức là các mục có mức độ ưu tiên cao sẽ được xử lý trước.
-      // 2. Nếu có nhiều mục có cùng mức độ ưu tiên, chúng sẽ được sắp xếp tiếp theo 'created_at' giảm dần,
-      //    tức là mục được tạo gần đây hơn sẽ đứng trước.
-      orderBy: [{ priority: "desc" }, { created_at: "desc" }],
+      orderBy: [
+        { priority: "desc" },
+        { appointment: { created_at: "asc" } },
+        { created_at: "asc" }
+      ],
       skip: (pageNumber - 1) * pageSize,
       take: pageSize,
       include: {
         patient: true,
+        appointment: true,
       },
     });
 
+    // 3. Tính toán thông tin phân trang
     const total = await prisma.queue.count({
       where: {
         clinic_id: Number(clinicId),
@@ -53,11 +66,16 @@ class QueueService {
     return { queueClinic, total, totalPages };
   }
 
+  /**
+   * Chỉ định thêm phòng khám cho bệnh nhân
+   * @param {Object} params - Thông tin chỉ định
+   * @returns {Promise<Object>} Thông tin queue mới
+   */
   static async assignAdditionalClinic({
     patient_id,
     to_clinic_id,
     record_id,
-    priority = 0,
+    priority = 2, // Mặc định priority cao nhất cho chuyển phòng
   }) {
     // 1. Tìm queue hiện tại của bệnh nhân (chưa done và đang khám)
     const currentQueue = await prisma.queue.findFirst({
@@ -104,7 +122,7 @@ class QueueService {
       include: { patient: true },
     });
 
-    // 5. Emit socket event như cũ
+    // 5. Emit socket event để thông báo cho phòng khám mới
     const io = getIO();
     if (io) {
       io.to(`clinic_${to_clinic_id}`).emit("queue:assigned", {
@@ -116,6 +134,12 @@ class QueueService {
     return newQueue;
   }
 
+  /**
+   * Cập nhật trạng thái queue
+   * @param {number} queueId - ID queue
+   * @param {string} status - Trạng thái mới
+   * @returns {Promise<Object>} Thông tin queue đã cập nhật
+   */
   static async updateQueueStatus(queueId, status) {
     const updated = await prisma.queue.update({
       where: { id: Number(queueId) },
@@ -123,9 +147,39 @@ class QueueService {
         status,
         called_at: status === "in_progress" ? new Date() : null,
       },
-      include: { patient: true, clinic: true },
+      include: { patient: true, clinic: true, appointment: true },
     });
-    // Emit socket event
+
+    // Nếu bắt đầu khám (in_progress), tạo ExaminationRecord nếu chưa có
+    if (status === "in_progress") {
+      await ExaminationRecordService.createIfNotExists(updated.patient_id);
+    }
+
+    // Nếu bệnh nhân vắng mặt (status = skipped), thêm vào danh sách đợi lại
+    if (status === "skipped") {
+      const missedQueue = await prisma.queue.create({
+        data: {
+          patient_id: updated.patient_id,
+          clinic_id: updated.clinic_id,
+          appointment_id: updated.appointment_id,
+          status: "waiting",
+          priority: updated.appointment?.priority || 0, // Giữ nguyên priority từ appointment
+        },
+        include: { patient: true },
+      });
+
+      // Emit socket event cho queue mới
+      const io = getIO();
+      if (io) {
+        io.to(`clinic_${updated.clinic_id}`).emit("queue:missed", {
+          patient: missedQueue.patient,
+          queue: missedQueue,
+          clinicId: updated.clinic_id,
+        });
+      }
+    }
+
+    // Emit socket event cho trạng thái thay đổi
     const io = getIO();
     if (io) {
       io.to(`clinic_${updated.clinic_id}`).emit("queue:statusChanged", {
@@ -136,11 +190,16 @@ class QueueService {
     return updated;
   }
 
-  // BỔ SUNG THÊM LOGIC: Check-in vào queue từ appointment
+  /**
+   * Check-in vào queue từ appointment
+   * @param {Object} params - Thông tin appointment
+   * @returns {Promise<Object>} Thông tin queue mới
+   */
   static async checkInFromAppointment({ appointment_id }) {
     // 1. Lấy thông tin appointment
     const appointment = await prisma.appointment.findUnique({
       where: { id: appointment_id },
+      include: { patient: true }
     });
     if (!appointment) throw new Error("Không tìm thấy lịch hẹn!");
 
@@ -153,19 +212,19 @@ class QueueService {
     });
     if (existingQueue) throw new Error("Đã check-in vào hàng đợi!");
 
-    // 3. Tạo queue mới
+    // 3. Tạo queue mới với priority từ appointment
     const newQueue = await prisma.queue.create({
       data: {
         patient_id: appointment.patient_id,
         clinic_id: appointment.clinic_id,
         appointment_id: appointment.id,
         status: "waiting",
-        priority: 0,
+        priority: appointment.priority || 0,
       },
       include: { patient: true },
     });
 
-    // 4. Emit socket event nếu cần
+    // 4. Emit socket event
     const io = getIO();
     if (io) {
       io.to(`clinic_${appointment.clinic_id}`).emit("queue:checkin", {
@@ -177,9 +236,13 @@ class QueueService {
     return newQueue;
   }
 
-  // BỔ SUNG THÊM LOGIC: Huỷ queue khi huỷ appointment
+  /**
+   * Hủy queue khi hủy appointment
+   * @param {Object} params - Thông tin appointment
+   * @returns {Promise<Object>} Thông tin queue đã hủy
+   */
   static async cancelQueueByAppointment({ appointment_id }) {
-    // Tìm queue liên kết với appointment này và chưa done/skipped
+    // 1. Tìm queue liên kết với appointment này và chưa done/skipped
     const queue = await prisma.queue.findFirst({
       where: {
         appointment_id,
@@ -187,11 +250,22 @@ class QueueService {
       },
     });
     if (!queue) return null;
-    // Cập nhật trạng thái queue thành skipped
+
+    // 2. Cập nhật trạng thái queue thành skipped
     const updated = await prisma.queue.update({
       where: { id: queue.id },
       data: { status: "skipped" },
     });
+
+    // 3. Emit socket event cho trạng thái thay đổi
+    const io = getIO();
+    if (io) {
+      io.to(`clinic_${queue.clinic_id}`).emit("queue:statusChanged", {
+        queue: updated,
+        clinicId: queue.clinic_id,
+      });
+    }
+
     return updated;
   }
 }

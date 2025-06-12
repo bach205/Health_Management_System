@@ -30,7 +30,7 @@ model User {
   createdRecords     ExaminationRecord[] @relation("CreatedByUser")
   examinationDetails ExaminationDetail[]
   passwordResetTokens PasswordResetToken[]
-  appointments       Appointment[]
+  appointments       Appointment[]      @relation("DoctorAppointment")
   availableSlots     AvailableSlot[]
 
   @@map("users")
@@ -50,6 +50,12 @@ enum SsoProvider {
   local
 }
 
+enum Gender {
+  male
+  female
+  other
+}
+
 model Patient {
   id              Int       @id
   identity_number String?
@@ -66,12 +72,6 @@ model Patient {
   appointments      Appointment[]
 
   @@map("patients")
-}
-
-enum Gender {
-  male
-  female
-  other
 }
 
 model Clinic {
@@ -193,13 +193,13 @@ model Queue {
   patient_id        Int
   clinic_id         Int
   record_id         Int?
-  appointment_id    Int?      @unique
+  appointment_id    Int?
   status            QueueStatus @default(waiting)
   priority          Int       @default(0)
   registered_online Boolean   @default(false)
-  qr_code          String?
-  called_at        DateTime?
-  created_at       DateTime   @default(now()) @db.DateTime
+  qr_code           String?
+  called_at         DateTime?
+  created_at        DateTime   @default(now()) @db.DateTime
 
   patient          Patient    @relation(fields: [patient_id], references: [id])
   clinic           Clinic     @relation(fields: [clinic_id], references: [id])
@@ -306,38 +306,39 @@ model Appointment {
   appointment_date DateTime         @db.Date
   appointment_time DateTime         @db.Time
   status          AppointmentStatus @default(pending)
-  reason          String?          @db.Text
-  note            String?          @db.Text
+  priority        Int              @default(0)  // 0: normal booking, 1: nurse booking, 2: urgent
+  reason          String?          @db.Text     // Lý do khám
+  note            String?          @db.Text     // Ghi chú thêm
   created_at      DateTime         @default(now()) @db.DateTime
   updated_at      DateTime         @updatedAt @db.DateTime
 
   patient         Patient          @relation(fields: [patient_id], references: [id])
   clinic          Clinic           @relation(fields: [clinic_id], references: [id])
-  doctor          User             @relation(fields: [doctor_id], references: [id])
-  queue           Queue?
+  doctor          User             @relation("DoctorAppointment", fields: [doctor_id], references: [id])
+  queues          Queue[]          // Một appointment có thể có nhiều queue
 
   @@map("appointments")
 }
 
-model AvailableSlot {
-  id            Int       @id @default(autoincrement())
-  doctor_id     Int
-  clinic_id     Int
-  slot_date     DateTime  @db.Date
-  start_time    DateTime  @db.Time
-  end_time      DateTime  @db.Time
-  is_available  Boolean   @default(true)
-  created_at    DateTime  @default(now()) @db.DateTime
-
-  doctor        User      @relation(fields: [doctor_id], references: [id])
-  clinic        Clinic    @relation(fields: [clinic_id], references: [id])
-
-  @@map("available_slots")
+enum AppointmentStatus {
+  pending    // Chờ xác nhận
+  confirmed  // Đã xác nhận
+  cancelled  // Đã hủy
+  completed  // Đã hoàn thành
 }
 
-enum AppointmentStatus {
-  pending
-  confirmed
-  cancelled
-  completed
+model AvailableSlot {
+  id           Int      @id @default(autoincrement())
+  doctor_id    Int
+  clinic_id    Int
+  slot_date    DateTime @db.Date
+  start_time   DateTime @db.Time
+  end_time     DateTime @db.Time
+  is_available Boolean  @default(true)
+  created_at   DateTime @default(now()) @db.DateTime
+
+  doctor       User     @relation(fields: [doctor_id], references: [id])
+  clinic       Clinic   @relation(fields: [clinic_id], references: [id])
+
+  @@map("available_slots")
 }

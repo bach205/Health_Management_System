@@ -11,4 +11,7 @@ router.put("/:id", asyncHandler(ExaminationDetailController.update));
 router.get("/:id", asyncHandler(ExaminationDetailController.getById));
 router.get("/", asyncHandler(ExaminationDetailController.getAll));
 
+// Tạo kết quả khám
+router.post("/", ExaminationDetailController.create);
+
 module.exports = router; 
