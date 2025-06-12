@@ -25,7 +25,11 @@ import MyAppointment from "./pages/Patient/MyAppointment";
 import Examination from "./pages/Doctor/Examination";
 import DoctorProfile from "./pages/Doctor/DoctorProfile";
 import type { Role } from "./store/authStore";
-import Resetpass from "./pages/ResetPassword";
+import Resetpass from "./pages/ResetPassWord"; // Fixed casing to match actual file path
+import PatientBookAppointment from "./pages/BookAppointment";
+import './styles/scrollbar.css';
+import NurseBookAppointment from "./pages/NurseBookAppointment";
+import NurseManageAppointment from "./pages/NurseManageAppointment";
 dayjs.extend(plugin);
 dayjs.updateLocale("en", {
   weekStart: 1,
@@ -73,6 +77,11 @@ const PublicRoutes = [
     layout: MainLayout,
   },
   {
+    path: "/book-appointment/:docId",
+    element: <PatientBookAppointment />,
+    layout: MainLayout,
+  },
+  {
     path: "/login",
     element: <Login />,
     layout: MainLayout,
@@ -109,6 +118,16 @@ const PrivateRoutes: PrivateRoute[] = [
   {
     path: "/workschedule",
     element: <Workschedule />,
+    layout: DashboardLayout,
+  },
+  {
+    path: "/nurse-book-appointments",
+    element: <NurseBookAppointment />,
+    layout: DashboardLayout,
+  },
+  {
+    path: "/user-book-appointments",
+    element: <NurseManageAppointment />,
     layout: DashboardLayout,
   },
   {

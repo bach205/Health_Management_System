@@ -55,17 +55,16 @@ const Workschedule = () => {
         const user = await getDoctorService();
         const clinic = await getClinicService();
         const shift = await getShiftService();
-
+ //     console.log(user.data.metadata);
         setShifts(shift.data.data);
         setClinics(clinic.data.metadata.clinics);
         setUsers(user.data.metadata);
 
         const enrichedData = res.data.data.map((item: any) => ({
           ...item,
-          user_name: user.data.metadata.find((u: any) => u.id === item.user_id)?.name || '',
+          user_name: user.data.metadata.find((u: any) => u.id === item.user_id)?.full_name || '',
           shift_name: shift.data.data.find((s: any) => s.id === item.shift_id)?.name || '',
         }));
-        
         setData(enrichedData);
     
     };
@@ -134,7 +133,7 @@ const Workschedule = () => {
           {
             id: newSchedule.id,
             user_id: newSchedule.user_id,
-            user_name: users.find(u => u.id === newSchedule.user_id)?.email || '',
+            user_name: users.find(u => u.id === newSchedule.user_id)?.full_name || '',
             clinic_id: newSchedule.clinic_id,
             work_date: newSchedule.work_date,
             shift_id: newSchedule.shift_id,
@@ -222,8 +221,9 @@ const Workschedule = () => {
           <Form.Item name="user_id" label="Nhân viên" rules={[{ required: true }]}>
             <Select placeholder="Chọn nhân viên">
               {users.map(user => (
+            
                 <Option key={user.id} value={user.id}>
-                  {user.email}
+                  {user.full_name}
                 </Option>
               ))}
             </Select>
