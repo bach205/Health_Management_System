@@ -25,6 +25,7 @@ interface AuthState {
     email: string;
     full_name: string;
     role: Role;
+    avatar?: string;
   } | null;
   login: (userData: AuthState["user"], token: string) => void;
   logout: () => void;

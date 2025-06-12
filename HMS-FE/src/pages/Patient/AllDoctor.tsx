@@ -17,11 +17,20 @@ const AllDoctor: React.FC = () => {
     } = useDoctorList({ pageSize: 8, current: 1 });
 
     useEffect(() => {
-        const speciality = searchParams.get('speciality');
-        if (speciality) {
-            setSpecialty(speciality);
+        const specialityQuery = searchParams.get('speciality');
+        if (specialityQuery === "" ) {
+            setSpecialty("all")
+            return
         }
+        if (specialityQuery) {
+            setSpecialty(specialityQuery);
+        }
+
     }, []);
+
+    // useEffect(() => {
+    //     setPagination({ ...pagination, current: 1 })
+    // }, [specialty])
 
     return (
         <div className="flex flex-col items-center sm:items-start">
@@ -45,10 +54,15 @@ const AllDoctor: React.FC = () => {
                     {specialtyOptions.map((item, index) => (
                         <p key={index}
                             onClick={() => {
+                                if (item.value === "") {
+                                    setSearchParams({ speciality: item.value })
+                                    setSpecialty("all")
+                                    return
+                                }
                                 setSpecialty(item.value)
                                 setSearchParams({ speciality: item.value })
                             }}
-                            className={`w-[200px] pl-3 py-1.5 border border-gray-300 rounded transition-all cursor-pointer ${specialty === item.value
+                            className={`w-[200px] pl-3 py-1.5 border border-gray-300 rounded transition-all cursor-pointer ${(specialty === item.value || (specialty === "all" && item.value === ""))
                                 ? "bg-indigo-100 text-black"
                                 : ""
                                 }`}
@@ -61,7 +75,7 @@ const AllDoctor: React.FC = () => {
                     <Row className="w-full" gutter={[16, 16]} >
                         {users.map((doctor, index) => (
                             <Col span={24} md={12} lg={6}
-                                onClick={() => navigate(`/doctor/${doctor.id}`)}
+                                onClick={() => navigate(`/book-appointment/${doctor.id}`)}
                                 key={index}
                             >
                                 <div className="border  border-blue-200 rounded-xl overflow-hidden cursor-pointer hover:translate-y-[-10px] transition-all duration-500">

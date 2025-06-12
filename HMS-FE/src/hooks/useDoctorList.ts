@@ -19,23 +19,25 @@ export const useDoctorList = (initialPagination?: Partial<IPagination>) => {
 
     useEffect(() => {
         const fetchData = async () => {
+            setLoading(true);
             try {
-                setLoading(true);
-
                 const searchOptions = {
                     searchKey: keyword,
-                    specialty: specialty,
+                    specialty,
                     sortBy: sort,
                     skip: (pagination.current - 1) * pagination.pageSize,
                     limit: pagination.pageSize,
-                    isActive: isActive,
-                }
+                    isActive,
+                };
 
-                const res = await getDoctors(searchOptions)
-                // console.log('res: ', res)
+                const res = await getDoctors(searchOptions);
                 setUsers(res.data.metadata.doctors);
-                setPagination({ ...pagination, total: res.data.metadata.total })
+                setPagination((prev) => ({
+                    ...prev,
+                    total: res.data.metadata.total,
+                }));
                 setLoading(false);
+
             } catch (error: any) {
                 console.log(error)
                 if (error?.response?.data?.errors) {
@@ -52,9 +54,20 @@ export const useDoctorList = (initialPagination?: Partial<IPagination>) => {
                 }
                 setLoading(false);
             }
-        }
+        };
         fetchData();
     }, [reload, pagination.current, specialty, sort, isActive]);
+
+    useEffect(() => {
+        setPagination((prev) => ({
+            ...prev,
+            current: 1,
+        }));
+    }, [specialty]);
+
+    // useEffect(() => {
+    //     setPagination({ ...pagination, current: 1 })
+    // }, [specialty])
 
     const handleTableChange = (pagination: IPagination) => {
         setPagination(pagination);
