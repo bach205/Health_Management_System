@@ -11,6 +11,7 @@ import { Ellipsis } from "lucide-react";
 import ResultExaminationModal from "./ResultExaminationModal";
 import ExaminationRecordModal from "../../components/doctor/ExaminationRecordModal";
 import { useAuthStore } from "../../store/authStore";
+import { useSocket } from "../../hooks/useSocket";
 
 const QueueTable = () => {
   const {
@@ -60,15 +61,15 @@ const QueueTable = () => {
     }
   }, [selectedClinic]);
 
-  // useSocket(
-  //   `clinic_${selectedClinic}`,
-  //   "queue:assigned",
-  //   (data: { clinicId: string | number }) => {
-  //     if (data.clinicId?.toString() === selectedClinic.toString()) {
-  //       fetchQueue(selectedClinic);
-  //     }
-  //   }
-  // );
+  useSocket(
+    `clinic_${selectedClinic}`,
+    "queue:assigned",
+    (data: { clinicId: string | number }) => {
+      if (data.clinicId?.toString() === selectedClinic.toString()) {
+        fetchQueue(selectedClinic);
+      }
+    }
+  );
 
   useEffect(() => {
     const tableEl = document.getElementById("table-container");
@@ -145,7 +146,7 @@ const QueueTable = () => {
               </tr>
             </thead>
             <tbody>
-              {queues.map((queue, index) => (
+              {queues?.map((queue, index) => (
                 <tr key={queue.id} className="hover:bg-gray-50">
                   <td className="border border-gray-300 text-center p-2">
                     {index +
