@@ -10,5 +10,9 @@ router.post("/", validate({ body: examinationDetailSchema }), asyncHandler(Exami
 router.put("/:id", asyncHandler(ExaminationDetailController.update));
 router.get("/:id", asyncHandler(ExaminationDetailController.getById));
 router.get("/", asyncHandler(ExaminationDetailController.getAll));
+router.get("/doctors/:clinicId", asyncHandler(ExaminationDetailController.getDoctorsInClinic));
+router.get("/available-slots/:clinicId/:doctorId", asyncHandler(ExaminationDetailController.getDoctorAvailableSlots));
+// // Tạo kết quả khám
+// router.post("/", ExaminationDetailController.create);
 
 module.exports = router; 

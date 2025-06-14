@@ -1,8 +1,8 @@
 import mainRequest from "../api/mainRequest";
-const BASE_URL = "api/v1/queues";
+const BASE_URL = "api/v1/queue";
 
 export const getQueueClinic = async (clinicId: string) => {
-  const response = await mainRequest.get(`${BASE_URL}/${clinicId}`);
+  const response = await mainRequest.get(`${BASE_URL}/clinic/${clinicId}`);
   return response.data;
 };
 

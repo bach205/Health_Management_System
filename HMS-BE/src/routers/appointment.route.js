@@ -9,6 +9,5 @@ router.get("/slots", appointmentController.getAvailableSlots);
 router.get("/patient/:id", appointmentController.getPatientAppointments);
 router.post("/confirm", appointmentController.confirmAppointment);
 router.post("/cancel", appointmentController.cancelAppointment);
-router.get("/detail/:id", appointmentController.getAppointmentDetail);
 
 module.exports = router;
