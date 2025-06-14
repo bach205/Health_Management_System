@@ -36,8 +36,8 @@ class ExaminationDetailController {
     }
 
     static async getDoctorAvailableSlots(req, res) {
-        const { clinicId, doctorId } = req.params;
-        const slots = await ExaminationDetailService.getDoctorAvailableSlots(clinicId, doctorId);
+        const { doctorId } = req.params;
+        const slots = await ExaminationDetailService.getDoctorAvailableSlots(doctorId);
         return new OK({ message: "Lấy danh sách ca khám có thể chọn thành công", metadata: slots }).send(res);
     }
 }

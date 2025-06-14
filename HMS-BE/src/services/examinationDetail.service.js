@@ -105,31 +105,47 @@ class ExaminationDetailService {
   }
 
   static async getDoctorsInClinic(clinicId) {
-    return prisma.workSchedule.findMany({
+    const now = new Date();
+    const todayStart = new Date(now.setHours(0, 0, 0, 0));
+    const todayEnd = new Date(now.setHours(23, 59, 59, 999));
+
+    const activeDoctors = await prisma.workSchedule.findMany({
       where: {
         clinic_id: +clinicId,
-        work_date: {
-          gte: new Date(),
-        },
+        // work_date: {
+        //   gte: todayStart,
+        //   lte: todayEnd,
+        // },
+        // shift: {
+        //   start_time: {
+        //     lte: now,
+        //   },
+        //   end_time: {
+        //     gte: now,
+        //   },
+        // },
       },
       include: {
-        user: {
-          include: {
-            doctor: true,
-          },
-        },
+        user: true, // để lấy thông tin bác sĩ
       },
-    }); 
+    });
+
+    return activeDoctors
   }
 
-  static async getDoctorAvailableSlots(clinicId, doctorId) {
+
+  static async getDoctorAvailableSlots(doctorId) {
+    const now = new Date();
+    const todayStart = new Date(now.setHours(0, 0, 0, 0));
+    const todayEnd = new Date(now.setHours(23, 59, 59, 999));
+
     return prisma.availableSlot.findMany({
       where: {
-        clinic_id: +clinicId,
         doctor_id: +doctorId,
-        slot_date: {
-          gte: new Date(),
-        },
+        // slot_date: {
+        //   gte: todayStart,
+        //   lte: todayEnd,
+        // },
       },
     });
   }

@@ -26,8 +26,8 @@ export const updatePassword = (id: number) => {
     return instance.post(`${BASE_URL}/update-password/`, { id });
 };
 
-export const getDoctorAvailableSlots = (clinicId: number, doctorId: number) => {
-    return instance.get(`${EXAMINATION_DETAIL_URL}/available-slots/${clinicId}/${doctorId}`);
+export const getDoctorAvailableSlots = (doctorId: number) => {
+    return instance.get(`${EXAMINATION_DETAIL_URL}/available-slots/${doctorId}`);
 };
 
 export const getDoctorsInClinic = (clinicId: number) => {

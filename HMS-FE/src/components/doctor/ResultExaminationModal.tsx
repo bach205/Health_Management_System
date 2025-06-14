@@ -36,10 +36,7 @@ const ResultExaminationModal = ({
   ];
 
 
-  const [doctorInClinic, setDoctorInClinic] = useState<any[]>([
-    { value: 1, label: "bác sĩ 1" },
-    { value: 2, label: "bác sĩ 2" },
-  ]);
+  const [doctorInClinic, setDoctorInClinic] = useState<any[]>([]);
   const [selectedClinicId, setSelectedClinicId] = useState<any>(null);
 
   const [availableDoctorTime, setAvailableDoctorTime] = useState<any[]>([
@@ -68,8 +65,8 @@ const ResultExaminationModal = ({
       try {
         const res = await getDoctorsInClinic(clinicId);
         console.log(res)
-        if (res.data.metadata.user) {
-          setDoctorInClinic(res.data.metadata.user?.map((doctor: any) => ({ value: doctor.id, label: doctor.user_name })) || []);
+        if (res.data.metadata.length > 0) {
+          setDoctorInClinic(res.data.metadata.map((data: any) => ({ value: data.user.id, label: data.user.full_name })) || []);
         } else {
           setDoctorInClinic([]);
         }
@@ -79,24 +76,25 @@ const ResultExaminationModal = ({
       }
 
     };
-    console.log(selectedClinicId)
-    if (selectedClinicId) {
+    // console.log(selectedClinicId)
+    if (selectedClinicId && selectedClinicId !== "") {
       getDoctorInClinic(selectedClinicId);
     }
   }, [selectedClinicId]);
 
   useEffect(() => {
-    const getAvailableDoctorTime = async (clinicId: number, doctorId: number) => {
+    const getAvailableDoctorTime = async (doctorId: number) => {
       try {
-        const res = await getDoctorAvailableSlots(clinicId, doctorId);
-        setAvailableDoctorTime(res.data.metadata.available_doctor_time || []);
+        const res = await getDoctorAvailableSlots(doctorId);
+        console.log(res)
+        setAvailableDoctorTime(res.data.metadata || []);
       } catch (err: any) {
         console.log(err);
         message.error("Có lỗi xảy ra!");
       }
     };
     if (selectedDoctorId && selectedClinicId) {
-      getAvailableDoctorTime(selectedClinicId, selectedDoctorId);
+      getAvailableDoctorTime(selectedDoctorId);
     }
   }, [selectedDoctorId, selectedClinicId]);
 
@@ -115,6 +113,8 @@ const ResultExaminationModal = ({
 
   const handleClose = () => {
     form.resetFields();
+    setSelectedClinicId(null)
+    setSelectedDoctorId(null)
     onClose();
   };
 
@@ -153,7 +153,8 @@ const ResultExaminationModal = ({
       setLoading(false);
     }
   };
-
+  // console.log("selectedClinicId", selectedClinicId, "selectedDoctorId", selectedDoctorId)
+  console.log("availableDoctorTime", availableDoctorTime)
   return (
     <Modal
       open={open}
@@ -240,12 +241,9 @@ const ResultExaminationModal = ({
                 ]}
               >
                 <Select onChange={(value) => {
-                  if (value === "") {
-                    setSelectedClinicId(value)
-                    setSelectedDoctorId(null)
-                  } else {
-                    setSelectedClinicId(value)
-                  }
+                  setSelectedClinicId(value)
+                  setSelectedDoctorId("")
+                  form.setFieldsValue({ doctor_id: "" });
                 }}
                   options={allClinics} />
               </Form.Item>
@@ -278,17 +276,28 @@ const ResultExaminationModal = ({
 
             <Form.Item
               name="doctor_id"
-              label="Bác sĩ"
-
+              label="Bác sĩ khám"
               rules={[{ required: true, message: "Vui lòng chọn bác sĩ" }]}
             >
-              <Select onChange={(value) => setSelectedDoctorId(value)} options={doctorInClinic} />
+              <Select onChange={(value) => setSelectedDoctorId(value)} options={[...doctorInClinic, { value: "", label: "" }]} />
             </Form.Item>
             {
               selectedDoctorId && (
                 <>
                   <div className="mb-2 text-sm">
-                    Thời gian khám: {availableDoctorTime.length > 0 ? availableDoctorTime.map((time) => time.time).join(", ") : "Hết ca khám"}
+                    Thời gian khám:
+
+                    <div className="mt-2">
+                      {availableDoctorTime.length > 0 ?
+                        availableDoctorTime.map((time) =>
+                          <Button className="mr-2" onClick={() => form.setFieldsValue({ examined_at: time.start_time })}>
+                            {dayjs(time.start_time).format("HH:mm")} - {dayjs(time.end_time).format("HH:mm")}
+                          </Button>)
+                        :
+                        <span className="text-red-500">Hết ca khám</span>
+                      }
+                    </div>
+
                   </div>
                 </>
               )
