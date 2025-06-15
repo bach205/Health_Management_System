@@ -1,7 +1,7 @@
 import type { IDoctor } from "../types/index.type";
 import instance from "../api/mainRequest";
 const BASE_URL = "api/v1/doctor";
-
+const EXAMINATION_DETAIL_URL = "api/v1/examination-detail";
 export const createDoctor = (doctor: IDoctor) => {
     return instance.post(`${BASE_URL}/create`, doctor);
 };
@@ -24,4 +24,12 @@ export const updateStatus = (id: number, status: boolean) => {
 
 export const updatePassword = (id: number) => {
     return instance.post(`${BASE_URL}/update-password/`, { id });
+};
+
+export const getDoctorAvailableSlots = (doctorId: number) => {
+    return instance.get(`${EXAMINATION_DETAIL_URL}/available-slots/${doctorId}`);
+};
+
+export const getDoctorsInClinic = (clinicId: number) => {
+    return instance.get(`${EXAMINATION_DETAIL_URL}/doctors/${clinicId}`);
 };

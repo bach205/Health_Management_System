@@ -1,6 +1,18 @@
 const prisma = require("../config/prisma");
 
 class ExaminationRecordService {
+    static async createIfNotExists(patient_id) {
+        let record = await prisma.examinationRecord.findFirst({
+            where: { patient_id, final_diagnosis: null },
+        });
+        if (!record) {
+            record = await prisma.examinationRecord.create({
+                data: { patient_id }
+            });
+        }
+        return record;
+    }
+
     static async create(data) {
         try {
             const { patient_id } = data;
@@ -14,8 +26,6 @@ class ExaminationRecordService {
             if (!queue) {
                 throw new Error("Bệnh nhân không có lịch khám");
             }
-
-
 
             await prisma.queue.update({
                 where: { id: queue.id },

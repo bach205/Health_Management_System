@@ -34,7 +34,7 @@ class DoctorService {
             ];
             let sendEmail = false;
             if (!doctorData.password || doctorData.password.trim() === '') {
-                const password = Math.floor(100000 + Math.random() * 900000);
+                const password = this.#createRandomPassword();
                 doctorData.password = password.toString();
                 sendEmail = true;
             }
@@ -67,7 +67,7 @@ class DoctorService {
                 value.password,
                 parseInt(process.env.BCRYPT_SALT_ROUNDS)
             );
-            
+
 
             // Create doctor
             const doctor = await prisma.user.create({
@@ -259,7 +259,7 @@ class DoctorService {
     updatePassword = async (body) => {
         try {
             const { id } = body;
-            const password = Math.floor(100000 + Math.random() * 900000).toString();
+            const password = this.#createRandomPassword();
             const hashedPassword = await bcrypt.hash(
                 password,
                 parseInt(process.env.BCRYPT_SALT_ROUNDS)
@@ -278,6 +278,39 @@ class DoctorService {
             throw new BadRequestError("Có lỗi xảy ra, vui lòng thử lại!");
         }
     }
+    #createRandomPassword() {
+        const upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        const lower = "abcdefghijklmnopqrstuvwxyz";
+        const digits = "0123456789";
+        const special = "!@#$%^&*()_+[]{}?";
+
+        const getRandom = (charset) => charset[Math.floor(Math.random() * charset.length)];
+
+        const mustInclude = [
+            getRandom(upper),
+            getRandom(lower),
+            getRandom(digits),
+            getRandom(special),
+        ];
+
+        const totalLength = 6;
+
+        const all = upper + lower + digits + special;
+        while (mustInclude.length < totalLength) {
+            mustInclude.push(getRandom(all));
+        }
+
+        for (let i = mustInclude.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = mustInclude[i];
+            mustInclude[i] = mustInclude[j];
+            mustInclude[j] = temp;
+        }
+
+        return mustInclude.join('');
+    }
+
+
 }
 
 module.exports = new DoctorService();

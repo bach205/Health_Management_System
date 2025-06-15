@@ -20,12 +20,8 @@ class ClinicController {
 
   async getAllClinics(req, res) {
     try {
-      const { page, limit, search } = req.query;
-      const result = await ClinicService.getAllClinics(
-        parseInt(page) || 1,
-        parseInt(limit) || 10,
-        search
-      );
+      const { search } = req.query;
+      const result = await ClinicService.getAllClinics(search);
       return new OK({
         message: "Lấy danh sách phòng khám thành công",
         metadata: result,

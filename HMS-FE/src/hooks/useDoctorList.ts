@@ -3,7 +3,7 @@ import { getDoctors } from "../services/doctor.service";
 import type { IDoctor, IPagination } from "../types/index.type";
 import { message } from "antd";
 
-export const useDoctorList = () => {
+export const useDoctorList = (initialPagination?: Partial<IPagination>) => {
     const [users, setUsers] = useState<IDoctor[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [keyword, setKeyword] = useState<string>("");
@@ -13,29 +13,31 @@ export const useDoctorList = () => {
     const [isActive, setIsActive] = useState<string>("all");
     const [pagination, setPagination] = useState<IPagination>({
         total: 0,
-        pageSize: 10,
-        current: 1,
+        pageSize: initialPagination?.pageSize || 10,
+        current: initialPagination?.current || 1,
     });
 
     useEffect(() => {
         const fetchData = async () => {
+            setLoading(true);
             try {
-                setLoading(true);
-
                 const searchOptions = {
                     searchKey: keyword,
-                    specialty: specialty,
+                    specialty,
                     sortBy: sort,
                     skip: (pagination.current - 1) * pagination.pageSize,
                     limit: pagination.pageSize,
-                    isActive: isActive,
-                }
+                    isActive,
+                };
 
-                const res = await getDoctors(searchOptions)
-                // console.log('res: ', res)
+                const res = await getDoctors(searchOptions);
                 setUsers(res.data.metadata.doctors);
-                setPagination({ ...pagination, total: res.data.metadata.total })
+                setPagination((prev) => ({
+                    ...prev,
+                    total: res.data.metadata.total,
+                }));
                 setLoading(false);
+
             } catch (error: any) {
                 console.log(error)
                 if (error?.response?.data?.errors) {
@@ -52,9 +54,20 @@ export const useDoctorList = () => {
                 }
                 setLoading(false);
             }
-        }
+        };
         fetchData();
-    }, [reload, pagination.current, pagination.pageSize, specialty, sort, isActive]);
+    }, [reload, pagination.current, specialty, sort, isActive]);
+
+    useEffect(() => {
+        setPagination((prev) => ({
+            ...prev,
+            current: 1,
+        }));
+    }, [specialty]);
+
+    // useEffect(() => {
+    //     setPagination({ ...pagination, current: 1 })
+    // }, [specialty])
 
     const handleTableChange = (pagination: IPagination) => {
         setPagination(pagination);
