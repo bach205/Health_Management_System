@@ -135,17 +135,24 @@ class ExaminationDetailService {
 
 
   static async getDoctorAvailableSlots(doctorId) {
-    const now = new Date();
-    const todayStart = new Date(now.setHours(0, 0, 0, 0));
-    const todayEnd = new Date(now.setHours(23, 59, 59, 999));
-
     return prisma.availableSlot.findMany({
       where: {
         doctor_id: +doctorId,
-        // slot_date: {
-        //   gte: todayStart,
-        //   lte: todayEnd,
-        // },
+        is_available: true,
+      },
+      include: {
+        doctor: {
+          select: {
+            id: true,
+            full_name: true,
+          },
+        },
+        clinic: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
     });
   }

@@ -13,43 +13,172 @@ import {
 } from 'antd';
 import { UserOutlined, PhoneOutlined, MailOutlined, CalendarOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+dayjs.extend(utc);
+import { getAllAvailableSlotsService, nurseBookAppointmentService } from '../../services/appointment.service';
+import { getDoctors } from '../../services/doctor.service';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const { Option } = Select;
+const { TextArea } = Input;
 
-interface BookAppointmentFormData {
-  patientName: string;
-  phoneNumber: string;
-  email: string;
-  appointmentDate: string;
-  appointmentTime: string;
-  doctorId: string;
-  symptoms: string;
+interface Doctor {
+  id: number;
+  name: string;
+  clinics: {
+    id: number;
+    name: string;
+  }[];
+}
+
+interface TimeSlot {
+  value: string;
+  label: string;
+}
+
+interface AvailableSlot {
+  id: number;
+  doctor_id: number;
+  clinic_id: number;
+  slot_date: string;
+  start_time: string;
+  end_time: string;
+  is_available: boolean;
+  doctor_name: string;
+  doctor_role: string;
+  clinic_name: string;
 }
 
 const NurseBookAppointment: React.FC = () => {
   const [form] = Form.useForm();
-  const [doctors, setDoctors] = useState<any[]>([]);
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [availableSlots, setAvailableSlots] = useState<AvailableSlot[]>([]);
+  const [selectedDoctor, setSelectedDoctor] = useState<number | null>(null);
+  const [selectedClinic, setSelectedClinic] = useState<number | null>(null);
+  const [availableDates, setAvailableDates] = useState<string[]>([]);
+  const [availableTimes, setAvailableTimes] = useState<TimeSlot[]>([]);
+  const [clinics, setClinics] = useState<{id: number, name: string}[]>([]);
 
   useEffect(() => {
-    // TODO: Fetch doctors list from API
-    // This is a placeholder for demonstration
-    setDoctors([
-      { id: '1', name: 'Dr. John Doe', specialization: 'General Medicine' },
-      { id: '2', name: 'Dr. Jane Smith', specialization: 'Cardiology' },
-    ]);
+    const fetchDoctorsAndSlots = async () => {
+      try {
+        const response = await getAllAvailableSlotsService();
+        console.log(response);
+        if (response.success) {
+          setAvailableSlots(response.data);
+          
+          // Build doctors with clinics array
+          const doctorsMap = new Map<number, Doctor>();
+          const clinicsMap = new Map<number, string>();
+
+          response.data.forEach((slot: AvailableSlot) => {
+            // Add to doctors map
+            if (!doctorsMap.has(slot.doctor_id)) {
+              doctorsMap.set(slot.doctor_id, {
+                id: slot.doctor_id,
+                name: slot.doctor_name,
+                clinics: [{ id: slot.clinic_id, name: slot.clinic_name }]
+              });
+            } else {
+              const doctor = doctorsMap.get(slot.doctor_id)!;
+              if (!doctor.clinics.some(c => c.id === slot.clinic_id)) {
+                doctor.clinics.push({ id: slot.clinic_id, name: slot.clinic_name });
+              }
+            }
+            
+            // Add to clinics map
+            if (!clinicsMap.has(slot.clinic_id)) {
+              clinicsMap.set(slot.clinic_id, slot.clinic_name);
+            }
+          });
+          setDoctors(Array.from(doctorsMap.values()));
+          setClinics(Array.from(clinicsMap.entries()).map(([id, name]) => ({ id, name })));
+        }
+      } catch (error) {
+        message.error('Failed to fetch doctors and slots');
+      }
+    };
+    fetchDoctorsAndSlots();
   }, []);
 
-  const onFinish = async (values: BookAppointmentFormData) => {
-    try {
-      setLoading(true);
-      // TODO: Implement API call to save appointment
-      console.log('Form values:', values);
+  // Update available clinics and dates when doctor is selected
+  const handleDoctorChange = (doctorId: number) => {
+    setSelectedDoctor(doctorId);
+    setSelectedClinic(null);
+    
+    // Reset form fields
+    form.setFieldsValue({
+      clinic_id: null,
+      appointment_date: null,
+      appointment_time: null
+    });
+  };
 
-      message.success('Appointment booked successfully!');
-      form.resetFields();
-    } catch (error) {
-      message.error('Failed to book appointment. Please try again.');
+  // Update available dates and times when clinic is selected
+  const handleClinicChange = (clinicId: number) => {
+    setSelectedClinic(clinicId);
+    const doctorSlots = availableSlots.filter(slot => 
+      slot.doctor_id === selectedDoctor && 
+      slot.clinic_id === clinicId
+    );
+    
+    // Get unique dates
+    const dates = Array.from(new Set(doctorSlots.map(slot => 
+      dayjs(slot.slot_date).format('YYYY-MM-DD')
+    )));
+    setAvailableDates(dates);
+
+    // Reset form fields
+    form.setFieldsValue({
+      appointment_date: null,
+      appointment_time: null
+    });
+  };
+
+  // Update available times when date is selected
+  const handleDateChange = (date: dayjs.Dayjs | null) => {
+    if (!selectedClinic || !date) return;
+
+    const selectedDate = dayjs(date).format('YYYY-MM-DD');
+    const times = availableSlots
+      .filter(slot => 
+        slot.doctor_id === selectedDoctor && 
+        slot.clinic_id === selectedClinic &&
+        dayjs(slot.slot_date).format('YYYY-MM-DD') === selectedDate
+      )
+      .map(slot => ({
+        value: dayjs.utc(slot.start_time).format('HH:mm'),
+        label: `${dayjs.utc(slot.start_time).format('HH:mm')} - ${dayjs.utc(slot.end_time).format('HH:mm')}`
+      }));
+      console.log(times);
+    setAvailableTimes(times);
+
+    // Reset time field
+    form.setFieldsValue({
+      appointment_time: null
+    });
+  };
+
+  const onFinish = async (values: any) => {
+    setLoading(true);
+    try {
+      const response = await nurseBookAppointmentService({
+        ...values,
+        doctor_id: selectedDoctor,
+        clinic_id: selectedClinic,
+        appointment_date: dayjs(values.appointment_date).format('YYYY-MM-DD'),
+        appointment_time: values.appointment_time
+      });
+
+      if (response.success) {
+        message.success('Đặt lịch thành công');
+        navigate('/nurse/appointments');
+      }
+    } catch (error: any) {
+      message.error(error.response?.data?.message || 'Đặt lịch thất bại');
     } finally {
       setLoading(false);
     }
@@ -57,33 +186,34 @@ const NurseBookAppointment: React.FC = () => {
 
   return (
     <div className="w-full flex justify-center">
-      <Card title="Book New Appointment" className="max-w-3xl mx-auto w-full">
+      <Card title="Đặt lịch khám qua y tá" className="max-w-3xl mx-auto w-full">
         <Form
           form={form}
           layout="vertical"
           onFinish={onFinish}
           autoComplete="off"
         >
+          {/* Thông tin bệnh nhân */}
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
                 name="patientName"
-                label="Patient Name"
-                rules={[{ required: true, message: 'Please enter patient name' }]}
+                label="Tên bệnh nhân"
+                rules={[{ required: true, message: 'Vui lòng nhập tên bệnh nhân' }]}
               >
-                <Input prefix={<UserOutlined />} placeholder="Enter patient name" />
+                <Input prefix={<UserOutlined />} placeholder="Nhập tên bệnh nhân" />
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item
                 name="phoneNumber"
-                label="Phone Number"
+                label="Số điện thoại"
                 rules={[
-                  { required: true, message: 'Please enter phone number' },
-                  { pattern: /^\d{10}$/, message: 'Please enter a valid 10-digit phone number' }
+                  { required: true, message: 'Vui lòng nhập số điện thoại' },
+                  { pattern: /^\d{10}$/, message: 'Số điện thoại không hợp lệ' }
                 ]}
               >
-                <Input prefix={<PhoneOutlined />} placeholder="Enter phone number" />
+                <Input prefix={<PhoneOutlined />} placeholder="Nhập số điện thoại" />
               </Form.Item>
             </Col>
           </Row>
@@ -94,25 +224,55 @@ const NurseBookAppointment: React.FC = () => {
                 name="email"
                 label="Email"
                 rules={[
-                  { required: true, message: 'Please enter email' },
-                  { type: 'email', message: 'Please enter a valid email' }
+                  { required: true, message: 'Vui lòng nhập email' },
+                  { type: 'email', message: 'Email không hợp lệ' }
                 ]}
               >
-                <Input prefix={<MailOutlined />} placeholder="Enter email" />
+                <Input prefix={<MailOutlined />} placeholder="Nhập email" />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          {/* Thông tin lịch hẹn */}
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                name="doctor_id"
+                label="Bác sĩ"
+                rules={[{ required: true, message: 'Vui lòng chọn bác sĩ' }]}
+              >
+                <Select 
+                  placeholder="Chọn bác sĩ"
+                  onChange={handleDoctorChange}
+                >
+                  {doctors.map(doctor => (
+                    <Option key={doctor.id} value={doctor.id}>
+                      {doctor.name}
+                    </Option>
+                  ))}
+                </Select>
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item
-                name="doctorId"
-                label="Select Doctor"
-                rules={[{ required: true, message: 'Please select a doctor' }]}
+                name="clinic_id"
+                label="Phòng khám"
+                rules={[{ required: true, message: 'Vui lòng chọn phòng khám' }]}
               >
-                <Select placeholder="Select a doctor">
-                  {doctors.map(doctor => (
-                    <Option key={doctor.id} value={doctor.id}>
-                      {doctor.name} - {doctor.specialization}
-                    </Option>
-                  ))}
+                <Select 
+                  placeholder="Chọn phòng khám"
+                  onChange={handleClinicChange}
+                  disabled={!selectedDoctor}
+                >
+                  {(() => {
+                    if (!selectedDoctor) return null;
+                    const doctor = doctors.find(d => d.id === selectedDoctor);
+                    return doctor?.clinics.map(clinic => (
+                      <Option key={clinic.id} value={clinic.id}>
+                        {clinic.name}
+                      </Option>
+                    ));
+                  })()}
                 </Select>
               </Form.Item>
             </Col>
@@ -121,45 +281,58 @@ const NurseBookAppointment: React.FC = () => {
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
-                name="appointmentDate"
-                label="Appointment Date"
-                rules={[{ required: true, message: 'Please select appointment date' }]}
+                name="appointment_date"
+                label="Ngày khám"
+                rules={[{ required: true, message: 'Vui lòng chọn ngày khám' }]}
               >
-                <DatePicker
+                <DatePicker 
                   className="w-full"
-                  format="YYYY-MM-DD"
                   disabledDate={(current) => {
-                    return current && current < dayjs().startOf('day');
+                    return !availableDates.includes(dayjs(current).format('YYYY-MM-DD'));
                   }}
+                  onChange={handleDateChange}
+                  disabled={!selectedClinic}
                 />
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item
-                name="appointmentTime"
-                label="Appointment Time"
-                rules={[{ required: true, message: 'Please select appointment time' }]}
+                name="appointment_time"
+                label="Giờ khám"
+                rules={[{ required: true, message: 'Vui lòng chọn giờ khám' }]}
               >
-                <TimePicker
-                  className="w-full"
-                  format="HH:mm"
-                  minuteStep={30}
-                />
+                <Select 
+                  placeholder="Chọn khung giờ"
+                  disabled={!form.getFieldValue('appointment_date')}
+                >
+                  {availableTimes.map(time => (
+                    <Option key={time.value} value={time.value}>
+                      {time.label}
+                    </Option>
+                  ))}
+                </Select>
               </Form.Item>
             </Col>
           </Row>
 
           <Form.Item
-            name="symptoms"
-            label="Symptoms/Notes"
-            rules={[{ required: true, message: 'Please enter symptoms or notes' }]}
+            name="reason"
+            label="Lý do khám"
+            rules={[{ required: true, message: 'Vui lòng nhập lý do khám' }]}
           >
-            <Input.TextArea rows={4} placeholder="Enter symptoms or any additional notes" />
+            <TextArea rows={4} placeholder="Nhập lý do khám" />
+          </Form.Item>
+
+          <Form.Item
+            name="note"
+            label="Ghi chú"
+          >
+            <TextArea rows={2} placeholder="Nhập ghi chú (nếu có)" />
           </Form.Item>
 
           <Form.Item>
             <Button type="primary" htmlType="submit" loading={loading} className="w-full">
-              Book Appointment
+              Đặt lịch khám
             </Button>
           </Form.Item>
         </Form>

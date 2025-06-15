@@ -47,7 +47,7 @@ const Workschedule = () => {
   const [editingRecord, setEditingRecord] = useState<WorkSchedule | null>(null);
   const [selectedRecord, setSelectedRecord] = useState<WorkSchedule | null>(null);
   const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
-  
+  const [change, setChange] = useState(true);
   useEffect(() => {
     const fetchData = async () => {
  
@@ -55,22 +55,23 @@ const Workschedule = () => {
         const user = await getDoctorService();
         const clinic = await getClinicService();
         const shift = await getShiftService();
+ //       console.log(clinic);
  //     console.log(user.data.metadata);
         setShifts(shift.data.data);
         setClinics(clinic.data.metadata.clinics);
         setUsers(user.data.metadata);
-
+        console.log(res.data.data);
         const enrichedData = res.data.data.map((item: any) => ({
           ...item,
           user_name: user.data.metadata.find((u: any) => u.id === item.user_id)?.full_name || '',
           shift_name: shift.data.data.find((s: any) => s.id === item.shift_id)?.name || '',
         }));
         setData(enrichedData);
-    
+        
     };
 
     fetchData();
-  }, []);
+  }, [change]);
    
   const handleView = (record: WorkSchedule) => {
     setSelectedRecord(record);
@@ -80,6 +81,7 @@ const Workschedule = () => {
     setEditingRecord(null);
     form.resetFields();
     setIsModalVisible(true);
+    
   };
 
   const handleEdit = (record: WorkSchedule) => {
@@ -215,7 +217,10 @@ const Workschedule = () => {
         title={editingRecord ? 'Cập Nhật Lịch' : 'Thêm Lịch'}
         open={isModalVisible}
         onCancel={() => setIsModalVisible(false)}
-        onOk={() => form.submit()}
+        onOk={() => {
+          form.submit();
+          setChange(!change);
+        }}
       >
         <Form form={form} layout="vertical" onFinish={handleSubmit}>
           <Form.Item name="user_id" label="Nhân viên" rules={[{ required: true }]}>
@@ -237,8 +242,19 @@ const Workschedule = () => {
               ))}
             </Select>
           </Form.Item>
-          <Form.Item name="work_date" label="Ngày làm việc" rules={[{ required: true }]}>
-            <DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" />
+          <Form.Item name="work_date" label="Ngày làm việc" rules={[{ required: true, message: 'Vui lòng chọn ngày làm việc' }, ({ getFieldValue }) => ({
+            validator(_, value) {
+              if (!value || value.isAfter(dayjs(), 'day')) {
+                return Promise.resolve();
+              }
+              return Promise.reject(new Error('Chỉ được chọn ngày lớn hơn ngày hiện tại!'));
+            },
+          })]}>
+            <DatePicker
+              style={{ width: '100%' }}
+              format="DD/MM/YYYY"
+              disabledDate={current => current && current.isBefore(dayjs(), 'day')}
+            />
           </Form.Item>
           <Form.Item name="shift_id" label="Ca làm" rules={[{ required: true }]}>
             <Select placeholder="Chọn ca làm">

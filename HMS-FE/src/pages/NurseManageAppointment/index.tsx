@@ -19,19 +19,29 @@ import {
   SearchOutlined,
   FilterOutlined
 } from '@ant-design/icons';
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
+import { getAllAppointmentsService, confirmAppointmentService, cancelAppointmentService } from '../../services/appointment.service';
 
 interface Appointment {
-  id: string;
-  patientName: string;
-  patientEmail: string;
-  patientPhone: string;
-  doctorName: string;
-  appointmentDate: string;
-  appointmentTime: string;
-  status: 'pending' | 'confirmed' | 'rejected' | 'completed';
-  symptoms: string;
-  createdAt: string;
+  id: number;
+  patient_name: string;
+  patient_email: string;
+  identity_number: string;
+  doctor_name: string;
+  clinic_name: string;
+  formatted_date: string;
+  formatted_time: string;
+  status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
+  reason: string;
+  note: string;
+  priority: number;
+  created_at: string;
+}
+
+interface Filters {
+  status: string;
+  dateRange: [Dayjs | null, Dayjs | null] | null;
+  search: string;
 }
 
 const { RangePicker } = DatePicker;
@@ -43,8 +53,8 @@ const NurseManageAppointment: React.FC = () => {
   const [rejectModalVisible, setRejectModalVisible] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
-  const [filters, setFilters] = useState({
-    status: 'pending',
+  const [filters, setFilters] = useState<Filters>({
+    status: 'all',
     dateRange: null,
     search: '',
   });
@@ -57,29 +67,40 @@ const NurseManageAppointment: React.FC = () => {
   const fetchAppointments = async () => {
     try {
       setLoading(true);
-      // TODO: Replace with actual API call
-      // Example API call:
-      // const response = await appointmentService.getNurseAppointments(filters);
-      // setAppointments(response.data);
-      
-      // Temporary mock data
-      setAppointments([
-        {
-          id: '1',
-          patientName: 'John Doe',
-          patientEmail: 'john@example.com',
-          patientPhone: '1234567890',
-          doctorName: 'Dr. Smith',
-          appointmentDate: '2024-03-20',
-          appointmentTime: '10:00',
-          status: 'pending',
-          symptoms: 'Fever and headache',
-          createdAt: '2024-03-18T10:00:00Z'
-        },
-        // Add more mock data as needed
-      ]);
+      const response = await getAllAppointmentsService();
+      let filteredData = response.data;
+
+      // Filter by status
+      if (filters.status !== 'all') {
+        filteredData = filteredData.filter((appointment: Appointment) => 
+          appointment.status === filters.status
+        );
+      }
+
+      // Filter by date range
+      if (filters.dateRange && filters.dateRange[0] && filters.dateRange[1]) {
+        const startDate = dayjs(filters.dateRange[0]).startOf('day');
+        const endDate = dayjs(filters.dateRange[1]).endOf('day');
+        filteredData = filteredData.filter((appointment: Appointment) => {
+          const appointmentDate = dayjs(appointment.formatted_date);
+          return appointmentDate.isAfter(startDate) && appointmentDate.isBefore(endDate);
+        });
+      }
+
+      // Filter by search
+      if (filters.search) {
+        const searchLower = filters.search.toLowerCase();
+        filteredData = filteredData.filter((appointment: Appointment) => 
+          appointment.patient_name.toLowerCase().includes(searchLower) ||
+          appointment.doctor_name.toLowerCase().includes(searchLower) ||
+          appointment.patient_email.toLowerCase().includes(searchLower) ||
+          appointment.identity_number.includes(searchLower)
+        );
+      }
+
+      setAppointments(filteredData);
     } catch (error) {
-      message.error('Failed to fetch appointments');
+      message.error('Không thể tải danh sách lịch hẹn');
     } finally {
       setLoading(false);
     }
@@ -88,13 +109,11 @@ const NurseManageAppointment: React.FC = () => {
   const handleConfirmAppointment = async (appointment: Appointment) => {
     try {
       setLoading(true);
-      // TODO: Replace with actual API call
-      // await appointmentService.confirmAppointment(appointment.id);
-      
-      message.success('Appointment confirmed successfully');
+      await confirmAppointmentService(appointment);
+      message.success('Xác nhận lịch hẹn thành công');
       fetchAppointments();
     } catch (error) {
-      message.error('Failed to confirm appointment');
+      message.error('Không thể xác nhận lịch hẹn');
     } finally {
       setLoading(false);
     }
@@ -105,16 +124,17 @@ const NurseManageAppointment: React.FC = () => {
 
     try {
       setLoading(true);
-      // TODO: Replace with actual API call
-      // await appointmentService.rejectAppointment(selectedAppointment.id, rejectReason);
-      
-      message.success('Appointment rejected successfully');
+      await cancelAppointmentService({ 
+        id: selectedAppointment.id, 
+        reason: rejectReason 
+      });
+      message.success('Hủy lịch hẹn thành công');
       setRejectModalVisible(false);
       setRejectReason('');
       setSelectedAppointment(null);
       fetchAppointments();
     } catch (error) {
-      message.error('Failed to reject appointment');
+      message.error('Không thể hủy lịch hẹn');
     } finally {
       setLoading(false);
     }
@@ -127,10 +147,10 @@ const NurseManageAppointment: React.FC = () => {
 
   const getStatusTag = (status: Appointment['status']) => {
     const statusConfig = {
-      pending: { color: 'gold', text: 'Pending' },
-      confirmed: { color: 'green', text: 'Confirmed' },
-      rejected: { color: 'red', text: 'Rejected' },
-      completed: { color: 'blue', text: 'Completed' }
+      pending: { color: 'gold', text: 'Chờ xác nhận' },
+      confirmed: { color: 'green', text: 'Đã xác nhận' },
+      cancelled: { color: 'red', text: 'Đã hủy' },
+      completed: { color: 'blue', text: 'Đã hoàn thành' }
     };
 
     const config = statusConfig[status];
@@ -139,52 +159,57 @@ const NurseManageAppointment: React.FC = () => {
 
   const columns = [
     {
-      title: 'Patient Name',
-      dataIndex: 'patientName',
-      key: 'patientName',
+      title: 'Tên bệnh nhân',
+      dataIndex: 'patient_name',
+      key: 'patient_name',
       sorter: true,
     },
     {
-      title: 'Contact',
+      title: 'Thông tin liên hệ',
       key: 'contact',
       render: (record: Appointment) => (
         <Space direction="vertical" size="small">
-          <div>{record.patientEmail}</div>
-          <div>{record.patientPhone}</div>
+          <div>{record.patient_email}</div>
+          <div>CCCD: {record.identity_number}</div>
         </Space>
       ),
     },
     {
-      title: 'Doctor',
-      dataIndex: 'doctorName',
-      key: 'doctorName',
+      title: 'Bác sĩ',
+      dataIndex: 'doctor_name',
+      key: 'doctor_name',
     },
     {
-      title: 'Date & Time',
+      title: 'Phòng khám',
+      dataIndex: 'clinic_name',
+      key: 'clinic_name',
+    },
+    {
+      title: 'Ngày & Giờ',
       key: 'datetime',
       render: (record: Appointment) => (
         <Space direction="vertical" size="small">
-          <div>{dayjs(record.appointmentDate).format('MMM DD, YYYY')}</div>
-          <div>{record.appointmentTime}</div>
+          <div>{dayjs(record.formatted_date).format('DD/MM/YYYY')}</div>
+          <div>{record.formatted_time}</div>
         </Space>
       ),
       sorter: true,
     },
     {
-      title: 'Status',
+      title: 'Trạng thái',
       key: 'status',
       render: (record: Appointment) => getStatusTag(record.status),
       filters: [
-        { text: 'Pending', value: 'pending' },
-        { text: 'Confirmed', value: 'confirmed' },
-        { text: 'Rejected', value: 'rejected' },
-        { text: 'Completed', value: 'completed' },
+        { text: 'Chờ xác nhận', value: 'pending' },
+        { text: 'Đã xác nhận', value: 'confirmed' },
+        { text: 'Đã hủy', value: 'cancelled' },
+        { text: 'Đã hoàn thành', value: 'completed' },
       ],
     },
     {
-      title: 'Symptoms',
-      dataIndex: 'symptoms',
-      key: 'symptoms',
+      title: 'Lý do khám',
+      dataIndex: 'reason',
+      key: 'reason',
       render: (text: string) => (
         <Tooltip title={text}>
           <div className="max-w-[200px] truncate">{text}</div>
@@ -192,7 +217,7 @@ const NurseManageAppointment: React.FC = () => {
       ),
     },
     {
-      title: 'Actions',
+      title: 'Thao tác',
       key: 'actions',
       render: (record: Appointment) => (
         <Space>
@@ -203,14 +228,14 @@ const NurseManageAppointment: React.FC = () => {
                 icon={<CheckCircleOutlined />}
                 onClick={() => handleConfirmAppointment(record)}
               >
-                Confirm
+                Xác nhận
               </Button>
               <Button
                 danger
                 icon={<CloseCircleOutlined />}
                 onClick={() => showRejectModal(record)}
               >
-                Reject
+                Hủy
               </Button>
             </>
           )}
@@ -221,50 +246,48 @@ const NurseManageAppointment: React.FC = () => {
 
   return (
     <div className="p-6">
-      <Card title="Manage Appointments">
+      <Card title="Quản lý lịch hẹn">
         {/* Filters */}
         <div className="mb-4 flex gap-4">
           <Input
-            placeholder="Search patient name or doctor"
+            placeholder="Tìm kiếm tên bệnh nhân hoặc bác sĩ"
             prefix={<SearchOutlined />}
             className="max-w-xs"
             value={filters.search}
             onChange={e => setFilters(prev => ({ ...prev, search: e.target.value }))}
+            allowClear
           />
           <Select
-            placeholder="Filter by status"
+            placeholder="Lọc theo trạng thái"
             className="min-w-[150px]"
             value={filters.status}
             onChange={status => setFilters(prev => ({ ...prev, status }))}
+            allowClear
           >
-            <Option value="all">All Status</Option>
-            <Option value="pending">Pending</Option>
-            <Option value="confirmed">Confirmed</Option>
-            <Option value="rejected">Rejected</Option>
-            <Option value="completed">Completed</Option>
+            <Option value="all">Tất cả</Option>
+            <Option value="pending">Chờ xác nhận</Option>
+            <Option value="confirmed">Đã xác nhận</Option>
+            <Option value="cancelled">Đã hủy</Option>
+            <Option value="completed">Đã hoàn thành</Option>
           </Select>
           <RangePicker
-            onChange={(dates) => setFilters(prev => ({ ...prev, dateRange: dates as null }))}
+            value={filters.dateRange}
+            onChange={(dates) => setFilters(prev => ({ ...prev, dateRange: dates }))}
+            format="DD/MM/YYYY"
+            allowClear
           />
         </div>
 
-        {/* Appointments Table */}
         <Table
           columns={columns}
           dataSource={appointments}
           rowKey="id"
           loading={loading}
-          pagination={{
-            total: appointments.length,
-            pageSize: 10,
-            showSizeChanger: true,
-            showTotal: (total) => `Total ${total} appointments`,
-          }}
+          pagination={{ pageSize: 10 }}
         />
 
-        {/* Reject Modal */}
         <Modal
-          title="Reject Appointment"
+          title="Lý do hủy lịch hẹn"
           open={rejectModalVisible}
           onOk={handleRejectAppointment}
           onCancel={() => {
@@ -274,13 +297,11 @@ const NurseManageAppointment: React.FC = () => {
           }}
           confirmLoading={loading}
         >
-          <p>Are you sure you want to reject this appointment?</p>
           <Input.TextArea
             rows={4}
-            placeholder="Please provide a reason for rejection"
             value={rejectReason}
             onChange={e => setRejectReason(e.target.value)}
-            className="mt-4"
+            placeholder="Nhập lý do hủy lịch hẹn"
           />
         </Modal>
       </Card>

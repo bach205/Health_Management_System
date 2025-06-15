@@ -25,18 +25,15 @@ import MyAppointment from "./pages/Patient/MyAppointment";
 import Examination from "./pages/Doctor/Examination";
 import DoctorProfile from "./pages/Doctor/DoctorProfile";
 import type { Role } from "./store/authStore";
-<<<<<<< HEAD
 import Resetpass from "./pages/ResetPassWord"; // Fixed casing to match actual file path
 import PatientBookAppointment from "./pages/BookAppointment";
 import './styles/scrollbar.css';
 import NurseBookAppointment from "./pages/NurseBookAppointment";
 import NurseManageAppointment from "./pages/NurseManageAppointment";
-=======
-import Resetpass from "./pages/ResetPassWord";
+
 import AllDoctor from "./pages/Patient/AllDoctor";
 import About from "./pages/Patient/About";
 import Contact from "./pages/Patient/Contact";
->>>>>>> 55859317d88f00e3cf07ad3610a360679fd0ca3d
 dayjs.extend(plugin);
 dayjs.updateLocale("en", {
   weekStart: 1,

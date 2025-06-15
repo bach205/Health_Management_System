@@ -1,5 +1,6 @@
-import axios from 'axios';
-// import { API_URL } from '../config';
+import mainRequest from "../api/mainRequest";
+
+const baseURL = `/api/v1`;
 
 export interface AppointmentData {
   patientName: string;
@@ -19,65 +20,48 @@ export interface AppointmentFilters {
   pageSize?: number;
 }
 
-const appointmentService = {
-  createAppointment: async (appointmentData: AppointmentData) => {
-    try {
-      const response = await axios.post(`/api/appointments`, appointmentData);
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
-  },
+export const getAvailableTimeSlotsService = async (docId: string) => {
+  const response = await mainRequest.get(`${baseURL}/examination-detail/available-slots/${docId}`);
 
-  getDoctors: async () => {
-    try {
-      const response = await axios.get(`/api/doctors`);
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
-  },
-
-  getAvailableTimeSlots: async (doctorId: string, date: string) => {
-    try {
-      const response = await axios.get(
-        `/api/appointments/available-slots?doctorId=${doctorId}&date=${date}`
-      );
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
-  },
-
-  // New methods for nurse appointment management
-  getNurseAppointments: async (filters: AppointmentFilters) => {
-    try {
-      const response = await axios.get('/api/nurse/appointments', { params: filters });
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
-  },
-
-  confirmAppointment: async (appointmentId: string) => {
-    try {
-      const response = await axios.put(`/api/nurse/appointments/${appointmentId}/confirm`);
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
-  },
-
-  rejectAppointment: async (appointmentId: string, reason: string) => {
-    try {
-      const response = await axios.put(`/api/nurse/appointments/${appointmentId}/reject`, {
-        reason
-      });
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
-  }
+  return response.data;
 };
 
-export default appointmentService; 
+export const getAllAppointmentsService = async () => {
+  const response = await mainRequest.get(`${baseURL}/appointment/all`);
+  return response.data;
+};
+
+export const confirmAppointmentService = async (appointmentId: any) => {
+  console.log(appointmentId);
+  const response = await mainRequest.post(`${baseURL}/appointment/confirm`, { appointment_id: appointmentId?.id });
+  return response.data;
+};
+
+export const cancelAppointmentService = async (appointmentId: any) => {
+  const response = await mainRequest.post(`${baseURL}/appointment/cancel`, { appointment_id: appointmentId?.id, reason: appointmentId?.reason });
+  return response.data;
+};
+
+export const bookAppointmentService = async (appointmentData: any) => {
+  const response = await mainRequest.post(`${baseURL}/appointment/book`, appointmentData);
+  return response;
+};
+
+export const getPatientAppointmentsService = async (patientId: string | number) => {
+  const response = await mainRequest.get(`/api/v1/appointment/patient/${patientId}`);
+  return response.data;
+};
+
+export const updateAppointmentService = async (appointmentId: string | number, data: any) => {
+  return mainRequest.put(`/api/v1/appointment/${appointmentId}`, data);
+};
+
+export const nurseBookAppointmentService = async (appointmentData: any) => {
+  const response = await mainRequest.post(`${baseURL}/appointment/nurse-book`, appointmentData);
+  return response.data;
+};
+
+export const getAllAvailableSlotsService = async () => {
+  const response = await mainRequest.get(`/api/v1/appointment/slots`);
+  return response.data;
+};
