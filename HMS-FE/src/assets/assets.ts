@@ -15,6 +15,7 @@ import info_icon from './info_icon.svg'
 import upload_icon from './upload_icon.png'
 import stripe_logo from './stripe_logo.png'
 import razorpay_logo from './razorpay_logo.png'
+import prjLogo from './prjLogo.png'
 import doc1 from './doc1.png'
 import doc2 from './doc2.png'
 import doc3 from './doc3.png'
@@ -43,6 +44,7 @@ export const assets = {
     header_img,
     group_profiles,
     logo,
+    prjLogo,
     chats_icon,
     verified_icon,
     info_icon,
@@ -60,28 +62,34 @@ export const assets = {
 
 export const specialityData = [
     {
-        speciality: 'General physician',
-        image: General_physician
+        speciality: 'Nội trú',
+        image: General_physician,
+        link: 'general'
     },
     {
-        speciality: 'Gynecologist',
-        image: Gynecologist
+        speciality: 'Sản phụ khoa',
+        image: Gynecologist,
+        link: 'gynecologist'
     },
     {
-        speciality: 'Dermatologist',
-        image: Dermatologist
+        speciality: 'Chỉnh hình',
+        image: Dermatologist,
+        link: 'orthopedics'
     },
     {
-        speciality: 'Pediatricians',
-        image: Pediatricians
+        speciality: 'Nhi khoa',
+        image: Pediatricians,
+        link: 'pediatricians'
     },
     {
-        speciality: 'Neurologist',
-        image: Neurologist
+        speciality: 'Thần kinh học',
+        image: Neurologist,
+        link: 'neurologist'
     },
     {
-        speciality: 'Gastroenterologist',
-        image: Gastroenterologist
+        speciality: 'Tiêu hóa',
+        image: Gastroenterologist,
+        link: 'gastroenterologist'
     },
 ]
 

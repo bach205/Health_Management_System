@@ -17,7 +17,7 @@ const Sidebar = ({ isCollapsed, role }: { isCollapsed: boolean, role: string }) 
   return (
     <aside
       className={`${isCollapsed ? "w-20" : "w-64"
-        } h-screen bg-white flex flex-col p-5 overflow-y-auto transition-all duration-300`}
+        } h-screen bg-white flex-col p-5 overflow-y-auto transition-all duration-300 hidden sm:flex`}
     >
       <div className="flex items-center justify-between mb-8 top-0 bg-white z-10">
         <div className="flex items-center gap-2">

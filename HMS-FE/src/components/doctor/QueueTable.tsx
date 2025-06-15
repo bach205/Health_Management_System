@@ -1,42 +1,16 @@
 import { useQueueStore } from "../../store/queueStore";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { getClinicService } from "../../services/clinic.service";
-import { toast } from "react-toastify";
+import { message, Select, Table, Dropdown, Menu, Button, Card, Space, Pagination } from "antd";
+import { EllipsisOutlined } from "@ant-design/icons";
 import useQueue from "../../hooks/useQueue";
 import { getQueueStatus } from "../../types/queue.type";
 import ExaminationOrderModal from "./ExaminationOrderModal";
-import { updateQueueStatus } from "../../services/queue.service";
-import { Ellipsis } from "lucide-react";
 import ResultExaminationModal from "./ResultExaminationModal";
 import ExaminationRecordModal from "../../components/doctor/ExaminationRecordModal";
 import { useAuthStore } from "../../store/authStore";
-import {
-  Card,
-  Select,
-  Table,
-  Tag,
-  Button,
-  Dropdown,
-  Space,
-  Badge,
-  Typography,
-  Tooltip,
-  Statistic
-} from "antd";
-import {
-  UserOutlined,
-  ClockCircleOutlined,
-  MedicineBoxOutlined,
-  ArrowRightOutlined,
-  MoreOutlined,
-  ReloadOutlined
-} from "@ant-design/icons";
-import dayjs from "dayjs";
-import "dayjs/locale/vi";
-dayjs.locale("vi");
-
-const { Title, Text } = Typography;
-const { Option } = Select;
+import { updateQueueStatus } from "../../services/queue.service";
+import { useSocket } from "../../hooks/useSocket";
 
 const QueueTable = () => {
   const {
@@ -50,34 +24,30 @@ const QueueTable = () => {
   const [showResultModal, setShowResultModal] = useState(false);
   const [clinics, setClinics] = useState<any[]>([]);
   const [selectedClinic, setSelectedClinic] = useState("");
-  const { fetchQueue } = useQueue();
-  const [showAssignModal, setShowAssignModal] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
+  const [showAssignModal, setShowAssignModal] = useState(false);
   const [showRecordModal, setShowRecordModal] = useState(false);
+  const { fetchQueue } = useQueue();
   const { user } = useAuthStore();
   const currentDoctorId = user?.id;
 
   useEffect(() => {
+    const fetchClinics = async () => {
+      try {
+        const res = await getClinicService();
+        const clinicsData = res.data?.metadata.clinics || [];
+        setClinics(clinicsData);
+        if (clinicsData.length > 0) {
+          setSelectedClinic(clinicsData[0].id.toString());
+        }
+      } catch (error: any) {
+        message.error(
+          error?.response?.data?.message || "Lỗi khi lấy danh sách phòng khám"
+        );
+      }
+    };
     fetchClinics();
   }, []);
-
-  const fetchClinics = async () => {
-    try {
-      setLoading(true);
-      const res = await getClinicService();
-      setClinics(res.data?.metadata.clinics || []);
-      if (res.data?.metadata && res.data?.metadata.length > 0) {
-        setSelectedClinic(res.data?.metadata[0].id.toString());
-      }
-    } catch (error: any) {
-      toast.error(
-        error?.response?.data?.message || "Lỗi khi lấy danh sách phòng khám"
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
 
   useEffect(() => {
     if (selectedClinic) {
@@ -87,211 +57,159 @@ const QueueTable = () => {
     }
   }, [selectedClinic]);
 
-  const handleFinishExam = (patient: any) => {
-    setSelectedPatient(patient);
-    setShowRecordModal(true);
-  };
+  useSocket(
+    `clinic_${selectedClinic}`,
+    "queue:assigned",
+    (data: { clinicId: string | number }) => {
+      if (data.clinicId?.toString() === selectedClinic.toString()) {
+        fetchQueue(selectedClinic);
+      }
+    }
+  );
 
-  const handleAssignClinic = (patient: any) => {
-    setSelectedPatient(patient);
-    setShowResultModal(true);
-  };
-
-  const getStatusTag = (status: string) => {
-    const statusConfig: Record<string, { color: string; text: string }> = {
-      waiting: { color: "gold", text: "Đang chờ" },
-      in_progress: { color: "processing", text: "Đang khám" },
-      completed: { color: "success", text: "Hoàn thành" },
-      cancelled: { color: "error", text: "Đã hủy" }
-    };
-    const config = statusConfig[status] || { color: "default", text: status };
-    return <Tag color={config.color}>{config.text}</Tag>;
-  };
-
-  const getPriorityTag = (priority: number) => {
-    const priorityConfig: Record<number, { color: string; text: string }> = {
-      0: { color: "default", text: "Thường" },
-      1: { color: "warning", text: "Ưu tiên" },
-      2: { color: "error", text: "Khẩn cấp" }
-    };
-    const config = priorityConfig[priority];
-    return <Tag color={config?.color || "default"}>{config?.text || "Thường"}</Tag>;
+  const handleMenuClick = async (key: string, queue: any) => {
+    if (key === "start") {
+      await updateQueueStatus(queue.id.toString(), "in_progress");
+    } else if (key === "skip") {
+      await updateQueueStatus(queue.id.toString(), "skipped");
+    } else if (key === "finish") {
+      setSelectedPatient(queue.patient);
+      setShowRecordModal(true);
+      return;
+    } else if (key === "assign") {
+      setSelectedPatient(queue.patient);
+      setShowResultModal(true);
+      return;
+    }
+    fetchQueue(selectedClinic);
   };
 
   const columns = [
     {
       title: "STT",
-      width: 70,
-      render: (_: any, __: any, index: number) => (
-        <Text>{(pagination.pageNumber - 1) * pagination.pageSize + index + 1}</Text>
-      ),
+      dataIndex: "index",
+      render: (_: any, __: any, index: number) =>
+        index + 1 + (pagination.pageNumber - 1) * pagination.pageSize,
+      width: 60,
     },
     {
-      title: "Thông tin bệnh nhân",
-      render: (record: any) => (
-        <Space direction="vertical" size="small">
-          <Text strong>{record.patient.fullname}</Text>
-          <Space size="large">
-            <Text type="secondary">
-              <UserOutlined /> {record.patient.gender === "male" ? "Nam" : "Nữ"}
-            </Text>
-            <Text type="secondary">{record.patient.phone}</Text>
-          </Space>
-        </Space>
-      ),
-    },
-    {
-      title: "Thời gian chờ",
-      width: 150,
-      render: (record: any) => (
-        <Space>
-          <ClockCircleOutlined />
-          <Text>{dayjs(record.created_at).format('YYYY-MM-DD HH:mm:ss')}</Text>
-        </Space>
-      ),
-    },
-    {
-      title: "Mức độ ưu tiên",
-      width: 120,
-      render: (record: any) => getPriorityTag(record.priority),
-      sorter: (a: any, b: any) => b.priority - a.priority,
+      title: "Bệnh nhân",
+      dataIndex: ["patient"],
+      render: (_: any, record: any) => {
+        return (
+          <div>
+            <p>{record.patient.user.full_name}</p>
+          </div>
+        );
+      },
     },
     {
       title: "Trạng thái",
-      width: 130,
-      render: (record: any) => getStatusTag(record.status),
+      dataIndex: "status",
+      render: (status: string) => getQueueStatus(status),
     },
     {
       title: "Thao tác",
-      width: 150,
-      render: (record: any) => (
-        <Space>
-          {record.status === "waiting" && (
-            <Button 
-              type="primary"
-              icon={<MedicineBoxOutlined />}
-              onClick={() => handleFinishExam(record.patient)}
-            >
-              Bắt đầu khám
-            </Button>
-          )}
-          {record.status === "in_progress" && (
-            <Dropdown
-              menu={{
-                items: [
-                  {
-                    key: "finish",
-                    label: "Kết thúc khám",
-                    onClick: () => handleFinishExam(record.patient),
-                  },
-                  {
-                    key: "assign",
-                    label: "Chỉ định phòng tiếp",
-                    onClick: () => handleAssignClinic(record.patient),
-                  },
-                ],
-              }}
-            >
-              <Button icon={<MoreOutlined />}>Thao tác</Button>
-            </Dropdown>
-          )}
-        </Space>
-      ),
+      dataIndex: "actions",
+      render: (_: any, queue: any) => {
+        const menuItems = [];
+
+        if (queue.status === "waiting") {
+          menuItems.push(
+            { key: "start", label: "Bắt đầu khám" },
+            { key: "skip", label: "Bỏ qua" }
+          );
+        }
+        if (queue.status === "in_progress") {
+          menuItems.push(
+            { key: "finish", label: "Khám xong" },
+            { key: "assign", label: "Chỉ định phòng tiếp" }
+          );
+        }
+
+        return (
+          <>
+            {menuItems.map((item) => (
+              <Button className="mr-2" key={item.key} onClick={() => handleMenuClick(item.key, queue)}>
+                {item.label}
+              </Button>
+            ))}
+          </>
+        );
+      },
     },
   ];
 
-  const getCurrentClinicStats = () => {
-    const currentClinic = clinics.find(c => c.id.toString() === selectedClinic);
-    if (!currentClinic) return null;
-
-    const waitingCount = queues.filter(q => q.status === "waiting").length;
-    const inProgressCount = queues.filter(q => q.status === "in_progress").length;
-
-    return {
-      name: currentClinic.name,
-      waitingCount,
-      inProgressCount,
-      volume: currentClinic.patient_volume
-    };
-  };
-
-  const clinicStats = getCurrentClinicStats();
-
   return (
-    <div className="flex flex-col gap-4">
-      <Card>
-        <div className="flex items-center justify-between mb-4">
-          <Space direction="vertical" size="small">
-            <Title level={4} style={{ margin: 0 }}>Hàng chờ phòng khám</Title>
-            <Space size="large">
-              <Select
-                value={selectedClinic}
-                onChange={setSelectedClinic}
-                style={{ width: 200 }}
-                loading={loading}
-              >
-                <Option value="">Chọn phòng khám</Option>
-                {clinics.map((clinic: any) => (
-                  <Option key={clinic.id} value={clinic.id}>
-                    {clinic.name}
-                  </Option>
-                ))}
-              </Select>
-              <Button 
-                icon={<ReloadOutlined />} 
-                onClick={() => fetchQueue(selectedClinic)}
-              >
-                Làm mới
-              </Button>
-            </Space>
-          </Space>
-          
-          {clinicStats && (
-            <Space size="large">
-              <Statistic
-                title="Đang chờ"
-                value={clinicStats.waitingCount}
-                prefix={<Badge status="warning" />}
-              />
-              <Statistic
-                title="Đang khám"
-                value={clinicStats.inProgressCount}
-                prefix={<Badge status="processing" />}
-              />
-              <Tooltip title="Mức độ bận">
-                <Tag color={
-                  clinicStats.volume === "high" ? "red" :
-                  clinicStats.volume === "medium" ? "orange" : "green"
-                }>
-                  {clinicStats.volume === "high" ? "Đông" :
-                   clinicStats.volume === "medium" ? "Trung bình" : "Vắng"}
-                </Tag>
-              </Tooltip>
-            </Space>
-          )}
-        </div>
-
-        <Table
-          columns={columns}
-          dataSource={queues}
-          rowKey="id"
-          pagination={{
-            current: pagination.pageNumber,
-            pageSize: pagination.pageSize,
-            total: totalElements,
-            showSizeChanger: true,
-            showTotal: (total) => `Tổng ${total} bệnh nhân`,
-          }}
-          onChange={(pagination) => {
-            setPagination({
-              pageNumber: pagination.current || 1,
-              pageSize: pagination.pageSize || 10,
-            });
-          }}
-          loading={loading}
+    <Card className="h-full flex flex-col">
+      <Space className="mb-3">
+        <span className="font-semibold">Phòng khám:</span>
+        <Select
+          style={{ minWidth: 200 }}
+          value={selectedClinic}
+          onChange={(val) => setSelectedClinic(val)}
+          options={
+            clinics.map((clinic: any) => ({
+              label: clinic.name,
+              value: clinic.id.toString(),
+            }))
+          }
+          placeholder="Chọn phòng khám"
         />
-      </Card>
+      </Space>
 
+      <div className="flex-1 overflow-auto">
+        <Table
+          dataSource={queues}
+          columns={columns}
+          rowKey="id"
+          pagination={false}
+          size="middle"
+          bordered
+        />
+      </div>
+      {queues && queues?.length > 0 && (
+
+        <div className="mt-3 flex justify-end items-center">
+
+          <Pagination
+            current={pagination.pageNumber}
+            total={totalElements}
+            pageSize={pagination.pageSize}
+            onChange={(page) =>
+              setPagination({ ...pagination, pageNumber: page })
+            }
+            showSizeChanger={false}
+          />
+        </div>
+      )}
+      {/* Keep Modal as is */}
+      <ExaminationOrderModal
+        open={showAssignModal && !!selectedPatient}
+        onClose={() => {
+          setShowAssignModal(false);
+          setSelectedPatient(null);
+        }}
+        patient={selectedPatient}
+        clinics={clinics}
+        selectedClinicId={selectedClinic}
+        onSuccess={() => {
+          setShowAssignModal(false);
+          setSelectedPatient(null);
+          fetchQueue(selectedClinic);
+        }}
+      />
+      <ExaminationRecordModal
+        open={showRecordModal}
+        onClose={() => setShowRecordModal(false)}
+        patientId={selectedPatient?.id}
+        doctorId={Number(currentDoctorId)}
+        onSuccess={() => {
+          setShowRecordModal(false);
+          setSelectedPatient(null);
+          fetchQueue(selectedClinic);
+        }}
+      />
       <ResultExaminationModal
         open={showResultModal}
         onClose={() => setShowResultModal(false)}
@@ -305,19 +223,7 @@ const QueueTable = () => {
           fetchQueue(selectedClinic);
         }}
       />
-
-      <ExaminationRecordModal
-        open={showRecordModal}
-        onClose={() => setShowRecordModal(false)}
-        patientId={selectedPatient?.id}
-        doctorId={Number(currentDoctorId)}
-        onSuccess={() => {
-          setShowRecordModal(false);
-          setSelectedPatient(null);
-          fetchQueue(selectedClinic);
-        }}
-      />
-    </div>
+    </Card>
   );
 };
 

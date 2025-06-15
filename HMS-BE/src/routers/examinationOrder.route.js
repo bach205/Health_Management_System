@@ -9,4 +9,7 @@ router.post("/", validate({ body: examinationOrderSchema }), asyncHandler(Examin
 router.get("/:id", asyncHandler(ExaminationOrderController.getById));
 router.get("/", asyncHandler(ExaminationOrderController.getAll));
 
+// Tạo yêu cầu chuyển phòng
+router.post("/", ExaminationOrderController.create);
+
 module.exports = router; 

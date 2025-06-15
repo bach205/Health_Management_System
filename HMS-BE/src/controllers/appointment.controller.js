@@ -32,13 +32,13 @@ exports.bookAppointment = async (req, res, next) => {
 
 exports.getAvailableSlots = async (req, res, next) => {
   try {
-    const { error } = getAvailableSlotsSchema.validate(req.query);
-    if (error) {
-      return res.status(400).json({
-        success: false,
-        message: error.details[0].message
-      });
-    }
+    // const { error } = getAvailableSlotsSchema.validate(req.query);
+    // if (error) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: error.details[0].message
+    //   });
+    // }
 
     const slots = await appointmentService.getAvailableSlots(req.query);
     res.status(200).json({
@@ -187,20 +187,10 @@ exports.getAllAppointments = async (req, res, next) => {
 
 exports.nurseBookAppointment = async (req, res, next) => {
   try {
-
-    const { error } = nurseBookAppointmentSchema.validate(req.body);
-    if (error) {
-      console.log(error)
-      return res.status(400).json({
-        success: false,
-        message: error.details[0].message
-      });
-    }
-    console.log(1)
     const result = await appointmentService.nurseBookAppointment(req.body);
     res.status(201).json({
       success: true,
-      message: "Đặt lịch thành công",
+      message: "Y tá đặt lịch thành công",
       data: result
     });
   } catch (error) {

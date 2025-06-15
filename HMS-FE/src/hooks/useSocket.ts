@@ -8,14 +8,14 @@ const socket = io(BACKEND_URL, {
   withCredentials: true,
 });
 
-export const useSocket = (
+export const useSocket = (  
   roomId: string,
   eventName: string,
   handler: (data: any) => void
 ) => {
   useEffect(() => {
     if (!roomId) return;
-    
+
     socket.emit("joinRoom", roomId);
     socket.on(eventName, handler);
 

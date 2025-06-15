@@ -13,12 +13,12 @@ const bookAppointmentSchema = Joi.object({
     'number.base': 'ID phòng khám phải là số',
     'any.required': 'ID phòng khám là bắt buộc'
   }),
-  appointment_date: Joi.date().greater('now').required().messages({
+  slot_date: Joi.date().greater('now').required().messages({
     'date.base': 'Ngày hẹn không hợp lệ',
     'date.greater': 'Ngày hẹn phải lớn hơn ngày hiện tại',
     'any.required': 'Ngày hẹn là bắt buộc'
   }),
-  appointment_time: Joi.string()
+  start_time: Joi.string()
     .pattern(/^([0-1][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/)
     .required()
     .messages({
@@ -82,7 +82,7 @@ const getAvailableSlotsSchema = Joi.object({
     'number.base': 'ID phòng khám phải là số',
     'any.required': 'ID phòng khám là bắt buộc'
   }),
-  appointment_date: Joi.date().required().messages({
+  slot_date: Joi.date().required().messages({
     'date.base': 'Ngày không hợp lệ',
     'any.required': 'Ngày là bắt buộc'
   }),
