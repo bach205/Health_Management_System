@@ -237,7 +237,7 @@ class AppointmentService {
     // 2. Kiểm tra bệnh nhân đã có lịch trùng chưa
     const exist = await prisma.appointment.findFirst({
       where: {
-        patient_id: data.patient_id,
+        email: data.email,
         appointment_date: new Date(data.appointment_date),
         appointment_time: new Date(`1970-01-01T${data.appointment_time}`),
         status: { in: ["pending", "confirmed"] },
