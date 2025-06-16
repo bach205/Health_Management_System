@@ -1,7 +1,10 @@
 const prisma = require("../config/prisma");
 const { getIO } = require("../config/socket.js");
+const ExaminationRecordService = require("./examinationRecord.service");
+const QueueService = require("./queue.service");
 
 class ExaminationDetailService {
+
   static async create(data) {
     try {
       const {
@@ -15,13 +18,16 @@ class ExaminationDetailService {
         clinic_id,
         patient_id,
         total_cost,
+        to_doctor_id,    
+        slot_date,      
+        start_time,     
       } = data;
-      // Lấy record để lấy patient_id
-      const record = await prisma.examinationRecord.findFirst({
-        where: { patient_id: patient_id, final_diagnosis: null },
-      });
-      if (!record) throw new Error("Không tìm thấy hồ sơ khám");
 
+      // 1. Lấy hoặc tạo hồ sơ khám
+      const record = await ExaminationRecordService.createIfNotExists(patient_id);
+      if (!record) throw new Error("Không tìm thấy hoặc tạo được hồ sơ khám");
+
+      // 2. Tạo kết quả khám
       const detail = await prisma.examinationDetail.create({
         data: {
           record_id: record.id,
@@ -34,8 +40,10 @@ class ExaminationDetailService {
         },
       });
 
-      if (to_clinic_id && from_clinic_id && doctor_id) {
-        await prisma.examinationOrder.create({
+      // 3. Nếu có chỉ định chuyển phòng
+      if (to_clinic_id && from_clinic_id && to_doctor_id && slot_date && start_time) {
+        // 3.1 Tạo examination order
+        const order = await prisma.examinationOrder.create({
           data: {
             doctor_id,
             patient_id: record.patient_id,
@@ -44,34 +52,71 @@ class ExaminationDetailService {
             total_cost: total_cost || 0,
           },
         });
-      }
 
-      await prisma.queue.updateMany({
-        where: {
-          patient_id: patient_id,
-          status: { in: ["waiting", "in_progress"] },
-        },
-        data: {
-          status: "done",
-        },
-      });
+        // 3.2 Tạo appointment cho phòng mới với priority cao
+        const appointment = await prisma.appointment.create({
+          data: {
+            patient_id,
+            clinic_id: to_clinic_id,
+            doctor_id: to_doctor_id,
+            appointment_date: slot_date,
+            appointment_time: start_time,
+            status: 'confirmed',
+            reason: `Chuyển từ phòng ${from_clinic_id}`,
+            created_at: new Date(),
+            updated_at: new Date()
+          }
+        });
 
-      const newQueue = await prisma.queue.create({
-        data: {
-          patient_id: patient_id,
-          status: "waiting",
-          clinic_id: to_clinic_id,
-          priority: 2,
-        },
-      });
+        // 3.3 Tìm và cập nhật queue hiện tại thành done
+        const currentQueue = await prisma.queue.findFirst({
+          where: {
+            patient_id,
+            status: { in: ["waiting", "in_progress"] },
+          },
+        });
 
-      // 5. Emit socket event như cũ
-      const io = getIO();
-      if (io) {
-        io.to(`clinic_${to_clinic_id}`).emit("queue:assigned", {
-          patient: newQueue.patient,
-          queue: newQueue,
-          clinicId: to_clinic_id,
+        if (currentQueue) {
+          await prisma.queue.update({
+            where: { id: currentQueue.id },
+            data: { status: "done" },
+          });
+        }
+
+        // 3.4 Tạo queue mới từ appointment (kết hợp logic từ checkInFromAppointment)
+        const newQueue = await prisma.queue.create({
+          data: {
+            patient_id,
+            clinic_id: to_clinic_id,
+            appointment_id: appointment.id,
+            record_id: record.id,
+            status: "waiting",
+            priority: 2,  // Giữ priority cao cho chuyển phòng
+          },
+          include: { patient: true },
+        });
+
+        // 3.5 Emit socket event
+        const io = getIO();
+        if (io) {
+          // Emit event chuyển phòng
+          io.to(`clinic_${to_clinic_id}`).emit("queue:assigned", {
+            patient: newQueue.patient,
+            queue: newQueue,
+            clinicId: to_clinic_id,
+          });
+        }
+
+      } else {
+        // 4. Nếu không chuyển phòng, chỉ cập nhật queue hiện tại thành done
+        await prisma.queue.updateMany({
+          where: {
+            patient_id: patient_id,
+            status: { in: ["waiting", "in_progress"] },
+          },
+          data: {
+            status: "done",
+          },
         });
       }
 

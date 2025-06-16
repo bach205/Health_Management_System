@@ -57,7 +57,27 @@ doctorRouter.post(
   doctorController.updatePassword
 );
 
+doctorRouter.get(
+  "/:id",
+  // authenticate,
+  // authorize("admin"),
+  asyncHandler(doctorController.getDoctorById),
+  doctorController.getDoctorById
+);
 
+doctorRouter.get(
+  "/clinic/:clinicId",
+  // authenticate,
+  // authorize("admin"),
+  asyncHandler(doctorController.getDoctorsInClinic),
+  doctorController.getDoctorsInClinic
+);
+
+doctorRouter.get(
+  "/available-slots/:doctorId",
+  asyncHandler(doctorController.getDoctorAvailableSlots),
+  doctorController.getDoctorAvailableSlots
+);
 
 // Ví dụ check authen bên trong router
 // authRouter.get("/users", authenticateToken, authorizeRoles("admin"), asyncHandler(AuthController.getUsers));

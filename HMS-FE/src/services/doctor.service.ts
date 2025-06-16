@@ -25,3 +25,11 @@ export const updateStatus = (id: number, status: boolean) => {
 export const updatePassword = (id: number) => {
     return instance.post(`${BASE_URL}/update-password/`, { id });
 };
+
+export const getDoctorsInClinic = (clinicId: number) => {
+    return instance.get(`${BASE_URL}/clinic/${clinicId}`);
+};
+
+export const getDoctorAvailableSlots = (doctorId: number) => {
+    return instance.get(`${BASE_URL}/available-slots/${doctorId}`);
+};

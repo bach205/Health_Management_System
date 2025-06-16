@@ -26,7 +26,7 @@ const ExaminationRecordModal = ({
   const onSubmit = async (values: any) => {
     setLoading(true);
     try {
-      await mainRequest.post("/examination-records", {
+      await mainRequest.post("/api/v1/examination-record", {
         ...values,
         patient_id: patientId,
         primary_doctor_id: doctorId,
