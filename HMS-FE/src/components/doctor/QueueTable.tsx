@@ -1,11 +1,11 @@
 import { useQueueStore } from "../../store/queueStore";
 import { useEffect, useState, useRef } from "react";
-import { getClinicService} from "../../services/clinic.service";
+import { getClinicService } from "../../services/clinic.service";
 import { toast } from "react-toastify";
 import useQueue from "../../hooks/useQueue";
 import { getQueueStatus } from "../../types/queue.type";
 import ExaminationOrderModal from "./ExaminationOrderModal";
-// import { useSocket } from "../../hooks/useSocket";
+import { useSocket } from "../../hooks/useSocket";
 import { updateQueueStatus } from "../../services/queue.service";
 import { Ellipsis } from "lucide-react";
 import ResultExaminationModal from "./ResultExaminationModal";
@@ -37,7 +37,7 @@ const QueueTable = () => {
     const fetchClinics = async () => {
       try {
         const res = await getClinicService();
-        
+
         setClinics(res.data?.metadata.clinics || []);
         if (res.data?.metadata && res.data?.metadata.length > 0) {
           setSelectedClinic(res.data?.metadata[0].id.toString());
@@ -52,23 +52,42 @@ const QueueTable = () => {
     fetchClinics();
   }, []);
 
-  useEffect(() => {  
+  useEffect(() => {
     if (selectedClinic) {
-      fetchQueue(selectedClinic);
+      fetchQueue(selectedClinic, {
+        pageNumber: pagination.pageNumber,
+        pageSize: pagination.pageSize
+      });
     } else {
       reset();
     }
-  }, [selectedClinic]);
+  }, [selectedClinic, pagination.pageNumber, pagination.pageSize]);
 
-  // useSocket(
-  //   `clinic_${selectedClinic}`,
-  //   "queue:assigned",
-  //   (data: { clinicId: string | number }) => {
-  //     if (data.clinicId?.toString() === selectedClinic.toString()) {
-  //       fetchQueue(selectedClinic);
-  //     }
-  //   }
-  // );
+  useSocket(
+    `clinic_${selectedClinic}`,
+    "queue:assigned",
+    (data: { clinicId: string | number }) => {
+      if (data.clinicId?.toString() === selectedClinic.toString()) {
+        fetchQueue(selectedClinic, {
+          pageNumber: pagination.pageNumber,
+          pageSize: pagination.pageSize
+        });
+      }
+    }
+  );
+
+  useSocket(
+    `clinic_${selectedClinic}`,
+    "queue:statusChanged",
+    (data: { clinicId: string | number }) => {
+      if (data.clinicId?.toString() === selectedClinic.toString()) {
+        fetchQueue(selectedClinic, {
+          pageNumber: pagination.pageNumber,
+          pageSize: pagination.pageSize
+        });
+      }
+    }
+  );
 
   useEffect(() => {
     const tableEl = document.getElementById("table-container");
@@ -78,9 +97,8 @@ const QueueTable = () => {
       ?.getBoundingClientRect().height;
     const tableTop = tableEl?.getBoundingClientRect().top;
     if (tableEl && paginationHeight && tableTop) {
-      tableEl.style.height = `${
-        heightWindow - tableTop - paginationHeight - 2
-      }px`;
+      tableEl.style.height = `${heightWindow - tableTop - paginationHeight - 2
+        }px`;
     }
   }, []);
 
@@ -187,7 +205,10 @@ const QueueTable = () => {
                                     "in_progress"
                                   );
                                   setActionDropdown(null);
-                                  fetchQueue(selectedClinic);
+                                  fetchQueue(selectedClinic, {
+                                    pageNumber: pagination.pageNumber,
+                                    pageSize: pagination.pageSize
+                                  });
                                 }}
                               >
                                 Bắt đầu khám
@@ -200,7 +221,10 @@ const QueueTable = () => {
                                     "skipped"
                                   );
                                   setActionDropdown(null);
-                                  fetchQueue(selectedClinic);
+                                  fetchQueue(selectedClinic, {
+                                    pageNumber: pagination.pageNumber,
+                                    pageSize: pagination.pageSize
+                                  });
                                 }}
                               >
                                 Bỏ qua
@@ -283,7 +307,10 @@ const QueueTable = () => {
         onSuccess={() => {
           setShowAssignModal(false);
           setSelectedPatient(null);
-          fetchQueue(selectedClinic);
+          fetchQueue(selectedClinic, {
+            pageNumber: pagination.pageNumber,
+            pageSize: pagination.pageSize
+          });
         }}
       />
       <ExaminationRecordModal
@@ -294,7 +321,10 @@ const QueueTable = () => {
         onSuccess={() => {
           setShowRecordModal(false);
           setSelectedPatient(null);
-          fetchQueue(selectedClinic);
+          fetchQueue(selectedClinic, {
+            pageNumber: pagination.pageNumber,
+            pageSize: pagination.pageSize
+          });
         }}
       />
       <ResultExaminationModal
@@ -307,7 +337,10 @@ const QueueTable = () => {
         onSuccess={() => {
           setShowResultModal(false);
           setSelectedPatient(null);
-          fetchQueue(selectedClinic);
+          fetchQueue(selectedClinic, {
+            pageNumber: pagination.pageNumber,
+            pageSize: pagination.pageSize
+          });
         }}
       />
     </div>

@@ -14,6 +14,7 @@ export const useNurseList = () => {
     const [keyword, setKeyword] = useState<string>("");
     const [reload, setReload] = useState<boolean>(false);
     const [sort, setSort] = useState<string>("name_asc");
+    const [shift, setShift] = useState<string>("all");
 
     const [pagination, setPagination] = useState<IPagination>({
         total: 0,
@@ -22,23 +23,23 @@ export const useNurseList = () => {
     });
 
     useEffect(() => {
-        // console.log('call use')
         const fetchData = async () => {
             try {
                 setLoading(true);
-                console.log(keyword)
-                const data = await getAllNurse({ keyword: keyword, sort: sort })
-                console.log(data)
+                const data = await getAllNurse({
+                    keyword: keyword,
+                    sort: sort,
+                    shift: shift !== "all" ? shift : undefined
+                });
                 setUsers(data?.data.metadata);
-
                 setLoading(false);
             } catch (error) {
-                console.log(error)
+                console.log(error);
                 setLoading(false);
             }
         }
         fetchData();
-    }, [reload]);
+    }, [reload, sort, shift]);
 
     const handleTableChange = (pagination: IPagination) => {
         setPagination(pagination);
@@ -53,6 +54,8 @@ export const useNurseList = () => {
         setReload,
         sort,
         setSort,
+        shift,
+        setShift,
         pagination,
         setPagination,
         handleTableChange,

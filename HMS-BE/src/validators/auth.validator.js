@@ -44,7 +44,8 @@ const createNurseSchema = Joi.object({
   password: Joi.string().min(6).required(),
   gender: Joi.string().valid("male", "female").required(),
   address: Joi.string().optional().allow(null, ""),
-});
+  date_of_birth: Joi.string().optional().allow(null, "")
+}).unknown(true);
 
 const updateNurseSchema = Joi.object({
   full_name: Joi.string().required(),

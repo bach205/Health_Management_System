@@ -15,7 +15,7 @@ export const useSocket = (
 ) => {
   useEffect(() => {
     if (!roomId) return;
-    
+
     socket.emit("joinRoom", roomId);
     socket.on(eventName, handler);
 
