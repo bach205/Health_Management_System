@@ -40,6 +40,7 @@ class ExaminationDetailService {
         },
       });
 
+      
       // 3. Nếu có chỉ định chuyển phòng
       if (to_clinic_id && from_clinic_id && to_doctor_id && slot_date && start_time) {
         // 3.1 Tạo examination order

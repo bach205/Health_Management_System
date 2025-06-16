@@ -9,7 +9,7 @@ import { getClinicService } from "../../services/clinic.service";
 import { getDoctorsInClinic, getDoctorAvailableSlots } from "../../services/doctor.service";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
-import { message } from "antd";
+import { Button, message } from "antd";
 dayjs.extend(utc);
 interface ResultExaminationModalProps {
   open: boolean;
@@ -124,26 +124,27 @@ const ResultExaminationModal = ({
           start_time: parsedSlot.start_time,
         };
       }
-      if (slotInfo.slot_date === "" || slotInfo.start_time === "") {
+      console.log("slotInfo", slotInfo)
+      if (values.to_clinic_id && (slotInfo.slot_date === undefined || slotInfo.slot_date === "" || slotInfo.start_time === undefined || slotInfo.start_time === "")) {
         message.error("Vui lòng chọn ca khám");
         return;
       }
-      // await mainRequest.post("/api/v1/examination-detail", {
-      //   ...values,
-      //   patient_id: patientId,
-      //   clinic_id: clinicId,
-      //   doctor_id: doctorId,
-      //   from_clinic_id: clinicId,
-      //   created_by_user_id: currentUserId,
-      //   examined_at: new Date(values.examined_at).toISOString(),
-      //   // Nếu chuyển phòng thì gửi thêm thông tin slot
-      //   ...(values.to_clinic_id ? {
-      //     to_clinic_id: Number(values.to_clinic_id),
-      //     to_doctor_id: Number(values.to_doctor_id),
-      //     total_cost: values.total_cost || 0,
-      //     ...slotInfo
-      //   } : {})
-      // });
+      await mainRequest.post("/api/v1/examination-detail", {
+        ...values,
+        patient_id: patientId,
+        clinic_id: clinicId,
+        doctor_id: doctorId,
+        from_clinic_id: clinicId,
+        created_by_user_id: currentUserId,
+        examined_at: new Date(values.examined_at).toISOString(),
+        // Nếu chuyển phòng thì gửi thêm thông tin slot
+        ...(values.to_clinic_id ? {
+          to_clinic_id: Number(values.to_clinic_id),
+          to_doctor_id: Number(values.to_doctor_id),
+          total_cost: values.total_cost || 0,
+          ...slotInfo
+        } : {})
+      });
       if (onSuccess) onSuccess();
       handleClose();
     } catch (err: any) {
@@ -189,22 +190,13 @@ const ResultExaminationModal = ({
             control={control}
             label="Ghi chú"
           />
-          {/* Chi phí chuyển phòng */}
+
           <TextFieldControl
             name="total_cost"
             control={control}
             type="number"
-            label="Chi phí chuyển phòng"
+            label="Tổng chi phí"
           />
-          {/* Chỉ hiện total_cost khi không chuyển phòng */}
-          {!to_clinic_id && (
-            <TextFieldControl
-              name="total_cost"
-              control={control}
-              type="number"
-              label="Tổng chi phí"
-            />
-          )}
 
           <div className="flex flex-col gap-4">
             <SelectFieldControl
@@ -232,7 +224,7 @@ const ResultExaminationModal = ({
             {to_clinic_id && (
               <>
                 {
-                  (doctorOptions && doctorOptions.length > 0) ? <SelectFieldControl
+                  (doctorOptions && doctorOptions.length > 1) ? <SelectFieldControl
                     name="to_doctor_id"
                     control={control}
                     label="Chọn bác sĩ khám"
@@ -259,7 +251,7 @@ const ResultExaminationModal = ({
 
 
                 {to_doctor_id && (
-                  availableSlots.length > 0 ? (
+                  availableSlots.length > 1 ? (
                     <SelectFieldControl
                       name="slot"
                       control={control}
@@ -294,13 +286,14 @@ const ResultExaminationModal = ({
         </form>
       }
       action={
-        <button
-          className="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50"
+        <Button
+          type="primary"
+          className="px-4 py-2 text-white rounded disabled:opacity-50"
           onClick={handleSubmit(onSubmit)}
           disabled={loading}
         >
           Lưu kết quả
-        </button>
+        </Button>
       }
     />
   );
