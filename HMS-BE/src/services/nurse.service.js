@@ -6,7 +6,7 @@ const bcrypt = require("bcrypt");
 class NurseService {
     async findAllNurse(query) {
         try {
-            const { keyword = '', sort = 'stt' } = query;
+            const { keyword = '', sort = 'stt', shift } = query;
 
             // Build where clause for search
             const whereClause = {
@@ -35,9 +35,29 @@ class NurseService {
                     orderBy = { id: 'asc' };
             }
 
-            console.log('Search params:', { keyword, sort, whereClause }); // Debug log
+            // If shift filter is provided, get nurses with that shift
+            let nurses;
+            if (shift) {
+                // Get work schedules for the specified shift
+                const workSchedules = await prisma.workSchedule.findMany({
+                    where: {
+                        shift_id: parseInt(shift)
+                    },
+                    select: {
+                        user_id: true
+                    }
+                });
 
-            const nurses = await prisma.user.findMany({
+                // Get unique user IDs from work schedules
+                const userIds = [...new Set(workSchedules.map(ws => ws.user_id))];
+
+                // Add user IDs to where clause
+                whereClause.id = {
+                    in: userIds
+                };
+            }
+
+            nurses = await prisma.user.findMany({
                 where: whereClause,
                 select: {
                     id: true,
@@ -209,7 +229,7 @@ class NurseService {
                 'phone',
             ];
             for (const field of updatedfields) {
-                if (field === 'date_of_birth' ) {
+                if (field === 'date_of_birth') {
                     // Special handling for date_of_birth
                     if (updateData[field] !== undefined &&
                         (updateData[field] === null || existingNurse[field] === null ||
@@ -219,7 +239,7 @@ class NurseService {
                 } else if (updateData[field] && updateData[field] !== existingNurse[field]) {
                     updateFields[field] = value[field];
                 }
-                if (field === 'address' ) {
+                if (field === 'address') {
                     // Special handling for date_of_birth
                     if (updateData[field] !== undefined &&
                         (updateData[field] === null || existingNurse[field] === null ||
@@ -229,7 +249,7 @@ class NurseService {
                 } else if (updateData[field] && updateData[field] !== existingNurse[field]) {
                     updateFields[field] = value[field];
                 }
-                if (field === 'phone' ) {
+                if (field === 'phone') {
                     // Special handling for date_of_birth
                     if (updateData[field] !== undefined &&
                         (updateData[field] === null || existingNurse[field] === null ||

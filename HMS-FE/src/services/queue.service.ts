@@ -17,3 +17,13 @@ export const updateQueueStatus = async (queueId: string, status: string) => {
   });
   return response.data;
 };
+
+export const assignAdditionalClinic = async (data: {
+  patient_id: number;
+  to_clinic_id: number;
+  record_id: number;
+  priority?: number;
+}) => {
+  const response = await mainRequest.post("/queues/queue-clinic/assign", data);
+  return response.data;
+};

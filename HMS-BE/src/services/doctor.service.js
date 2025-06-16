@@ -7,6 +7,9 @@ const { sendStaffNewPasswordEmail } = require("../utils/staff.email");
 class DoctorService {
     async findAllDoctor() {
         const users = await prisma.user.findMany({
+            where: {
+                role: "doctor"
+            },
             select: {
                 id: true,
                 full_name: true,
@@ -23,6 +26,17 @@ class DoctorService {
         });
         return users;
     }
+    getDoctorById = async (id) => {
+        const doctor = await prisma.user.findUnique({
+            where: { id: +id, role: "doctor" },
+            include: {
+                doctor: true
+            }
+        });
+        return doctor;
+    }
+
+
 
     createDoctor = async (doctorData) => {
         try {
@@ -310,7 +324,44 @@ class DoctorService {
         return mustInclude.join('');
     }
 
+    getDoctorsInClinic = async (clinicId) => {
+        const doctors = await prisma.user.findMany({
+            where: {
+                role: 'doctor',
+                workSchedules: {
+                    some: {
+                        clinic_id: +clinicId,
+                        work_date: {
+                            // gte: new Date().setHours(0, 0, 0, 0),   // Tùy chọn: chỉ lấy lịch hôm nay
+                            // lte: new Date().setHours(23, 59, 59, 999),
+                        },
+                    },
+                },
+            },
+            include: {
+                doctor: true,        // Thông tin từ bảng Doctor
+                workSchedules: true, // Lịch làm việc (nếu cần)
+            },
+        });
+        return doctors;
+    }
 
+    getDoctorAvailableSlots = async (doctorId) => {
+        const now = new Date();
+        const todayStart = new Date(now.setHours(0, 0, 0, 0));
+        const todayEnd = new Date(now.setHours(23, 59, 59, 999));
+
+        return prisma.availableSlot.findMany({
+            where: {
+                doctor_id: +doctorId,
+                is_available: true,
+                slot_date: {
+                    //   gte: todayStart,
+                    //   lte: todayEnd,
+                },
+            },
+        });
+    }
 }
 
 module.exports = new DoctorService();

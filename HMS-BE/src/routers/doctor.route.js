@@ -7,6 +7,11 @@ const {
 const validate = require("../middlewares/validate");
 const { authenticate, authorize } = require("../middlewares/auth");
 const doctorRouter = express.Router();
+const checkUserStatus = require("../middlewares/checkUserStatus");
+
+// Apply middleware to all routes
+// doctorRouter.use(authenticate);
+// doctorRouter.use(checkUserStatus());
 
 doctorRouter.post(
   "/create",
@@ -57,7 +62,27 @@ doctorRouter.post(
   doctorController.updatePassword
 );
 
+doctorRouter.get(
+  "/:id",
+  // authenticate,
+  // authorize("admin"),
+  asyncHandler(doctorController.getDoctorById),
+  doctorController.getDoctorById
+);
 
+doctorRouter.get(
+  "/clinic/:clinicId",
+  // authenticate,
+  // authorize("admin"),
+  asyncHandler(doctorController.getDoctorsInClinic),
+  doctorController.getDoctorsInClinic
+);
+
+doctorRouter.get(
+  "/available-slots/:doctorId",
+  asyncHandler(doctorController.getDoctorAvailableSlots),
+  doctorController.getDoctorAvailableSlots
+);
 
 // Ví dụ check authen bên trong router
 // authRouter.get("/users", authenticateToken, authorizeRoles("admin"), asyncHandler(AuthController.getUsers));

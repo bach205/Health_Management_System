@@ -14,7 +14,7 @@ class WorkScheduleService {
         throw new BadRequestError(error.details[0].message);
       }
 
-      // Check if user exists
+      // Check if user exists and has correct role
       const user = await prisma.user.findUnique({
         where: { id: workScheduleData.user_id },
       });

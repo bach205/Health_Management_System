@@ -7,8 +7,12 @@ const {
 } = require("../validators/work-schedule.validator");
 const validate = require("../middlewares/validate");
 const { authenticate, authorize } = require("../middlewares/auth");
+const checkUserStatus = require("../middlewares/checkUserStatus");
 
 const workScheduleRouter = express.Router();
+
+// Apply middleware to all routes
+// workScheduleRouter.use(checkUserStatus);
 
 // Get all work schedules (admin, doctor, nurse)
 workScheduleRouter.get(

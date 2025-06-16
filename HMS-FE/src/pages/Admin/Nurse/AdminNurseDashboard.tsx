@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Table, Tag, Space, Flex, Button, Form, Input, Select, notification, Tooltip, Popconfirm } from "antd";
 import { Ban, CirclePlus, Eye, RefreshCcw, RotateCcw, Search, UserRoundPen } from "lucide-react";
 import { specialtyOptions, TYPE_EMPLOYEE_STR, PASSWORD_DEFAULT } from "../../../constants/user.const";
@@ -10,17 +10,31 @@ import { useNurseList } from "../../../hooks/useNurseList";
 import UserListTitle from "../../../components/ui/UserListTitle";
 import type { IUserBase } from "../../../types/index.type";
 import { createNurse, updateNurse, banNurse, resetPassword } from "../../../api/nurse.ts";
+import { getShiftService } from "../../../services/shift.service.ts";
 
 const AdminNurseDashboard = () => {
   const [isCreateVisible, setIsCreateVisible] = useState<boolean>(false);
   const [isUpdateVisible, setIsUpdateVisible] = useState<boolean>(false);
   const [isViewVisible, setIsViewVisible] = useState<boolean>(false);
-  const filterOptions = [{ value: "all", label: "Tất cả" }, ...specialtyOptions]
-  
+  const [shifts, setShifts] = useState<any[]>([]);
+
   const [formCreate] = Form.useForm();
   const [formUpdate] = Form.useForm();
   const [formView] = Form.useForm();
   const [curNurseId, setCurNurseId] = useState(0);
+
+  // Fetch shifts on component mount
+  useEffect(() => {
+    const fetchShifts = async () => {
+      try {
+        const response = await getShiftService();
+        setShifts(response.data.data);
+      } catch (error) {
+        console.error('Error fetching shifts:', error);
+      }
+    };
+    fetchShifts();
+  }, []);
 
   // Table column
   const columns: any = [
@@ -254,12 +268,14 @@ const AdminNurseDashboard = () => {
 
   // custom hook
   const {
-    users, loading, keyword, reload, pagination, sort,
-    setKeyword, setReload, setSort, handleTableChange,
+    users, loading, keyword, reload, pagination, sort, shift,
+    setKeyword, setReload, setSort, setShift, handleTableChange,
   } = useNurseList();
+
   const handleAbortFilter = () => {
     setReload(!reload);
     setSort("name_asc");
+    setShift("all");
     setKeyword("");
   }
 
@@ -293,12 +309,18 @@ const AdminNurseDashboard = () => {
       <Flex gap={10} justify="space-between" style={{ marginBottom: 10 }}>
         <Form>
           <Flex gap={10}>
-            <Form.Item label="Lọc theo khoa" style={{ width: '220px' }} name="specialty" valuePropName="specialty" >
+            <Form.Item label="Ca làm việc" style={{ width: '220px' }} name="shift" valuePropName="shift" >
               <Select
                 style={{ width: 120 }}
-              // value={specialty}
-              // onChange={(value) => setSpecialty(value)}
-              // options={filterOptions}
+                value={shift}
+                onChange={(value) => setShift(value)}
+                options={[
+                  { value: "all", label: "Tất cả" },
+                  ...shifts.map(shift => ({
+                    value: String(shift.id),
+                    label: shift.name
+                  }))
+                ]}
               />
             </Form.Item>
             <Form.Item label="Sắp xếp" style={{ width: '220px' }} name="sort" valuePropName="sort" >

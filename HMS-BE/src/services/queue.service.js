@@ -48,16 +48,13 @@ class QueueService {
       include: {
         patient: {
           include: {
-            user: {
-              select: {
-                full_name: true,
-              },
-            },
+            user: true,
           },
         },
         appointment: true,
       },
     });
+    console.log(queueClinic);
 
     // 3. Tính toán thông tin phân trang
     const total = await prisma.queue.count({
