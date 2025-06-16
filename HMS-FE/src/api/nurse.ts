@@ -7,7 +7,11 @@ export const createNurse = async (nurse: IUserBase) => {
     return await instance.post(`${BASE_URL}/create`, nurse);
 };
 
-export const getAllNurse = async (params?: { keyword?: string; sort?: string }) => {
+export const getAllNurse = async (params?: {
+    keyword?: string;
+    sort?: string;
+    shift?: string;
+}) => {
     return await instance.get(`${BASE_URL}/get-all-nurse`, { params });
 }
 

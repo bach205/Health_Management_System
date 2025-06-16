@@ -156,6 +156,59 @@ class ExaminationDetailService {
       orderBy: { examined_at: "desc" },
     });
   }
+
+  static async getDoctorsInClinic(clinicId) {
+    const now = new Date();
+    const todayStart = new Date(now.setHours(0, 0, 0, 0));
+    const todayEnd = new Date(now.setHours(23, 59, 59, 999));
+
+    const activeDoctors = await prisma.workSchedule.findMany({
+      where: {
+        clinic_id: +clinicId,
+        // work_date: {
+        //   gte: todayStart,
+        //   lte: todayEnd,
+        // },
+        // shift: {
+        //   start_time: {
+        //     lte: now,
+        //   },
+        //   end_time: {
+        //     gte: now,
+        //   },
+        // },
+      },
+      include: {
+        user: true, // để lấy thông tin bác sĩ
+      },
+    });
+
+    return activeDoctors
+  }
+
+
+  static async getDoctorAvailableSlots(doctorId) {
+    return prisma.availableSlot.findMany({
+      where: {
+        doctor_id: +doctorId,
+        is_available: true,
+      },
+      include: {
+        doctor: {
+          select: {
+            id: true,
+            full_name: true,
+          },
+        },
+        clinic: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
+  }
 }
 
 module.exports = ExaminationDetailService;

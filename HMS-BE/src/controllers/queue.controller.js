@@ -131,10 +131,7 @@ class QueueController {
     try {
       const { queue_id } = req.body;
       const updated = await QueueService.updateQueueStatus(queue_id, "skipped");
-      return new OK({
-        message: "Đã đánh dấu vắng mặt",
-        metadata: updated,
-      }).send(res);
+      return res.json({ message: "Đã đánh dấu vắng mặt", queue: updated });
     } catch (error) {
       next(error);
     }
@@ -145,10 +142,7 @@ class QueueController {
     try {
       const { queue_id } = req.body;
       const updated = await QueueService.updateQueueStatus(queue_id, "done");
-      return new OK({
-        message: "Đã hoàn thành khám",
-        metadata: updated,
-      }).send(res);
+      return res.json({ message: "Đã hoàn thành khám", queue: updated });
     } catch (error) {
       next(error);
     }

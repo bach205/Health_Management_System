@@ -1,10 +1,16 @@
-import { getQueueClinic } from "@/services/queue.service";
-import { useQueueStore } from "@/store/queueStore";
+import { getQueueClinic } from "../services/queue.service";
+import { useQueueStore } from "../store/queueStore";
 import { toast } from "react-toastify";
+
+interface PaginationParams {
+  pageNumber: number;
+  pageSize: number;
+}
 
 const useQueue = () => {
   const { setQueues, setTotalElements, setTotalPages } = useQueueStore();
-  const fetchQueue = async (clinicId: string) => {
+
+  const fetchQueue = async (clinicId: string, pagination?: PaginationParams) => {
     try {
       const response = await getQueueClinic(clinicId);
       setQueues(response.metadata.queueClinic);

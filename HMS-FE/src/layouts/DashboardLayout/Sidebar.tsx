@@ -19,7 +19,7 @@ const Sidebar = ({ isCollapsed, role }: { isCollapsed: boolean, role: string }) 
       className={`${isCollapsed ? "w-20" : "w-64"
         } h-screen bg-white flex-col p-5 overflow-y-auto transition-all duration-300 hidden sm:flex`}
     >
-      <div className="flex items-center justify-between mb-8 sticky top-0 bg-white z-10">
+      <div className="flex items-center justify-between mb-8 top-0 bg-white z-10">
         <div className="flex items-center gap-2">
           <Hospital className="w-8 h-8 text-indigo-500" />
           {!isCollapsed && (
@@ -184,5 +184,22 @@ const SIDEBAR_ITEMS = [
       },
     ],
   },
-
+  {
+    id: 5,
+    label: "Y Tá",
+    items: [
+      {
+        id: "nurse-book-appointments",
+        label: "Đặt Lịch Hẹn",
+        icon: <ClipboardType className="w-4 h-4" />,
+        href: "/nurse-book-appointments",
+      },
+      {
+        id: "nurse-manage-appointments",
+        label: "Quản lý lịch hẹn",
+        icon: <ClipboardType className="w-4 h-4" />,
+        href: "/user-book-appointments",
+      },
+    ],
+  },
 ];

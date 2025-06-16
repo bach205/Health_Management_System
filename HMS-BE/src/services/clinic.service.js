@@ -34,10 +34,8 @@ class ClinicService {
     }
   }
 
-  async getAllClinics(page = 1, limit = 10, search = "") {
+  async getAllClinics(search = "") {
     try {
-      const skip = (page - 1) * limit;
-
       // Build where clause for search
       const where = search
         ? {
@@ -48,22 +46,17 @@ class ClinicService {
           }
         : {};
 
-      // Get total count
-      const total = await prisma.clinic.count({ where });
-
-      // Get clinics with pagination
+      // Get all clinics (no pagination)
       const clinics = await prisma.clinic.findMany({
         where,
-        skip,
-        take: limit,
         orderBy: { id: "desc" },
       });
 
       return {
         clinics,
-        total,
-        totalPages: Math.ceil(total / limit),
-        currentPage: page,
+        total: clinics.length,
+        totalPages: 1,
+        currentPage: 1,
       };
     } catch (error) {
       throw error;

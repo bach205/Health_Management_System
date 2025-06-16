@@ -19,7 +19,7 @@ interface ResultExaminationModalProps {
   doctorId?: number;
   currentUserId?: number;
   onSuccess?: () => void;
-}
+} 
 
 const ResultExaminationModal = ({
   open,

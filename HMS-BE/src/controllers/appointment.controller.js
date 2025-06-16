@@ -11,6 +11,7 @@ const {
 
 exports.bookAppointment = async (req, res, next) => {
   try {
+    
     const { error } = bookAppointmentSchema.validate(req.body);
     if (error) {
       return res.status(400).json({
@@ -18,7 +19,7 @@ exports.bookAppointment = async (req, res, next) => {
         message: error.details[0].message
       });
     }
-
+    console.log(req.body);
     const result = await appointmentService.bookAppointment(req.body);
     res.status(201).json({
       success: true,

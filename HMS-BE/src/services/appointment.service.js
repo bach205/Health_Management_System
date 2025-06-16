@@ -82,22 +82,32 @@ class AppointmentService {
    */
   // chạy thành công 
   async getAvailableSlots({ doctor_id, clinic_id, slot_date }) {
-    let query = "SELECT * FROM available_slots WHERE is_available = 1";
+    let query = `
+      SELECT s.*, 
+        u.full_name as doctor_name,
+        u.role as doctor_role,
+        c.name as clinic_name
+      FROM available_slots s
+      LEFT JOIN users u ON s.doctor_id = u.id
+      LEFT JOIN clinics c ON s.clinic_id = c.id
+      WHERE s.is_available = 1
+      AND u.role = 'doctor'
+    `;
     const params = [];
 
     if (doctor_id) {
-      query += " AND doctor_id = ?";
+      query += " AND s.doctor_id = ?";
       params.push(doctor_id);
     }
     if (clinic_id) {
-      query += " AND clinic_id = ?";
+      query += " AND s.clinic_id = ?";
       params.push(clinic_id);
     }
     if (slot_date) {
-      query += " AND slot_date = ?";
+      query += " AND s.slot_date = ?";
       params.push(slot_date);
     }
-    query += " ORDER BY start_time ASC";
+    query += " ORDER BY s.start_time ASC";
 
     const slots = await prisma.$queryRawUnsafe(query, ...params);
     return slots;
@@ -209,6 +219,7 @@ class AppointmentService {
   // viết lại nhé anh Bách
   async nurseBookAppointment(data) {
     // 1. Kiểm tra slot còn trống không
+    console.log(new Date(data.appointment_date));
     const slot = await prisma.availableSlot.findFirst({
       where: {
         doctor_id: data.doctor_id,

@@ -14,7 +14,9 @@ export type Shift = {
 
 const formatDateToHHmm = (isoString: string) => {
   const date = new Date(isoString);
-  return date.toTimeString().slice(0, 5);
+  const hours = date.getUTCHours().toString().padStart(2, '0');
+  const minutes = date.getUTCMinutes().toString().padStart(2, '0');
+  return `${hours}:${minutes}`;
 };
 
 const convertHHmmToISOString = (time: string) => {
@@ -47,11 +49,12 @@ function ShiftManager() {
           start_time: formatDateToHHmm(shift.start_time),
           end_time: formatDateToHHmm(shift.end_time),
         }));
+        
         setShifts(formattedShifts);      
     };
     fetchShifts();
   }, [change]);
-
+ 
   const openModal = (shift?: Shift) => {
     if (shift) {
       setEditingShift(shift);
@@ -75,7 +78,6 @@ function ShiftManager() {
     message.success('Đã xoá ca làm');
     setChange(!change);
   };
-
   const handleSubmit = async (values: any) => {
     const payload = {
       name: values.name,
@@ -203,7 +205,9 @@ function ShiftManager() {
         footer={null}
         onCancel={() => setViewModalVisible(false)}
       >
+        
         {viewShift && (
+         
           <div>
             <p><strong>Tên ca:</strong> {viewShift.name}</p>
             <p><strong>Giờ bắt đầu:</strong> {viewShift.start_time}</p>

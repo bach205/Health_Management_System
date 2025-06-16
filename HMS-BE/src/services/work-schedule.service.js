@@ -63,6 +63,29 @@ class WorkScheduleService {
         },
       });
 
+      // Sau khi tạo workSchedule, tạo availableSlot tương ứng nếu chưa tồn tại
+      const existingSlot = await prisma.availableSlot.findFirst({
+        where: {
+          doctor_id: workSchedule.user_id,
+          clinic_id: workSchedule.clinic_id,
+          slot_date: workSchedule.work_date,
+          start_time: workSchedule.shift.start_time,
+          end_time: workSchedule.shift.end_time,
+        },
+      });
+      if (!existingSlot) {
+        await prisma.availableSlot.create({
+          data: {
+            doctor_id: workSchedule.user_id,
+            clinic_id: workSchedule.clinic_id,
+            slot_date: workSchedule.work_date,
+            start_time: workSchedule.shift.start_time,
+            end_time: workSchedule.shift.end_time,
+            is_available: true,
+          },
+        });
+      }
+
       return workSchedule;
     } catch (error) {
       throw error;
@@ -133,6 +156,18 @@ class WorkScheduleService {
       // Check if work schedule exists
       const existingSchedule = await prisma.workSchedule.findUnique({
         where: { id: parseInt(id) },
+        include: {
+          shift: true,
+          user: {
+            select: {
+              id: true,
+              full_name: true,
+              email: true,
+              phone: true,
+            }
+          },
+          clinic: true,
+        },
       });
 
       if (!existingSchedule) {
@@ -167,6 +202,37 @@ class WorkScheduleService {
           shift: true,
         },
       });
+
+      // Nếu có thay đổi về shift, work_date, user_id hoặc clinic_id, cập nhật available slot
+      if (updateData.shift_id || updateData.work_date || updateData.user_id || updateData.clinic_id) {
+        // Lấy thông tin shift mới nếu có thay đổi
+        const newShift = updateData.shift_id 
+          ? await prisma.shift.findUnique({ where: { id: updateData.shift_id } })
+          : existingSchedule.shift;
+
+        // Xóa available slot cũ
+        await prisma.availableSlot.deleteMany({
+          where: {
+            doctor_id: existingSchedule.user_id,
+            clinic_id: existingSchedule.clinic_id,
+            slot_date: existingSchedule.work_date,
+            start_time: existingSchedule.shift.start_time,
+            end_time: existingSchedule.shift.end_time,
+          },
+        });
+
+        // Tạo available slot mới
+        await prisma.availableSlot.create({
+          data: {
+            doctor_id: updateData.user_id || existingSchedule.user_id,
+            clinic_id: updateData.clinic_id || existingSchedule.clinic_id,
+            slot_date: updateData.work_date || existingSchedule.work_date,
+            start_time: newShift.start_time,
+            end_time: newShift.end_time,
+            is_available: true,
+          },
+        });
+      }
 
       return updatedSchedule;
     } catch (error) {

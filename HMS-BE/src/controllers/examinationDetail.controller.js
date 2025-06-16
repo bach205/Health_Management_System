@@ -28,6 +28,18 @@ class ExaminationDetailController {
         const details = await ExaminationDetailService.getAll(req.query);
         return new OK({ message: "Lấy danh sách kết quả khám thành công", metadata: details }).send(res);
     }
+
+    static async getDoctorsInClinic(req, res) {
+        const { clinicId } = req.params;
+        const doctors = await ExaminationDetailService.getDoctorsInClinic(clinicId);
+        return new OK({ message: "Lấy danh sách bác sĩ trong phòng khám thành công", metadata: doctors }).send(res);
+    }
+
+    static async getDoctorAvailableSlots(req, res) {
+        const { doctorId } = req.params;
+        const slots = await ExaminationDetailService.getDoctorAvailableSlots(doctorId);
+        return new OK({ message: "Lấy danh sách ca khám có thể chọn thành công", metadata: slots }).send(res);
+    }
 }
 
 module.exports = ExaminationDetailController; 
