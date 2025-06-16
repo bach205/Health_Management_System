@@ -95,6 +95,7 @@ export default function AppointmentsPage() {
                 onCancel={handleViewAppointmentCancel}
                 visible={true}
                 selectedPatient={patient}
+                setReload={setReload}
                 reload={reload}
                 isPage
             />

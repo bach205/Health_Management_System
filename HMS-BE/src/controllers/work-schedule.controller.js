@@ -3,6 +3,7 @@ const workScheduleService = require("../services/work-schedule.service");
 class WorkScheduleController {
   async createWorkSchedule(req, res) {
     try {
+      
       const workSchedule = await workScheduleService.createWorkSchedule(
         req.body
       );
