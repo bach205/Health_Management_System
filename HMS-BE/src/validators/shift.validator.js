@@ -5,14 +5,19 @@ const createShiftSchema = Joi.object({
     "string.empty": "Tên ca làm việc không được để trống",
     "any.required": "Tên ca làm việc là bắt buộc",
   }),
-  start_time: Joi.date().required().messages({
+  start_time: Joi.string().isoDate().required().messages({
     "any.required": "Thời gian bắt đầu là bắt buộc",
+    "string.isoDate": "Thời gian bắt đầu không hợp lệ",
   }),
-  end_time: Joi.date().required().messages({
+  end_time: Joi.string().isoDate().required().messages({
     "any.required": "Thời gian kết thúc là bắt buộc",
+    "string.isoDate": "Thời gian kết thúc không hợp lệ",
   }),
 }).custom((obj, helpers) => {
-  if (new Date(obj.start_time) >= new Date(obj.end_time)) {
+  const startTime = new Date(obj.start_time);
+  const endTime = new Date(obj.end_time);
+  
+  if (startTime >= endTime) {
     return helpers.error("any.invalid", {
       message: "Thời gian kết thúc phải sau thời gian bắt đầu",
     });
@@ -22,17 +27,22 @@ const createShiftSchema = Joi.object({
 
 const updateShiftSchema = Joi.object({
   name: Joi.string().optional(),
-  start_time: Joi.date().optional(),
-  end_time: Joi.date().optional(),
+  start_time: Joi.string().isoDate().optional().messages({
+    "string.isoDate": "Thời gian bắt đầu không hợp lệ",
+  }),
+  end_time: Joi.string().isoDate().optional().messages({
+    "string.isoDate": "Thời gian kết thúc không hợp lệ",
+  }),
 }).custom((obj, helpers) => {
-  if (
-    obj.start_time &&
-    obj.end_time &&
-    new Date(obj.start_time) >= new Date(obj.end_time)
-  ) {
-    return helpers.error("any.invalid", {
-      message: "Thời gian kết thúc phải sau thời gian bắt đầu",
-    });
+  if (obj.start_time && obj.end_time) {
+    const startTime = new Date(obj.start_time);
+    const endTime = new Date(obj.end_time);
+    
+    if (startTime >= endTime) {
+      return helpers.error("any.invalid", {
+        message: "Thời gian kết thúc phải sau thời gian bắt đầu",
+      });
+    }
   }
   return obj;
 });
