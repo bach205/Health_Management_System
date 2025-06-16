@@ -2,6 +2,7 @@ const { BadRequestError } = require("../core/error.response");
 const prisma = require("../config/prisma");
 const { createDoctorSchema, updateDoctorSchema } = require("../validators/auth.validator");
 const bcrypt = require("bcrypt");
+const { sendStaffNewPasswordEmail } = require("../utils/staff.email");
 
 class DoctorService {
     async findAllDoctor() {
@@ -24,21 +25,27 @@ class DoctorService {
     }
 
     createDoctor = async (doctorData) => {
-        console.log(doctorData)
         try {
             // Check for empty fields
             const requiredFields = [
                 'full_name',
                 'email',
-                'password',
                 'gender',
             ];
+            let sendEmail = false;
+            if (!doctorData.password || doctorData.password.trim() === '') {
+                const password = this.#createRandomPassword();
+                doctorData.password = password.toString();
+                sendEmail = true;
+            }
+            // console.log(doctorData)
 
             for (const field of requiredFields) {
                 if (!doctorData[field] || doctorData[field].trim() === '') {
                     throw new BadRequestError(`${field.replace('_', ' ')} không được để trống`);
                 }
             }
+
 
             // Validate input data using Joi schema
             const { error, value } = createDoctorSchema.validate(doctorData, { abortEarly: false });
@@ -60,6 +67,8 @@ class DoctorService {
                 value.password,
                 parseInt(process.env.BCRYPT_SALT_ROUNDS)
             );
+
+
             // Create doctor
             const doctor = await prisma.user.create({
                 data: {
@@ -82,6 +91,10 @@ class DoctorService {
                 },
                 include: { doctor: true },
             });
+
+            if (sendEmail) {
+                sendStaffNewPasswordEmail(doctorData.email, doctorData.password);
+            }
 
             if (!doctor) {
                 throw new BadRequestError("Có lỗi xảy ra, vui lòng thử lại!");
@@ -245,23 +258,59 @@ class DoctorService {
 
     updatePassword = async (body) => {
         try {
-            const { id, password } = body;
+            const { id } = body;
+            const password = this.#createRandomPassword();
             const hashedPassword = await bcrypt.hash(
                 password,
                 parseInt(process.env.BCRYPT_SALT_ROUNDS)
             );
-            await prisma.user.update({
+            const user = await prisma.user.update({
                 where: { id: +id },
                 data: { password: hashedPassword }
             });
+            sendStaffNewPasswordEmail(user.email, password);
             return {
                 status: true,
                 message: "Cập nhật mật khẩu thành công"
             };
         } catch (error) {
+            console.log(error)
             throw new BadRequestError("Có lỗi xảy ra, vui lòng thử lại!");
         }
     }
+    #createRandomPassword() {
+        const upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        const lower = "abcdefghijklmnopqrstuvwxyz";
+        const digits = "0123456789";
+        const special = "!@#$%^&*()_+[]{}?";
+
+        const getRandom = (charset) => charset[Math.floor(Math.random() * charset.length)];
+
+        const mustInclude = [
+            getRandom(upper),
+            getRandom(lower),
+            getRandom(digits),
+            getRandom(special),
+        ];
+
+        const totalLength = 6;
+
+        const all = upper + lower + digits + special;
+        while (mustInclude.length < totalLength) {
+            mustInclude.push(getRandom(all));
+        }
+
+        for (let i = mustInclude.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = mustInclude[i];
+            mustInclude[i] = mustInclude[j];
+            mustInclude[j] = temp;
+        }
+
+        return mustInclude.join('');
+    }
+
+
 }
 
 module.exports = new DoctorService();

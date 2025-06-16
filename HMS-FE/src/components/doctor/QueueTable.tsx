@@ -5,12 +5,14 @@ import { toast } from "react-toastify";
 import useQueue from "../../hooks/useQueue";
 import { getQueueStatus } from "../../types/queue.type";
 import ExaminationOrderModal from "./ExaminationOrderModal";
-import { useSocket } from "../../hooks/useSocket";
+// import { useSocket } from "../../hooks/useSocket";
 import { updateQueueStatus } from "../../services/queue.service";
 import { Ellipsis } from "lucide-react";
 import ResultExaminationModal from "./ResultExaminationModal";
 import ExaminationRecordModal from "../../components/doctor/ExaminationRecordModal";
 import { useAuthStore } from "../../store/authStore";
+import { updateQueueStatus } from "../../services/queue.service";
+import { useSocket } from "../../hooks/useSocket";
 
 const QueueTable = () => {
   const {
@@ -24,12 +26,10 @@ const QueueTable = () => {
   const [showResultModal, setShowResultModal] = useState(false);
   const [clinics, setClinics] = useState<any[]>([]);
   const [selectedClinic, setSelectedClinic] = useState("");
-  const { fetchQueue } = useQueue();
-  const [showAssignModal, setShowAssignModal] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<any>(null);
-  const [actionDropdown, setActionDropdown] = useState<string | null>(null);
-  const dropdownRef = useRef<HTMLDivElement | null>(null);
+  const [showAssignModal, setShowAssignModal] = useState(false);
   const [showRecordModal, setShowRecordModal] = useState(false);
+  const { fetchQueue } = useQueue();
   const { user } = useAuthStore();
   const currentDoctorId = user?.id;
 
@@ -43,8 +43,7 @@ const QueueTable = () => {
           setSelectedClinic(res.data?.metadata[0].id.toString());
         }
       } catch (error: any) {
-        console.log(error);
-        toast.error(
+        message.error(
           error?.response?.data?.message || "Lỗi khi lấy danh sách phòng khám"
         );
       }
@@ -63,31 +62,15 @@ const QueueTable = () => {
     }
   }, [selectedClinic, pagination.pageNumber, pagination.pageSize]);
 
-  useSocket(
-    `clinic_${selectedClinic}`,
-    "queue:assigned",
-    (data: { clinicId: string | number }) => {
-      if (data.clinicId?.toString() === selectedClinic.toString()) {
-        fetchQueue(selectedClinic, {
-          pageNumber: pagination.pageNumber,
-          pageSize: pagination.pageSize
-        });
-      }
-    }
-  );
-
-  useSocket(
-    `clinic_${selectedClinic}`,
-    "queue:statusChanged",
-    (data: { clinicId: string | number }) => {
-      if (data.clinicId?.toString() === selectedClinic.toString()) {
-        fetchQueue(selectedClinic, {
-          pageNumber: pagination.pageNumber,
-          pageSize: pagination.pageSize
-        });
-      }
-    }
-  );
+  // useSocket(
+  //   `clinic_${selectedClinic}`,
+  //   "queue:assigned",
+  //   (data: { clinicId: string | number }) => {
+  //     if (data.clinicId?.toString() === selectedClinic.toString()) {
+  //       fetchQueue(selectedClinic);
+  //     }
+  //   }
+  // );
 
   useEffect(() => {
     const tableEl = document.getElementById("table-container");
@@ -130,25 +113,32 @@ const QueueTable = () => {
   };
 
   return (
-    <div className="flex flex-col w-full h-full">
-      {/* Dropdown chọn phòng khám */}
-      <div className="flex items-center gap-2 mb-2">
-        <label htmlFor="clinic-select" className="font-semibold">
-          Phòng khám:
-        </label>
-        <select
-          id="clinic-select"
+    <Card className="h-full flex flex-col">
+      <Space className="mb-3">
+        <span className="font-semibold">Phòng khám:</span>
+        <Select
+          style={{ minWidth: 200 }}
           value={selectedClinic}
-          onChange={(e) => setSelectedClinic(e.target.value)}
-          className="border border-gray-300 rounded-md p-2 min-w-[200px]"
-        >
-          <option value="">Chọn phòng khám</option>
-          {clinics.map((clinic: any) => (
-            <option key={clinic.id} value={clinic.id}>
-              {clinic.name}
-            </option>
-          ))}
-        </select>
+          onChange={(val) => setSelectedClinic(val)}
+          options={
+            clinics.map((clinic: any) => ({
+              label: clinic.name,
+              value: clinic.id.toString(),
+            }))
+          }
+          placeholder="Chọn phòng khám"
+        />
+      </Space>
+
+      <div className="flex-1 overflow-auto">
+        <Table
+          dataSource={queues}
+          columns={columns}
+          rowKey="id"
+          pagination={false}
+          size="middle"
+          bordered
+        />
       </div>
       {/* Search */}
       <div className="flex flex-col flex-1 mx-2 border border-gray-300 h-full overflow-visible">
@@ -205,10 +195,7 @@ const QueueTable = () => {
                                     "in_progress"
                                   );
                                   setActionDropdown(null);
-                                  fetchQueue(selectedClinic, {
-                                    pageNumber: pagination.pageNumber,
-                                    pageSize: pagination.pageSize
-                                  });
+                                  fetchQueue(selectedClinic);
                                 }}
                               >
                                 Bắt đầu khám
@@ -221,10 +208,7 @@ const QueueTable = () => {
                                     "skipped"
                                   );
                                   setActionDropdown(null);
-                                  fetchQueue(selectedClinic, {
-                                    pageNumber: pagination.pageNumber,
-                                    pageSize: pagination.pageSize
-                                  });
+                                  fetchQueue(selectedClinic);
                                 }}
                               >
                                 Bỏ qua
@@ -257,93 +241,57 @@ const QueueTable = () => {
             </tbody>
           </table>
         </div>
-        {/* Pagination */}
-        <div
-          id="pagination"
-          className="flex justify-between items-center gap-2 p-2 bg-white border-t border-gray-300"
-        >
-          <p className="text-sm text-gray-500">
-            Hiển thị {(pagination?.pageNumber - 1) * pagination?.pageSize + 1}{" "}
-            đến {pagination?.pageNumber * pagination?.pageSize} trên{" "}
-            {totalElements} kết quả
-          </p>
-          <div className="flex items-center gap-2">
-            <button
-              className="border border-gray-300 bg-white px-2 py-1 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-              onClick={() =>
-                setPagination({
-                  ...pagination,
-                  pageNumber: pagination.pageNumber - 1,
-                })
-              }
-              disabled={pagination.pageNumber === 1}
-            >
-              Trước
-            </button>
-            <button
-              className="border border-gray-300 bg-white px-2 py-1 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-              onClick={() =>
-                setPagination({
-                  ...pagination,
-                  pageNumber: pagination.pageNumber + 1,
-                })
-              }
-              disabled={pagination.pageNumber >= totalPages}
-            >
-              Tiếp
-            </button>
-          </div>
-        </div>
-      </div>
-      <ExaminationOrderModal
-        open={showAssignModal && !!selectedPatient}
-        onClose={() => {
-          setShowAssignModal(false);
-          setSelectedPatient(null);
-        }}
-        patient={selectedPatient}
-        clinics={clinics}
-        selectedClinicId={selectedClinic}
-        onSuccess={() => {
-          setShowAssignModal(false);
-          setSelectedPatient(null);
-          fetchQueue(selectedClinic, {
-            pageNumber: pagination.pageNumber,
-            pageSize: pagination.pageSize
-          });
-        }}
-      />
-      <ExaminationRecordModal
-        open={showRecordModal}
-        onClose={() => setShowRecordModal(false)}
-        patientId={selectedPatient?.id}
-        doctorId={(Number)(currentDoctorId)}
-        onSuccess={() => {
-          setShowRecordModal(false);
-          setSelectedPatient(null);
-          fetchQueue(selectedClinic, {
-            pageNumber: pagination.pageNumber,
-            pageSize: pagination.pageSize
-          });
-        }}
-      />
-      <ResultExaminationModal
-        open={showResultModal}
-        onClose={() => setShowResultModal(false)}
-        patientId={selectedPatient?.id}
-        clinicId={Number(selectedClinic)}
-        doctorId={(Number)(currentDoctorId)}
-        currentUserId={(Number)(user?.id)}
-        onSuccess={() => {
-          setShowResultModal(false);
-          setSelectedPatient(null);
-          fetchQueue(selectedClinic, {
-            pageNumber: pagination.pageNumber,
-            pageSize: pagination.pageSize
-          });
-        }}
-      />
-    </div>
+      )}
+        {/* Keep Modal as is */}
+        <ExaminationOrderModal
+          open={showAssignModal && !!selectedPatient}
+          onClose={() => {
+            setShowAssignModal(false);
+            setSelectedPatient(null);
+          }}
+          patient={selectedPatient}
+          clinics={clinics}
+          selectedClinicId={selectedClinic}
+          onSuccess={() => {
+            setShowAssignModal(false);
+            setSelectedPatient(null);
+            fetchQueue(selectedClinic, {
+              pageNumber: pagination.pageNumber,
+              pageSize: pagination.pageSize
+            });
+          }}
+        />
+        <ExaminationRecordModal
+          open={showRecordModal}
+          onClose={() => setShowRecordModal(false)}
+          patientId={selectedPatient?.id}
+          doctorId={Number(currentDoctorId)}
+          onSuccess={() => {
+            setShowRecordModal(false);
+            setSelectedPatient(null);
+            fetchQueue(selectedClinic, {
+              pageNumber: pagination.pageNumber,
+              pageSize: pagination.pageSize
+            });
+          }}
+        />
+        <ResultExaminationModal
+          open={showResultModal}
+          onClose={() => setShowResultModal(false)}
+          patientId={selectedPatient?.id}
+          clinicId={Number(selectedClinic)}
+          doctorId={Number(currentDoctorId)}
+          currentUserId={Number(user?.id)}
+          onSuccess={() => {
+            setShowResultModal(false);
+            setSelectedPatient(null);
+            fetchQueue(selectedClinic, {
+              pageNumber: pagination.pageNumber,
+              pageSize: pagination.pageSize
+            });
+          }}
+        />
+    </Card>
   );
 };
 

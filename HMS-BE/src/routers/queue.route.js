@@ -1,29 +1,40 @@
 const express = require("express");
 const queueRouter = express.Router();
-const { authenticate } = require("../middlewares/authenticate");
 const QueueController = require("../controllers/queue.controller");
 const asyncHandler = require("../helper/asyncHandler");
 
-// queueRouter.use(authenticate);
-queueRouter.get("/:clinicId", asyncHandler(QueueController.getQueueClinic));
+
+// Lấy danh sách queue của phòng khám
+queueRouter.get("/clinic/:clinicId", asyncHandler(QueueController.getQueueClinic));
+
+// Chỉ định thêm phòng khám cho bệnh nhân
 queueRouter.post(
-  "/queue-clinic/assign",
+  "/assign-clinic",
   asyncHandler(QueueController.assignAdditionalClinic)
 );
+
+// Cập nhật trạng thái queue
 queueRouter.patch(
   "/:queueId/status",
   asyncHandler(QueueController.updateQueueStatus)
 );
 
-// BỔ SUNG THÊM LOGIC: Check-in vào queue từ appointment
+// Check-in vào queue từ appointment
 queueRouter.post(
-  "/checkin-appointment",
+  "/checkin",
   asyncHandler(QueueController.checkInFromAppointment)
 );
-// BỔ SUNG THÊM LOGIC: Huỷ queue khi huỷ appointment
+
+// Hủy queue khi hủy appointment
 queueRouter.post(
-  "/cancel-queue-appointment",
+  "/cancel",
   asyncHandler(QueueController.cancelQueueByAppointment)
+);
+
+// Gọi số tiếp theo
+queueRouter.post(
+  "/call-next",
+  asyncHandler(QueueController.callNextPatient)
 );
 
 module.exports = queueRouter;

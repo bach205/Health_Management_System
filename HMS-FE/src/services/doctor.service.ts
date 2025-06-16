@@ -1,13 +1,8 @@
 import type { IDoctor } from "../types/index.type";
 import instance from "../api/mainRequest";
-import { PASSWORD_DEFAULT } from "../constants/user.const";
 const BASE_URL = "api/v1/doctor";
-
+const EXAMINATION_DETAIL_URL = "api/v1/examination-detail";
 export const createDoctor = (doctor: IDoctor) => {
-    if (!doctor.password) {
-        doctor.password = PASSWORD_DEFAULT;
-    }
-    console.log(doctor)
     return instance.post(`${BASE_URL}/create`, doctor);
 };
 
@@ -27,6 +22,14 @@ export const updateStatus = (id: number, status: boolean) => {
     return instance.post(`${BASE_URL}/update-status/`, { id, isActive: status });
 };
 
-export const updatePassword = (id: number, password: string) => {
-    return instance.post(`${BASE_URL}/update-password/`, { id, password });
+export const updatePassword = (id: number) => {
+    return instance.post(`${BASE_URL}/update-password/`, { id });
+};
+
+export const getDoctorAvailableSlots = (doctorId: number) => {
+    return instance.get(`${EXAMINATION_DETAIL_URL}/available-slots/${doctorId}`);
+};
+
+export const getDoctorsInClinic = (clinicId: number) => {
+    return instance.get(`${EXAMINATION_DETAIL_URL}/doctors/${clinicId}`);
 };

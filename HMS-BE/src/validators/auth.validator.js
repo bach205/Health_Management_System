@@ -65,6 +65,10 @@ const forgetPasswordSchema = Joi.object({
 
 const resetPasswordSchema = Joi.object({
   token: Joi.string().required(),
+  oldPassword: Joi.string().required().messages({
+    "string.empty": "Mật khẩu cũ không được để trống",
+    "any.required": "Mật khẩu cũ là bắt buộc",
+  }),
   newPassword: Joi.string()
     .min(8)
     .pattern(
@@ -126,6 +130,30 @@ const facebookLoginSchema = Joi.object({
   picture: Joi.string().optional(),
 });
 
+const changePasswordSchema = Joi.object({
+  oldPassword: Joi.string().required().messages({
+    "string.empty": "Mật khẩu cũ không được để trống",
+    "any.required": "Mật khẩu cũ là bắt buộc",
+  }),
+  newPassword: Joi.string()
+    .min(8)
+    .pattern(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
+    )
+    .required()
+    .messages({
+      "string.pattern.base":
+        "Mật khẩu phải chứa ít nhất 1 chữ hoa, 1 chữ thường, 1 số và 1 ký tự đặc biệt",
+      "string.min": "Mật khẩu phải có ít nhất 8 ký tự",
+    }),
+  confirmPassword: Joi.string()
+    .valid(Joi.ref("newPassword"))
+    .required()
+    .messages({
+      "any.only": "Mật khẩu không khớp nhau",
+    }),
+});
+
 module.exports = {
   registerSchema,
   loginSchema,
@@ -139,4 +167,5 @@ module.exports = {
   updateDoctorSchema,
   googleLoginSchema,
   facebookLoginSchema,
+  changePasswordSchema,
 };
