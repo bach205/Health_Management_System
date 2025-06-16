@@ -5,7 +5,6 @@ const {
   getPatientAppointmentsSchema,
   confirmAppointmentSchema,
   cancelAppointmentSchema,
-  getAppointmentDetailSchema,
   nurseBookAppointmentSchema,
 } = require("../validators/appointment.validator");
 
@@ -129,48 +128,6 @@ exports.cancelAppointment = async (req, res, next) => {
   }
 };
 
-exports.getAppointmentDetail = async (req, res, next) => {
-  try {
-    const appointment_id = parseInt(req.params.id);
-
-    if (isNaN(appointment_id)) {
-      return res.status(400).json({
-        success: false,
-        message: "ID lịch hẹn không hợp lệ"
-      });
-    }
-
-    const { error } = getAppointmentDetailSchema.validate({
-      appointment_id: appointment_id
-    });
-
-    if (error) {
-      return res.status(400).json({
-        success: false,
-        message: error.details[0].message
-      });
-    }
-
-    const appointment = await appointmentService.getAppointmentDetail({
-      appointment_id: appointment_id
-    });
-
-    if (!appointment) {
-      return res.status(404).json({
-        success: false,
-        message: "Không tìm thấy lịch hẹn"
-      });
-    }
-
-    res.status(200).json({
-      success: true,
-      message: "Lấy chi tiết lịch hẹn thành công",
-      data: appointment
-    });
-  } catch (error) {
-    next(error);
-  }
-};
 
 exports.getAllAppointments = async (req, res, next) => {
   try {

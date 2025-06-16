@@ -73,20 +73,20 @@ const IsPatientIdValid = Joi.object({
   }),
 })
 
-const getAvailableSlotsSchema = Joi.object({
-  doctor_id: Joi.number().integer().required().messages({
-    'number.base': 'ID bác sĩ phải là số',
-    'any.required': 'ID bác sĩ là bắt buộc'
-  }),
-  clinic_id: Joi.number().integer().required().messages({
-    'number.base': 'ID phòng khám phải là số',
-    'any.required': 'ID phòng khám là bắt buộc'
-  }),
-  slot_date: Joi.date().required().messages({
-    'date.base': 'Ngày không hợp lệ',
-    'any.required': 'Ngày là bắt buộc'
-  }),
-});
+// const getAvailableSlotsSchema = Joi.object({
+//   doctor_id: Joi.number().integer().required().messages({
+//     'number.base': 'ID bác sĩ phải là số',
+//     'any.required': 'ID bác sĩ là bắt buộc'
+//   }),
+//   clinic_id: Joi.number().integer().required().messages({
+//     'number.base': 'ID phòng khám phải là số',
+//     'any.required': 'ID phòng khám là bắt buộc'
+//   }),
+//   slot_date: Joi.date().required().messages({
+//     'date.base': 'Ngày không hợp lệ',
+//     'any.required': 'Ngày là bắt buộc'
+//   }),
+// });
 
 const getPatientAppointmentsSchema = Joi.object({
   patient_id: Joi.number().integer().required().messages({
@@ -121,7 +121,7 @@ const getAppointmentDetailSchema = Joi.object({
 
 module.exports = {
   bookAppointmentSchema,
-  getAvailableSlotsSchema,
+  // getAvailableSlotsSchema,
   getPatientAppointmentsSchema,
   confirmAppointmentSchema,
   cancelAppointmentSchema,

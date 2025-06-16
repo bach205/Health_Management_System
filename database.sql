@@ -331,13 +331,13 @@ INSERT INTO examination_details (record_id, clinic_id, doctor_id, result, note, 
 (6, 6, 5, 'Đo thị lực: 3/10, cần đeo kính -2.5', 'Tái khám sau 3 tháng', '2025-06-06 09:00:00', 'done');
 
 -- Insert bảng queues
-INSERT INTO queues (patient_id, clinic_id, record_id, appointment_id, status, priority, registered_online, qr_code, called_at) VALUES
-(8, 1, 1, 1, 'done', 1, true, 'QR001', '2025-06-01 09:00:00'),
-(9, 2, 2, 2, 'done', 2, false, 'QR002', '2025-06-02 14:00:00'),
-(10, 3, 3, 3, 'done', 0, true, 'QR003', '2025-06-03 08:30:00'),
-(11, 4, 4, 4, 'done', 1, false, 'QR004', '2025-06-04 11:00:00'),
-(12, 5, 5, 5, 'done', 0, true, 'QR005', '2025-06-05 15:00:00'),
-(13, 6, 6, 6, 'done', 0, false, 'QR006', '2025-06-06 08:45:00');
+-- INSERT INTO queues (patient_id, clinic_id, record_id, appointment_id, status, priority, registered_online, qr_code, called_at) VALUES
+-- (8, 1, 1, 1, 'done', 1, true, 'QR001', '2025-06-01 09:00:00'),
+-- (9, 2, 2, 2, 'done', 2, false, 'QR002', '2025-06-02 14:00:00'),
+-- (10, 3, 3, 3, 'done', 0, true, 'QR003', '2025-06-03 08:30:00'),
+-- (11, 4, 4, 4, 'done', 1, false, 'QR004', '2025-06-04 11:00:00'),
+-- (12, 5, 5, 5, 'done', 0, true, 'QR005', '2025-06-05 15:00:00'),
+-- (13, 6, 6, 6, 'done', 0, false, 'QR006', '2025-06-06 08:45:00');
 
 -- Insert bảng prescriptions
 INSERT INTO prescriptions (record_id) VALUES
@@ -566,3 +566,17 @@ INSERT INTO queues (patient_id, clinic_id, record_id, appointment_id, status, pr
 
 
 select * from appointments
+
+-- sửa một ít về db
+ALTER TABLE appointments
+ADD COLUMN priority INT DEFAULT 0 COMMENT '0: normal booking, 1: nurse booking, 2: urgent'
+AFTER status;
+
+ALTER TABLE appointments
+ADD INDEX idx_priority (priority);
+
+ALTER TABLE queues
+ADD INDEX idx_priority (priority);
+
+-- câu lệnh prisma
+npx prisma migrate dev --name add-priority-to-appointment
