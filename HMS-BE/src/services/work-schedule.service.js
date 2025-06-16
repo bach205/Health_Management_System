@@ -14,7 +14,7 @@ class WorkScheduleService {
         throw new BadRequestError(error.details[0].message);
       }
 
-      // Check if user exists
+      // Check if user exists and has correct role
       const user = await prisma.user.findUnique({
         where: { id: workScheduleData.user_id },
       });
@@ -206,7 +206,7 @@ class WorkScheduleService {
       // Nếu có thay đổi về shift, work_date, user_id hoặc clinic_id, cập nhật available slot
       if (updateData.shift_id || updateData.work_date || updateData.user_id || updateData.clinic_id) {
         // Lấy thông tin shift mới nếu có thay đổi
-        const newShift = updateData.shift_id 
+        const newShift = updateData.shift_id
           ? await prisma.shift.findUnique({ where: { id: updateData.shift_id } })
           : existingSchedule.shift;
 

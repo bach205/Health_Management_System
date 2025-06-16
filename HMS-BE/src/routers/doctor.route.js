@@ -7,6 +7,11 @@ const {
 const validate = require("../middlewares/validate");
 const { authenticate, authorize } = require("../middlewares/auth");
 const doctorRouter = express.Router();
+const checkUserStatus = require("../middlewares/checkUserStatus");
+
+// Apply middleware to all routes
+// doctorRouter.use(authenticate);
+// doctorRouter.use(checkUserStatus());
 
 doctorRouter.post(
   "/create",
