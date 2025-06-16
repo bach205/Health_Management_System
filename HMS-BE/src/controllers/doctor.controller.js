@@ -49,6 +49,30 @@ class DoctorController {
       message: "Cập nhật mật khẩu bác sĩ thành công",
     }).send(res);
   }
+
+  getDoctorById = async (req, res) => {
+    const result = await DoctorService.getDoctorById(req.params.id);
+    return new OK({
+      message: "Lấy bác sĩ thành công",
+      metadata: result,
+    }).send(res);
+  }
+
+  getDoctorsInClinic = async (req, res) => {
+    const result = await DoctorService.getDoctorsInClinic(req.params.clinicId);
+    return new OK({
+      message: "Lấy danh sách bác sĩ thành công",
+      metadata: result, 
+    }).send(res);
+  }
+
+  getDoctorAvailableSlots = async (req, res) => {
+    const result = await DoctorService.getDoctorAvailableSlots(req.params.doctorId);
+    return new OK({
+      message: "Lấy danh sách slot khả dụng thành công",
+      metadata: result,
+    }).send(res);
+  }
 }
 
 module.exports = new DoctorController();

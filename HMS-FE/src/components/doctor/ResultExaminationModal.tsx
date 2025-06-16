@@ -1,12 +1,16 @@
-import { Modal, Form, Input, InputNumber, Select, DatePicker, Button, message } from "antd";
-import { useEffect, useState } from "react";
-import dayjs from "dayjs";
-import { toast } from "react-toastify";
+import Modal from "../../components/ui/Modal";
+import { useForm } from "react-hook-form";
+import TextFieldControl from "../../components/form/TextFieldControl";
+import SelectFieldControl from "../../components/form/SelectFieldControl";
 import mainRequest from "../../api/mainRequest";
+import { useState, useEffect } from "react";
+import { toast } from "react-toastify";
 import { getClinicService } from "../../services/clinic.service";
 import { getDoctorsInClinic, getDoctorAvailableSlots } from "../../services/doctor.service";
-
-
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import { Button, message } from "antd";
+dayjs.extend(utc);
 interface ResultExaminationModalProps {
   open: boolean;
   onClose: () => void;
@@ -15,7 +19,7 @@ interface ResultExaminationModalProps {
   doctorId?: number;
   currentUserId?: number;
   onSuccess?: () => void;
-}
+} 
 
 const ResultExaminationModal = ({
   open,
@@ -26,287 +30,272 @@ const ResultExaminationModal = ({
   currentUserId,
   onSuccess,
 }: ResultExaminationModalProps) => {
-  const [form] = Form.useForm();
+  const { control, handleSubmit, reset, watch } = useForm({
+    defaultValues: {
+      to_clinic_id: "",
+      to_doctor_id: "",
+      examined_at: new Date(),
+    },
+  });
   const [loading, setLoading] = useState(false);
-  const [clinics, setClinics] = useState<any[]>([
-  ]);
-  const allClinics = [
-    { value: "", label: "Không chỉ định phòng khám tiếp theo" },
-    ...(clinics?.map((c) => ({ value: c.id, label: c.name }))).filter((c) => c.value !== clinicId),
-  ];
+  const [clinics, setClinics] = useState<any[]>([]);
+  const [doctorsInClinic, setDoctorsInClinic] = useState<any[]>([]);
+  const [availableSlots, setAvailableSlots] = useState<any[]>([]);
 
-
-  const [doctorInClinic, setDoctorInClinic] = useState<any[]>([]);
-  const [selectedClinicId, setSelectedClinicId] = useState<any>(null);
-
-  const [availableDoctorTime, setAvailableDoctorTime] = useState<any[]>([
-    { value: "08:00", label: "08:00" },
-    { value: "09:00", label: "09:00" },
-    { value: "10:00", label: "10:00" },
-    { value: "11:00", label: "11:00" },
-    { value: "12:00", label: "12:00" },
-    { value: "13:00", label: "13:00" },
-    { value: "14:00", label: "14:00" },
-    { value: "15:00", label: "15:00" },
-    { value: "16:00", label: "16:00" },
-    { value: "17:00", label: "17:00" },
-    { value: "18:00", label: "18:00" },
-    { value: "19:00", label: "19:00" },
-
-
-  ]);
-  const [selectedDoctorId, setSelectedDoctorId] = useState<any>(null);
-
-  // const to_clinic_id = Form.useWatch("to_clinic_id", form);
-  // const clinicSelected = clinics.find((c) => c.id === Number(to_clinic_id));
-
-  useEffect(() => {
-    const getDoctorInClinic = async (clinicId: number) => {
-      try {
-        const res = await getDoctorsInClinic(clinicId);
-        console.log(res)
-        if (res.data.metadata.length > 0) {
-          setDoctorInClinic(res.data.metadata.map((data: any) => ({ value: data.user.id, label: data.user.full_name })) || []);
-        } else {
-          setDoctorInClinic([]);
-        }
-      } catch (err: any) {
-        console.log(err);
-        message.error("Có lỗi xảy ra!");
-      }
-
-    };
-    // console.log(selectedClinicId)
-    if (selectedClinicId && selectedClinicId !== "") {
-      getDoctorInClinic(selectedClinicId);
-    }
-  }, [selectedClinicId]);
-
-  useEffect(() => {
-    const getAvailableDoctorTime = async (doctorId: number) => {
-      try {
-        const res = await getDoctorAvailableSlots(doctorId);
-        console.log(res)
-        setAvailableDoctorTime(res.data.metadata || []);
-      } catch (err: any) {
-        console.log(err);
-        message.error("Có lỗi xảy ra!");
-      }
-    };
-    if (selectedDoctorId && selectedClinicId) {
-      getAvailableDoctorTime(selectedDoctorId);
-    }
-  }, [selectedDoctorId, selectedClinicId]);
-
-  useEffect(() => {
-    const getClinics = async () => {
-      try {
-        const res = await getClinicService();
-        setClinics(res.data.metadata.clinics || []);
-      } catch (err: any) {
-        console.log(err);
-        message.error("Có lỗi xảy ra!");
-      }
-    }
-    getClinics();
-  }, [open]);
+  const to_clinic_id = watch("to_clinic_id");
+  const to_doctor_id = watch("to_doctor_id");
 
   const handleClose = () => {
-    form.resetFields();
-    setSelectedClinicId(null)
-    setSelectedDoctorId(null)
+    reset();
+    setDoctorsInClinic([]);
+    setAvailableSlots([]);
     onClose();
   };
+
+  // Lấy danh sách phòng khám
+  useEffect(() => {
+    if (open) {
+      getClinicService().then((res) => {
+        setClinics(res.data.metadata.clinics || []);
+      });
+    }
+  }, [open]);
+
+  // Lấy danh sách bác sĩ khi chọn phòng khám
+  useEffect(() => {
+    if (to_clinic_id) {
+      getDoctorsInClinic(Number(to_clinic_id))
+        .then((res: any) => {
+          setDoctorsInClinic(res.data.metadata || []);
+        })
+        .catch(() => {
+          setDoctorsInClinic([]);
+          toast.error("Không lấy được danh sách bác sĩ");
+        });
+    } else {
+      setDoctorsInClinic([]);
+      setAvailableSlots([]);
+    }
+  }, [to_clinic_id]);
+
+  // Lấy slots trống khi chọn bác sĩ
+  useEffect(() => {
+    if (to_doctor_id) {
+      getDoctorAvailableSlots(Number(to_doctor_id))
+        .then((res: any) => {
+          setAvailableSlots([{
+            slot_date: "",
+            start_time: "",
+          }, ...res.data.metadata]);
+        })
+        .catch(() => {
+          setAvailableSlots([
+            {
+              slot_date: "",
+              start_time: "",
+            }
+          ]);
+          toast.error("Không lấy được lịch trống của bác sĩ");
+        });
+    } else {
+      setAvailableSlots([
+        {
+          slot_date: "",
+          start_time: "",
+        }
+      ]);
+    }
+  }, [to_doctor_id]);
 
   const onSubmit = async (values: any) => {
     setLoading(true);
     try {
-      if (
-        values.examined_at &&
-        dayjs(values.examined_at).isAfter(dayjs().hour(20).minute(59).second(59))
-      ) {
-        toast.error("Thời gian khám không hợp lệ!");
+      console.log("values", values)
+      if (to_clinic_id !== "" && to_doctor_id === "") {
+        message.error("Vui lòng chọn bác sĩ");
         return;
       }
-
-      await mainRequest.post("api/v1/examination-detail", {
+      // Parse slot nếu có
+      let slotInfo = {};
+      if (values.slot) {
+        const parsedSlot = JSON.parse(values.slot);
+        slotInfo = {
+          slot_date: parsedSlot.slot_date,
+          start_time: parsedSlot.start_time,
+        };
+      }
+      console.log("slotInfo", slotInfo)
+      if (values.to_clinic_id && (slotInfo.slot_date === undefined || slotInfo.slot_date === "" || slotInfo.start_time === undefined || slotInfo.start_time === "")) {
+        message.error("Vui lòng chọn ca khám");
+        return;
+      }
+      await mainRequest.post("/api/v1/examination-detail", {
         ...values,
         patient_id: patientId,
-        clinic_id: selectedClinicId,
-        doctor_id: selectedDoctorId,
-        status: "pending",
+        clinic_id: clinicId,
+        doctor_id: doctorId,
         from_clinic_id: clinicId,
         created_by_user_id: currentUserId,
-        examined_at: values.examined_at ? dayjs(values.examined_at).toISOString() : undefined,
-        total_cost: values.total_cost || 0,
-        to_clinic_id: selectedClinicId
-          ? Number(selectedClinicId)
-          : undefined,
+        examined_at: new Date(values.examined_at).toISOString(),
+        // Nếu chuyển phòng thì gửi thêm thông tin slot
+        ...(values.to_clinic_id ? {
+          to_clinic_id: Number(values.to_clinic_id),
+          to_doctor_id: Number(values.to_doctor_id),
+          total_cost: values.total_cost || 0,
+          ...slotInfo
+        } : {})
       });
-
-      onSuccess?.();
+      if (onSuccess) onSuccess();
       handleClose();
     } catch (err: any) {
-      console.log(err);
-      toast.error(err?.response?.data?.message || "Có lỗi xảy ra!");
+      message.error(err?.response?.data?.message || "Có lỗi xảy ra!");
     } finally {
       setLoading(false);
     }
   };
-  // console.log("selectedClinicId", selectedClinicId, "selectedDoctorId", selectedDoctorId)
-  console.log("availableDoctorTime", availableDoctorTime)
+
+  const clinicSelected = clinics.find((c) => c.id === Number(to_clinic_id));
+  const nextClinicOptions = [
+    { value: "", label: "Không chỉ định phòng tiếp theo" },
+    ...clinics
+      .filter((c) => c.id !== clinicId)
+      .map((c) => ({
+        value: c.id,
+        label: c.name,
+      })),
+  ];
+  const doctorOptions = [
+    { value: "", label: "Chọn bác sĩ" },
+    ...doctorsInClinic.map((d: any) => ({
+      value: d.id,
+      label: d.full_name,
+    })),
+  ];
   return (
     <Modal
       open={open}
-      centered
-      onCancel={handleClose}
+      onClose={handleClose}
       title="Nhập kết quả khám phòng"
-      onOk={form.submit}
-      confirmLoading={loading}
-      footer={[
-        <Button key="cancel" onClick={handleClose}>
-          Hủy
-        </Button>,
+      paperProps={{ className: "w-full max-w-2xl" }}
+      content={
+        <form className="space-y-4 bg-white p-4" onSubmit={handleSubmit(onSubmit)}>
+          <TextFieldControl
+            name="result"
+            control={control}
+            label="Kết quả khám"
+            rules={{ required: "Vui lòng nhập kết quả khám" }}
+          />
+          <TextFieldControl
+            name="note"
+            control={control}
+            label="Ghi chú"
+          />
+
+          <TextFieldControl
+            name="total_cost"
+            control={control}
+            type="number"
+            label="Tổng chi phí"
+          />
+
+          <div className="flex flex-col gap-4">
+            <SelectFieldControl
+              name="to_clinic_id"
+              control={control}
+              label="Chỉ định phòng khám tiếp theo"
+              options={nextClinicOptions}
+              rules={{ required: false }}
+            />
+
+            {clinicSelected && (
+              <div className="text-sm flex items-center gap-2">
+                Số lượng bệnh nhân:{" "}
+                <span className={`text-white px-2 py-1 rounded ${clinicSelected.patient_volume === "high" ? "bg-red-500"
+                  : clinicSelected.patient_volume === "medium" ? "bg-yellow-500"
+                    : "bg-green-500"
+                  }`}>
+                  {clinicSelected.patient_volume === "high" ? "Đông"
+                    : clinicSelected.patient_volume === "medium" ? "Vừa phải"
+                      : "Ít"}
+                </span>
+              </div>
+            )}
+
+            {to_clinic_id && (
+              <>
+                {
+                  (doctorOptions && doctorOptions.length > 1) ? <SelectFieldControl
+                    name="to_doctor_id"
+                    control={control}
+                    label="Chọn bác sĩ khám"
+                    options={doctorOptions}
+                    rules={{
+                      validate: (value: any) => {
+                        if (to_clinic_id && !value) {
+                          return "Vui lòng chọn bác sĩ";
+                        }
+                        return true;
+                      },
+                    }}
+                  />
+                    :
+                    <SelectFieldControl
+                      name="to_doctor_id"
+                      control={control}
+                      label="Chọn bác sĩ khám"
+                      options={[{ value: "", label: "Không có bác sĩ trong phòng" }]}
+                      rules={{ required: false }}
+                      disabled
+                    />
+                }
+
+
+                {to_doctor_id && (
+                  availableSlots.length > 1 ? (
+                    <SelectFieldControl
+                      name="slot"
+                      control={control}
+                      label="Chọn ca khám"
+                      options={availableSlots?.map((slot: any) => ({
+                        value: JSON.stringify({
+                          slot_date: slot.slot_date || "",
+                          start_time: slot.start_time || ""
+                        }),
+                        label: `${slot.start_time ? dayjs.utc(slot.start_time).format("HH:mm") : ""} - ${slot.end_time ? dayjs.utc(slot.end_time).format("HH:mm") : ""}`
+                      }))}
+                      defaultValue={JSON.stringify({
+                        slot_date: availableSlots[0]?.slot_date,
+                        start_time: availableSlots[0]?.start_time
+                      })}
+                      rules={{ required: "Vui lòng chọn ca khám" }}
+                    />
+                  ) : (
+                    <SelectFieldControl
+                      name="slot"
+                      control={control}
+                      label="Chọn ca khám"
+                      options={[{ value: "", label: "Không có ca khám" }]}
+                      rules={{ required: false }}
+                      disabled
+                    />
+                  )
+                )}
+              </>
+            )}
+          </div>
+        </form>
+      }
+      action={
         <Button
-          key="submit"
           type="primary"
-          onClick={() => form.submit()}
-          loading={loading}
+          className="px-4 py-2 text-white rounded disabled:opacity-50"
+          onClick={handleSubmit(onSubmit)}
+          disabled={loading}
         >
           Lưu kết quả
-        </Button>,
-      ]}
-    >
-      <Form
-        form={form}
-        layout="vertical"
-        onFinish={onSubmit}
-        initialValues={{
-          examined_at: dayjs(),
-          to_clinic_id: "",
-        }}
-      >
-        <Form.Item
-          name="result"
-          label="Kết quả khám"
-          rules={[{ required: true, message: "Vui lòng nhập kết quả khám" }]}
-        >
-          <Input.TextArea rows={3} />
-        </Form.Item>
-
-        <Form.Item name="note" label="Ghi chú">
-          <Input.TextArea rows={2} />
-        </Form.Item>
-
-        {/* <Form.Item
-          name="examined_at"
-          label="Thời gian khám"
-          rules={[{ required: true, message: "Vui lòng chọn thời gian khám" }]}
-        >
-          <DatePicker
-            showTime={{ format: "HH:mm" }}
-            format="YYYY-MM-DD HH:mm"
-            className="w-full"
-          />
-        </Form.Item> */}
-
-        <Form.Item name="total_cost" label="Tổng chi phí">
-          <InputNumber className="w-full" min={0} />
-        </Form.Item>
-
-        {/* <Form.Item
-          name="status"
-          label="Trạng thái"
-          rules={[{ required: true, message: "Vui lòng chọn trạng thái" }]}
-        >
-          <Select options={statusOptions} />
-        </Form.Item> */}
-
-        {
-          // dayjs().hour(17).minute(0).second(0).isAfter(dayjs())
-          true
-            ? (
-              <Form.Item
-                name="to_clinic_id"
-                label="Chỉ định phòng khám tiếp theo"
-                rules={[
-                  {
-                    validator(_, value) {
-                      if (value === "" || (!isNaN(Number(value)) && Number(value) > 0)) {
-                        return Promise.resolve();
-                      }
-                      return Promise.reject(new Error("Vui lòng chọn phòng khám hợp lệ"));
-                    },
-                  },
-                ]}
-              >
-                <Select onChange={(value) => {
-                  setSelectedClinicId(value)
-                  setSelectedDoctorId("")
-                  form.setFieldsValue({ doctor_id: "" });
-                }}
-                  options={allClinics} />
-              </Form.Item>
-            ) : (
-              <Form.Item name="to_clinic_id" label="Chỉ định phòng khám tiếp theo">
-                <div className="text-red-500">* Đã quá giờ chỉ định phòng khám tiếp theo</div>
-              </Form.Item>
-            )
-        }
-
-        {(selectedClinicId && selectedClinicId !== "") && (
-          <>
-            <div className="mb-2 text-sm">
-              Số lượng bệnh nhân:{" "}
-              <span
-                className={`text-white px-2 py-1 rounded ${selectedClinicId.patient_volume === "high"
-                  ? "bg-red-500"
-                  : selectedClinicId.patient_volume === "medium"
-                    ? "bg-yellow-500"
-                    : "bg-green-500"
-                  }`}
-              >
-                {selectedClinicId.patient_volume === "high"
-                  ? "Đông"
-                  : selectedClinicId.patient_volume === "medium"
-                    ? "Vừa phải"
-                    : "Ít"}
-              </span>
-            </div>
-
-            <Form.Item
-              name="doctor_id"
-              label="Bác sĩ khám"
-              rules={[{ required: true, message: "Vui lòng chọn bác sĩ" }]}
-            >
-              <Select onChange={(value) => setSelectedDoctorId(value)} options={[...doctorInClinic, { value: "", label: "" }]} />
-            </Form.Item>
-            {
-              selectedDoctorId && (
-                <>
-                  <div className="mb-2 text-sm">
-                    Thời gian khám:
-
-                    <div className="mt-2">
-                      {availableDoctorTime.length > 0 ?
-                        availableDoctorTime.map((time) =>
-                          <Button className="mr-2" onClick={() => form.setFieldsValue({ examined_at: time.start_time })}>
-                            {dayjs(time.start_time).format("HH:mm")} - {dayjs(time.end_time).format("HH:mm")}
-                          </Button>)
-                        :
-                        <span className="text-red-500">Hết ca khám</span>
-                      }
-                    </div>
-
-                  </div>
-                </>
-              )
-            }
-          </>
-        )}
-
-      </Form>
-    </Modal>
+        </Button>
+      }
+    />
   );
 };
 
