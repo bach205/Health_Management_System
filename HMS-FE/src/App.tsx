@@ -30,7 +30,7 @@ import PatientBookAppointment from "./pages/BookAppointment";
 import './styles/scrollbar.css';
 import NurseBookAppointment from "./pages/NurseBookAppointment";
 import NurseManageAppointment from "./pages/NurseManageAppointment";
-
+import DoctorQueue from "./pages/Doctor/Queue/DoctorQueue";
 import AllDoctor from "./pages/Patient/AllDoctor";
 import About from "./pages/Patient/About";
 import Contact from "./pages/Patient/Contact";
@@ -203,5 +203,10 @@ const PrivateRoutes: PrivateRoute[] = [
     element: <MyProfile />,
     allowedRoles: ["patient"],
     layout: MainLayout,
+  },
+  {
+    path: "/doctor/queue",
+    element: <DoctorQueue />,
+    layout: DashboardLayout,
   },
 ];

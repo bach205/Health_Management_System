@@ -180,7 +180,7 @@ const SIDEBAR_ITEMS = [
         id: "examination",
         label: "Khám bệnh",
         icon: <ClipboardType className="w-4 h-4" />,
-        href: "/examination",
+        href: "/doctor/queue",
       },
     ],
   },
