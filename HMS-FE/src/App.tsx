@@ -34,6 +34,7 @@ import DoctorQueue from "./pages/Doctor/Queue/DoctorQueue";
 import AllDoctor from "./pages/Patient/AllDoctor";
 import About from "./pages/Patient/About";
 import Contact from "./pages/Patient/Contact";
+import AdminPatientDashboard from "./pages/Admin/Patient/AdminPatientDashboard";
 dayjs.extend(plugin);
 dayjs.updateLocale("en", {
   weekStart: 1,
@@ -119,7 +120,7 @@ const PublicRoutes = [
     element: <Contact />,
     layout: MainLayout,
   },
-  
+
 ];
 
 interface PrivateRoute {
@@ -208,5 +209,11 @@ const PrivateRoutes: PrivateRoute[] = [
     path: "/doctor/queue",
     element: <DoctorQueue />,
     layout: DashboardLayout,
+  },
+  {
+    path: "/admin/patients",
+    element: <AdminPatientDashboard />,
+    layout: DashboardLayout,
+    // allowedRoles: ["admin"],
   },
 ];

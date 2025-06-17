@@ -10,8 +10,9 @@ import ExaminationRecordModal from "../../../components/doctor/ExaminationRecord
 import { useAuthStore } from "../../../store/authStore";
 import { useSocket } from "../../../hooks/useSocket";
 import { updateQueueStatus } from "../../../services/queue.service";
-import { Dropdown, Menu, Select, Table, Typography } from "antd";
-import { EllipsisOutlined } from "@ant-design/icons";
+import { Button, Dropdown, Flex, Menu, Select, Table, Tag, Typography } from "antd";
+import ModalPatientExaminationOrder from "./ModalPatientExaminationOrder";
+import DoctorExaminationOrderModal from "./DoctorExaminationOrderModal";
 
 const { Option } = Select;
 const { Text } = Typography;
@@ -27,6 +28,8 @@ const QueueTable = () => {
         setQueues,  // Thêm setQueues vào đây
     } = useQueueStore();
 
+    const [showModalPatientExaminationOrder, setShowModalPatientExaminationOrder] = useState(false);
+    const [showDoctorExaminationOrderModal, setShowDoctorExaminationOrderModal] = useState(false);
     const [showResultModal, setShowResultModal] = useState(false);
     const [showAssignModal, setShowAssignModal] = useState(false);
     const [showRecordModal, setShowRecordModal] = useState(false);
@@ -38,37 +41,37 @@ const QueueTable = () => {
     const currentDoctorId = user?.id;
 
     // // Cập nhật xử lý socket cho queue:statusChanged
-    // useSocket(
-    //     `clinic_${selectedClinic}`,
-    //     "queue:statusChanged",
-    //     (data: any) => {
-    //         if (data.clinicId?.toString() === selectedClinic.toString()) {
-    //             fetchQueue(selectedClinic);
-    //         }
-    //     }
-    // );
+    useSocket(
+        `clinic_${selectedClinic}`,
+        "queue:statusChanged",
+        (data: any) => {
+            if (data.clinicId?.toString() === selectedClinic.toString()) {
+                fetchQueue(selectedClinic);
+            }
+        }
+    );
 
-    // // Cập nhật xử lý socket cho queue:assigned
-    // useSocket(
-    //     `clinic_${selectedClinic}`,
-    //     "queue:assigned",
-    //     (data: any) => {
-    //         if (data.clinicId?.toString() === selectedClinic.toString()) {
-    //             fetchQueue(selectedClinic);
-    //         }
-    //     }
-    // );
+    // Cập nhật xử lý socket cho queue:assigned
+    useSocket(
+        `clinic_${selectedClinic}`,
+        "queue:assigned",
+        (data: any) => {
+            if (data.clinicId?.toString() === selectedClinic.toString()) {
+                fetchQueue(selectedClinic);
+            }
+        }
+    );
 
-    // // Thêm socket cho queue:missed nếu cần
-    // useSocket(
-    //     `clinic_${selectedClinic}`,
-    //     "queue:missed",
-    //     (data: any) => {
-    //         if (data.clinicId?.toString() === selectedClinic.toString()) {
-    //             fetchQueue(selectedClinic);
-    //         }
-    //     }
-    // );
+    // Thêm socket cho queue:missed nếu cần
+    useSocket(
+        `clinic_${selectedClinic}`,
+        "queue:missed",
+        (data: any) => {
+            if (data.clinicId?.toString() === selectedClinic.toString()) {
+                fetchQueue(selectedClinic);
+            }
+        }
+    );
     const handleStatusUpdate = async (queueId: string, newStatus: string) => {
         try {
             await updateQueueStatus(queueId, newStatus);
@@ -91,6 +94,7 @@ const QueueTable = () => {
                     <Menu.Item
                         key="skip"
                         onClick={() => handleStatusUpdate(record.id, "skipped")}
+                        danger
                     >
                         Bỏ qua
                     </Menu.Item>
@@ -129,67 +133,92 @@ const QueueTable = () => {
 
     const handleAssignClinic = (patient: any) => {
         setSelectedPatient(patient);
-        setShowResultModal(true);
+        setShowDoctorExaminationOrderModal(true);
+        // setShowResultModal(true);
+    };
+
+    const handleViewExaminationOrder = (patient: any) => {
+        setSelectedPatient(patient);
+        setShowModalPatientExaminationOrder(true);
+    };
+
+    const getQueueStatusColor = (status: string) => {
+        switch (status) {
+            case "waiting":
+                return "yellow";
+            case "in_progress":
+                return "blue";
+            case "done":
+                return "green";
+            case "skipped":
+                return "red";
+            default:
+                return "default";
+        }
     };
 
     const columns = [
         {
             title: "STT",
-            dataIndex: "index",
-            key: "index",
-            render: (_: any, __: any, index: number) =>
-                index + 1 + (pagination.pageNumber - 1) * pagination.pageSize,
+            dataIndex: "id",
+            key: "id",
+            width: 100,
         },
         {
             title: "Bệnh nhân",
             dataIndex: ["patient", "user", "full_name"],
             key: "full_name",
+            width: 200,
             render: (_: any, record: any) => record?.patient?.user?.full_name || "-",
         },
         {
             title: "Trạng thái",
             dataIndex: "status",
             key: "status",
-            render: (status: string) => <Text>{getQueueStatus(status)}</Text>,
+            width: 150,
+            render: (status: string) => <Tag color={getQueueStatusColor(status)}>{getQueueStatus(status)}</Tag>,
         },
         {
             title: "Thao tác",
             key: "action",
             render: (_: any, record: any) => {
                 const menu = (
-                    <Menu>
+                    <Flex gap={8}>
                         {record.status === "waiting" && (
                             <>
-                                <Menu.Item
+                                <Button
                                     key="start"
                                     onClick={() => handleStatusUpdate(record.id, "in_progress")}
+                                    type="primary"
                                 >
                                     Bắt đầu khám
-                                </Menu.Item>
-                                <Menu.Item
+                                </Button>
+                                <Button
                                     key="skip"
                                     onClick={() => handleStatusUpdate(record.id, "skipped")}
+                                    danger
                                 >
                                     Bỏ qua
-                                </Menu.Item>
+                                </Button>
                             </>
                         )}
                         {record.status === "in_progress" && (
                             <>
-                                <Menu.Item key="finish" onClick={() => handleFinishExam(record.patient)}>
+                                <Button color="pink" key="viewExaminationOrder" onClick={() => handleViewExaminationOrder(record.patient)}>
+                                    Xem lịch sử chuyển phòng
+                                </Button>
+                                <Button type="primary" key="finish" onClick={() => handleFinishExam(record.patient)}>
                                     Khám xong
-                                </Menu.Item>
-                                <Menu.Item key="assign" onClick={() => handleAssignClinic(record.patient)}>
+                                </Button>
+                                <Button type="dashed" key="assign" onClick={() => handleAssignClinic(record.patient)}>
                                     Chỉ định phòng tiếp
-                                </Menu.Item>
+                                </Button>
                             </>
                         )}
-                    </Menu>
+                    </Flex>
                 );
                 return (
-                    <Dropdown overlay={menu} trigger={["click"]}>
-                        <EllipsisOutlined style={{ fontSize: 18, cursor: "pointer" }} />
-                    </Dropdown>
+                    menu
                 );
             },
         },
@@ -235,7 +264,24 @@ const QueueTable = () => {
                 }}
                 scroll={{ y: 400 }}
             />
-
+            <ModalPatientExaminationOrder
+                open={showModalPatientExaminationOrder}
+                onClose={() => setShowModalPatientExaminationOrder(false)}
+                patient={selectedPatient}
+            />
+            <DoctorExaminationOrderModal
+                open={showDoctorExaminationOrderModal}
+                onClose={() => setShowDoctorExaminationOrderModal(false)}
+                patientId={selectedPatient?.id}
+                clinicId={Number(selectedClinic)}
+                doctorId={(Number)(currentDoctorId)}
+                currentUserId={(Number)(user?.id)}
+                onSuccess={() => {
+                    setShowDoctorExaminationOrderModal(false);
+                    setSelectedPatient(null);
+                    fetchQueue(selectedClinic);
+                }}
+            />
             <ExaminationOrderModal
                 open={showAssignModal && !!selectedPatient}
                 onClose={() => {

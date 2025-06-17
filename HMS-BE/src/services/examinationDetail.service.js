@@ -100,11 +100,17 @@ class ExaminationDetailService {
         // 3.5 Emit socket event
         const io = getIO();
         if (io) {
-          // Emit event chuyển phòng
+          // Emit event cho phòng mới
           io.to(`clinic_${to_clinic_id}`).emit("queue:assigned", {
             patient: newQueue.patient,
             queue: newQueue,
             clinicId: to_clinic_id,
+          });
+        
+          // Emit event cho phòng cũ để cập nhật queue đã done
+          io.to(`clinic_${from_clinic_id}`).emit("queue:statusChanged", {
+            queue: currentQueue,
+            clinicId: from_clinic_id,
           });
         }
 

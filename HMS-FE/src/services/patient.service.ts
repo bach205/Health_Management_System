@@ -1,8 +1,11 @@
 
 import { message } from "antd";
 import instance from "../api/mainRequest";
+import type { IPatient } from "../types/index.type";
 const BASE_URL = "api/v1/patients";
 const baseURL = `/api/v1/auth`;
+const examinationOrderURL = `/api/v1/examination-order`;
+const patientURL = `/api/v1/patient`;
 interface IUpdatePatient {
   userId: number;
   updateData: any;
@@ -27,3 +30,30 @@ export const fetchUserImage = async (id: number) => {
   const response = await instance.get(`${BASE_URL}/${id}/avatar`)
   return response;
 }
+export const getPatientExaminationOrder = async (id: number) => {
+  const response = await instance.get(`${examinationOrderURL}/patient/${id}`)
+  return response;
+}
+
+export const getPatients = async (searchOptions: any) => {
+  return instance.post(`${patientURL}`, searchOptions);
+};
+export const createPatient = (patient: IPatient) => {
+    return instance.post(`${patientURL}/create`, patient);
+};
+
+export const getDoctors = async (searchOptions: any) => {
+    return instance.post(`${patientURL}`, searchOptions);
+};
+
+export const updatePatient = (patient: IPatient) => {
+    return instance.post(`${patientURL}/update`, patient);
+};
+
+export const getDoctorById = (id: number) => {
+    return instance.get(`${patientURL}/${id}`);
+};
+
+export const updateStatus = (id: number, status: boolean) => {
+    return instance.post(`${patientURL}/update-status/`, { id, isActive: status });
+};

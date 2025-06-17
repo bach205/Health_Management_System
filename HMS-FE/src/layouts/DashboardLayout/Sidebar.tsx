@@ -110,10 +110,10 @@ const SIDEBAR_ITEMS = [
     label: "Quản lý",
     items: [
       {
-        id: "users",
-        label: "Quản lý người dùng",
-        icon: <Users className="w-4 h-4" />,
-        href: "/admin/users",
+        id: "patients",
+        label: "Quản lý bệnh nhân",
+        icon: <FileUser className="w-4 h-4" />,
+        href: "/admin/patients",
       },
       {
         id: "workschedule",
@@ -127,12 +127,7 @@ const SIDEBAR_ITEMS = [
         icon: <Calendar className="w-4 h-4" />,
         href: "/shift",
       },
-      {
-        id: "patients",
-        label: "Quản lý bệnh nhân",
-        icon: <FileUser className="w-4 h-4" />,
-        href: "/admin/patients",
-      },
+
       {
         id: "doctors",
         label: "Quản lý bác sĩ",
@@ -142,7 +137,7 @@ const SIDEBAR_ITEMS = [
       {
         id: "nurses",
         label: "Quản lý y tá",
-        icon: <User className="w-4 h-4" />,
+        icon: <Users className="w-4 h-4" />,
         href: "/admin/nurses",
       },
     ],

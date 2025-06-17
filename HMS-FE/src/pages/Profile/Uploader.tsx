@@ -28,8 +28,20 @@ const Uploader = ({ user, reload, setReload }: { user: any, reload: boolean, set
         }
     }, [user])
     const beforeUpload: UploadProps['beforeUpload'] = async (file) => {
+        const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
+        const isLt5M = file.size / 1024 / 1024 < 5;
+    
+        if (!isJpgOrPng) {
+            message.error('Chỉ cho phép ảnh định dạng JPG/PNG!');
+            return Upload.LIST_IGNORE;
+        }
+    
+        if (!isLt5M) {
+            message.error('Ảnh phải nhỏ hơn 5MB!');
+            return Upload.LIST_IGNORE;
+        }
+    
         const base64 = await getBase64(file);
-        // console.log(base64)
         const newFile: UploadFile = {
             uid: Date.now().toString(),
             name: file.name,
@@ -37,8 +49,10 @@ const Uploader = ({ user, reload, setReload }: { user: any, reload: boolean, set
             url: base64,
         };
         setFileList([newFile]);
-        return false;
+    
+        return false; // 
     };
+    
 
     const handleRemove = () => {
         setFileList([]);

@@ -216,7 +216,15 @@ class DoctorService {
             }
 
             // Check if email already exists
-
+            const user = await prisma.user.findUnique({
+                where: { id: value.id }
+            });
+            const existingEmail = await prisma.user.findUnique({
+                where: { email: value.email }
+            });
+            if (existingEmail && existingEmail.id !== user.id) {
+                throw new BadRequestError("Email đã tồn tại");
+            }
 
             // Update user + doctor
             const doctor = await prisma.user.update({

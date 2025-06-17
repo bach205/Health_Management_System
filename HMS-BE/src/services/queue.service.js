@@ -161,29 +161,32 @@ class QueueService {
     }
 
     // Nếu bệnh nhân vắng mặt (status = skipped), thêm vào danh sách đợi lại
+    // if (status === "skipped") {
+    //   const missedQueue = await prisma.queue.create({
+    //     data: {
+    //       patient_id: updated.patient_id,
+    //       clinic_id: updated.clinic_id,
+    //       // appointment_id: updated.appointment_id,
+    //       status: "waiting",
+    //       priority: updated.appointment?.priority || 0, // Giữ nguyên priority từ appointment
+    //     },
+    //     include: { patient: true },
+    //   });
+
+    //   // Emit socket event cho queue mới
+    //   const io = getIO();
+    //   if (io) {
+    //     io.to(`clinic_${updated.clinic_id}`).emit("queue:missed", {
+    //       patient: missedQueue.patient,
+    //       queue: missedQueue,
+    //       clinicId: updated.clinic_id,
+    //     });
+    //   }
+    // }
     if (status === "skipped") {
-      const missedQueue = await prisma.queue.create({
-        data: {
-          patient_id: updated.patient_id,
-          clinic_id: updated.clinic_id,
-          appointment_id: updated.appointment_id,
-          status: "waiting",
-          priority: updated.appointment?.priority || 0, // Giữ nguyên priority từ appointment
-        },
-        include: { patient: true },
-      });
-
-      // Emit socket event cho queue mới
-      const io = getIO();
-      if (io) {
-        io.to(`clinic_${updated.clinic_id}`).emit("queue:missed", {
-          patient: missedQueue.patient,
-          queue: missedQueue,
-          clinicId: updated.clinic_id,
-        });
-      }
+      // Không tạo queue mới => coi như hủy khám
+      console.log(`Patient ${updated.patient_id} skipped. No new queue created.`);
     }
-
     // Emit socket event cho trạng thái thay đổi
     const io = getIO();
     if (io) {
