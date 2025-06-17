@@ -11,6 +11,7 @@ import UserListTitle from "../../../components/ui/UserListTitle";
 import type { IUserBase } from "../../../types/index.type";
 import { createNurse, updateNurse, banNurse, resetPassword } from "../../../api/nurse.ts";
 import { getShiftService } from "../../../services/shift.service.ts";
+import { updatePassword } from "../../../services/doctor.service.ts";
 
 const AdminNurseDashboard = () => {
   const [isCreateVisible, setIsCreateVisible] = useState<boolean>(false);
@@ -198,17 +199,30 @@ const AdminNurseDashboard = () => {
   };
 
   const handleResetPassword = async (id: number) => {
+    // try {
+    //   const result = await resetPassword(id);
+    //   if (result.status >= 200 && result.status < 300) {
+    //     notification.success({ message: result.data.message });
+    //   } else if (result.status >= 400) {
+    //     notification.error({ message: result.data.message });
+    //   }
+    // } catch (error: any) {
+    //   console.log(error);
+    //   notification.error({ message: error.response?.data?.message || "Có lỗi xảy ra" });
+    // }
     try {
-      const result = await resetPassword(id);
-      if (result.status >= 200 && result.status < 300) {
-        notification.success({ message: result.data.message });
-      } else if (result.status >= 400) {
-        notification.error({ message: result.data.message });
-      }
+      await updatePassword(id);
+      notification.success({ message: "Khôi phục mật khẩu thành công" });
+      setReload(!reload);
     } catch (error: any) {
       console.log(error);
-      notification.error({ message: error.response?.data?.message || "Có lỗi xảy ra" });
+      if (error?.response?.data) {
+        notification.error({ message: error.response.data.message });
+      } else {
+        notification.error({ message: "Có lỗi xảy ra" });
+      }
     }
+
   };
 
   const handleCreateCancel = () => {

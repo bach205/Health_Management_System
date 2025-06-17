@@ -3,6 +3,7 @@ const { BadRequestError } = require("../core/error.response");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 const QueueService = require("./queue.service");
+const { sendStaffNewPasswordEmail } = require("../utils/staff.email");
 
 class AppointmentService {
   /**
@@ -275,14 +276,14 @@ class AppointmentService {
 
         return { user, patient, password: randomPassword };
       });
-
-
       patient = result.user;
       data.patient_id = patient.id;
       data.generated_password = result.password;
+      sendStaffNewPasswordEmail(patient.email, randomPassword)
     } else {
       data.patient_id = patient.id;
     }
+
     // 4. Kiểm tra bệnh nhân đã có lịch trùng chưa
     const exist = await prisma.appointment.findFirst({
       where: {

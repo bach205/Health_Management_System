@@ -46,7 +46,7 @@ class DoctorController {
   updatePassword = async (req, res) => {
     const result = await DoctorService.updatePassword(req.body);
     return new OK({
-      message: "Cập nhật mật khẩu bác sĩ thành công",
+      message: "Cập nhật mật khẩu thành công",
     }).send(res);
   }
 
@@ -62,7 +62,7 @@ class DoctorController {
     const result = await DoctorService.getDoctorsInClinic(req.params.clinicId);
     return new OK({
       message: "Lấy danh sách bác sĩ thành công",
-      metadata: result, 
+      metadata: result,
     }).send(res);
   }
 
