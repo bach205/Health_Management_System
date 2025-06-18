@@ -202,6 +202,7 @@ class AppointmentService {
         p.identity_number,
         u.full_name as patient_name,
         u.email as patient_email,
+        u.phone as patient_phone,
         d.full_name as doctor_name,
         d2.specialty as doctor_specialty,
         c.name as clinic_name
