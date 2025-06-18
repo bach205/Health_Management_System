@@ -238,7 +238,7 @@ class AppointmentService {
     console.log(slot)
     // 2. Kiểm tra email bệnh nhân đã tồn tại chưa
     let patient = await prisma.user.findUnique({
-      where: { email: data.patient_email },
+      where: { email: data.email },
       include: { patient: true }
     });
 
@@ -257,7 +257,7 @@ class AppointmentService {
 
         const user = await prisma.user.create({
           data: {
-            email: data.patient_email,
+            email: data.email,
             password: hashedPassword,
             phone: data.patient_phone || "",
             role: "patient",
