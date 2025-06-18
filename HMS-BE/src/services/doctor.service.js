@@ -7,6 +7,9 @@ const { sendStaffNewPasswordEmail } = require("../utils/staff.email");
 class DoctorService {
     async findAllDoctor() {
         const users = await prisma.user.findMany({
+            where: {
+                role: "doctor"
+            },
             select: {
                 id: true,
                 full_name: true,
@@ -23,6 +26,17 @@ class DoctorService {
         });
         return users;
     }
+    getDoctorById = async (id) => {
+        const doctor = await prisma.user.findUnique({
+            where: { id: +id, role: "doctor" },
+            include: {
+                doctor: true
+            }
+        });
+        return doctor;
+    }
+
+
 
     createDoctor = async (doctorData) => {
         try {
@@ -34,7 +48,7 @@ class DoctorService {
             ];
             let sendEmail = false;
             if (!doctorData.password || doctorData.password.trim() === '') {
-                const password = Math.floor(100000 + Math.random() * 900000);
+                const password = this.#createRandomPassword();
                 doctorData.password = password.toString();
                 sendEmail = true;
             }
@@ -67,7 +81,7 @@ class DoctorService {
                 value.password,
                 parseInt(process.env.BCRYPT_SALT_ROUNDS)
             );
-            
+
 
             // Create doctor
             const doctor = await prisma.user.create({
@@ -259,7 +273,7 @@ class DoctorService {
     updatePassword = async (body) => {
         try {
             const { id } = body;
-            const password = Math.floor(100000 + Math.random() * 900000).toString();
+            const password = this.#createRandomPassword();
             const hashedPassword = await bcrypt.hash(
                 password,
                 parseInt(process.env.BCRYPT_SALT_ROUNDS)
@@ -277,6 +291,76 @@ class DoctorService {
             console.log(error)
             throw new BadRequestError("Có lỗi xảy ra, vui lòng thử lại!");
         }
+    }
+    #createRandomPassword() {
+        const upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        const lower = "abcdefghijklmnopqrstuvwxyz";
+        const digits = "0123456789";
+        const special = "!@#$%^&*()_+[]{}?";
+
+        const getRandom = (charset) => charset[Math.floor(Math.random() * charset.length)];
+
+        const mustInclude = [
+            getRandom(upper),
+            getRandom(lower),
+            getRandom(digits),
+            getRandom(special),
+        ];
+
+        const totalLength = 6;
+
+        const all = upper + lower + digits + special;
+        while (mustInclude.length < totalLength) {
+            mustInclude.push(getRandom(all));
+        }
+
+        for (let i = mustInclude.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = mustInclude[i];
+            mustInclude[i] = mustInclude[j];
+            mustInclude[j] = temp;
+        }
+
+        return mustInclude.join('');
+    }
+
+    getDoctorsInClinic = async (clinicId) => {
+        const doctors = await prisma.user.findMany({
+            where: {
+                role: 'doctor',
+                workSchedules: {
+                    some: {
+                        clinic_id: +clinicId,
+                        work_date: {
+                            // gte: new Date().setHours(0, 0, 0, 0),   // Tùy chọn: chỉ lấy lịch hôm nay
+                            // lte: new Date().setHours(23, 59, 59, 999),
+                        },
+                    },
+                },
+            },
+            include: {
+                doctor: true,        // Thông tin từ bảng Doctor
+                workSchedules: true, // Lịch làm việc (nếu cần)
+            },
+        });
+        return doctors;
+    }
+
+    getDoctorAvailableSlots = async (doctorId) => {
+        const now = new Date();
+        const todayStart = new Date(now.setHours(0, 0, 0, 0));
+        const todayEnd = new Date(now.setHours(23, 59, 59, 999));
+
+        return prisma.availableSlot.findMany({
+            where: {
+                doctor_id: +doctorId,
+                is_available: true,
+                slot_date: {
+                    //   gte: todayStart,
+                    //   lte: todayEnd,
+                },
+            },
+        });
     }
 }
 

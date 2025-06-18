@@ -38,6 +38,16 @@ const ModalEditPassword = ({ isVisible, handleOk, handleCancel, form }: IProps) 
             >
 
                 <Form.Item
+                    label="Mật khẩu cũ"
+                    name="oldPassword"
+                    rules={[
+                        { required: true, message: "Vui lòng nhập mật khẩu cũ!" },
+                        { min: 6, message: "Mật khẩu phải có ít nhất 6 ký tự!" }
+                    ]}
+                >
+                    <Input.Password placeholder="Mật khẩu cũ" />
+                </Form.Item>
+                <Form.Item
                     label="Mật khẩu mới"
                     name="newPassword"
                     rules={[

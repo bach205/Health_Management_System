@@ -22,8 +22,10 @@ interface AuthState {
   isAuthenticated: boolean | false;
   user: {
     id: string;
-    name: string;
+    email: string;
+    full_name: string;
     role: Role;
+    avatar?: string;
   } | null;
   login: (userData: AuthState["user"], token: string) => void;
   logout: () => void;

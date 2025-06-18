@@ -47,32 +47,32 @@ const Workschedule = () => {
   const [editingRecord, setEditingRecord] = useState<WorkSchedule | null>(null);
   const [selectedRecord, setSelectedRecord] = useState<WorkSchedule | null>(null);
   const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
-  
+  const [change, setChange] = useState(true);
   useEffect(() => {
     const fetchData = async () => {
- 
-        const res = await getWorkSchedulesService();
-        const user = await getDoctorService();
-        const clinic = await getClinicService();
-        const shift = await getShiftService();
 
-        setShifts(shift.data.data);
-        setClinics(clinic.data.metadata.clinics);
-        setUsers(user.data.metadata);
+      const res = await getWorkSchedulesService();
+      const user = await getDoctorService();
+      const clinic = await getClinicService();
+      const shift = await getShiftService();
+      //       console.log(clinic);
+      //     console.log(user.data.metadata);
+      setShifts(shift.data.data);
+      setClinics(clinic.data.metadata.clinics);
+      setUsers(user.data.metadata);
+      console.log(res.data.data);
+      const enrichedData = res.data.data.map((item: any) => ({
+        ...item,
+        user_name: user.data.metadata.find((u: any) => u.id === item.user_id)?.full_name || '',
+        shift_name: shift.data.data.find((s: any) => s.id === item.shift_id)?.name || '',
+      }));
+      setData(enrichedData);
 
-        const enrichedData = res.data.data.map((item: any) => ({
-          ...item,
-          user_name: user.data.metadata.find((u: any) => u.id === item.user_id)?.name || '',
-          shift_name: shift.data.data.find((s: any) => s.id === item.shift_id)?.name || '',
-        }));
-        
-        setData(enrichedData);
-    
     };
 
     fetchData();
-  }, []);
-   
+  }, [change]);
+
   const handleView = (record: WorkSchedule) => {
     setSelectedRecord(record);
     setIsDetailModalVisible(true);
@@ -81,6 +81,7 @@ const Workschedule = () => {
     setEditingRecord(null);
     form.resetFields();
     setIsModalVisible(true);
+
   };
 
   const handleEdit = (record: WorkSchedule) => {
@@ -106,10 +107,10 @@ const Workschedule = () => {
     const payload = {
       user_id: values.user_id,
       clinic_id: values.clinic_id,
-      work_date: values.work_date.toISOString(),
+      work_date: dayjs(values.work_date).format('YYYY-MM-DD'),
       shift_id: values.shift_id,
     };
-
+    console.log(payload);
     try {
       if (editingRecord) {
         await updateWorkScheduleService(payload, editingRecord.id.toString());
@@ -117,14 +118,15 @@ const Workschedule = () => {
           prev.map(item =>
             item.id === editingRecord.id
               ? {
-                  ...item,
-                  ...payload,
-                  user_name: users.find(u => u.id === payload.user_id)?.name || '',
-                  shift_name: shifts.find(s => s.id === payload.shift_id)?.name || '',
-                }
+                ...item,
+                ...payload,
+                user_name: users.find(u => u.id === payload.user_id)?.name || '',
+                shift_name: shifts.find(s => s.id === payload.shift_id)?.name || '',
+              }
               : item
           )
         );
+
         message.success('Cập nhật thành công');
       } else {
         const res = await createWorkScheduleService(payload);
@@ -134,7 +136,7 @@ const Workschedule = () => {
           {
             id: newSchedule.id,
             user_id: newSchedule.user_id,
-            user_name: users.find(u => u.id === newSchedule.user_id)?.email || '',
+            user_name: users.find(u => u.id === newSchedule.user_id)?.full_name || '',
             clinic_id: newSchedule.clinic_id,
             work_date: newSchedule.work_date,
             shift_id: newSchedule.shift_id,
@@ -143,6 +145,7 @@ const Workschedule = () => {
         ]);
         message.success('Tạo mới thành công');
       }
+      setChange(!change);
       setIsModalVisible(false);
     } catch {
       message.error('Có lỗi xảy ra, vui lòng thử lại');
@@ -184,13 +187,13 @@ const Workschedule = () => {
       key: 'actions',
       render: (_: any, record: WorkSchedule) => (
         <>
-        <Button onClick={() => handleView(record)} size="small" className="mr-2"><View size={15} /></Button>
+          <Button onClick={() => handleView(record)} size="small" className="mr-2"><View size={15} /></Button>
           <Button onClick={() => handleEdit(record)} size="small">
-            <PenLine size={15}/>
+            <PenLine size={15} />
           </Button>
           <Popconfirm title="Xoá?" onConfirm={() => handleDelete(record.id)}>
             <Button danger size="small" className="ml-2">
-              <Delete size={15}/>
+              <Delete size={15} />
             </Button>
           </Popconfirm>
         </>
@@ -209,21 +212,25 @@ const Workschedule = () => {
         dataSource={data}
         rowKey="id"
         bordered
-        pagination={{ pageSize: 10}}
+        pagination={{ pageSize: 10 }}
       />
 
       <Modal
         title={editingRecord ? 'Cập Nhật Lịch' : 'Thêm Lịch'}
         open={isModalVisible}
         onCancel={() => setIsModalVisible(false)}
-        onOk={() => form.submit()}
+        onOk={() => {
+          form.submit();
+          setChange(!change);
+        }}
       >
         <Form form={form} layout="vertical" onFinish={handleSubmit}>
           <Form.Item name="user_id" label="Nhân viên" rules={[{ required: true }]}>
             <Select placeholder="Chọn nhân viên">
               {users.map(user => (
+
                 <Option key={user.id} value={user.id}>
-                  {user.email}
+                  {user.full_name}
                 </Option>
               ))}
             </Select>
@@ -237,8 +244,19 @@ const Workschedule = () => {
               ))}
             </Select>
           </Form.Item>
-          <Form.Item name="work_date" label="Ngày làm việc" rules={[{ required: true }]}>
-            <DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" />
+          <Form.Item name="work_date" label="Ngày làm việc" rules={[{ required: true, message: 'Vui lòng chọn ngày làm việc' }, ({ getFieldValue }) => ({
+            validator(_, value) {
+              if (!value || value.isAfter(dayjs(), 'day')) {
+                return Promise.resolve();
+              }
+              return Promise.reject(new Error('Chỉ được chọn ngày lớn hơn ngày hiện tại!'));
+            },
+          })]}>
+            <DatePicker
+              style={{ width: '100%' }}
+              format="DD/MM/YYYY"
+              disabledDate={current => current && current.isBefore(dayjs(), 'day')}
+            />
           </Form.Item>
           <Form.Item name="shift_id" label="Ca làm" rules={[{ required: true }]}>
             <Select placeholder="Chọn ca làm">
@@ -251,21 +269,21 @@ const Workschedule = () => {
           </Form.Item>
         </Form>
       </Modal>
-    <Modal
+      <Modal
         title="Chi tiết lịch làm việc"
         open={isDetailModalVisible}
         footer={null}
         onCancel={() => setIsDetailModalVisible(false)}
-        >
+      >
         {selectedRecord && (
-            <div>
+          <div>
             <p><strong>Nhân viên:</strong> {selectedRecord.user_name}</p>
             <p><strong>Phòng khám:</strong> {clinics.find(c => c.id === selectedRecord.clinic_id)?.name}</p>
             <p><strong>Ngày làm:</strong> {dayjs(selectedRecord.work_date).format('DD/MM/YYYY')}</p>
             <p><strong>Ca làm:</strong> {selectedRecord.shift_name}</p>
-            </div>
+          </div>
         )}
-    </Modal>
+      </Modal>
     </div>
   );
 };

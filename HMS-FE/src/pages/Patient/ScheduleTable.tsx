@@ -13,6 +13,7 @@ import {
   Divider,
   Tooltip,
   ConfigProvider,
+  Input,
 } from "antd";
 
 import dayjs from "dayjs";
@@ -25,6 +26,7 @@ import {
   ReloadOutlined,
 } from "@ant-design/icons";
 
+import { cancelAppointmentService } from '../../services/appointment.service';
 
 const style = {
   ".ant-table-thead .ant-table-cell": {
@@ -32,30 +34,35 @@ const style = {
   },
 }
 
-const ScheduleTable = ({ visible, selectedPatient, onEdit, onCancel, reload: reloadSchedule, isPage, }: any) => {
-  const [appointments, setAppointments] = useState([]);
-  const [reload, setReload] = useState(false);
+const ScheduleTable = ({ data = [], setReload, loading = false, visible, selectedPatient, onEdit, onCancel, reload, isPage, }: any) => {
+ // const [reload, setReload] = useState(false);
 
   const handleEditAppointment = (record: any) => {
-    // TODO: Edit appinment
     onEdit(record);
   };
 
   const handleCancelAppmt = async (record: any) => {
     try {
-      //   await updateStatusAppointment({
-      //     appointmentId: record._id,
-      //     status: "cancelled",
-      //   });
-
-      setReload(!reload);
-      notification.success({
-        message: "Cập nhật thành công",
+      let reason = '';
+      Modal.confirm({
+        title: 'Xác nhận huỷ lịch khám',
+        content: (
+          <>
+            <Typography.Text>Nhập lý do huỷ (tuỳ chọn):</Typography.Text>
+            <Input.TextArea onChange={e => reason = e.target.value} />
+          </>
+        ),
+        onOk: async () => {
+          await cancelAppointmentService({ id: record._id || record.id, reason });
+          setReload(!reload);
+          notification.success({ message: 'Huỷ lịch thành công' });
+       //   if (typeof reloadSchedule === 'function') reloadSchedule((r: any) => !r);
+        },
+        okText: 'Xác nhận',
+        cancelText: 'Không',
       });
     } catch (error) {
-      notification.error({
-        message: "Cập nhật không thành công",
-      });
+      notification.error({ message: 'Huỷ lịch không thành công' });
     }
   };
 
@@ -96,97 +103,70 @@ const ScheduleTable = ({ visible, selectedPatient, onEdit, onCancel, reload: rel
       </>
     )
   }
-  const data = [
-    {
-      _id: "1",
-      createdAt: "2021-01-01",
-      date: "2021-01-01",
-      time: "10:00",
-      specialty: "Cardiologist",
-      doctorId: "1",
-      status: "booked",
-    }
-  ]
+
   const columns = [
     {
       title: "Ngày đặt",
-      dataIndex: "createdAt",
-      key: "createdAt",
-      width: 120,
-      render: (createdAt: any) => {
-        return dayjs(createdAt).format("HH:mm:ss DD/MM/YYYY");
-      },
+      dataIndex: "created_at",
+      key: "created_at",
+      width: 140,
+      render: (created_at: any) => dayjs(created_at).format("HH:mm:ss DD/MM/YYYY"),
     },
     {
       title: "Ngày khám",
-      dataIndex: "date",
+      dataIndex: "formatted_date",
+      key: "formatted_date",
       width: 120,
-      key: "date",
-      render: (text: any) => {
-        return dayjs(text, "DD/MM/YYYY").format("DD/MM/YYYY");
-      },
+      render: (date: any) => dayjs(date).format("DD/MM/YYYY"),
     },
     {
-      width: 120,
       title: "Giờ dự kiến",
-      dataIndex: "time",
-      align: "center",
-      key: "time",
-      render: (text: any) => {
-        return dayjs(text, "HH:mm").format("HH:mm");
-      },
+      dataIndex: "formatted_time",
+      key: "formatted_time",
+      width: 110,
+      align: "center" as const,
+      render: (time: any) => time ? time.slice(0,5) : "",
     },
     {
       title: "Chuyên khoa",
-      dataIndex: "specialty",
-      key: "specialty",
-      render: (key: any) => {
-        return key;
-      },
+      dataIndex: "clinic_name",
+      key: "clinic_name",
+      width: 160,
+      render: (text: any) => text,
     },
     {
-      width: 150,
       title: "Bác sĩ",
-      dataIndex: "doctorId",
-      key: "doctorId",
-      render: (doctor: any) => {
-        return doctor?.fullName || "Chưa xác định";
-      },
+      dataIndex: "doctor_name",
+      key: "doctor_name",
+      width: 150,
+      render: (text: any) => text,
     },
     {
       title: "Trạng thái",
-      align: "center",
       dataIndex: "status",
       key: "status",
-      render: (key: any) => {
-        return (
-          <Tag color={"green"}>{key}</Tag>
-        );
+      width: 120,
+      align: "center" as const,
+      render: (status: string) => {
+        let color = "default";
+        let text = status;
+        if (status === "pending") { color = "gold"; text = "Chờ xác nhận"; }
+        else if (status === "confirmed") { color = "green"; text = "Đã xác nhận"; }
+        else if (status === "cancelled") { color = "red"; text = "Đã hủy"; }
+        else if (status === "completed") { color = "blue"; text = "Đã hoàn thành"; }
+        return <Tag color={color}>{text}</Tag>;
       },
     },
     {
       title: "Hành động",
-      width: 150,
+      width: 120,
       key: "action",
-      align: "center",
+      align: "center" as const,
       render: (text: any, record: any) => {
         return <Flex gap={10} justify="center">{hasPermissionEdit(record)}</Flex>;
       },
     },
   ];
-
-  useEffect(() => {
-    const initData = async () => {
-      // Replace this with the actual API call to fetch appointments
-      const { appointments } = { appointments: [] };
-      setAppointments(appointments);
-    };
-    if (visible && selectedPatient?._id) {
-      initData();
-    }
-  }, [selectedPatient?._id, visible, reload, reloadSchedule]);
-
-
 
   return (
     <ConfigProvider theme={{
@@ -207,10 +187,11 @@ const ScheduleTable = ({ visible, selectedPatient, onEdit, onCancel, reload: rel
       },
     }}>
       <Table
-        scroll={{ y: 300 }}
-        rowKey="_id"
-        columns={columns as any}
         dataSource={data}
+        loading={loading}
+        columns={columns}
+        rowKey={record => record._id || record.id}
+        pagination={{ pageSize: 10 }}
       />
     </ConfigProvider>
   )

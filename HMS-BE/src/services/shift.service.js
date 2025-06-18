@@ -98,6 +98,34 @@ class ShiftService {
         data: updateData,
       });
 
+      // Update all related available slots
+      if (updateData.start_time || updateData.end_time) {
+        // Get all work schedules using this shift
+        const workSchedules = await prisma.workSchedule.findMany({
+          where: { shift_id: parseInt(id) },
+          include: {
+            shift: true,
+          },
+        });
+
+        // Update available slots for each work schedule
+        for (const schedule of workSchedules) {
+          await prisma.availableSlot.updateMany({
+            where: {
+              doctor_id: schedule.user_id,
+              clinic_id: schedule.clinic_id,
+              slot_date: schedule.work_date,
+              start_time: existingShift.start_time,
+              end_time: existingShift.end_time,
+            },
+            data: {
+              start_time: updateData.start_time || existingShift.start_time,
+              end_time: updateData.end_time || existingShift.end_time,
+            },
+          });
+        }
+      }
+
       return updatedShift;
     } catch (error) {
       throw error;

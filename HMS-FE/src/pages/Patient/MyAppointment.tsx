@@ -3,11 +3,13 @@ import {
     ReloadOutlined,
     SearchOutlined,
 } from "@ant-design/icons";
-import { Button, Flex, Input, Tooltip } from "antd";
-import React, { useState } from "react";
+import { Button, Flex, Input, Tooltip, Form, message } from "antd";
+import React, { useEffect, useState } from "react";
 
 
 import ScheduleTable from "./ScheduleTable";
+import { getPatientAppointmentsService, updateAppointmentService } from "../../services/appointment.service";
+import ModalUpdateAppointment from "./ModalUpdateAppointment";
 
 export default function AppointmentsPage() {
     const [viewVisibleAppointmentModal, setViewVisibleAppointmentModal] =
@@ -20,11 +22,32 @@ export default function AppointmentsPage() {
     };
     const [reload, setReload] = useState(false);
     const [addVisiableAppointment, setAddVisiableAppointment] = useState(false);
-    const [selectedAppointent, setSelectedAppointent] = useState(null);
+    const [selectedAppointent, setSelectedAppointent] = useState<any>(null);
+    const [appointments, setAppointments] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [form] = Form.useForm();
+    const patientId = localStorage.getItem("user");
+
+    useEffect(() => {
+        const fetchAppointments = async () => {
+            setLoading(true);
+            try {
+                const data = await getPatientAppointmentsService(JSON.parse(patientId || "").id);
+                console.log(data.data);
+                setAppointments(Array.isArray(data) ? data : (data?.data ?? []));
+            } catch (error) {
+                setAppointments([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchAppointments();
+    }, [patientId, reload]);
 
     const handleViewAppointmentCancel = () => {
         setViewVisibleAppointmentModal(false);
         setSelectedAppointent(null);
+        form.resetFields();
     };
     const handleAddAppointmentCancel = (reset: any) => {
         setAddVisiableAppointment(false);
@@ -36,16 +59,27 @@ export default function AppointmentsPage() {
     };
 
     const handleViewAppointmentEdit = (record: any) => {
-        setAddVisiableAppointment(true);
         setSelectedAppointent(record);
+        setViewVisibleAppointmentModal(true);
+        form.setFieldsValue({
+            specialty: record.specialty,
+            doctor: record.doctorId,
+            date: record.date ? record.date : null,
+        });
     };
 
-    const handleAppointmentOk = async (values: any) => {
+    const handleUpdateAppointment = async () => {
         try {
-            setReload(!reload);
-            setAddVisiableAppointment(false);
+            const values = await form.validateFields();
+            await updateAppointmentService(selectedAppointent._id || selectedAppointent.id, {
+                ...values,
+                date: values.date ? values.date.format("YYYY-MM-DD") : undefined,
+            });
+            message.success("Cập nhật lịch hẹn thành công");
+            setViewVisibleAppointmentModal(false);
+            setReload(r => !r);
         } catch (error) {
-            console.log(error);
+            message.error("Cập nhật lịch hẹn thất bại");
         }
     };
 
@@ -55,12 +89,22 @@ export default function AppointmentsPage() {
                 Lịch hẹn khám bệnh
             </p>
             <ScheduleTable
+                data={Array.isArray(appointments) ? appointments : []}
+                loading={loading}
                 onEdit={handleViewAppointmentEdit}
                 onCancel={handleViewAppointmentCancel}
                 visible={true}
                 selectedPatient={patient}
+                setReload={setReload}
                 reload={reload}
                 isPage
+            />
+            <ModalUpdateAppointment
+                isVisible={viewVisibleAppointmentModal}
+                handleOk={handleUpdateAppointment}
+                handleCancel={handleViewAppointmentCancel}
+                form={form}
+                role={"patient"}
             />
         </div>
     );

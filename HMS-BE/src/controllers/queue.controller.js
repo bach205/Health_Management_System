@@ -15,7 +15,7 @@ class QueueController {
       });
       return new OK({
         message: "Lấy danh sách queue thành công",
-        data: result,
+        metadata: result,
       }).send(res);
     } catch (error) {
       next(error);
@@ -36,7 +36,7 @@ class QueueController {
       });
       return new OK({
         message: "Chỉ định phòng khám thành công",
-        data: queue,
+        metadata: queue,
       }).send(res);
     } catch (error) {
       next(error);
@@ -53,7 +53,7 @@ class QueueController {
       const queue = await QueueService.updateQueueStatus(queueId, status);
       return new OK({
         message: "Cập nhật trạng thái queue thành công",
-        data: queue,
+        metadata: queue,
       }).send(res);
     } catch (error) {
       next(error);
@@ -71,7 +71,7 @@ class QueueController {
       });
       return new OK({
         message: "Check-in vào hàng đợi thành công",
-        data: queue,
+        metadata: queue,
       }).send(res);
     } catch (error) {
       next(error);
@@ -89,7 +89,7 @@ class QueueController {
       });
       return new OK({
         message: "Hủy queue thành công",
-        data: queue,
+        metadata: queue,
       }).send(res);
     } catch (error) {
       next(error);
@@ -119,7 +119,7 @@ class QueueController {
       );
       return new OK({
         message: "Đã gọi số tiếp theo",
-        data: updated,
+        metadata: updated,
       }).send(res);
     } catch (error) {
       next(error);

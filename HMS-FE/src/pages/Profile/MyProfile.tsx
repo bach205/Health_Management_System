@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Form, notification } from "antd";
+import { Form, message, notification, Upload } from "antd";
 import ModalEditProfile from "../../components/modal/ModalEditProfile";
 import dayjs from "dayjs";
-import type { IPatient } from "../../types/index.type";
-import { assets } from "../../assets/assets";
 import { getProfile, updatePassword, updateProfile } from "../../services/patient.service";
 import ModalEditPassword from "../../components/modal/ModalEditPassword";
+import Uploader from "./Uploader";
 
 const MyProfile: React.FC = () => {
   const [profile, setProfile] = useState<any>({} as any);
@@ -21,6 +20,7 @@ const MyProfile: React.FC = () => {
       console.log(res)
       if (res.data.success) {
         // setUserData(res.data.user)
+  
         setProfile(res.data.user)
       }
     } catch (error) {
@@ -96,6 +96,7 @@ const MyProfile: React.FC = () => {
       const value = formPassword.getFieldsValue();
       const updateData = {
         token: localStorage.getItem("token"),
+        oldPassword: value.oldPassword,
         newPassword: value.newPassword,
         confirmPassword: value.confirmPassword,
       }
@@ -121,9 +122,10 @@ const MyProfile: React.FC = () => {
   const handleCancelPassword = () => {
     setIsVisiblePassword(false);
   }
+
   return (
     <div className="max-w-lg flex mx-auto flex-col gap-2 text-sm">
-
+      <Uploader reload={reload} setReload={setReload} user={profile}/>
       {/* <img className="w-36 rounded" src={assets.profile_pic} alt="profile" /> */}
 
       <p className="font-medium text-3xl text-neutral-800 mt-4">
