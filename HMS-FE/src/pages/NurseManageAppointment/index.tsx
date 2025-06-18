@@ -89,7 +89,7 @@ const NurseManageAppointment: React.FC = () => {
 
       // Filter by status
       if (filters.status !== 'all') {
-        filteredData = filteredData.filter((appointment: Appointment) => 
+        filteredData = filteredData.filter((appointment: Appointment) =>
           appointment.status === filters.status
         );
       }
@@ -107,7 +107,7 @@ const NurseManageAppointment: React.FC = () => {
       // Filter by search
       if (filters.search) {
         const searchLower = filters.search.toLowerCase();
-        filteredData = filteredData.filter((appointment: Appointment) => 
+        filteredData = filteredData.filter((appointment: Appointment) =>
           appointment.patient_name.toLowerCase().includes(searchLower) ||
           appointment.doctor_name.toLowerCase().includes(searchLower) ||
           appointment.patient_email.toLowerCase().includes(searchLower) ||
@@ -141,9 +141,9 @@ const NurseManageAppointment: React.FC = () => {
 
     try {
       setLoading(true);
-      await cancelAppointmentService({ 
-        id: selectedAppointment.id, 
-        reason: rejectReason 
+      await cancelAppointmentService({
+        id: selectedAppointment.id,
+        reason: rejectReason
       });
       message.success('Hủy lịch hẹn thành công');
       setRejectModalVisible(false);
