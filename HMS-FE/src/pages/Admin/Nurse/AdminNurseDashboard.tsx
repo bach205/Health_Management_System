@@ -120,7 +120,7 @@ const AdminNurseDashboard = () => {
 
           <Popconfirm
             title="Khôi phục mật khẩu"
-            description={"Mật khẩu sẽ được khôi phục về mặc định là " + PASSWORD_DEFAULT}
+            description={"Mật khẩu sẽ được gửi về email của tài khoản này"}
             onConfirm={() => handleResetPassword(record.id)}
             okText="Xác nhận"
             cancelText="Hủy"

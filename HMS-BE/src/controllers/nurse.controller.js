@@ -3,6 +3,7 @@ const NurseService = require("../services/nurse.service");
 class NurseController {
     getAllNurse = async (req, res) => {
         try {
+
             const result = await NurseService.findAllNurse(req.query);
             if (!result) return res.status(400).json({
                 message: "Có lỗi trong quá trình lấy tất cả tài khoản, vui lòng thử lại!"
