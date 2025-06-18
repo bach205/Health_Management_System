@@ -1,4 +1,5 @@
 import mainRequest from "../api/mainRequest";
+import axios from "axios";
 
 const baseURL = `/api/v1`;
 
@@ -63,5 +64,32 @@ export const nurseBookAppointmentService = async (appointmentData: any) => {
 
 export const getAllAvailableSlotsService = async () => {
   const response = await mainRequest.get(`/api/v1/appointment/slots`);
+  return response.data;
+};
+
+export const getAppointmentByIdService = async (id: string) => {
+  try {
+    const response = await axios.get(
+      `${baseURL}/appointments/${id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      }
+    );
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const nurseRescheduleAppointmentService = async (data: any) => {
+  const { cancel_reason, ...rest } = data;
+  const response = await mainRequest.post("/api/v1/appointment/nurse/reschedule", rest);
+  return response.data;
+};
+
+export const getAvailableTimeSlotsBySpecialtyService = async (specialty: string) => {
+  const response = await mainRequest.get(`/api/v1/appointment/slots-by-specialty?specialty=${encodeURIComponent(specialty)}`);
   return response.data;
 };

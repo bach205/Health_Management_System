@@ -21,6 +21,18 @@ import {
 } from '@ant-design/icons';
 import dayjs, { Dayjs } from 'dayjs';
 import { getAllAppointmentsService, confirmAppointmentService, cancelAppointmentService } from '../../services/appointment.service';
+import { Link } from "react-router-dom";
+import NurseRescheduleAppointment from '../RescheduleAppointment';
+import type { Key } from 'react';
+
+interface Filters {
+  status: string;
+  dateRange: [Dayjs | null, Dayjs | null] | null;
+  search: string;
+}
+
+const { RangePicker } = DatePicker;
+const { Option } = Select;
 
 interface Appointment {
   id: number;
@@ -36,16 +48,18 @@ interface Appointment {
   note: string;
   priority: number;
   created_at: string;
+  patient_phone?: string;
 }
 
-interface Filters {
-  status: string;
-  dateRange: [Dayjs | null, Dayjs | null] | null;
-  search: string;
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 640);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  return isMobile;
 }
-
-const { RangePicker } = DatePicker;
-const { Option } = Select;
 
 const NurseManageAppointment: React.FC = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -58,6 +72,9 @@ const NurseManageAppointment: React.FC = () => {
     dateRange: null,
     search: '',
   });
+  const [rescheduleModalVisible, setRescheduleModalVisible] = useState(false);
+  const [rescheduleAppointment, setRescheduleAppointment] = useState<Appointment | null>(null);
+  const isMobile = useIsMobile();
 
   // Fetch appointments
   useEffect(() => {
@@ -162,107 +179,112 @@ const NurseManageAppointment: React.FC = () => {
       title: 'Tên bệnh nhân',
       dataIndex: 'patient_name',
       key: 'patient_name',
-      sorter: true,
+      sorter: (a: Appointment, b: Appointment) => a.patient_name.localeCompare(b.patient_name),
+      className: 'whitespace-nowrap',
     },
     {
       title: 'Thông tin liên hệ',
       key: 'contact',
       render: (record: Appointment) => (
         <Space direction="vertical" size="small">
-          <div>{record.patient_email}</div>
-          <div>CCCD: {record.identity_number}</div>
+          <div>Email: {record.patient_email}</div>
+          <div>SĐT: {record.patient_phone || '-'}</div>
         </Space>
       ),
+      className: 'whitespace-nowrap',
     },
     {
       title: 'Bác sĩ',
       dataIndex: 'doctor_name',
       key: 'doctor_name',
+      className: 'whitespace-nowrap',
     },
     {
       title: 'Phòng khám',
       dataIndex: 'clinic_name',
       key: 'clinic_name',
+      className: 'whitespace-nowrap',
     },
     {
-      title: 'Ngày & Giờ',
-      key: 'datetime',
-      render: (record: Appointment) => (
-        <Space direction="vertical" size="small">
-          <div>{dayjs(record.formatted_date).format('DD/MM/YYYY')}</div>
-          <div>{record.formatted_time}</div>
-        </Space>
-      ),
-      sorter: true,
+      title: 'Ngày',
+      dataIndex: 'formatted_date',
+      key: 'formatted_date',
+      sorter: (a: Appointment, b: Appointment) => dayjs(a.formatted_date).unix() - dayjs(b.formatted_date).unix(),
+      render: (date: string) => <div>{dayjs(date).format('DD/MM/YYYY')}</div>,
+      className: 'whitespace-nowrap',
+    },
+    {
+      title: 'Giờ',
+      dataIndex: 'formatted_time',
+      key: 'formatted_time',
+      sorter: (a: Appointment, b: Appointment) => a.formatted_time.localeCompare(b.formatted_time),
+      className: 'whitespace-nowrap',
     },
     {
       title: 'Trạng thái',
+      dataIndex: 'status',
       key: 'status',
-      render: (record: Appointment) => getStatusTag(record.status),
+      sorter: (a: Appointment, b: Appointment) => a.status.localeCompare(b.status),
+      render: (status: Appointment['status']) => getStatusTag(status),
       filters: [
         { text: 'Chờ xác nhận', value: 'pending' },
         { text: 'Đã xác nhận', value: 'confirmed' },
         { text: 'Đã hủy', value: 'cancelled' },
         { text: 'Đã hoàn thành', value: 'completed' },
       ],
-    },
-    {
-      title: 'Lý do khám',
-      dataIndex: 'reason',
-      key: 'reason',
-      render: (text: string) => (
-        <Tooltip title={text}>
-          <div className="max-w-[200px] truncate">{text}</div>
-        </Tooltip>
-      ),
+      onFilter: (value: boolean | Key, record: Appointment) => record.status === value,
+      className: 'whitespace-nowrap',
     },
     {
       title: 'Thao tác',
-      key: 'actions',
-      render: (record: Appointment) => (
-        <Space>
-          {record.status === 'pending' && (
-            <>
-              <Button
-                type="primary"
-                icon={<CheckCircleOutlined />}
-                onClick={() => handleConfirmAppointment(record)}
-              >
-                Xác nhận
-              </Button>
-              <Button
-                danger
-                icon={<CloseCircleOutlined />}
-                onClick={() => showRejectModal(record)}
-              >
-                Hủy
-              </Button>
-            </>
+      key: 'action',
+      render: (_: any, record: Appointment) => (
+        <Space direction="vertical" size="small" style={{ width: "100%" }}>
+          <Button
+            type="primary"
+            onClick={() => handleConfirmAppointment(record)}
+            block
+            disabled={record.status !== "pending"}
+          >
+            Xác nhận
+          </Button>
+          {record.status !== "pending" ? (
+            <Button
+              onClick={() => showRejectModal(record)}
+              block
+            >
+              Đổi lịch khám
+            </Button>
+          ) : (
+            <Button danger onClick={() => showRejectModal(record)} block disabled={String(record.status) === "cancelled"}>Hủy</Button>
           )}
         </Space>
       ),
+      className: 'whitespace-nowrap',
     },
   ];
 
   return (
-    <div className="p-6">
-      <Card title="Quản lý lịch hẹn">
+    <div className="p-4 sm:p-6 max-w-full">
+      <Card title="Quản lý lịch hẹn" className="shadow-md rounded-lg overflow-hidden">
         {/* Filters */}
-        <div className="mb-4 flex gap-4">
+        <div className="mb-4 flex flex-col sm:flex-row gap-2 sm:gap-4 items-stretch sm:items-center">
           <Input
             placeholder="Tìm kiếm tên bệnh nhân hoặc bác sĩ"
             prefix={<SearchOutlined />}
-            className="max-w-xs"
+            className="max-w-full sm:max-w-xs"
             value={filters.search}
             onChange={e => setFilters(prev => ({ ...prev, search: e.target.value }))}
             allowClear
+            size="large"
           />
           <Select
             placeholder="Lọc theo trạng thái"
-            className="min-w-[150px]"
+            className="min-w-[150px] max-w-full"
             value={filters.status}
             onChange={status => setFilters(prev => ({ ...prev, status }))}
             allowClear
+            size="large"
           >
             <Option value="all">Tất cả</Option>
             <Option value="pending">Chờ xác nhận</Option>
@@ -275,34 +297,104 @@ const NurseManageAppointment: React.FC = () => {
             onChange={(dates) => setFilters(prev => ({ ...prev, dateRange: dates }))}
             format="DD/MM/YYYY"
             allowClear
+            className="w-full sm:w-auto"
+            size="large"
+          />
+        </div>
+        <div className="w-full overflow-x-auto">
+          <Table
+            columns={columns}
+            dataSource={appointments}
+            rowKey="id"
+            loading={loading}
+            pagination={{ pageSize: 10 }}
+            bordered={false}
+            scroll={{ x: 'max-content' }}
           />
         </div>
 
-        <Table
-          columns={columns}
-          dataSource={appointments}
-          rowKey="id"
-          loading={loading}
-          pagination={{ pageSize: 10 }}
-        />
-
         <Modal
-          title="Lý do hủy lịch hẹn"
+          title={selectedAppointment && selectedAppointment.status !== "pending" ? "Đổi lịch khám" : "Lý do hủy lịch hẹn"}
           open={rejectModalVisible}
-          onOk={handleRejectAppointment}
+          footer={null}
           onCancel={() => {
             setRejectModalVisible(false);
             setRejectReason('');
             setSelectedAppointment(null);
           }}
-          confirmLoading={loading}
+          width={window.innerWidth < 640 ? '98vw' : 800}
+          bodyStyle={{ maxHeight: window.innerWidth < 640 ? 350 : 500, overflowY: 'auto', padding: window.innerWidth < 640 ? 12 : 24 }}
+          className="max-w-full"
         >
-          <Input.TextArea
-            rows={4}
-            value={rejectReason}
-            onChange={e => setRejectReason(e.target.value)}
-            placeholder="Nhập lý do hủy lịch hẹn"
-          />
+          {selectedAppointment && selectedAppointment.status !== "pending" ? null : (
+            <>
+              <Input.TextArea
+                rows={4}
+                value={rejectReason}
+                onChange={e => setRejectReason(e.target.value)}
+                placeholder="Nhập lý do hủy lịch hẹn"
+              />
+              <div className="flex justify-end gap-2 mt-4">
+                <Button
+                  type="primary"
+                  onClick={() => {
+                    setRescheduleAppointment(selectedAppointment);
+                    setRescheduleModalVisible(true);
+                    setRejectModalVisible(false);
+                  }}
+                  disabled={!selectedAppointment}
+                >
+                  Đặt lại lịch
+                </Button>
+                <Button
+                  danger
+                  onClick={handleRejectAppointment}
+                  loading={loading}
+                >
+                  Hủy luôn
+                </Button>
+              </div>
+            </>
+          )}
+          {selectedAppointment && selectedAppointment.status !== "pending" && (
+            <div className="flex justify-end gap-2 mt-4">
+              <Button
+                type="primary"
+                onClick={() => {
+                  setRescheduleAppointment(selectedAppointment);
+                  setRescheduleModalVisible(true);
+                  setRejectModalVisible(false);
+                }}
+                disabled={!selectedAppointment}
+              >
+                Đổi lịch khám
+              </Button>
+            </div>
+          )}
+        </Modal>
+
+        <Modal
+          title="Đặt lại lịch khám"
+          open={rescheduleModalVisible}
+          onCancel={() => {
+            setRescheduleModalVisible(false);
+            setRescheduleAppointment(null);
+          }}
+          footer={null}
+          width={window.innerWidth < 640 ? '98vw' : 800}
+          bodyStyle={{ maxHeight: window.innerWidth < 640 ? 400 : 500, overflowY: 'auto', padding: window.innerWidth < 640 ? 12 : 24 }}
+          className="max-w-full"
+        >
+          {rescheduleAppointment && (
+            <NurseRescheduleAppointment
+              appointment={rescheduleAppointment}
+              onSuccess={() => {
+                setRescheduleModalVisible(false);
+                setRescheduleAppointment(null);
+                fetchAppointments();
+              }}
+            />
+          )}
         </Modal>
       </Card>
     </div>
