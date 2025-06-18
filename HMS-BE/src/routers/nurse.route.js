@@ -41,4 +41,10 @@ nurseRouter.get("/get-all-nurse",
         return await NurseController.getAllNurse(req, res);
     });
 
+nurseRouter.delete("/delete/:id",
+    authorize(["admin"]),
+    async (req, res) => {
+        return await NurseController.deleteNurse(req, res);
+    });
+
 module.exports = nurseRouter; 

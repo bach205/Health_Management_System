@@ -2,6 +2,8 @@ const { BadRequestError } = require("../core/error.response");
 const prisma = require("../config/prisma");
 const { createNurseSchema, updateNurseSchema } = require("../validators/auth.validator");
 const bcrypt = require("bcrypt");
+const { generateRandomPassword } = require("../utils/randomPasswordGenerate");
+const { sendStaffNewPasswordEmail } = require("../utils/staff.email");
 
 class NurseService {
     async findAllNurse(query) {
@@ -95,20 +97,20 @@ class NurseService {
                 'password',
                 'gender',
             ];
-            console.log(1)
+            if (!nurseData.password || nurseData.password.trim() === '') {
+                const password = generateRandomPassword(10);
+                nurseData.password = password;
+            }
             for (const field of requiredFields) {
                 if (!nurseData[field] || nurseData[field].trim() === '') {
                     throw new BadRequestError(`${field.replace('_', ' ')} không được để trống`);
                 }
             }
-            console.log(2)
             // Validate input data using Joi schema
             const { error, value } = createNurseSchema.validate(nurseData, { abortEarly: false });
             if (error) {
                 throw new BadRequestError(error.details.map(detail => detail.message).join(', '));
             }
-            console.log(value);
-
             // Check if email already exists
             const existingEmail = await prisma.user.findUnique({
                 where: { email: value.email }
@@ -116,15 +118,6 @@ class NurseService {
             if (existingEmail) {
                 throw new BadRequestError("Email đã tồn tại");
             }
-
-            // // Check if phone number already exists
-            // const existingPhone = await prisma.user.findFirst({
-            //     where: { phone: value.phone }
-            // });
-            // if (existingPhone) {
-            //     throw new BadRequestError("Phone number already exists");
-            // }
-
             // Hash password
             const hashedPassword = await bcrypt.hash(
                 value.password,
@@ -146,11 +139,11 @@ class NurseService {
                     sso_provider: "local"
                 },
             });
+            await sendStaffNewPasswordEmail(nurseData.email, nurseData.password);
 
             if (!nurse) {
                 throw new BadRequestError("Có lỗi trong quá trình tạo tài khoản, vui lòng thử lại!");
             }
-
             return nurse;
         } catch (error) {
             throw new BadRequestError(error.message);
@@ -347,6 +340,28 @@ class NurseService {
                     message: "Đặt lại mật khẩu thành công"
                 }
             };
+        } catch (error) {
+            throw new BadRequestError(error.message);
+        }
+    }
+
+    deleteNurse = async (nurseId) => {
+        try {
+            nurseId = parseInt(nurseId, 10);
+            const existingNurse = await prisma.user.findUnique({
+                where: { id: nurseId }
+            });
+            if (!existingNurse) {
+                throw new BadRequestError("Không tìm thấy tài khoản");
+            }
+            if (existingNurse.role !== "nurse") {
+                throw new BadRequestError("Tài khoản không phải là nurse");
+            }
+            const deletedNurse = await prisma.user.delete({
+                where: { id: nurseId }
+            });
+            console.log(deletedNurse)
+            return deletedNurse;
         } catch (error) {
             throw new BadRequestError(error.message);
         }

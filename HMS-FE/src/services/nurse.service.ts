@@ -28,3 +28,7 @@ export const resetPassword = async (id: string) => {
     return await instance.put(`${BASE_URL}/reset-password/${id}`);
 };
 
+export const deleteNurse = async (id: string) => {
+    return await instance.delete(`${BASE_URL}/delete/${id}`);
+};
+
