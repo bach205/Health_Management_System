@@ -270,17 +270,7 @@ INSERT INTO clinics (name, description) VALUES
 INSERT INTO doctors (user_id, specialty, bio) VALUES
 (1, 'Tim mạch', 'Bác sĩ tim mạch với 10 năm kinh nghiệm'),
 (2, 'Thần kinh', 'Chuyên gia về rối loạn thần kinh'),
-(14, 'Chấn thương chỉnh hình', 'Chuyên gia phẫu thuật thay khớp'),
-(3, 'Nhi khoa', 'Chuyên gia chăm sóc trẻ em'),
-(4, 'Da liễu', 'Chuyên gia chăm sóc da với 8 năm kinh nghiệm'),
-(5, 'Mắt', 'Chuyên gia phẫu thuật mắt'),
-(6, 'Tai mũi họng', 'Chuyên gia về tai, mũi và họng'),
-(7, 'Nội tổng quát', 'Bác sĩ đa khoa'),
-(8, 'Chẩn đoán hình ảnh', 'Chuyên gia chẩn đoán hình ảnh'),
-(9, 'Ung bướu', 'Chuyên gia điều trị ung thư'),
-(10, 'Tiêu hóa', 'Chuyên gia hệ tiêu hóa'),
-(11, 'Tiết niệu', 'Chuyên gia tiết niệu và sức khỏe sinh sản nam'),
-(12, 'Nội tiết', 'Chuyên gia rối loạn hormone');
+(14, 'Chấn thương chỉnh hình', 'Chuyên gia phẫu thuật thay khớp');
 
 -- Insert bảng shifts
 INSERT INTO shifts (name, start_time, end_time) VALUES
@@ -297,20 +287,14 @@ INSERT INTO shifts (name, start_time, end_time) VALUES
 
 -- Insert bảng work_schedules
 INSERT INTO work_schedules (user_id, clinic_id, work_date, shift_id) VALUES
-(1, 1, '2025-06-03', 1), -- Bác sĩ 1, Tim mạch, Sáng
-(2, 2, '2025-06-03', 2), -- Bác sĩ 2, Thần kinh, Chiều
+(2, 1, '2025-06-03', 1), -- Bác sĩ 1, Tim mạch, Sáng
+(33, 2, '2025-06-03', 2), -- Bác sĩ 2, Thần kinh, Chiều
 (3, 4, '2025-06-03', 1), -- Y tá 1, Nhi khoa, Sáng
 (4, 5, '2025-06-03', 3), -- Y tá 2, Da liễu, Tối
 (14, 3, '2025-06-04', 1), -- Bác sĩ 3, Chấn thương chỉnh hình, Sáng
 (5, 6, '2025-06-04', 2), -- Lễ tân 1, Mắt, Chiều
 (6, 7, '2025-06-04', 3), -- Lễ tân 2, Tai mũi họng, Tối
-(7, 8, '2025-06-05', 1), -- Quản trị viên 2, Nội tổng quát, Sáng
-(8, 9, '2025-06-05', 2), -- Bệnh nhân 1, Chẩn đoán hình ảnh, Chiều
-(9, 10, '2025-06-05', 3), -- Bệnh nhân 2, Ung bướu, Tối
-(10, 11, '2025-06-06', 1), -- Bệnh nhân 3, Tiêu hóa, Sáng
-(11, 12, '2025-06-06', 2), -- Bệnh nhân 4, Tiết niệu, Chiều
-(12, 13, '2025-06-06', 3); -- Bệnh nhân 5, Nội tiết, Tối
-
+(7, 8, '2025-06-05', 1); -- Quản trị viên 2, Nội tổng quát, Sáng
 -- Insert bảng examination_records
 INSERT INTO examination_records (patient_id, symptoms, primary_doctor_id, final_diagnosis, created_by_user_id) VALUES
 (8, 'Đau đầu, sốt cao 39 độ, ho nhiều', 1, 'Viêm phổi cấp', 1),
@@ -390,7 +374,6 @@ INSERT INTO invoice_items (record_id, description, amount) VALUES
 (5, 'Thuốc chống dị ứng', 100000.00),
 (6, 'Khám bệnh', 300000.00),
 (6, 'Đo thị lực', 0.00);
-
 -- Bảng lịch hẹn khám
 CREATE TABLE appointments (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -441,23 +424,11 @@ CREATE TABLE available_slots (
 
 -- Thêm dữ liệu mẫu cho các khung giờ khám
 INSERT INTO available_slots (doctor_id, clinic_id, slot_date, start_time, end_time) VALUES
--- Khung giờ của bác sĩ tim mạch
-(1, 1, '2025-06-10', '08:00:00', '08:30:00'),
-(1, 1, '2025-06-10', '08:30:00', '09:00:00'),
-(1, 1, '2025-06-10', '09:00:00', '09:30:00'),
-(1, 1, '2025-06-10', '09:30:00', '10:00:00'),
-
--- Khung giờ của bác sĩ thần kinh
-(2, 2, '2025-06-11', '13:00:00', '13:30:00'),
-(2, 2, '2025-06-11', '13:30:00', '14:00:00'),
-(2, 2, '2025-06-11', '14:00:00', '14:30:00'),
-(2, 2, '2025-06-11', '14:30:00', '15:00:00'),
-
 -- Khung giờ của bác sĩ chỉnh hình
-(14, 3, '2025-06-12', '08:00:00', '08:30:00'),
-(14, 3, '2025-06-12', '08:30:00', '09:00:00'),
-(14, 3, '2025-06-12', '09:00:00', '09:30:00'),
-(14, 3, '2025-06-12', '09:30:00', '10:00:00');
+(14, 3, '2025-06-20', '08:00:00', '08:30:00'),
+(14, 3, '2025-06-20', '08:30:00', '09:00:00'),
+(14, 3, '2025-06-20', '09:00:00', '09:30:00'),
+(14, 3, '2025-06-2020', '09:30:00', '10:00:00');
 
 -- Thêm cột appointment_id vào bảng queues
 ALTER TABLE queues 
@@ -480,89 +451,91 @@ WHERE q.appointment_id IS NULL;
 -- Thêm thêm sample data cho bảng appointments
 INSERT INTO appointments (patient_id, clinic_id, doctor_id, appointment_date, appointment_time, status, reason, note) VALUES
 -- Lịch hẹn khám tái khám cho các bệnh nhân cũ
-(8, 1, 1, '2025-06-20', '08:30:00', 'confirmed', 'Tái khám sau điều trị viêm phổi', 'Kiểm tra phục hồi sau 3 tuần điều trị'),
-(9, 8, 7, '2025-06-18', '10:00:00', 'pending', 'Khám tổng quát định kỳ', 'Bệnh nhân có tiền sử phẫu thuật ruột thừa'),
-(10, 3, 14, '2025-06-25', '14:30:00', 'confirmed', 'Tái khám khớp gối', 'Đánh giá hiệu quả vật lý trị liệu'),
+-- (8, 1, 1, '2025-06-20', '08:30:00', 'confirmed', 'Tái khám sau điều trị viêm phổi', 'Kiểm tra phục hồi sau 3 tuần điều trị'),
+-- (9, 8, 7, '2025-06-18', '10:00:00', 'pending', 'Khám tổng quát định kỳ', 'Bệnh nhân có tiền sử phẫu thuật ruột thừa'),
+-- (10, 3, 14, '2025-06-25', '14:30:00', 'confirmed', 'Tái khám khớp gối', 'Đánh giá hiệu quả vật lý trị liệu'),
 
--- Lịch hẹn mới cho các chuyên khoa khác
-(11, 7, 6, '2025-06-16', '09:00:00', 'pending', 'Đau tai, nghe kém', 'Triệu chứng xuất hiện sau cảm lạnh'),
-(12, 11, 10, '2025-06-17', '15:30:00', 'confirmed', 'Đau bụng, khó tiêu', 'Bệnh nhân có tiền sử dị ứng thuốc'),
-(13, 12, 11, '2025-06-19', '11:00:00', 'pending', 'Khám tuyến tiền liệt', 'Nam giới trên 50 tuổi, khám định kỳ'),
+-- -- Lịch hẹn mới cho các chuyên khoa khác
+-- (11, 7, 6, '2025-06-16', '09:00:00', 'pending', 'Đau tai, nghe kém', 'Triệu chứng xuất hiện sau cảm lạnh'),
+-- (12, 11, 10, '2025-06-17', '15:30:00', 'confirmed', 'Đau bụng, khó tiêu', 'Bệnh nhân có tiền sử dị ứng thuốc'),
+-- (13, 12, 11, '2025-06-19', '11:00:00', 'pending', 'Khám tuyến tiền liệt', 'Nam giới trên 50 tuổi, khám định kỳ'),
 
--- Lịch hẹn cho tuần sau
-(8, 9, 8, '2025-06-22', '08:00:00', 'confirmed', 'Chụp CT ngực kiểm tra', 'Theo dõi sau điều trị viêm phổi'),
-(9, 10, 9, '2025-06-23', '13:30:00', 'pending', 'Tư vấn dinh dưỡng ung thư', 'Phòng ngừa ung thư đại tràng'),
-(10, 13, 12, '2025-06-24', '10:30:00', 'confirmed', 'Khám tiểu đường', 'Kiểm tra đường huyết định kỳ'),
+-- -- Lịch hẹn cho tuần sau
+-- (8, 9, 8, '2025-06-22', '08:00:00', 'confirmed', 'Chụp CT ngực kiểm tra', 'Theo dõi sau điều trị viêm phổi'),
+-- (9, 10, 9, '2025-06-23', '13:30:00', 'pending', 'Tư vấn dinh dưỡng ung thư', 'Phòng ngừa ung thư đại tràng'),
+-- (10, 13, 12, '2025-06-24', '10:30:00', 'confirmed', 'Khám tiểu đường', 'Kiểm tra đường huyết định kỳ'),
 
--- Lịch hẹn cuối tuần
-(11, 1, 1, '2025-06-21', '09:30:00', 'confirmed', 'Khám tim định kỳ', 'Bệnh nhân có gia đình bị bệnh tim'),
-(12, 2, 2, '2025-06-21', '14:00:00', 'pending', 'Đau đầu mãn tính', 'Stress công việc, cần tư vấn'),
-(13, 4, 3, '2025-06-22', '10:00:00', 'confirmed', 'Khám sức khỏe trẻ em', 'Tiêm chủng định kỳ'),
+-- -- Lịch hẹn cuối tuần
+-- (11, 1, 1, '2025-06-21', '09:30:00', 'confirmed', 'Khám tim định kỳ', 'Bệnh nhân có gia đình bị bệnh tim'),
+-- (12, 2, 2, '2025-06-21', '14:00:00', 'pending', 'Đau đầu mãn tính', 'Stress công việc, cần tư vấn'),
+-- (13, 4, 3, '2025-06-22', '10:00:00', 'confirmed', 'Khám sức khỏe trẻ em', 'Tiêm chủng định kỳ'),
 
--- Lịch hẹn đã hủy (các trường hợp khác nhau)
-(8, 5, 4, '2025-06-15', '16:00:00', 'cancelled', 'Khám da dị ứng', 'Bệnh nhân đã khỏi, không cần khám'),
-(9, 6, 5, '2025-06-16', '11:30:00', 'cancelled', 'Khám mắt', 'Xung đột lịch trình, sẽ đặt lại'),
-(10, 7, 6, '2025-06-17', '15:00:00', 'cancelled', 'Khám tai mũi họng', 'Triệu chứng đã thuyên giảm'),
+-- -- Lịch hẹn đã hủy (các trường hợp khác nhau)
+-- (8, 5, 4, '2025-06-15', '16:00:00', 'cancelled', 'Khám da dị ứng', 'Bệnh nhân đã khỏi, không cần khám'),
+-- (9, 6, 5, '2025-06-16', '11:30:00', 'cancelled', 'Khám mắt', 'Xung đột lịch trình, sẽ đặt lại'),
+-- (10, 7, 6, '2025-06-17', '15:00:00', 'cancelled', 'Khám tai mũi họng', 'Triệu chứng đã thuyên giảm'),
 
--- Lịch hẹn đã hoàn thành (trong tuần trước)
-(11, 8, 7, '2025-06-02', '08:30:00', 'completed', 'Khám tổng quát', 'Đã hoàn thành, kết quả bình thường'),
-(12, 9, 8, '2025-06-03', '14:30:00', 'completed', 'Chụp X-quang lưng', 'Phát hiện thoái hóa cột sống nhẹ'),
-(13, 10, 9, '2025-06-04', '16:00:00', 'completed', 'Tư vấn phòng chống ung thư', 'Đã tư vấn lối sống lành mạnh'),
+-- -- Lịch hẹn đã hoàn thành (trong tuần trước)
+-- (11, 8, 7, '2025-06-02', '08:30:00', 'completed', 'Khám tổng quát', 'Đã hoàn thành, kết quả bình thường'),
+-- (12, 9, 8, '2025-06-03', '14:30:00', 'completed', 'Chụp X-quang lưng', 'Phát hiện thoái hóa cột sống nhẹ'),
+-- (13, 10, 9, '2025-06-04', '16:00:00', 'completed', 'Tư vấn phòng chống ung thư', 'Đã tư vấn lối sống lành mạnh'),
 
--- Lịch hẹn khẩn cấp
-(8, 8, 7, '2025-06-09', '07:30:00', 'completed', 'Cấp cứu đau bụng', 'Đã xử lý, không nghiêm trọng'),
-(9, 1, 1, '2025-06-08', '20:00:00', 'completed', 'Đau ngực cấp', 'Tim bình thường, do căng thẳng');
+-- -- Lịch hẹn khẩn cấp
+-- (8, 8, 7, '2025-06-09', '07:30:00', 'completed', 'Cấp cứu đau bụng', 'Đã xử lý, không nghiêm trọng'),
+-- (9, 1, 1, '2025-06-08', '20:00:00', 'completed', 'Đau ngực cấp', 'Tim bình thường, do căng thẳng');
 
 -- Thêm dữ liệu cho available_slots tương ứng với các lịch hẹn mới
-INSERT INTO available_slots (doctor_id, clinic_id, slot_date, start_time, end_time, is_available) VALUES
--- Khung giờ cho tuần sau (một số đã được đặt, một số còn trống)
-(1, 1, '2025-06-20', '08:00:00', '08:30:00', TRUE),
-(1, 1, '2025-06-20', '08:30:00', '09:00:00', FALSE), -- Đã được đặt
-(1, 1, '2025-06-20', '09:00:00', '09:30:00', TRUE),
-(1, 1, '2025-06-20', '09:30:00', '10:00:00', TRUE),
+-- INSERT INTO available_slots (doctor_id, clinic_id, slot_date, start_time, end_time, is_available) VALUES
+-- -- Khung giờ cho tuần sau (một số đã được đặt, một số còn trống)
+-- (1, 1, '2025-06-20', '08:00:00', '08:30:00', TRUE),
+-- (1, 1, '2025-06-20', '08:30:00', '09:00:00', FALSE), -- Đã được đặt
+-- (1, 1, '2025-06-20', '09:00:00', '09:30:00', TRUE),
+-- (1, 1, '2025-06-20', '09:30:00', '10:00:00', TRUE),
 
-(7, 8, '2025-06-18', '09:30:00', '10:00:00', TRUE),
-(7, 8, '2025-06-18', '10:00:00', '10:30:00', FALSE), -- Đã được đặt
-(7, 8, '2025-06-18', '10:30:00', '11:00:00', TRUE),
+-- (7, 8, '2025-06-18', '09:30:00', '10:00:00', TRUE),
+-- (7, 8, '2025-06-18', '10:00:00', '10:30:00', FALSE), -- Đã được đặt
+-- (7, 8, '2025-06-18', '10:30:00', '11:00:00', TRUE),
 
-(14, 3, '2025-06-25', '14:00:00', '14:30:00', TRUE),
-(14, 3, '2025-06-25', '14:30:00', '15:00:00', FALSE), -- Đã được đặt
-(14, 3, '2025-06-25', '15:00:00', '15:30:00', TRUE),
+-- (14, 3, '2025-06-25', '14:00:00', '14:30:00', TRUE),
+-- (14, 3, '2025-06-25', '14:30:00', '15:00:00', FALSE), -- Đã được đặt
+-- (14, 3, '2025-06-25', '15:00:00', '15:30:00', TRUE),
 
-(6, 7, '2025-06-16', '08:30:00', '09:00:00', TRUE),
-(6, 7, '2025-06-16', '09:00:00', '09:30:00', FALSE), -- Đã được đặt
-(6, 7, '2025-06-16', '09:30:00', '10:00:00', TRUE),
+-- (6, 7, '2025-06-16', '08:30:00', '09:00:00', TRUE),
+-- (6, 7, '2025-06-16', '09:00:00', '09:30:00', FALSE), -- Đã được đặt
+-- (6, 7, '2025-06-16', '09:30:00', '10:00:00', TRUE),
 
-(10, 11, '2025-06-17', '15:00:00', '15:30:00', TRUE),
-(10, 11, '2025-06-17', '15:30:00', '16:00:00', FALSE), -- Đã được đặt
-(10, 11, '2025-06-17', '16:00:00', '16:30:00', TRUE),
+-- (10, 11, '2025-06-17', '15:00:00', '15:30:00', TRUE),
+-- (10, 11, '2025-06-17', '15:30:00', '16:00:00', FALSE), -- Đã được đặt
+-- (10, 11, '2025-06-17', '16:00:00', '16:30:00', TRUE),
 
-(11, 12, '2025-06-19', '10:30:00', '11:00:00', TRUE),
-(11, 12, '2025-06-19', '11:00:00', '11:30:00', FALSE), -- Đã được đặt
-(11, 12, '2025-06-19', '11:30:00', '12:00:00', TRUE);
+-- (11, 12, '2025-06-19', '10:30:00', '11:00:00', TRUE),
+-- (11, 12, '2025-06-19', '11:00:00', '11:30:00', FALSE), -- Đã được đặt
+-- (11, 12, '2025-06-19', '11:30:00', '12:00:00', TRUE);
 
--- Cập nhật các khung giờ đã được đặt thành không khả dụng
-UPDATE available_slots 
-SET is_available = FALSE 
-WHERE (doctor_id = 1 AND clinic_id = 1 AND slot_date = '2025-06-20' AND start_time = '08:30:00')
-   OR (doctor_id = 7 AND clinic_id = 8 AND slot_date = '2025-06-18' AND start_time = '10:00:00')
-   OR (doctor_id = 14 AND clinic_id = 3 AND slot_date = '2025-06-25' AND start_time = '14:30:00')
-   OR (doctor_id = 6 AND clinic_id = 7 AND slot_date = '2025-06-16' AND start_time = '09:00:00')
-   OR (doctor_id = 10 AND clinic_id = 11 AND slot_date = '2025-06-17' AND start_time = '15:30:00')
-   OR (doctor_id = 11 AND clinic_id = 12 AND slot_date = '2025-06-19' AND start_time = '11:00:00');
+-- -- Cập nhật các khung giờ đã được đặt thành không khả dụng
+-- UPDATE available_slots 
+-- SET is_available = FALSE 
+-- WHERE (doctor_id = 1 AND clinic_id = 1 AND slot_date = '2025-06-20' AND start_time = '08:30:00')
+--    OR (doctor_id = 7 AND clinic_id = 8 AND slot_date = '2025-06-18' AND start_time = '10:00:00')
+--    OR (doctor_id = 14 AND clinic_id = 3 AND slot_date = '2025-06-25' AND start_time = '14:30:00')
+--    OR (doctor_id = 6 AND clinic_id = 7 AND slot_date = '2025-06-16' AND start_time = '09:00:00')
+--    OR (doctor_id = 10 AND clinic_id = 11 AND slot_date = '2025-06-17' AND start_time = '15:30:00')
+--    OR (doctor_id = 11 AND clinic_id = 12 AND slot_date = '2025-06-19' AND start_time = '11:00:00');
 
--- Cập nhật bảng queues với appointment_id mới
-INSERT INTO queues (patient_id, clinic_id, record_id, appointment_id, status, priority, registered_online, qr_code) VALUES
--- Queue cho các lịch hẹn chưa hoàn thành
-(11, 7, NULL, 7, 'waiting', 0, TRUE, 'QR007'),
-(12, 11, NULL, 8, 'waiting', 1, FALSE, 'QR008'),
-(13, 12, NULL, 9, 'waiting', 0, TRUE, 'QR009'),
-(8, 9, NULL, 10, 'waiting', 1, TRUE, 'QR010'),
-(9, 10, NULL, 11, 'waiting', 0, FALSE, 'QR011'),
-(10, 13, NULL, 12, 'waiting', 0, TRUE, 'QR012'),
-(11, 1, NULL, 13, 'waiting', 1, TRUE, 'QR013'),
-(12, 2, NULL, 14, 'waiting', 0, FALSE, 'QR014'),
-(13, 4, NULL, 15, 'waiting', 2, TRUE, 'QR015'); -- Ưu tiên cao cho trẻ em
+-- -- Cập nhật bảng queues với appointment_id mới
+-- INSERT INTO queues (patient_id, clinic_id, record_id, appointment_id, status, priority, registered_online, qr_code) VALUES
+-- -- Queue cho các lịch hẹn chưa hoàn thành
+-- (11, 7, NULL, 7, 'waiting', 0, TRUE, 'QR007'),
+-- (12, 11, NULL, 8, 'waiting', 1, FALSE, 'QR008'),
+-- (13, 12, NULL, 9, 'waiting', 0, TRUE, 'QR009'),
+-- (8, 9, NULL, 10, 'waiting', 1, TRUE, 'QR010'),
+-- (9, 10, NULL, 11, 'waiting', 0, FALSE, 'QR011'),
+-- (10, 13, NULL, 12, 'waiting', 0, TRUE, 'QR012'),
+-- (11, 1, NULL, 13, 'waiting', 1, TRUE, 'QR013'),
+-- (12, 2, NULL, 14, 'waiting', 0, FALSE, 'QR014'),
+-- (13, 4, NULL, 15, 'waiting', 2, TRUE, 'QR015'); -- Ưu tiên cao cho trẻ em
 
 
-select * from appointments
+-- select * from appointments
+
+ALTER TABLE appointments ADD COLUMN priority INT DEFAULT 0 COMMENT '0: normal booking, 1: nurse booking, 2: urgent' AFTER STATUS;
