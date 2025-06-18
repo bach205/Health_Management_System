@@ -172,6 +172,7 @@ const NurseBookAppointment: React.FC = () => {
         appointment_date: dayjs(values.appointment_date).format('YYYY-MM-DD'),
         appointment_time: values.appointment_time // Ensure HH:mm:ss format
       });
+      
       if (response.success) {
         message.success('Đặt lịch thành công');
         navigate('/nurse/appointments');
