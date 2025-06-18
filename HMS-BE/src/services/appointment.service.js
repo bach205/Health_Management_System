@@ -197,7 +197,7 @@ class AppointmentService {
         TIME_FORMAT(a.appointment_time, '%H:%i:%s') as formatted_time,
         p.identity_number,
         u.full_name as patient_name,
-        u.email as patient_email,
+        u.email as email,
         d.full_name as doctor_name,
         c.name as clinic_name
       FROM appointments a
@@ -218,7 +218,7 @@ class AppointmentService {
    */
   // viết lại nhé anh Bách
   async nurseBookAppointment(data) {
-
+    console.log("Nurse booking appointment with data:", data);
     // 1. Kiểm tra slot còn trống không
     let slot = await prisma.$queryRaw`
   SELECT * FROM available_slots
@@ -234,13 +234,13 @@ class AppointmentService {
       throw new BadRequestError(
         "Khung giờ này đã được đặt hoặc không tồn tại!"
       );
-    console.log(slot)
+
     // 2. Kiểm tra email bệnh nhân đã tồn tại chưa
     let patient = await prisma.user.findUnique({
-      where: { email: data.patient_email },
+      where: { email: data.email },
       include: { patient: true }
     });
-
+    console.log("Creating new user with email:", patient);
     // 3. Nếu chưa tồn tại, tạo tài khoản mới cho bệnh nhân
     if (!patient) {
       // Tạo mật khẩu ngẫu nhiên
@@ -256,7 +256,7 @@ class AppointmentService {
 
         const user = await prisma.user.create({
           data: {
-            email: data.patient_email,
+            email: data.email,
             password: hashedPassword,
             phone: data.patient_phone || "",
             role: "patient",
@@ -286,7 +286,7 @@ class AppointmentService {
     // 4. Kiểm tra bệnh nhân đã có lịch trùng chưa
     const exist = await prisma.appointment.findFirst({
       where: {
-        email: data.email,
+        patient_id: data.patient_id,
         appointment_date: new Date(data.appointment_date),
         appointment_time: new Date(`1970-01-01T${data.appointment_time}`),
         status: { in: ["pending", "confirmed"] },
