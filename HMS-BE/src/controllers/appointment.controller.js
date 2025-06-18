@@ -197,7 +197,6 @@ exports.nurseBookAppointment = async (req, res, next) => {
         message: error.details[0].message
       });
     }
-    console.log(1)
     const result = await appointmentService.nurseBookAppointment(req.body);
     res.status(201).json({
       success: true,

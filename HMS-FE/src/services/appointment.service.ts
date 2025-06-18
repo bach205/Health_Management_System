@@ -57,6 +57,7 @@ export const updateAppointmentService = async (appointmentId: string | number, d
 };
 
 export const nurseBookAppointmentService = async (appointmentData: any) => {
+  console.log(appointmentData);
   const response = await mainRequest.post(`${baseURL}/appointment/nurse-book`, appointmentData);
   return response.data;
 };
