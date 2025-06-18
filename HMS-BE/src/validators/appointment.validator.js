@@ -119,6 +119,44 @@ const getAppointmentDetailSchema = Joi.object({
   }),
 });
 
+const nurseRescheduleAppointmentSchema = Joi.object({
+  old_appointment_id: Joi.number().required().messages({
+    'number.base': 'ID lịch hẹn cũ phải là số',
+    'any.required': 'ID lịch hẹn cũ là bắt buộc'
+  }),
+  patient_id: Joi.number().required().messages({
+    'number.base': 'ID bệnh nhân phải là số',
+    'any.required': 'ID bệnh nhân là bắt buộc'
+  }),
+  doctor_id: Joi.number().required().messages({
+    'number.base': 'ID bác sĩ phải là số',
+    'any.required': 'ID bác sĩ là bắt buộc'
+  }),
+  clinic_id: Joi.number().required().messages({
+    'number.base': 'ID phòng khám phải là số',
+    'any.required': 'ID phòng khám là bắt buộc'
+  }),
+  slot_date: Joi.date().iso().required().messages({
+    'date.base': 'Ngày khám không hợp lệ',
+    'date.format': 'Ngày khám phải theo định dạng ISO',
+    'any.required': 'Ngày khám là bắt buộc'
+  }),
+  start_time: Joi.string().pattern(/^([01]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/).required().messages({
+    'string.pattern.base': 'Giờ khám phải theo định dạng HH:mm:ss',
+    'any.required': 'Giờ khám là bắt buộc'
+  }),
+  reason: Joi.string().required().messages({
+    'string.base': 'Lý do khám phải là chuỗi',
+    'any.required': 'Lý do khám là bắt buộc'
+  }),
+  note: Joi.string().allow('', null).messages({
+    'string.base': 'Ghi chú phải là chuỗi'
+  }),
+  cancel_reason: Joi.string().allow('', null).messages({
+    'string.base': 'Lý do hủy phải là chuỗi'
+  })
+});
+
 module.exports = {
   bookAppointmentSchema,
   // getAvailableSlotsSchema,
@@ -128,4 +166,5 @@ module.exports = {
   getAppointmentDetailSchema,
   nurseBookAppointmentSchema,
   IsPatientIdValid,
+  nurseRescheduleAppointmentSchema
 };

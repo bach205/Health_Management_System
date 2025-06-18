@@ -6,6 +6,7 @@ const {
   confirmAppointmentSchema,
   cancelAppointmentSchema,
   nurseBookAppointmentSchema,
+  nurseRescheduleAppointmentSchema,
 } = require("../validators/appointment.validator");
 
 exports.bookAppointment = async (req, res, next) => {
@@ -161,6 +162,62 @@ exports.nurseBookAppointment = async (req, res, next) => {
       message: "Đặt lịch thành công",
       data: result
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.nurseRescheduleAppointment = async (req, res, next) => {
+  try {
+    const { error } = nurseRescheduleAppointmentSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: error.details[0].message
+      });
+    }
+
+    const result = await appointmentService.nurseRescheduleAppointment(req.body);
+    res.status(201).json({
+      success: true,
+      message: "Đặt lại lịch thành công",
+      data: result
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getAppointmentById = async (req, res, next) => {
+  try {
+    const appointment_id = parseInt(req.params.id);
+
+    if (isNaN(appointment_id)) {
+      return res.status(400).json({
+        success: false,
+        message: "ID lịch hẹn không hợp lệ"
+      });
+    }
+
+    const appointment = await appointmentService.getAppointmentById(appointment_id);
+    res.status(200).json({
+      success: true,
+      message: "Lấy thông tin lịch hẹn thành công",
+      data: appointment
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getAvailableSlotsBySpecialty = async (req, res, next) => {
+  try {
+    const { specialty } = req.query;
+    if (!specialty) {
+      return res.status(400).json({ success: false, message: 'Thiếu chuyên môn (specialty)' });
+    }
+    const slots = await appointmentService.getAvailableSlotsBySpecialty(specialty);
+    res.status(200).json({ success: true, message: 'Lấy danh sách slot trống theo chuyên môn thành công', data: slots });
   } catch (error) {
     next(error);
   }
