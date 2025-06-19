@@ -4,6 +4,7 @@ import { assets } from "../../assets/assets";
 import RelatedDoctors from "../../components/RelatedDoctors";
 import { Button, Form, Input, Card, Space, Typography, message } from "antd";
 import { bookAppointmentService, getAvailableTimeSlotsService } from "../../services/appointment.service";
+import { getDoctorById } from "../../services/doctor.service";
 import dayjs from "dayjs";
 const { Title, Text } = Typography;
 
@@ -19,6 +20,8 @@ interface AvailableSlot {
   doctor: {
     id: number;
     full_name: string;
+    speciality: string;
+    bio: string;
   };
   clinic: {
     id: number;
@@ -35,6 +38,8 @@ const PatientBookAppointment: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [selectedClinic, setSelectedClinic] = useState<number | null>(null);
   const [success, setSuccess] = useState(false);
+  const [doctor, setDoctor] = useState<any>(null);
+
   useEffect(() => {
     const fetchSlots = async () => {
       setLoading(true);
@@ -55,32 +60,52 @@ const PatientBookAppointment: React.FC = () => {
     if (docId) fetchSlots();
   }, [docId, success]);
 
+  useEffect(() => {
+    const fetchDoctor = async () => {
+      if (docId) {
+        try {
+          const res = await getDoctorById(Number(docId));
+          setDoctor(res.data);
+          console.log('Doctor API:', res.data);
+        } catch (err) {
+          message.error('Không thể tải thông tin bác sĩ');
+        }
+      }
+    };
+    fetchDoctor();
+  }, [docId]);
+
   const handleBookAppointment = async (values: any) => {
     if (selectedSlot) {
-      const patientId = localStorage.getItem("user");
-      const slotDate = dayjs(selectedSlot.slot_date).format("YYYY-MM-DD");
-      const startTime = new Date(selectedSlot.start_time).getUTCHours().toString().padStart(2, '0') + ':' + 
-                       new Date(selectedSlot.start_time).getUTCMinutes().toString().padStart(2, '0') + ':00';
-      const res = await bookAppointmentService({
-        patient_id: JSON.parse(patientId || "").id,
-        doctor_id: docId,
-        clinic_id: selectedClinic,
-        slot_date: slotDate,
-        start_time: startTime,
-        reason: values.symptoms,
-        note: values.notes,
-      });
-      if (res.status === 201) {
-        message.success("Đặt lịch khám thành công");
-        setSuccess(!success);
-        form.resetFields();
-      } 
+      try {
+        const patientId = localStorage.getItem("user");
+        const slotDate = dayjs(selectedSlot.slot_date).format("YYYY-MM-DD");
+        const startTime = new Date(selectedSlot.start_time).getUTCHours().toString().padStart(2, '0') + ':' + 
+                          new Date(selectedSlot.start_time).getUTCMinutes().toString().padStart(2, '0') + ':00';
+        const res = await bookAppointmentService({
+          patient_id: JSON.parse(patientId || "").id,
+          doctor_id: docId,
+          clinic_id: selectedClinic,
+          slot_date: slotDate,
+          start_time: startTime,
+          reason: values.symptoms,
+          note: values.notes,
+        });
+        if (res.status === 201) {
+          message.success("Đặt lịch khám thành công");
+          setSuccess(!success);
+          form.resetFields();
+        }
+      } catch (error: any) {
+        let apiMsg = error?.response?.data?.message || error?.message || "Đặt lịch khám thất bại";
+        if (apiMsg && apiMsg.startsWith('Vui lòng cập nhật đầy đủ thông tin')) {
+          apiMsg = 'Vui lòng nhập đủ thông tin cá nhân trước khi đặt lịch khám';
+        }
+        message.error(apiMsg);
+      }
     }
   };
 
-  // Lấy thông tin bác sĩ và phòng khám từ slot đầu tiên (nếu có)
-  const doctor = slots[0]?.doctor;
- // const clinic = slots[0]?.clinic;
   // Lấy danh sách phòng khám từ slots
   const clinics = Array.from(
     new Map(slots.map(slot => [slot.clinic.id, slot.clinic])).values()
@@ -89,7 +114,7 @@ const PatientBookAppointment: React.FC = () => {
   // Lọc slot theo phòng khám đã chọn
   const filteredSlots = selectedClinic
     ? slots.filter(slot => slot.clinic.id === selectedClinic)
-    : slots;
+    : [];
 
   // Group lại filteredSlots theo ngày
   const slotsByDate = filteredSlots.reduce((acc, slot) => {
@@ -115,7 +140,7 @@ const PatientBookAppointment: React.FC = () => {
           <div className="flex-1">
             <Space direction="vertical" size="small" className="w-full">
               <Title level={4} className="!mb-0">
-                {doctor?.full_name}
+                {doctor?.metadata?.full_name}
                 <img className="w-5 inline-block ml-2" src={assets.verified_icon} alt="verified" />
               </Title>
               <Space size="small" className="flex-wrap">
@@ -123,6 +148,12 @@ const PatientBookAppointment: React.FC = () => {
                   Phòng khám: {clinics.map(item => item.name).join(", ")}
                 </Text>
               </Space>
+              {doctor?.metadata?.doctor?.specialty && (
+                <Text type="secondary">Chuyên khoa: {doctor.metadata.doctor.specialty}</Text>
+              )}
+              {doctor?.metadata?.doctor?.bio && (
+                <Text type="secondary">Tiểu sử: {doctor.metadata.doctor.bio}</Text>
+              )}
             </Space>
           </div>
         </div>
@@ -156,7 +187,8 @@ const PatientBookAppointment: React.FC = () => {
         </div>
         <Title level={5} className="!mb-4">Chọn ngày khám</Title>
         <div className="flex gap-3 items-center w-full overflow-x-auto mb-4">
-          {dateOptions.map(dateKey => {
+          {!selectedClinic && <Text type="secondary">Vui lòng chọn phòng khám trước</Text>}
+          {selectedClinic && dateOptions.map(dateKey => {
             const dateObj = new Date(dateKey);
             const weekday = dateObj.toLocaleDateString('vi-VN', { weekday: 'long' });
             const dateStr = dateObj.toLocaleDateString('vi-VN');
@@ -179,13 +211,15 @@ const PatientBookAppointment: React.FC = () => {
               </div>
             );
           })}
-          {clinics.length > 0 && dateOptions.length === 0 && (
+          {selectedClinic && dateOptions.length === 0 && (
             <Text type="secondary">Không có lịch trống cho phòng khám này</Text>
           )}
         </div>
         <Title level={5} className="!mb-4">Chọn giờ khám</Title>
         <div className="flex flex-wrap gap-3 mb-6">
-          {selectedDate && slotsByDate[selectedDate]?.map(slot => {
+          {!selectedClinic && <Text type="secondary">Vui lòng chọn phòng khám trước</Text>}
+          {selectedClinic && !selectedDate && <Text type="secondary">Vui lòng chọn ngày trước</Text>}
+          {selectedClinic && selectedDate && slotsByDate[selectedDate]?.map(slot => {
             const startTime = new Date(slot.start_time).getUTCHours().toString().padStart(2, '0') + ':' + 
                             new Date(slot.start_time).getUTCMinutes().toString().padStart(2, '0');
             const endTime = new Date(slot.end_time).getUTCHours().toString().padStart(2, '0') + ':' + 
@@ -201,8 +235,7 @@ const PatientBookAppointment: React.FC = () => {
               </Button>
             );
           })}
-          {!selectedDate && <Text type="secondary">Vui lòng chọn ngày trước</Text>}
-          {selectedDate && (!slotsByDate[selectedDate] || slotsByDate[selectedDate].length === 0) && (
+          {selectedClinic && selectedDate && (!slotsByDate[selectedDate] || slotsByDate[selectedDate].length === 0) && (
             <Text type="secondary">Không có giờ trống cho ngày này</Text>
           )}
         </div>
