@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Table, Tag, Space, Flex, Button, Form, Input, Select, notification, Tooltip, Popconfirm } from "antd";
-import { Ban, CirclePlus, Eye, RefreshCcw, RotateCcw, Search, UserRoundPen } from "lucide-react";
+import { Ban, CirclePlus, Eye, RefreshCcw, RotateCcw, Search, Trash, UserRoundPen } from "lucide-react";
 import { specialtyOptions, TYPE_EMPLOYEE_STR, PASSWORD_DEFAULT } from "../../../constants/user.const";
 import ModalCreateUser from "../../../components/modal/ModalCreateUser";
 import ModalUpdateUser from "../../../components/modal/ModalUpdateUser";
@@ -9,7 +9,7 @@ import ModalViewUser from "../../../components/modal/ModalViewUser";
 import { useNurseList } from "../../../hooks/useNurseList";
 import UserListTitle from "../../../components/ui/UserListTitle";
 import type { IUserBase } from "../../../types/index.type";
-import { createNurse, updateNurse, banNurse, resetPassword } from "../../../api/nurse.ts";
+import { createNurse, updateNurse, banNurse, resetPassword, deleteNurse } from "../../../api/nurse.ts";
 import { getShiftService } from "../../../services/shift.service.ts";
 import { updatePassword } from "../../../services/doctor.service.ts";
 
@@ -43,7 +43,7 @@ const AdminNurseDashboard = () => {
       title: "STT",
       dataIndex: "index",
       key: "index",
-      width: 60,
+      width: 50,
       align: "center" as const,
       render: (_: any, __: any, index: number) => index + 1,
     },
@@ -79,7 +79,7 @@ const AdminNurseDashboard = () => {
     },
 
     {
-      width: 150,
+      width: 100,
       title: "Trạng thái",
       dataIndex: "is_active",
       key: "is_active",
@@ -96,7 +96,7 @@ const AdminNurseDashboard = () => {
       title: "Hành động",
       fixed: "right",
       align: "center",
-      width: 160,
+      width: 170,
       ellipsis: true,
       key: "action",
       render: (_: any, record: IUserBase) => (
@@ -105,7 +105,7 @@ const AdminNurseDashboard = () => {
             <Button
               type="text"
               onClick={() => handleView(record)}
-              icon={<Eye size={17.5} />}
+              icon={<Eye size={16} />}
             ></Button>
           </Tooltip>
           {record?.role === TYPE_EMPLOYEE_STR.patient ? null : (
@@ -113,20 +113,20 @@ const AdminNurseDashboard = () => {
               <Button
                 type="text"
                 onClick={() => { handleEdit(record) }}
-                icon={<UserRoundPen size={17.5} />}
+                icon={<UserRoundPen size={16} />}
               ></Button>
             </Tooltip>
           )}
 
           <Popconfirm
             title="Khôi phục mật khẩu"
-            description={"Mật khẩu sẽ được khôi phục về mặc định là " + PASSWORD_DEFAULT}
+            description={"Mật khẩu sẽ được gửi về email của tài khoản này"}
             onConfirm={() => handleResetPassword(record.id)}
             okText="Xác nhận"
             cancelText="Hủy"
           >
             <Tooltip title="Khôi phục mật khẩu mặc định" placement="topRight">
-              <Button type="text" icon={<RotateCcw size={17.5} />}></Button>
+              <Button type="text" icon={<RotateCcw size={16} />}></Button>
             </Tooltip>
           </Popconfirm>
           <Tooltip title={record?.is_active ? "Bạn muốn khóa tài khoản ?" : "Bạn muốn mở khóa tài khoản?"} >
@@ -139,8 +139,21 @@ const AdminNurseDashboard = () => {
             >
               <Button
                 type="text"
-                icon={<Ban size={17.5} style={{ color: record?.is_active ? undefined : 'red' }} />}
+                icon={<Ban size={16} style={{ color: record?.is_active ? undefined : 'red' }} />}
               />
+            </Popconfirm>
+          </Tooltip>
+          <Tooltip title="Xóa tài khoản">
+            <Popconfirm
+              title="Xóa tài khoản?"
+              description="Bạn chắc chắn muốn xóa tài khoản này?"
+              onConfirm={() => handleDeleteNurse(record.id.toString())}
+              okText="Xác nhận"
+              cancelText="Hủy"
+            >
+              <Button type="text" danger
+                icon={<Trash size={16} />}>
+              </Button>
             </Popconfirm>
           </Tooltip>
         </Space>
@@ -242,7 +255,7 @@ const AdminNurseDashboard = () => {
     try {
       const values = await formCreate.validateFields();
       if (!values.create_password) {
-        values.password = PASSWORD_DEFAULT;
+        values.password = undefined;
       }
       const result = await createNurse(values);
       if (result.status >= 200 && result.status < 300) {
@@ -292,6 +305,20 @@ const AdminNurseDashboard = () => {
     setShift("all");
     setKeyword("");
   }
+
+  const handleDeleteNurse = async (id: string) => {
+    try {
+      const result = await deleteNurse(id);
+      if (result.status >= 200 && result.status < 300) {
+        notification.success({ message: 'Xóa tài khoản thành công' });
+        setReload(!reload);
+      } else {
+        notification.error({ message: result.data.message });
+      }
+    } catch (error: any) {
+      notification.error({ message: error.response?.data?.message || 'Có lỗi xảy ra khi xóa tài khoản' });
+    }
+  };
 
   return (
     <div>

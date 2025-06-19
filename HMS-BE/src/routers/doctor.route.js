@@ -10,13 +10,13 @@ const doctorRouter = express.Router();
 const checkUserStatus = require("../middlewares/checkUserStatus");
 
 // Apply middleware to all routes
-// doctorRouter.use(authenticate);
-// doctorRouter.use(checkUserStatus());
+doctorRouter.use(authenticate);
+doctorRouter.use(checkUserStatus());
 
 doctorRouter.post(
   "/create",
-  // authenticate,
-  // authorize("admin"),
+  authenticate,
+  authorize("admin"),
   // validate({ body: createDoctorSchema }),
   asyncHandler(doctorController.createDoctor),
   doctorController.createDoctor
@@ -24,56 +24,56 @@ doctorRouter.post(
 
 doctorRouter.post(
   "/",
-  // authenticate,
-  // authorize("admin"),
+  authenticate,
+  authorize("admin"),
   asyncHandler(doctorController.getDoctors),
   doctorController.getDoctors
 );
 
 doctorRouter.get(
   "/",
-  // authenticate,
-  // authorize("admin"),
+  authenticate,
+  authorize("admin"),
   asyncHandler(doctorController.getAllDoctors),
   doctorController.getAllDoctors
 );
 
 doctorRouter.post(
   "/update",
-  // authenticate,
-  // authorize("admin"),
+  authenticate,
+  authorize("admin"),
   asyncHandler(doctorController.updateDoctor),
   doctorController.updateDoctor
 );
 
 doctorRouter.post(
   "/update-status",
-  // authenticate,
-  // authorize("admin"),
+  authenticate,
+  authorize("admin"),
   asyncHandler(doctorController.changeActive),
   doctorController.changeActive
 );
 
 doctorRouter.post(
   "/update-password",
-  // authenticate,
-  // authorize("admin"),
+  authenticate,
+  authorize("admin"),
   asyncHandler(doctorController.updatePassword),
   doctorController.updatePassword
 );
 
 doctorRouter.get(
   "/:id",
-  // authenticate,
-  // authorize("admin"),
+  authenticate,
+  authorize("admin"),
   asyncHandler(doctorController.getDoctorById),
   doctorController.getDoctorById
 );
 
 doctorRouter.get(
   "/clinic/:clinicId",
-  // authenticate,
-  // authorize("admin"),
+  authenticate,
+  authorize("admin"),
   asyncHandler(doctorController.getDoctorsInClinic),
   doctorController.getDoctorsInClinic
 );

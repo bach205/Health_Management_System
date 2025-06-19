@@ -5,7 +5,7 @@ const checkUserStatus = () => {
 
     return async (req, res, next) => {
         try {
-            console.log(req)
+
             const userId = req.user.id;
 
             // Get user from database

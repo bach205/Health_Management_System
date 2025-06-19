@@ -16,9 +16,11 @@ const generateToken = (user) => {
 
 const verifyToken = (token) => {
     try {
-        return jwt.verify(token, process.env.JWT_SECRET);
-    }catch (error) {
-        console.log(error);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        return decoded;
+    } catch (error) {
+        console.log("JWT verification error:", error);
+        throw error;
     }
 }
 

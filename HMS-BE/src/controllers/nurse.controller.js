@@ -3,6 +3,7 @@ const NurseService = require("../services/nurse.service");
 class NurseController {
     getAllNurse = async (req, res) => {
         try {
+
             const result = await NurseService.findAllNurse(req.query);
             if (!result) return res.status(400).json({
                 message: "Có lỗi trong quá trình lấy tất cả tài khoản, vui lòng thử lại!"
@@ -67,6 +68,20 @@ class NurseController {
             res.status(result.status).json(result.data);
         } catch (error) {
             res.status(400).json({ message: error.message });
+        }
+    }
+
+    deleteNurse = async (req, res) => {
+        try {
+            const result = await NurseService.deleteNurse(req.params.id);
+            return res.status(200).json({
+                message: "Xóa tài khoản thành công",
+                metadata: result
+            });
+        } catch (error) {
+            return res.status(error.status || 400).json({
+                message: error.message
+            });
         }
     }
 }
