@@ -16,7 +16,7 @@ doctorRouter.use(checkUserStatus());
 doctorRouter.post(
   "/create",
   authenticate,
-  authorize("admin"),
+//  authorize("admin"),
   // validate({ body: createDoctorSchema }),
   asyncHandler(doctorController.createDoctor),
   doctorController.createDoctor
@@ -25,7 +25,7 @@ doctorRouter.post(
 doctorRouter.post(
   "/",
   authenticate,
-  authorize("admin"),
+  //  authorize("admin"),
   asyncHandler(doctorController.getDoctors),
   doctorController.getDoctors
 );
@@ -33,7 +33,7 @@ doctorRouter.post(
 doctorRouter.get(
   "/",
   authenticate,
-  authorize("admin"),
+  //authorize("admin"),
   asyncHandler(doctorController.getAllDoctors),
   doctorController.getAllDoctors
 );
@@ -65,7 +65,7 @@ doctorRouter.post(
 doctorRouter.get(
   "/:id",
   authenticate,
-  authorize("admin"),
+  // authorize("admin"),
   asyncHandler(doctorController.getDoctorById),
   doctorController.getDoctorById
 );
