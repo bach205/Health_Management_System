@@ -1,15 +1,20 @@
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { assets } from "../../assets/assets.ts";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../store/authStore.ts";
 import useAuth from "../../hooks/useAuth.ts"
 import { User } from "lucide-react";
 import logo from '../../assets/prjLogo.png'
+// import { getProfile } from "../../services/patient.service.ts";
+import { Avatar } from "antd";
+import ProfileContext from "../../context/ProfileContext.tsx";
 const Navbar: React.FC = () => {
   const navigate = useNavigate();
   const [showMenu, setShowMenu] = useState<boolean>(false);
   const { isAuthenticated, user } = useAuthStore();
   const auth = useAuth();
+
+  const { userData } = useContext(ProfileContext);
   return (
 
     <div className="flex items-center justify-between text-sm py-4 mb-5 border-b border-b-gray-400">
@@ -52,8 +57,14 @@ const Navbar: React.FC = () => {
               src={assets.profile_pic}
               alt="hồ sơ cá nhân"
             /> */}
-                <User className="w-6 h-6" ></User>
-                <p>{user?.full_name}</p>
+                {
+                  userData?.avatar ? (
+                    <Avatar className="w-8 rounded-full" src={userData?.avatar} alt="hồ sơ cá nhân" />
+                  ) : (
+                    <User className="w-6 h-6" ></User>
+                  )
+                }
+                <p>{userData?.full_name}</p>
                 <img className="w-2.5" src={assets.dropdown_icon} alt="mở rộng" />
                 <div className="absolute top-0 right-0 pt-14 text-base font-medium text-gray-600 z-20 hidden group-hover:block">
                   <div className="min-w-48 bg-stone-100 rounded flex flex-col gap-4 p-4">

@@ -14,6 +14,7 @@ const validate = require("../middlewares/validate");
 const authController = require("../controllers/auth.controller");
 const authRouter = express.Router();
 const { authenticate } = require("../middlewares/auth");
+const checkUserStatus = require("../middlewares/checkUserStatus");
 
 authRouter.post(
   "/login",
@@ -31,6 +32,8 @@ authRouter.post(
 
 authRouter.put(
   "/update-patient",
+  authenticate,
+  checkUserStatus(),
   asyncHandler(AuthController.updatePatientFullInfo),
   authController.updatePatientFullInfo
 );
@@ -73,6 +76,7 @@ authRouter.post(
 authRouter.get(
   "/me",
   authenticate,
+  checkUserStatus(),
   asyncHandler(AuthController.getUserInfor),
   authController.getUserInfor
 );
@@ -80,6 +84,7 @@ authRouter.get(
 authRouter.post(
   "/update-avatar",
   authenticate,
+  checkUserStatus(),
   asyncHandler(AuthController.updateAvatar),
   authController.updateAvatar
 );

@@ -25,7 +25,7 @@ doctorRouter.post(
 doctorRouter.post(
   "/",
   authenticate,
-  // authorize("admin"),
+  // authorize("admin", "doctor", "patient"),
   asyncHandler(doctorController.getDoctors),
   doctorController.getDoctors
 );

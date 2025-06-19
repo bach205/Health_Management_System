@@ -1,15 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Form, message, notification, Upload } from "antd";
 import ModalEditProfile from "../../components/modal/ModalEditProfile";
 import dayjs from "dayjs";
 import { getProfile, updatePassword, updateProfile } from "../../services/patient.service";
 import ModalEditPassword from "../../components/modal/ModalEditPassword";
 import Uploader from "./Uploader";
+import ProfileContext from "../../context/ProfileContext";
 
 const MyProfile: React.FC = () => {
   const [profile, setProfile] = useState<any>({} as any);
   const [reload, setReload] = useState<boolean>(false);
-  
+  const { reloadUser, setReloadUser } = useContext(ProfileContext);
   useEffect(() => {
     fetchProfile()
   }, [reload]);
@@ -50,9 +51,11 @@ const MyProfile: React.FC = () => {
       // console.log(value);
       setIsVisibleProfile(false);
       console.log(updateData)
-      await updateProfile({ userId: profile.id, updateData, });
+      const res = await updateProfile({ userId: profile.id, updateData, });
+      console.log("res", res)
       notification.success({ message: "Cập nhật thông tin thành công" });
       setReload(!reload);
+      setReloadUser(!reloadUser);
       setIsVisibleProfile(false);
     } catch (error: any) {
       if (error?.response?.data?.errors) {
