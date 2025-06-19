@@ -158,6 +158,7 @@ class ExaminationDetailService {
         record: true,
         clinic: true,
         doctor: true,
+        appointment: true,
       },
       orderBy: { examined_at: "desc" },
     });

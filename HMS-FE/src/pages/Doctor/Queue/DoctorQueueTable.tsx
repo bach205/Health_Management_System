@@ -10,9 +10,11 @@ import ExaminationRecordModal from "../../../components/doctor/ExaminationRecord
 import { useAuthStore } from "../../../store/authStore";
 import { useSocket } from "../../../hooks/useSocket";
 import { updateQueueStatus } from "../../../services/queue.service";
-import { Button, Dropdown, Flex, Menu, Select, Table, Tag, Typography } from "antd";
+import { Button, Dropdown, Flex, Menu, Select, Table, Tag, Tooltip, Typography } from "antd";
 import ModalPatientExaminationOrder from "./ModalPatientExaminationOrder";
 import DoctorExaminationOrderModal from "./DoctorExaminationOrderModal";
+import { RefreshCcw } from "lucide-react";
+import dayjs from "dayjs";
 
 const { Option } = Select;
 const { Text } = Typography;
@@ -27,7 +29,7 @@ const QueueTable = () => {
         reset,
         setQueues,  // Thêm setQueues vào đây
     } = useQueueStore();
-
+    console.log(queues);
     const [showModalPatientExaminationOrder, setShowModalPatientExaminationOrder] = useState(false);
     const [showDoctorExaminationOrderModal, setShowDoctorExaminationOrderModal] = useState(false);
     const [showResultModal, setShowResultModal] = useState(false);
@@ -73,6 +75,13 @@ const QueueTable = () => {
         }
     );
     const handleStatusUpdate = async (queueId: string, newStatus: string) => {
+        // const queue = queues.find((queue: any) => queue.id === queueId);
+        // if (queue) {
+        //     if (dayjs.utc(queue.appointment.appointment_time).isBefore(dayjs())) {
+        //         toast.error("Chưa đến giờ khám");
+        //         return;
+        //     }
+        // }
         try {
             await updateQueueStatus(queueId, newStatus);
             // Không cần fetchQueue nữa vì socket sẽ handle việc update UI
@@ -172,6 +181,13 @@ const QueueTable = () => {
             render: (_: any, record: any) => record?.patient?.user?.full_name || "-",
         },
         {
+            title: "Giờ khám",
+            dataIndex: ["appointment"],
+            key: "appointment",
+            width: 100,
+            render: (appointment: any) => <Tag>{dayjs.utc(appointment?.appointment_time).format("HH:mm")}</Tag>,
+        },
+        {
             title: "Trạng thái",
             dataIndex: "status",
             key: "status",
@@ -227,25 +243,54 @@ const QueueTable = () => {
     return (
         <div className="flex flex-col w-full h-full p-4 gap-4">
             <div className="flex items-center gap-2">
-                <label htmlFor="clinic-select" className="font-semibold">
-                    Phòng khám:
-                </label>
-                <Select
-                    id="clinic-select"
-                    value={selectedClinic}
-                    onChange={(value) => setSelectedClinic(value)}
-                    style={{ minWidth: 200 }}
-                >
-                    <Option key={"clinic.id"} value={""}>
-                        Chọn phòng khám
-                    </Option>
-
-                    {clinics.map((clinic) => (
-                        <Option key={clinic.id} value={clinic.id.toString()}>
-                            {clinic.name}
+                <Flex gap={10} align="center">
+                    <label htmlFor="clinic-select" className="font-semibold ">
+                        Phòng khám:
+                    </label>
+                    <Select
+                        id="clinic-select"
+                        value={selectedClinic}
+                        onChange={(value) => setSelectedClinic(value)}
+                        style={{ minWidth: 200 }}
+                    >
+                        <Option key={"clinic.id"} value={""}>
+                            Chọn phòng khám
                         </Option>
-                    ))}
-                </Select>
+
+                        {clinics.map((clinic) => (
+                            <Option key={clinic.id} value={clinic.id.toString()}>
+                                {clinic.name}
+                            </Option>
+                        ))}
+                    </Select>
+                </Flex>
+                {
+                    selectedClinic && (
+                        < >
+                            <Tooltip title="Làm mới">
+                                <Button onClick={() => fetchQueue(selectedClinic)}>
+                                    <RefreshCcw size={17.5} />
+                                </Button>
+                            </Tooltip>
+                            <Flex gap={10} align="center">
+                                <label htmlFor="clinic-select" className="font-light">
+                                    Lọc theo:
+                                </label>
+                                <Select style={{ minWidth: 200 }} value={""} >
+                                    <Option key={"clinic.id"} value={""}>
+                                        Tất cả
+                                    </Option>
+
+                                    <Option value={"waiting"}>Chờ khám</Option>
+                                    <Option value={"in_progress"}>Đang khám</Option>
+                                    <Option value={"done"}>Đã khám</Option>
+                                    <Option value={"skipped"}>Bỏ qua</Option>
+                                </Select>
+                            </Flex>
+                        </>
+                    )
+                }
+
             </div>
 
             <Table

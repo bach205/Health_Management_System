@@ -6,6 +6,7 @@ const BASE_URL = "api/v1/patients";
 const baseURL = `/api/v1/auth`;
 const examinationOrderURL = `/api/v1/examination-order`;
 const patientURL = `/api/v1/patient`;
+const staffURL = `/api/v1/doctor`;
 interface IUpdatePatient {
   userId: number;
   updateData: any;
@@ -57,3 +58,12 @@ export const getDoctorById = (id: number) => {
 export const updateStatus = (id: number, status: boolean) => {
     return instance.post(`${patientURL}/update-status/`, { id, isActive: status });
 };
+
+export const updateStaffInfo = (data: any) => {
+    return instance.post(`${staffURL}/update-staff-info`, data);
+};
+
+export const updateAvatar = (data: any) => {
+    return instance.post(`${baseURL}/update-avatar`, data);
+};
+

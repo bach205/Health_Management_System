@@ -31,14 +31,20 @@ const Sidebar = ({ isCollapsed, role }: { isCollapsed: boolean, role: string }) 
       </div>
 
       {SIDEBAR_ITEMS.map((sidebar) => {
-        // if (sidebar.label === "Quản lý" && role !== "admin") {
-        //     return null
-        // }
+        if (sidebar.label === "Quản lý" && role !== "admin") {
+            return null
+        }
 
-        // if (sidebar.label === "Bác sĩ" && role !== "doctor") {
-        //   return <></>
-        // }
+        if (sidebar.label === "Phòng khám" && (role !== "admin")) {
+          return null
+        }
+        if (sidebar.label === "Bác sĩ" && (role !== "doctor" && role !== "admin")) {
+          return null
+        }
 
+        if (sidebar.label === "Y Tá" && (role !== "nurse" && role !== "admin")) {
+          return null
+        }
         return (
           <div key={sidebar.id} className="mb-4">
             {!isCollapsed && (
@@ -158,12 +164,12 @@ const SIDEBAR_ITEMS = [
         icon: <Hospital className="w-4 h-4" />,
         href: "/rooms",
       },
-      {
-        id: "queues",
-        label: "Hàng chờ phòng khám",
-        icon: <CalendarArrowDown className="w-4 h-4" />,
-        href: "/queues",
-      },
+      // {
+      //   id: "queues",
+      //   label: "Hàng chờ phòng khám",
+      //   icon: <CalendarArrowDown className="w-4 h-4" />,
+      //   href: "/queues",
+      // },
     ],
 
   },

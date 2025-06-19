@@ -15,6 +15,7 @@
     "@tailwindcss/vite": "^4.1.7",
     "antd": "^5.25.2",
     "axios": "^1.9.0",
+    "browser-image-compression": "^2.0.2",
     "dayjs": "^1.11.10",
     "dotenv": "^16.5.0",
     "lucide-react": "^0.511.0",

@@ -194,7 +194,7 @@ class DoctorService {
     };
 
     updateDoctor = async (doctorData) => {
-        console.log(doctorData)
+        // console.log(doctorData)
         try {
             const requiredFields = [
                 'full_name',
@@ -315,7 +315,7 @@ class DoctorService {
             getRandom(special),
         ];
 
-        const totalLength = 6;
+        const totalLength = 8;
 
         const all = upper + lower + digits + special;
         while (mustInclude.length < totalLength) {
@@ -370,6 +370,76 @@ class DoctorService {
             },
         });
     }
+    async updateDoctorInfo(updateData) {
+        // Kiểm tra user có tồn tại và có role doctor không
+        console.log("updateData", updateData)
+        const user = await prisma.user.findUnique({
+          where: { id: updateData.id },
+        });
+        if (!user) {
+          throw new BadRequestError("Bác sĩ không tồn tại");
+        }
+        if (user.role !== "doctor") {
+            throw new BadRequestError("Bác sĩ không tồn tại");
+        }
+        // Cập nhật thông tin trong transaction để đảm bảo tính nhất quán
+        const result = await prisma.$transaction(async (prisma) => {
+          // Cập nhật thông tin user
+          const updatedUser = await prisma.user.update({
+            where: { id: updateData.id },
+            data: {
+              full_name: updateData.full_name?.trim(),
+              address: updateData.address?.trim(),
+              phone: updateData.phone?.trim(),
+              gender: updateData.gender,
+              date_of_birth: updateData.date_of_birth,
+            },
+          });
+        //   console.log(updatedUser)
+          // Cập nhật thông tin doctor (sử dụng cùng id với user)
+          const updatedDoctor = await prisma.doctor.update({
+            where: { user_id: updateData.id },
+            data: {
+              bio: updateData.bio?.trim(),
+            },
+          });
+    
+          return { user: updatedUser, doctor: updatedDoctor };
+        });
+    
+        return result;
+      }
+
+      async updateStaffInfo({userId, updateData}) {
+        // console.log("updateData", updateData)
+        const user = await prisma.user.findUnique({
+          where: { id: userId },
+        });
+        if (!user) {
+          throw new BadRequestError("Nhân viên không tồn tại");
+        }
+        if (user.role === "patient") {
+            throw new BadRequestError("Nhân viên không tồn tại");
+        }
+        // Cập nhật thông tin trong transaction để đảm bảo tính nhất quán
+        const result = await prisma.$transaction(async (prisma) => {
+          // Cập nhật thông tin user
+          const updatedUser = await prisma.user.update({
+            where: { id: userId },
+            data: {
+              full_name: updateData.full_name?.trim(),
+              address: updateData.address?.trim(),
+              phone: updateData.phone?.trim(),
+              gender: updateData.gender,
+              date_of_birth: updateData.date_of_birth,
+            },
+          });
+    
+          return { user: updatedUser };
+        });
+    
+        return result;
+      } 
 }
 
 module.exports = new DoctorService();

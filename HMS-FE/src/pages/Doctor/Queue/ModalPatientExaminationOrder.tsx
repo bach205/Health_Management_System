@@ -8,12 +8,14 @@ const ModalPatientExaminationOrder = ({ open, onClose, patient }: { open: boolea
         pageSize: 5,
     });
     useEffect(() => {
-        const fetchExaminationOrders = async () => {
-            const res = await getPatientExaminationOrder(patient.id);
-            console.log(res.data.metadata);
-            setExaminationOrders(res.data.metadata);
-        };
-        fetchExaminationOrders();
+        if (patient) {
+            const fetchExaminationOrders = async () => {
+                const res = await getPatientExaminationOrder(patient.id);
+                console.log(res.data.metadata); 
+                setExaminationOrders(res.data.metadata);
+            };
+            fetchExaminationOrders();
+        }
     }, [patient]);
     const columns = [
         {
@@ -46,7 +48,7 @@ const ModalPatientExaminationOrder = ({ open, onClose, patient }: { open: boolea
             <Table
                 columns={columns}
                 dataSource={examinationOrders}
-                pagination={pagination}
+                pagination={{ ...pagination, showSizeChanger: false }}
                 onChange={(pagination: any) => setPagination(pagination)}
             />
         </Modal>

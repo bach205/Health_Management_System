@@ -77,6 +77,12 @@ authRouter.get(
   authController.getUserInfor
 );
 
+authRouter.post(
+  "/update-avatar",
+  authenticate,
+  asyncHandler(AuthController.updateAvatar),
+  authController.updateAvatar
+);
 // Ví dụ check authen bên trong router
 // authRouter.get("/users", authenticateToken, authorizeRoles("admin"), asyncHandler(AuthController.getUsers));
 

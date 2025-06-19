@@ -42,17 +42,21 @@ const ModalEditPassword = ({ isVisible, handleOk, handleCancel, form }: IProps) 
                     name="oldPassword"
                     rules={[
                         { required: true, message: "Vui lòng nhập mật khẩu cũ!" },
-                        { min: 6, message: "Mật khẩu phải có ít nhất 6 ký tự!" }
+                        { min: 8, message: "Mật khẩu phải có ít nhất 8 ký tự!" }
                     ]}
                 >
                     <Input.Password placeholder="Mật khẩu cũ" />
                 </Form.Item>
                 <Form.Item
-                    label="Mật khẩu mới"
+                    label="Mật khẩu mới"    
                     name="newPassword"
                     rules={[
                         { required: true, message: "Vui lòng nhập mật khẩu mới!" },
-                        { min: 6, message: "Mật khẩu phải có ít nhất 6 ký tự!" }
+                        { min: 8, message: "Mật khẩu phải có ít nhất 8 ký tự!" },
+                        {
+                            pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$/,
+                            message: "Mật khẩu phải chứa chữ hoa, chữ thường, số và ký tự đặc biệt!"
+                        }
                     ]}
                 >
                     <Input.Password placeholder="Mật khẩu mới" />

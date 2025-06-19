@@ -47,7 +47,7 @@ const AdminPatientDashboard = () => {
             dataIndex: "gender",
             key: "gender",
             render: (gender: 'male' | 'female' | 'other') => {
-                return gender === 'male' ? 'Nam' : gender === 'female' ? 'Nữ' : gender === 'other' ? 'Khác' : '-';
+                return gender === 'male' ? 'Nam' : gender === 'female' ? 'Nữ' : gender === 'other' ? 'Khác' : '';
             },
         },
         {
@@ -61,7 +61,7 @@ const AdminPatientDashboard = () => {
             title: "CMND/CCCD",
             dataIndex: "patient",
             key: "identity_number",
-            render: (record: any) => record?.identity_number || '-',
+            render: (record: any) => record?.identity_number || '',
         },
         {
             width: 150,
@@ -202,6 +202,7 @@ const AdminPatientDashboard = () => {
         setKeyword("");
         setSort("newest");
         setIsActive("all");
+        setReload(!reload);
     }
 
     // custom hook

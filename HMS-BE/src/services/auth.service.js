@@ -465,6 +465,7 @@ class AuthService {
         created_at: true,
         updated_at: true,
         password: true,
+        avatar: true,
         patient: {
           select: {
             identity_number: true
@@ -473,6 +474,37 @@ class AuthService {
       },
     });
     return user;
+  }
+
+  async updateAvatar(updateData) {
+    // console.log(updateData.id, updateData.avatar[0])
+    const user = await prisma.user.findUnique({
+      where: { id: +updateData.id },
+    });
+
+    if (!user) {
+      throw new BadRequestError("Người dùng không tồn tại");
+    }
+    const base64 = updateData.avatar; // ví dụ dạng "data:image/png;base64,iVBORw0KGgoAAAANS..."
+  
+    // Lấy phần sau "base64,", vì chỉ phần đó là dữ liệu
+    const base64Data = base64.split(',')[1] || base64;
+  
+    const sizeInKB = (base64Data.length * 3) / 4 / 1024;
+    if (sizeInKB > 760) {
+      throw new BadRequestError("Ảnh quá lớn, vui lòng chọn ảnh nhỏ hơn 750KB");
+    }
+  
+    console.log(updateData.id, updateData.avatar.length)
+    const updatedUser = await prisma.user.update({
+      data: { avatar: base64 },
+      where: { 
+        id: +updateData.id
+       },
+    });
+    // console.log(updatedUser)
+
+    return updatedUser;
   }
 }
 

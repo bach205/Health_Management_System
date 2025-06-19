@@ -177,6 +177,14 @@ class AuthController {
       });
     }
   }
+
+  async updateAvatar(req, res) {
+    const result = await AuthService.updateAvatar(req.body);
+    return new OK({
+      message: "Cập nhật avatar thành công",
+      metadata: result,
+    }).send(res);
+  }
 }
 
 module.exports = new AuthController();

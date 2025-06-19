@@ -112,7 +112,11 @@ const ModalCreatePatient = ({ role, isVisible, handleOk, handleCancel, form }: I
           name="password"
           rules={[
             { required: showPasswordFields, message: "Vui lòng nhập mật khẩu!" },
-            { min: 6, message: "Mật khẩu phải có ít nhất 6 ký tự!" }
+            { min: 8, message: "Mật khẩu phải có ít nhất 8 ký tự!" },
+            {
+              pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$/,
+              message: "Mật khẩu phải chứa chữ hoa, chữ thường, số và ký tự đặc biệt!"
+            }
           ]}
         >
           <Input.Password placeholder="Nhập mật khẩu" />

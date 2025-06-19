@@ -123,7 +123,7 @@ const MyProfile: React.FC = () => {
     setIsVisiblePassword(false);
   }
 
-  return (
+    return (
     <div className="max-w-lg flex mx-auto flex-col gap-2 text-sm">
       <Uploader reload={reload} setReload={setReload} user={profile}/>
       {/* <img className="w-36 rounded" src={assets.profile_pic} alt="profile" /> */}

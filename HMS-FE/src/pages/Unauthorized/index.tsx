@@ -10,8 +10,8 @@ function Unauthorized() {
             title="403"
             subTitle="Bạn không có quyền truy cập trang này."
             extra={
-            <Link to="/login">
-                <Button type="primary">Đi tới trang đăng nhập</Button>
+            <Link to="/">
+                <Button type="primary">Đi tới trang chủ</Button>
             </Link>
             }
         />

@@ -7,7 +7,8 @@ const DoctorQueue = () => {
         Hàng chờ khám
       </h2>
       <p className="text-gray-500 text-sm mb-5">
-        <span className="text-indigo-600">Bác sĩ</span> &gt; Bệnh nhân
+        <span className="text-indigo-600">Bác sĩ</span> &gt; Hàng chờ khám
+
       </p>
       <DoctorQueueTable />
     </div>

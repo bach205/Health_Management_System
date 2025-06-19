@@ -62,7 +62,7 @@ class DoctorController {
     const result = await DoctorService.getDoctorsInClinic(req.params.clinicId);
     return new OK({
       message: "Lấy danh sách bác sĩ thành công",
-      metadata: result, 
+      metadata: result,
     }).send(res);
   }
 
@@ -70,6 +70,22 @@ class DoctorController {
     const result = await DoctorService.getDoctorAvailableSlots(req.params.doctorId);
     return new OK({
       message: "Lấy danh sách slot khả dụng thành công",
+      metadata: result,
+    }).send(res);
+  }
+
+  updateDoctorInfo = async (req, res) => {
+    const result = await DoctorService.updateDoctorInfo(req.body);
+    return new OK({
+      message: "Cập nhật thông tin bác sĩ thành công",
+      metadata: result,
+    }).send(res);
+  }
+
+  updateStaffInfo = async (req, res) => {
+    const result = await DoctorService.updateStaffInfo(req.body);
+    return new OK({
+      message: "Cập nhật thông tin nhân viên thành công",
       metadata: result,
     }).send(res);
   }

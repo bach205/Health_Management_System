@@ -20,14 +20,13 @@ const Topbar = ({ isCollapsed, setCollapsed }: { isCollapsed: boolean; setCollap
         <Flex>
           <Tooltip title="Sửa thông tin" placement="bottom">
             <Button type="text"
-              onClick={() => navigate("/doctor-profile")}
+              onClick={() => user?.role === "doctor" ? navigate("/doctor-profile") : navigate("/staff-profile")}
               icon={<User className="w-4 h-4 text-2xl" />}
             >
               {user?.role === "admin" && "Quản trị viên"}
               {user?.role === "doctor" && "Bác sĩ"}
               {user?.role === "nurse" && "Y tá"}
 
-              {user?.full_name ? user?.full_name : "Không có tên"}
             </Button>
           </Tooltip>
           <Tooltip title="Đăng xuất" placement="bottom">

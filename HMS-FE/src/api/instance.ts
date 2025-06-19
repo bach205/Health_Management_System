@@ -9,7 +9,7 @@ import axios from "axios";
     timeout: 10000,
 });
 
-instance.interceptors.response.use(
+instance.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem("token");
         if (token) {

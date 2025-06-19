@@ -10,57 +10,57 @@ const patientRouter = express.Router();
 // Create new patient (Admin, Receptionist only)
 patientRouter.post(
     "/create",
-    // authenticate,
-    // authorize(["admin", "receptionist"]),
+    authenticate,
+    authorize("admin"),
     validate({ body: createPatientSchema }),
     asyncHandler(patientController.createPatient)
 );
 
-// Get patients with filters (Admin, Doctor, Receptionist)
+// Get patients with filters (Admin, , Receptionist)
 patientRouter.post(
     "/",
-    // authenticate,
-    // authorize(["admin", "doctor", "receptionist"]),
+    authenticate,
+    authorize("admin"),
     asyncHandler(patientController.getPatients)
 );
 
-// Get all patients (Admin, Doctor, Receptionist)
+// Get all patients (Admin, , Receptionist)
 patientRouter.get(
     "/",
-    // authenticate,
-    // authorize(["admin", "doctor", "receptionist"]),
+    authenticate,
+    authorize("admin"),
     asyncHandler(patientController.getAllPatients)
 );
 
 // Update patient (Admin, Receptionist)
 patientRouter.post(
     "/update",
-    // authenticate,
-    // authorize(["admin", "receptionist"]),
+    authenticate,
+    authorize("admin"),
     asyncHandler(patientController.updatePatient)
 );
 
 // Update patient status (Admin only)
 patientRouter.post(
     "/update-status",
-    // authenticate,
-    // authorize(["admin"]),
+    authenticate,
+    authorize("admin"),
     asyncHandler(patientController.changeActive)
 );
 
 // Reset patient password (Admin only)
 patientRouter.post(
     "/update-password",
-    // authenticate,
-    // authorize(["admin"]),
+    authenticate,
+    authorize("admin"),
     asyncHandler(patientController.updatePassword)
 );
 
-// Get patient by ID (Admin, Doctor, Receptionist)
+// Get patient by ID (Admin)
 patientRouter.get(
     "/:id",
-    // authenticate,
-    // authorize(["admin", "doctor", "receptionist"]),
+    authenticate,
+    authorize("admin"),
     asyncHandler(patientController.getPatientById)
 );
 
