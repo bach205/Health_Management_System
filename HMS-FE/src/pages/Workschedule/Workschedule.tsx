@@ -55,12 +55,12 @@ const Workschedule = () => {
       const user = await getDoctorService();
       const clinic = await getClinicService();
       const shift = await getShiftService();
+      console.log(user.data.metadata);
       //       console.log(clinic);
       //     console.log(user.data.metadata);
       setShifts(shift.data.data);
       setClinics(clinic.data.metadata.clinics);
       setUsers(user.data.metadata);
-      console.log(res.data.data);
       const enrichedData = res.data.data.map((item: any) => ({
         ...item,
         user_name: user.data.metadata.find((u: any) => u.id === item.user_id)?.full_name || '',

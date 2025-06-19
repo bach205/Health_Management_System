@@ -70,6 +70,20 @@ class NurseController {
             res.status(400).json({ message: error.message });
         }
     }
+
+    deleteNurse = async (req, res) => {
+        try {
+            const result = await NurseService.deleteNurse(req.params.id);
+            return res.status(200).json({
+                message: "Xóa tài khoản thành công",
+                metadata: result
+            });
+        } catch (error) {
+            return res.status(error.status || 400).json({
+                message: error.message
+            });
+        }
+    }
 }
 
 module.exports = new NurseController();

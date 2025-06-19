@@ -32,3 +32,6 @@ export const resetPassword = async (id: string) => {
     return await mainRequest.put(`${BASE_URL}/reset-password/${id}`);
 };
 
+export const deleteNurse = async (id: string) => {
+    return await mainRequest.delete(`${BASE_URL}/delete/${id}`);
+};

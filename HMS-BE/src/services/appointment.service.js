@@ -13,6 +13,9 @@ class AppointmentService {
    */
   async bookAppointment(data) {
     //đã test thành công
+    // 0. Kiểm tra thông tin bệnh nhân đã đầy đủ chưa
+    await this.checkPatientInfoCompleteness(data.patient_id);
+
     // 1. Kiểm tra slot còn trống không (dùng raw query)
     console.log({
       doctor_id: data.doctor_id,
@@ -198,13 +201,16 @@ class AppointmentService {
         TIME_FORMAT(a.appointment_time, '%H:%i:%s') as formatted_time,
         p.identity_number,
         u.full_name as patient_name,
-        u.email as email,
+        u.email as patient_email,
+        u.phone as patient_phone,
         d.full_name as doctor_name,
+        d2.specialty as doctor_specialty,
         c.name as clinic_name
       FROM appointments a
       LEFT JOIN patients p ON a.patient_id = p.id
       LEFT JOIN users u ON p.id = u.id
       LEFT JOIN users d ON a.doctor_id = d.id
+      LEFT JOIN doctors d2 ON d.id = d2.user_id
       LEFT JOIN clinics c ON a.clinic_id = c.id
       ORDER BY a.id ASC
     `;
@@ -325,6 +331,144 @@ class AppointmentService {
       appointment,
       generated_password: data.generated_password // Trả về mật khẩu nếu tạo tài khoản mới
     };
+  }
+
+  /**
+   * Kiểm tra thông tin bệnh nhân đã đầy đủ chưa
+   * @param {number} patient_id - ID của bệnh nhân
+   * @returns {Promise<boolean>} true nếu thông tin đầy đủ
+   */
+  async checkPatientInfoCompleteness(patient_id) {
+    const patient = await prisma.user.findUnique({
+      where: { id: patient_id },
+      include: { patient: true }
+    });
+
+    if (!patient) {
+      throw new BadRequestError("Không tìm thấy thông tin bệnh nhân");
+    }
+
+    // Kiểm tra các thông tin bắt buộc
+    const requiredFields = {
+      full_name: patient.full_name,
+      phone: patient.phone,
+      date_of_birth: patient.date_of_birth,
+      gender: patient.gender,
+      address: patient.address
+    };
+
+    const missingFields = Object.entries(requiredFields)
+      .filter(([_, value]) => !value)
+      .map(([key]) => key);
+
+    if (missingFields.length > 0) {
+      throw new BadRequestError(
+        `Vui lòng cập nhật đầy đủ thông tin: ${missingFields.join(", ")}`
+      );
+    }
+
+    return true;
+  }
+
+  /**
+   * Y tá hủy và đặt lại lịch cho bệnh nhân
+   * @param {Object} data - Thông tin hủy và đặt lại lịch
+   * @returns {Promise<Object>} Thông tin lịch hẹn mới
+   */
+  async nurseRescheduleAppointment(data) {
+    // 1. Hủy lịch cũ
+    await this.cancelAppointment({
+      appointment_id: data.old_appointment_id,
+      reason: data.cancel_reason || "Được y tá đặt lại lịch"
+    });
+
+    // 2. Kiểm tra slot mới còn trống không
+    const slot = await prisma.$queryRaw`
+      SELECT * FROM available_slots
+      WHERE doctor_id = ${data.doctor_id}
+        AND clinic_id = ${data.clinic_id}
+        AND slot_date = ${data.slot_date}
+        AND start_time = ${data.start_time}
+        AND is_available = true
+      LIMIT 1
+    `;
+
+    if (!slot[0]) {
+      throw new BadRequestError("Khung giờ mới không còn trống!");
+    }
+
+    // 3. Tạo lịch hẹn mới với priority cao hơn (1: nurse booking)
+    const newAppointment = await prisma.appointment.create({
+      data: {
+        patient_id: data.patient_id,
+        doctor_id: data.doctor_id,
+        clinic_id: data.clinic_id,
+        appointment_date: new Date(data.slot_date),
+        appointment_time: new Date(`1970-01-01T${data.start_time}`),
+        reason: data.reason,
+        note: data.note,
+        status: "confirmed", // Tự động xác nhận vì là y tá đặt
+        priority: 1 // Ưu tiên cao hơn
+      },
+      include: {
+        patient: true,
+        doctor: true,
+        clinic: true
+      }
+    });
+
+    // 4. Cập nhật slot thành không còn trống
+    await prisma.availableSlot.update({
+      where: { id: slot[0].id },
+      data: { is_available: false }
+    });
+
+    return newAppointment;
+  }
+
+  /**
+   * Lấy thông tin chi tiết lịch hẹn theo ID
+   * @param {number} appointment_id - ID của lịch hẹn
+   * @returns {Promise<Object>} Thông tin chi tiết lịch hẹn
+   */
+  async getAppointmentById(appointment_id) {
+    const appointment = await prisma.appointment.findUnique({
+      where: { id: Number(appointment_id) },
+      include: {
+        patient: true,
+        doctor: {
+          include: { doctor: true } // Lấy cả bảng doctor (specialty)
+        },
+        clinic: true
+      }
+    });
+    if (!appointment) {
+      throw new BadRequestError("Không tìm thấy lịch hẹn");
+    }
+    // Flatten specialty for easier FE usage
+    let doctor_specialty = null;
+    if (appointment.doctor && appointment.doctor.doctor) {
+      doctor_specialty = appointment.doctor.doctor.specialty;
+    }
+    return { ...appointment, doctor_specialty };
+  }
+
+  /**
+   * Lấy danh sách slot còn trống theo chuyên môn
+   * @param {string} specialty - chuyên môn
+   * @returns {Promise<Array>} Danh sách slot còn trống của các bác sĩ cùng chuyên môn
+   */
+  async getAvailableSlotsBySpecialty(specialty) {
+    const slots = await prisma.$queryRaw`
+      SELECT s.*, u.full_name as doctor_name, c.name as clinic_name
+      FROM available_slots s
+      LEFT JOIN doctors d ON s.doctor_id = d.user_id
+      LEFT JOIN users u ON d.user_id = u.id
+      LEFT JOIN clinics c ON s.clinic_id = c.id
+      WHERE s.is_available = true AND d.specialty = ${specialty}
+      ORDER BY s.start_time ASC
+    `;
+    return slots;
   }
 
 }
