@@ -22,6 +22,12 @@ class ExaminationOrderController {
         const orders = await ExaminationOrderService.getAll(req.query);
         return new OK({ message: "Lấy danh sách yêu cầu chuyển phòng thành công", metadata: orders }).send(res);
     }
+
+    static async getPatientExaminationOrder(req, res) {
+        const { id } = req.params;
+        const orders = await ExaminationOrderService.getPatientExaminationOrder(id);
+        return new OK({ message: "Lấy danh sách yêu cầu chuyển phòng thành công", metadata: orders }).send(res);
+    }
 }
 
 module.exports = ExaminationOrderController; 

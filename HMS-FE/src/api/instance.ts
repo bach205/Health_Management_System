@@ -9,7 +9,7 @@ const instance = axios.create({
     timeout: 10000,
 });
 
-instance.interceptors.response.use(
+instance.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem("token");
         console.log(token)

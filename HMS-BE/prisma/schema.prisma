@@ -17,6 +17,7 @@
     address      String?
     date_of_birth   DateTime?
     gender          Gender?
+    avatar          String?   @db.LongText
     sso_provider SsoProvider @default(local)
     is_active    Boolean     @default(true)
     created_at   DateTime    @default(now())

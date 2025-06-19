@@ -1,8 +1,9 @@
-import { DatePicker, Form, Input, Modal, Select, type FormInstance } from "antd";
-import { useState } from "react";
+import { Button, DatePicker, Form, Input, Modal, Select, type FormInstance } from "antd";
+import { useEffect, useState } from "react";
 import { specialtyOptions, TYPE_EMPLOYEE_STR } from "../../constants/user.const";
 import type { IUserBase } from "../../types/index.type";
 import dayjs from "dayjs";
+import Uploader from "../../pages/Profile/Uploader";
 
 interface IProps {
   isVisible: boolean;
@@ -10,10 +11,17 @@ interface IProps {
   handleCancel: () => void;
   form: FormInstance;
   role: IUserBase["role"];
+  user: any;
+  reload: boolean;
+  setReload: (reload: boolean) => void;
 }
 
-const ModalUpdateDoctor = ({ role, isVisible, handleOk, handleCancel, form }: IProps) => {
+const ModalUpdateDoctor = ({ role, isVisible, handleOk, handleCancel, form, user, reload, setReload }: IProps) => {
   const [specialty, setSpecialty] = useState<string>("internal");
+  const handleReload = () => {
+    handleCancel();
+    setReload(!reload);
+  }
   return (
     <Modal
       open={isVisible}
@@ -26,6 +34,11 @@ const ModalUpdateDoctor = ({ role, isVisible, handleOk, handleCancel, form }: IP
       centered
 
     >
+      <Uploader
+        user={user}
+        reload={reload}
+        setReload={handleReload}
+      ></Uploader>
       <Form
         name="updateUserForm"
         form={form}
@@ -53,7 +66,7 @@ const ModalUpdateDoctor = ({ role, isVisible, handleOk, handleCancel, form }: IP
             { max: 50, message: "Email không được vượt quá 50 ký tự!" }
           ]}
         >
-          <Input placeholder={`Email ${TYPE_EMPLOYEE_STR[role]}`} maxLength={50} />
+          <Input disabled={true} placeholder={`Email ${TYPE_EMPLOYEE_STR[role]}`} maxLength={50} />
         </Form.Item>
 
         <Form.Item
@@ -90,7 +103,7 @@ const ModalUpdateDoctor = ({ role, isVisible, handleOk, handleCancel, form }: IP
         <Form.Item
           name="gender"
           label="Giới tính"
-          // rules={[{ required: true, message: "Vui lòng chọn giới tính!" }]}
+        // rules={[{ required: true, message: "Vui lòng chọn giới tính!" }]}
         >
           <Select style={{ width: 100 }}>
             <Select.Option value="male"><span className="text-black">Nam</span></Select.Option>

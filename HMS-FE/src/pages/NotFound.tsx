@@ -10,21 +10,16 @@ const NotFound = () => {
     <Result
       status="404"
       title="404"
-      subTitle="Sorry, the page you visited does not exist."
+      subTitle="Trang bạn đang tìm kiếm không tồn tại."
       extra={
-        user?.role === "patient" ? (
+        user ? (
           <Link to="/">
-            <Button type="primary">Back Home</Button>
+            <Button type="primary">Trang chủ</Button>
           </Link>
-        ) : user ?
-          (
-            <Link to={`/${user?.role}`}>
-              <Button type="primary">Back to Dashboard</Button>
-            </Link>
-          ) : (
-            <Link to="/login">
-              <Button type="primary">Login</Button>
-            </Link>
+        ) : (
+          <Link to="/login">
+            <Button type="primary">Đăng nhập</Button>
+          </Link>
           )
       }
     />

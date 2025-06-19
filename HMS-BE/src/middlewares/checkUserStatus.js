@@ -12,7 +12,7 @@ const checkUserStatus = () => {
             const user = await prisma.user.findUnique({
                 where: { id: userId }
             });
-
+            console.log("user", user)
             if (!user) {
                 throw new BadRequestError("User not found");
             }
