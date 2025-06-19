@@ -74,19 +74,31 @@ export default function AppointmentsPage() {
         setSelectedAppointent(record);
         setViewVisibleAppointmentModal(true);
         form.setFieldsValue({
-            specialty: record.specialty,
-            doctor: record.doctorId,
-            date: record.date ? record.date : null,
+            appointment_date: record.formatted_date ? dayjs(record.formatted_date) : null,
+            appointment_time: record.formatted_time ? dayjs(`2000-01-01 ${record.formatted_time}`) : null,
+            reason: record.reason || "",
+            note: record.note || "",
         });
     };
 
     const handleUpdateAppointment = async () => {
         try {
             const values = await form.validateFields();
-            await updateAppointmentService(selectedAppointent._id || selectedAppointent.id, {
-                ...values,
-                date: values.date ? values.date.format("YYYY-MM-DD") : undefined,
+            const updateData: Record<string, any> = {
+                appointment_date: values.appointment_date ? values.appointment_date.format("YYYY-MM-DD") : undefined,
+                appointment_time: values.appointment_time ? values.appointment_time.format("HH:mm:ss") : undefined,
+                reason: values.reason || undefined,
+                note: values.note || undefined,
+            };
+
+            // Remove undefined values
+            Object.keys(updateData).forEach(key => {
+                if (updateData[key] === undefined) {
+                    delete updateData[key];
+                }
             });
+
+            await updateAppointmentService(selectedAppointent._id || selectedAppointent.id, updateData);
             message.success("Cập nhật lịch hẹn thành công");
             setViewVisibleAppointmentModal(false);
             setReload(r => !r);
@@ -242,6 +254,7 @@ export default function AppointmentsPage() {
                 handleCancel={handleViewAppointmentCancel}
                 form={form}
                 role={"patient"}
+                selectedAppointment={selectedAppointent}
             />
         </div>
     );
