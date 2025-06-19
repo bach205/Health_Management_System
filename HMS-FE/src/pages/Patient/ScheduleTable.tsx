@@ -14,6 +14,8 @@ import {
   Tooltip,
   ConfigProvider,
   Input,
+  Row,
+  Col,
 } from "antd";
 
 import dayjs from "dayjs";
@@ -36,9 +38,21 @@ const style = {
 
 const ScheduleTable = ({ data = [], setReload, loading = false, visible, selectedPatient, onEdit, onCancel, reload, isPage, }: any) => {
  // const [reload, setReload] = useState(false);
+  const [viewModalVisible, setViewModalVisible] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState<any>(null);
 
   const handleEditAppointment = (record: any) => {
     onEdit(record);
+  };
+
+  const handleViewAppointment = (record: any) => {
+    setSelectedRecord(record);
+    setViewModalVisible(true);
+  };
+
+  const handleViewModalCancel = () => {
+    setViewModalVisible(false);
+    setSelectedRecord(null);
   };
 
   const handleCancelAppmt = async (record: any) => {
@@ -70,6 +84,15 @@ const ScheduleTable = ({ data = [], setReload, loading = false, visible, selecte
     //Có thể chỉnh sửa nếu thời gian đặt cách thời gian hiện tại 2 tiếng
     return (
       <>
+        <Tooltip title="Xem chi tiết">
+          <Button
+            type="default"
+            size="small"
+            onClick={() => handleViewAppointment(record)}
+          >
+            <InfoCircleOutlined />
+          </Button>
+        </Tooltip>
         <Tooltip title="Chỉnh sửa lịch khám">
           <Button
             type="default"
@@ -193,6 +216,84 @@ const ScheduleTable = ({ data = [], setReload, loading = false, visible, selecte
         rowKey={record => record._id || record.id}
         pagination={{ pageSize: 10 }}
       />
+
+      {/* View Appointment Modal */}
+      <Modal
+        title="Chi tiết lịch hẹn khám"
+        open={viewModalVisible}
+        onCancel={handleViewModalCancel}
+        footer={[
+          <Button key="close" onClick={handleViewModalCancel}>
+            Đóng
+          </Button>
+        ]}
+        width={600}
+      >
+        {selectedRecord && (
+          <div className="space-y-4">
+            <Row gutter={[16, 16]}>
+              <Col span={12}>
+                <div className="font-medium text-gray-700">Ngày đặt lịch:</div>
+                <div>{dayjs(selectedRecord.created_at).format("HH:mm:ss DD/MM/YYYY")}</div>
+              </Col>
+              <Col span={12}>
+                <div className="font-medium text-gray-700">Ngày khám:</div>
+                <div>{dayjs(selectedRecord.formatted_date).format("DD/MM/YYYY")}</div>
+              </Col>
+            </Row>
+
+            <Row gutter={[16, 16]}>
+              <Col span={12}>
+                <div className="font-medium text-gray-700">Giờ khám:</div>
+                <div>{selectedRecord.formatted_time ? selectedRecord.formatted_time.slice(0,5) : "Chưa xác định"}</div>
+              </Col>
+              <Col span={12}>
+                <div className="font-medium text-gray-700">Trạng thái:</div>
+                <div>
+                  {(() => {
+                    let color = "default";
+                    let text = selectedRecord.status;
+                    if (selectedRecord.status === "pending") { color = "gold"; text = "Chờ xác nhận"; }
+                    else if (selectedRecord.status === "confirmed") { color = "green"; text = "Đã xác nhận"; }
+                    else if (selectedRecord.status === "cancelled") { color = "red"; text = "Đã hủy"; }
+                    else if (selectedRecord.status === "completed") { color = "blue"; text = "Đã hoàn thành"; }
+                    return <Tag color={color}>{text}</Tag>;
+                  })()}
+                </div>
+              </Col>
+            </Row>
+
+            <Row gutter={[16, 16]}>
+              <Col span={12}>
+                <div className="font-medium text-gray-700">Chuyên khoa:</div>
+                <div>{selectedRecord.clinic_name || "Chưa xác định"}</div>
+              </Col>
+              <Col span={12}>
+                <div className="font-medium text-gray-700">Bác sĩ:</div>
+                <div>{selectedRecord.doctor_name || "Chưa xác định"}</div>
+              </Col>
+            </Row>
+
+            {selectedRecord.note && (
+              <Row gutter={[16, 16]}>
+                <Col span={24}>
+                  <div className="font-medium text-gray-700">Ghi chú:</div>
+                  <div className="bg-gray-50 p-3 rounded">{selectedRecord.note}</div>
+                </Col>
+              </Row>
+            )}
+
+            {selectedRecord.reason && (
+              <Row gutter={[16, 16]}>
+                <Col span={24}>
+                  <div className="font-medium text-gray-700">Lý do hủy:</div>
+                  <div className="bg-red-50 p-3 rounded text-red-700">{selectedRecord.reason}</div>
+                </Col>
+              </Row>
+            )}
+          </div>
+        )}
+      </Modal>
     </ConfigProvider>
   )
 
