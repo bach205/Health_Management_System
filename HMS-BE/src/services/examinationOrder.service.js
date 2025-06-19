@@ -79,6 +79,18 @@ class ExaminationOrderService {
             orderBy: { created_at: "desc" },
         });
     }
+
+    static async getPatientExaminationOrder(id) {
+        return prisma.examinationOrder.findMany({
+            where: { patient_id: Number(id) },
+            include: {
+                doctor: true,
+                patient: true,
+                fromClinic: true,
+                toClinic: true,
+            },
+        });
+    }
 }
 
 module.exports = ExaminationOrderService; 

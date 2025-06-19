@@ -1,4 +1,5 @@
 const prisma = require("../config/prisma");
+const { getIO } = require("../config/socket");
 
 class ExaminationRecordService {
     static async createIfNotExists(patient_id) {
@@ -32,6 +33,12 @@ class ExaminationRecordService {
                 data: {
                     status: "done",
                 },
+            });
+            console.log("queue.clinic_id", queue.clinic_id, "queue", queue);
+            const io = getIO();
+            io.to(`clinic_${queue.clinic_id}`).emit("queue:statusChanged", {
+                queue: queue,
+                clinicId: queue.clinic_id,
             });
 
             return await prisma.examinationRecord.create({ data });

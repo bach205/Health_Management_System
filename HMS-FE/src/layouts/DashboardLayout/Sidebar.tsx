@@ -31,14 +31,20 @@ const Sidebar = ({ isCollapsed, role }: { isCollapsed: boolean, role: string }) 
       </div>
 
       {SIDEBAR_ITEMS.map((sidebar) => {
-        // if (sidebar.label === "Quản lý" && role !== "admin") {
-        //     return null
-        // }
+        if (sidebar.label === "Quản lý" && role !== "admin") {
+            return null
+        }
 
-        // if (sidebar.label === "Bác sĩ" && role !== "doctor") {
-        //   return <></>
-        // }
+        if (sidebar.label === "Phòng khám" && (role !== "admin")) {
+          return null
+        }
+        if (sidebar.label === "Bác sĩ" && (role !== "doctor" && role !== "admin")) {
+          return null
+        }
 
+        if (sidebar.label === "Y Tá" && (role !== "nurse" && role !== "admin")) {
+          return null
+        }
         return (
           <div key={sidebar.id} className="mb-4">
             {!isCollapsed && (
@@ -110,10 +116,10 @@ const SIDEBAR_ITEMS = [
     label: "Quản lý",
     items: [
       {
-        id: "users",
-        label: "Quản lý người dùng",
-        icon: <Users className="w-4 h-4" />,
-        href: "/admin/users",
+        id: "patients",
+        label: "Quản lý bệnh nhân",
+        icon: <FileUser className="w-4 h-4" />,
+        href: "/admin/patients",
       },
       {
         id: "workschedule",
@@ -127,12 +133,7 @@ const SIDEBAR_ITEMS = [
         icon: <Calendar className="w-4 h-4" />,
         href: "/shift",
       },
-      {
-        id: "patients",
-        label: "Quản lý bệnh nhân",
-        icon: <FileUser className="w-4 h-4" />,
-        href: "/admin/patients",
-      },
+
       {
         id: "doctors",
         label: "Quản lý bác sĩ",
@@ -142,7 +143,7 @@ const SIDEBAR_ITEMS = [
       {
         id: "nurses",
         label: "Quản lý y tá",
-        icon: <User className="w-4 h-4" />,
+        icon: <Users className="w-4 h-4" />,
         href: "/admin/nurses",
       },
     ],
@@ -163,12 +164,12 @@ const SIDEBAR_ITEMS = [
         icon: <Hospital className="w-4 h-4" />,
         href: "/rooms",
       },
-      {
-        id: "queues",
-        label: "Hàng chờ phòng khám",
-        icon: <CalendarArrowDown className="w-4 h-4" />,
-        href: "/queues",
-      },
+      // {
+      //   id: "queues",
+      //   label: "Hàng chờ phòng khám",
+      //   icon: <CalendarArrowDown className="w-4 h-4" />,
+      //   href: "/queues",
+      // },
     ],
 
   },
@@ -180,7 +181,7 @@ const SIDEBAR_ITEMS = [
         id: "examination",
         label: "Khám bệnh",
         icon: <ClipboardType className="w-4 h-4" />,
-        href: "/examination",
+        href: "/doctor/queue",
       },
     ],
   },

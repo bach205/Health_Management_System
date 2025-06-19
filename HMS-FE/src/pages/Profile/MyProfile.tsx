@@ -1,15 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Form, message, notification, Upload } from "antd";
 import ModalEditProfile from "../../components/modal/ModalEditProfile";
 import dayjs from "dayjs";
 import { getProfile, updatePassword, updateProfile } from "../../services/patient.service";
 import ModalEditPassword from "../../components/modal/ModalEditPassword";
 import Uploader from "./Uploader";
+import ProfileContext from "../../context/ProfileContext";
 
 const MyProfile: React.FC = () => {
   const [profile, setProfile] = useState<any>({} as any);
   const [reload, setReload] = useState<boolean>(false);
-  
+  const { reloadUser, setReloadUser } = useContext(ProfileContext);
   useEffect(() => {
     fetchProfile()
   }, [reload]);
@@ -39,20 +40,22 @@ const MyProfile: React.FC = () => {
       await formProfile.validateFields();
       const value = formProfile.getFieldsValue();
       const updateData = {
-        full_name: value.full_name,
-        email: value.email,
-        address: value.address,
-        phone: value.phone,
+        full_name: value.full_name?.trim(),
+        email: value.email?.trim(),
+        address: value.address?.trim(),
+        phone: value.phone?.trim(),
         gender: value.gender,
-        identity_number: value.identity_number,
+        identity_number: value.identity_number?.trim(),
         date_of_birth: value.date_of_birth,
       }
       // console.log(value);
       setIsVisibleProfile(false);
       console.log(updateData)
-      await updateProfile({ userId: profile.id, updateData, });
+      const res = await updateProfile({ userId: profile.id, updateData, });
+      console.log("res", res)
       notification.success({ message: "Cập nhật thông tin thành công" });
       setReload(!reload);
+      setReloadUser(!reloadUser);
       setIsVisibleProfile(false);
     } catch (error: any) {
       if (error?.response?.data?.errors) {
@@ -122,13 +125,12 @@ const MyProfile: React.FC = () => {
   const handleCancelPassword = () => {
     setIsVisiblePassword(false);
   }
-
-  return (
+    return (
     <div className="max-w-lg flex mx-auto flex-col gap-2 text-sm">
-      <Uploader reload={reload} setReload={setReload} user={profile}/>
+      <Uploader reload={reload} setReload={setReload} user={profile} reloadUser={reloadUser} setReloadUser={setReloadUser} />
       {/* <img className="w-36 rounded" src={assets.profile_pic} alt="profile" /> */}
 
-      <p className="font-medium text-3xl text-neutral-800 mt-4">
+      <p className="font-medium text-3xl text-neutral-800 mt-4">  
         {profile.full_name || "Không có tên"}
       </p>
 
@@ -137,14 +139,14 @@ const MyProfile: React.FC = () => {
         <p className="text-neutral-500 underline mt-3">Thông tin liên hệ</p>
         <div className="grid grid-cols-[1fr_3fr] gap-y-2.5 mt-3 text-neutral-700">
           <p className="font-medium">Email:</p>
-          <p className="text-blue-500">{profile.email || "Không có email"}</p>
+          <p className="text-blue-500">{profile?.email || "Không có email"}</p>
           <p className="font-medium">Số điện thoại:</p>
 
-          <p className="">{profile.phone || "Không có số điện thoại"}</p>
+          <p className="">{profile?.phone || "Không có số điện thoại"}</p>
           <p className="font-medium">Địa chỉ:</p>
 
           <p className="text-gray-500">
-            {profile.address || "Không có địa chỉ"}
+            {profile?.address || "Không có địa chỉ"}
           </p>
 
         </div>
@@ -154,11 +156,11 @@ const MyProfile: React.FC = () => {
         <div className="grid grid-cols-[1fr_3fr] gap-y-2.5 mt-3 text-neutral-700">
           <p className="font-medium">Giới tính:</p>
 
-          <p className="text-gray-400">{profile.gender ? (profile.gender === "male" ? "Nam" : profile.gender === "female" ? "Nữ" : "Khác") : "Không có giới tính"}</p>
+          <p className="text-gray-400">{profile?.gender ? (profile?.gender === "male" ? "Nam" : profile?.gender === "female" ? "Nữ" : "Khác") : "Không có giới tính"}</p>
           <p className="font-medium">Ngày sinh:</p>
-          <p className="text-gray-400">{profile.date_of_birth ? dayjs(profile.date_of_birth).format("DD/MM/YYYY") : "Không có ngày sinh"}</p>
+          <p className="text-gray-400">{profile?.date_of_birth ? dayjs(profile?.date_of_birth).format("DD/MM/YYYY") : "Không có ngày sinh"}</p>
           <p className="font-medium">Số CMND:</p>
-            <p className="text-gray-400">{profile.patient?.identity_number || "Không có số CMND"}</p>
+            <p className="text-gray-400">{profile?.patient?.identity_number || "Không có số CMND"}</p>
         </div>
       </div>
       <div className="flex justify-between">

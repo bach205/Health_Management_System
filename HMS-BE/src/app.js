@@ -8,8 +8,8 @@ const router = require("./routers");
 const { globalErrorHandler } = require("./middlewares/errorHandler");
 
 // Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ limit: "10mb", extended: true }));
 app.use(cors({
   origin: 'http://localhost:5173', // hoặc dùng function để dynamic origin nếu cần
   credentials: true

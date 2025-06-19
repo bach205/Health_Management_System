@@ -1,9 +1,11 @@
 import { Button, Flex, message } from "antd";
+import imageCompression from 'browser-image-compression';
 
 import React, { useEffect, useState } from 'react';
 import { PlusOutlined } from '@ant-design/icons';
 import { Upload } from 'antd';
 import type { UploadProps, UploadFile } from 'antd';
+import { updateAvatar } from "../../services/patient.service";
 
 
 const getBase64 = (file: File): Promise<string> =>
@@ -14,11 +16,11 @@ const getBase64 = (file: File): Promise<string> =>
         reader.onerror = (error) => reject(error);
     });
 
-const Uploader = ({ user, reload, setReload }: { user: any, reload: boolean, setReload: (reload: boolean) => void }) => {
+const Uploader = ({ user, reload, setReload, reloadUser, setReloadUser }: { user: any, reload: boolean, setReload: (reload: boolean) => void, reloadUser?: boolean, setReloadUser?: (reloadUser: boolean) => void }) => {
     const [fileList, setFileList] = useState<UploadFile[]>([]);
     const [removeUserImage, setRemoveUserImage] = useState(false)
     useEffect(() => {
-        if (user.avatar) {
+        if (user?.avatar) {
             setFileList([{
                 uid: user.id,
                 name: "avatar.png",
@@ -28,17 +30,42 @@ const Uploader = ({ user, reload, setReload }: { user: any, reload: boolean, set
         }
     }, [user])
     const beforeUpload: UploadProps['beforeUpload'] = async (file) => {
-        const base64 = await getBase64(file);
-        // console.log(base64)
-        const newFile: UploadFile = {
-            uid: Date.now().toString(),
-            name: file.name,
-            status: 'done',
-            url: base64,
-        };
-        setFileList([newFile]);
-        return false;
+        const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
+        const isLt1M = file.size / 1024 / 1024 < 5;
+
+        if (!isJpgOrPng) {
+            message.error('Chỉ cho phép ảnh định dạng JPG/PNG!');
+            return Upload.LIST_IGNORE;
+        }
+
+        if (!isLt1M) {
+            message.error('Ảnh phải nhỏ hơn 5MB!');
+            return Upload.LIST_IGNORE;
+        }
+        try {
+            const options = {
+                maxSizeMB: 0.75, // 750KB
+                maxWidthOrHeight: 1024, // Optional: resize nếu cần
+                useWebWorker: true,
+            };
+            const compressedFile = await imageCompression(file, options);
+
+            const base64 = await getBase64(compressedFile);
+            const newFile: UploadFile = {
+                uid: Date.now().toString(),
+                name: file.name,
+                status: 'done',
+                url: base64,
+            };
+            setFileList([newFile]);
+        } catch (error) {
+            console.log(error)
+            message.error("Cập nhật ảnh thất bại")
+        }
+
+        return false; // 
     };
+
 
     const handleRemove = () => {
         setFileList([]);
@@ -52,15 +79,25 @@ const Uploader = ({ user, reload, setReload }: { user: any, reload: boolean, set
     );
 
     const handleUpload = async () => {
-        const userData = {
-            id: user?.id,
-            avatar: fileList[0]?.url
+        try {
+            const userData = {
+                id: user?.id,
+                avatar: fileList[0]?.url
+            }
+            setFileList([])
+            setRemoveUserImage(false)
+            console.log(userData)
+            const response = await updateAvatar(userData)
+            console.log(response)
+            setReload(!reload)
+            if (reloadUser && setReloadUser) {
+                setReloadUser(!reloadUser)
+            }
+            message.success("Cập nhật ảnh thành công")
+        } catch (error) {
+            console.log(error)
+            message.error("Cập nhật ảnh thất bại")
         }
-        setFileList([])
-        setRemoveUserImage(false)
-        setReload(!reload)
-        console.log(userData)
-        message.success("Cập nhật ảnh thành công")
     }
     const SubmitImageButton = ({ title }: { title: string }) => <Button type="primary"
         onClick={() => {
@@ -81,7 +118,7 @@ const Uploader = ({ user, reload, setReload }: { user: any, reload: boolean, set
                 beforeUpload={beforeUpload}
                 onRemove={handleRemove}
                 maxCount={1}
-                showUploadList={{ showPreviewIcon: false }}
+                showUploadList={{ showPreviewIcon: false, showRemoveIcon: removeUserImage }}
             >
                 {fileList.length >= 1 ? null : uploadButton}
             </Upload>

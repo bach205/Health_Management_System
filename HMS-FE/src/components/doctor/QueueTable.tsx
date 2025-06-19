@@ -40,6 +40,7 @@ const QueueTable = () => {
     "queue:statusChanged",
     (data: { clinicId: string | number }) => {
       if (data.clinicId?.toString() === selectedClinic.toString()) {
+        console.log("data.clinicId", data, "selectedClinic", selectedClinic);
         fetchQueue(selectedClinic);
       }
     }
@@ -126,7 +127,7 @@ const QueueTable = () => {
   return (
     <div className="flex flex-col w-full h-full">
       {/* Dropdown chọn phòng khám */}
-      <div className="flex items-center gap-2 mb-2">
+      <div className="flex items-center gap-  2 mb-2">
         <label htmlFor="clinic-select" className="font-semibold">
           Phòng khám:
         </label>

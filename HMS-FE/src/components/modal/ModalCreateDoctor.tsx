@@ -1,5 +1,5 @@
 import { DatePicker, Form, Input, Modal, Select, Checkbox, type FormInstance } from "antd";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { specialtyOptions, TYPE_EMPLOYEE_STR } from "../../constants/user.const";
 import type { IUserBase } from "../../types/index.type";
 import dayjs from "dayjs";
@@ -16,7 +16,12 @@ interface IProps {
 const ModalCreateDoctor = ({ role, isVisible, handleOk, handleCancel, form }: IProps) => {
   const [specialty, setSpecialty] = useState<string>("internal");
   const [showPasswordFields, setShowPasswordFields] = useState(false);
-
+  useEffect(() => {
+    form.setFieldsValue({
+      password: "",
+      confirm_password: "",
+    });
+  }, [showPasswordFields]);
   return (
     <Modal
       open={isVisible}
@@ -40,7 +45,7 @@ const ModalCreateDoctor = ({ role, isVisible, handleOk, handleCancel, form }: IP
           label="Họ tên"
           name="full_name"
           rules={[
-            { required: true, message: "Vui lòng nhập họ tên!" },
+            { required: true, message: "Vui lòng nhập họ tên!", whitespace: true },
             { max: 25, message: "Họ tên không được vượt quá 25 ký tự!" }
           ]}
         >
@@ -51,7 +56,7 @@ const ModalCreateDoctor = ({ role, isVisible, handleOk, handleCancel, form }: IP
           label="Email"
           name="email"
           rules={[
-            { required: true, type: "email", message: "Vui lòng nhập đúng format!" },
+            { required: true, type: "email", message: "Vui lòng nhập đúng format email!", whitespace: true },
             { max: 50, message: "Email không được vượt quá 50 ký tự!" }
           ]}
         >
@@ -134,7 +139,11 @@ const ModalCreateDoctor = ({ role, isVisible, handleOk, handleCancel, form }: IP
           name="password"
           rules={[
             { required: showPasswordFields, message: "Vui lòng nhập mật khẩu!" },
-            { min: 6, message: "Mật khẩu phải có ít nhất 6 ký tự!" }
+            { min: 8, message: "Mật khẩu phải có ít nhất 8 ký tự!" },
+            {
+              pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$/,
+              message: "Mật khẩu phải chứa chữ hoa, chữ thường, số và ký tự đặc biệt!"
+            }
           ]}
         >
           <Input.Password placeholder="Nhập mật khẩu" />

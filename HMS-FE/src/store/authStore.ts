@@ -36,7 +36,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   user: parsedUser,
   login: (userData, token) => {
     if (!userData) return;
-    set(() => ({isAuthenticated: true, user: userData}));
+    set(() => ({ isAuthenticated: true, user: userData }));
     localStorage.setItem("token", token);
     localStorage.setItem("user", JSON.stringify(userData));
     localStorage.setItem("isAuth", "true");

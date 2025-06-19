@@ -33,3 +33,7 @@ export const getDoctorsInClinic = (clinicId: number) => {
 export const getDoctorAvailableSlots = (doctorId: number) => {
     return instance.get(`${BASE_URL}/available-slots/${doctorId}`);
 };
+
+export const updateDoctorProfile = (doctor: any) => {
+    return instance.post(`${BASE_URL}/update-info`, doctor);
+};

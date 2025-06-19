@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Table, Tag, Space, Flex, Button, Form, Input, Select, notification, Tooltip, Popconfirm, } from "antd";
-import { Ban, CirclePlus, Eye, RefreshCcw, RotateCcw, Search, UserRoundPen } from "lucide-react";
+import { Table, Tag, Space, Flex, Button, Form, Input, Select, notification, Tooltip, Popconfirm, Avatar, } from "antd";
+import { Ban, CirclePlus, Eye, RefreshCcw, RotateCcw, Search, User, UserRoundPen } from "lucide-react";
 
 import ModalCreateUser from "../../../components/modal/ModalCreateUser";
 import ModalUpdateUser from "../../../components/modal/ModalUpdateUser";
@@ -34,6 +34,16 @@ const AdminDoctorDashboard = () => {
       width: 60,
       align: "center" as const,
       render: (_: any, __: any, index: number) => index + 1,
+    },
+    {
+      title: "Ảnh",
+      dataIndex: "avatar",
+      key: "avatar",
+      width: 60,
+      align: "center" as const,
+      render: (avatar: string) => {
+        return avatar ? <Avatar src={avatar} /> : <Avatar icon={<User size={17.5} />} />
+      },
     },
     {
       title: "Email",
@@ -77,7 +87,7 @@ const AdminDoctorDashboard = () => {
       },
     },
     {
-      width: 150,
+      width: 120,
       title: "Trạng thái",
       dataIndex: "is_active",
       key: "is_active",
@@ -161,6 +171,7 @@ const AdminDoctorDashboard = () => {
 
   const handleView = async (record: IDoctor) => {
     try {
+      setCurrentUser(record);
       formView.setFieldsValue({
         ...record,
         date_of_birth: record.date_of_birth ? dayjs(record.date_of_birth) : null,
@@ -227,6 +238,11 @@ const AdminDoctorDashboard = () => {
       const values = await formCreate.validateFields();
       const createValue = {
         ...values,
+        full_name: values.full_name?.trim(),
+        email: values.email?.trim(),
+        phone: values.phone?.trim(),
+        bio: values.bio?.trim(),
+        address: values.address?.trim(),
         password: values.password || "",
       }
       delete createValue.create_password;
@@ -259,6 +275,11 @@ const AdminDoctorDashboard = () => {
       const updatedDoctor = {
         ...values,
         id: currentUser.id,
+        full_name: values.full_name?.trim(),
+        email: values.email?.trim(),
+        phone: values.phone?.trim(),
+        bio: values.bio?.trim(),
+        address: values.address?.trim(),
       };
       await updateDoctor(updatedDoctor);
       setReload(!reload);
@@ -282,6 +303,7 @@ const AdminDoctorDashboard = () => {
     setSpecialty("all");
     setSort("newest");
     setIsActive("all");
+    setReload(!reload);
   }
 
   // custom hook
@@ -360,8 +382,8 @@ const AdminDoctorDashboard = () => {
       />
 
       <ModalCreateDoctor role="doctor" form={formCreate} handleOk={handleCreateOk} isVisible={isCreateVisible} handleCancel={handleCreateCancel}></ModalCreateDoctor>
-      <ModalUpdateDoctor role="doctor" form={formUpdate} handleOk={handleUpdateOk} isVisible={isUpdateVisible} handleCancel={handleUpdateCancel}></ModalUpdateDoctor>
-      <ModalViewUser role="doctor" form={formView} isVisible={isViewVisible} handleCancel={handleViewCancel}></ModalViewUser>
+      <ModalUpdateDoctor reload={reload} setReload={setReload} user={currentUser} role="doctor" form={formUpdate} handleOk={handleUpdateOk} isVisible={isUpdateVisible} handleCancel={handleUpdateCancel}></ModalUpdateDoctor>
+      <ModalViewUser role="doctor" form={formView} isVisible={isViewVisible} handleCancel={handleViewCancel} user={currentUser}></ModalViewUser>
 
     </div>
   );

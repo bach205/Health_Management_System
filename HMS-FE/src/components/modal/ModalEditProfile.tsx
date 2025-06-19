@@ -12,7 +12,7 @@ interface IProps {
 const ModalEditProfile = ({ isVisible, handleOk, handleCancel, form }: IProps) => {
 
     const [identityType, setIdentityType] = useState("citizen");
-    
+
     return (
         <Modal
             open={isVisible}
@@ -77,12 +77,12 @@ const ModalEditProfile = ({ isVisible, handleOk, handleCancel, form }: IProps) =
                     </Select>
                 </Form.Item>
 
-                <Form.Item name="address" label="Địa chỉ">
-                    <Input placeholder="Địa chỉ" />
+                <Form.Item name="address" label="Địa chỉ" rules={[{ required: false, whitespace: true, message: "Địa chỉ không được có khoảng trắng thừa!" }]}>
+                    <Input placeholder="Địa chỉ" maxLength={255} />
                 </Form.Item>
 
                 <Form.Item name="date_of_birth" label="Ngày sinh">
-                    <DatePicker format="DD/MM/YYYY" placeholder="Ngày sinh" maxDate={dayjs() } />
+                    <DatePicker format="DD/MM/YYYY" placeholder="Ngày sinh" maxDate={dayjs()} />
                 </Form.Item>
 
                 <Form.Item
@@ -91,24 +91,25 @@ const ModalEditProfile = ({ isVisible, handleOk, handleCancel, form }: IProps) =
                     initialValue="citizen"
                 >
                     <Select onChange={(value) => setIdentityType(value)} style={{ width: "100%" }}>
-                        <Select.Option value="citizen"><span className="text-black">Căn cước công dân</span></Select.Option>
                         <Select.Option value="passport"><span className="text-black">Chứng minh nhân dân</span></Select.Option>
+                        <Select.Option value="citizen"><span className="text-black">Căn cước công dân</span></Select.Option>
                     </Select>
                 </Form.Item>
 
                 {identityType === "citizen" ? (
                     <Form.Item name="identity_number" label="Số CCCD"
-                    rules={[
-                        { pattern: new RegExp(/^\d{12}$/), message: "Số CCCD không hợp lệ!" }
-                    ]}
+                        rules={[
+                            { pattern: new RegExp(/^\d{12}$/), message: "Số CCCD không hợp lệ!",whitespace:true }
+                        ]}
                     >
                         <Input placeholder="Số CCCD" maxLength={12} />
                     </Form.Item>
-                ):(
+                ) : (
                     <Form.Item name="identity_number" label="Số CMND"
-                    rules={[
-                        { pattern: new RegExp(/^\d{12}$/), message: "Số CMND không hợp lệ!" }
-                    ]}
+                    
+                        rules={[
+                            { pattern: new RegExp(/^\d{9}(\d{3})?$/), message: "Số CMND không hợp lệ!",whitespace:true }
+                        ]}
                     >
                         <Input placeholder="Số CMND" maxLength={12} />
                     </Form.Item>

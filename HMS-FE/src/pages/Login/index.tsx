@@ -41,7 +41,7 @@ const Login = () => {
       <form className="min-h-[80vh] flex items-center" >
         <div className="flex flex-col gap-3 m-auto items-start p-8 min-w-[340px] sm:min-w-96 border rounded-xl text-zinc-600 text-sm shadow-lg">
           <p className="text-2xl font-semibold">Đăng Nhập</p>
-          <p>Xin mời đăng nhập để đặt lịch hẹn</p>
+          <p>Xin mời đăng nhập </p>
           <div className="w-full">
             <p>Email</p>
             <input
