@@ -16,7 +16,7 @@ const getBase64 = (file: File): Promise<string> =>
         reader.onerror = (error) => reject(error);
     });
 
-const Uploader = ({ user, reload, setReload }: { user: any, reload: boolean, setReload: (reload: boolean) => void }) => {
+const Uploader = ({ user, reload, setReload, reloadUser, setReloadUser }: { user: any, reload: boolean, setReload: (reload: boolean) => void, reloadUser?: boolean, setReloadUser?: (reloadUser: boolean) => void }) => {
     const [fileList, setFileList] = useState<UploadFile[]>([]);
     const [removeUserImage, setRemoveUserImage] = useState(false)
     useEffect(() => {
@@ -90,6 +90,9 @@ const Uploader = ({ user, reload, setReload }: { user: any, reload: boolean, set
             const response = await updateAvatar(userData)
             console.log(response)
             setReload(!reload)
+            if (reloadUser && setReloadUser) {
+                setReloadUser(!reloadUser)
+            }
             message.success("Cập nhật ảnh thành công")
         } catch (error) {
             console.log(error)

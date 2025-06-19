@@ -77,7 +77,7 @@ const ModalEditProfile = ({ isVisible, handleOk, handleCancel, form }: IProps) =
                     </Select>
                 </Form.Item>
 
-                <Form.Item name="address" label="Địa chỉ" rules={[{ required: false, whitespace: true }]}>
+                <Form.Item name="address" label="Địa chỉ" rules={[{ required: false, whitespace: true, message: "Địa chỉ không được có khoảng trắng thừa!" }]}>
                     <Input placeholder="Địa chỉ" maxLength={255} />
                 </Form.Item>
 

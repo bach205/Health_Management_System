@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Table, Tag, Space, Flex, Button, Form, Input, Select, notification, Tooltip, Popconfirm } from "antd";
-import { Ban, CirclePlus, Eye, RefreshCcw, RotateCcw, Search, UserRoundPen } from "lucide-react";
+import { Table, Tag, Space, Flex, Button, Form, Input, Select, notification, Tooltip, Popconfirm, Avatar } from "antd";
+import { Ban, CirclePlus, Eye, RefreshCcw, RotateCcw, Search, User, UserRoundPen } from "lucide-react";
 import dayjs from "dayjs";
 import { usePatientList } from "../../../hooks/usePatientList";
 import ModalViewUser from "../../../components/modal/ModalViewUser";
@@ -27,6 +27,16 @@ const AdminPatientDashboard = () => {
             align: "center" as const,
             render: (_: any, __: any, index: number) => index + 1,
         },
+        {
+            title: "Ảnh",
+            dataIndex: "avatar",
+            key: "avatar",
+            width: 60,
+            align: "center" as const,
+            render: (avatar: string) => {
+              return avatar ? <Avatar src={avatar} /> : <Avatar icon={<User size={17.5} />} />
+            },
+          },
         {
             title: "Email",
             dataIndex: "email",
@@ -135,11 +145,13 @@ const AdminPatientDashboard = () => {
 
     const handleView = async (record: IPatient) => {
         try {
+            setCurrentUser(record);
             formView.setFieldsValue({
                 ...record,
                 date_of_birth: record.date_of_birth ? dayjs(record.date_of_birth) : null,
                 identity_number: record.patient?.identity_number,
             });
+
             setIsViewVisible(true);
         } catch (error) {
             console.log(error);
@@ -290,6 +302,7 @@ const AdminPatientDashboard = () => {
                 form={formView}
                 isVisible={isViewVisible}
                 handleCancel={handleViewCancel}
+                user={currentUser}
             />
         </div>
     );
