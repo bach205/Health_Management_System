@@ -13,6 +13,7 @@ import {
   Divider,
   Tooltip,
   ConfigProvider,
+  Input,
 } from "antd";
 
 import dayjs from "dayjs";
@@ -25,6 +26,7 @@ import {
   ReloadOutlined,
 } from "@ant-design/icons";
 
+import { cancelAppointmentService } from '../../services/appointment.service';
 
 const style = {
   ".ant-table-thead .ant-table-cell": {
@@ -32,8 +34,8 @@ const style = {
   },
 }
 
-const ScheduleTable = ({ data = [], loading = false, visible, selectedPatient, onEdit, onCancel, reload: reloadSchedule, isPage, }: any) => {
-  const [reload, setReload] = useState(false);
+const ScheduleTable = ({ data = [], setReload, loading = false, visible, selectedPatient, onEdit, onCancel, reload, isPage, }: any) => {
+ // const [reload, setReload] = useState(false);
 
   const handleEditAppointment = (record: any) => {
     onEdit(record);
@@ -41,17 +43,26 @@ const ScheduleTable = ({ data = [], loading = false, visible, selectedPatient, o
 
   const handleCancelAppmt = async (record: any) => {
     try {
-      //   await updateStatusAppointment({
-      //     appointmentId: record._id,
-      //     status: "cancelled",
-      //   });
-      notification.success({
-        message: "Cập nhật thành công",
+      let reason = '';
+      Modal.confirm({
+        title: 'Xác nhận huỷ lịch khám',
+        content: (
+          <>
+            <Typography.Text>Nhập lý do huỷ (tuỳ chọn):</Typography.Text>
+            <Input.TextArea onChange={e => reason = e.target.value} />
+          </>
+        ),
+        onOk: async () => {
+          await cancelAppointmentService({ id: record._id || record.id, reason });
+          setReload(!reload);
+          notification.success({ message: 'Huỷ lịch thành công' });
+       //   if (typeof reloadSchedule === 'function') reloadSchedule((r: any) => !r);
+        },
+        okText: 'Xác nhận',
+        cancelText: 'Không',
       });
     } catch (error) {
-      notification.error({
-        message: "Cập nhật không thành công",
-      });
+      notification.error({ message: 'Huỷ lịch không thành công' });
     }
   };
 

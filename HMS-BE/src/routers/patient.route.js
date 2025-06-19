@@ -4,8 +4,13 @@ const asyncHandler = require("../helper/asyncHandler");
 const { authenticate, authorize } = require("../middlewares/auth");
 const validate = require("../middlewares/validate");
 const { createPatientSchema } = require("../validators/auth.validator");
+const checkUserStatus = require("../middlewares/checkUserStatus");
 
 const patientRouter = express.Router();
+
+// Apply middleware to all routes
+patientRouter.use(authenticate);
+patientRouter.use(checkUserStatus());
 
 // Create new patient (Admin, Receptionist only)
 patientRouter.post(

@@ -11,7 +11,7 @@ const {
 
 exports.bookAppointment = async (req, res, next) => {
   try {
-    
+
     const { error } = bookAppointmentSchema.validate(req.body);
     if (error) {
       return res.status(400).json({
@@ -188,13 +188,23 @@ exports.getAllAppointments = async (req, res, next) => {
 
 exports.nurseBookAppointment = async (req, res, next) => {
   try {
+
+    const { error } = nurseBookAppointmentSchema.validate(req.body);
+    if (error) {
+      console.log(error)
+      return res.status(400).json({
+        success: false,
+        message: error.details[0].message
+      });
+    }
     const result = await appointmentService.nurseBookAppointment(req.body);
     res.status(201).json({
       success: true,
-      message: "Y tá đặt lịch thành công",
+      message: "Đặt lịch thành công",
       data: result
     });
   } catch (error) {
     next(error);
   }
 };
+

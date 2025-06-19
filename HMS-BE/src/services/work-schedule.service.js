@@ -14,7 +14,7 @@ class WorkScheduleService {
         throw new BadRequestError(error.details[0].message);
       }
 
-      // Check if user exists
+      // Check if user exists and has correct role
       const user = await prisma.user.findUnique({
         where: { id: workScheduleData.user_id },
       });
@@ -38,11 +38,15 @@ class WorkScheduleService {
         throw new NotFoundError("Không tìm thấy ca làm việc");
       }
 
+      // Convert work_date to Date object for database
+      const [year, month, day] = workScheduleData.work_date.split('-').map(Number);
+      const workDate = new Date(Date.UTC(year, month - 1, day));
+      console.log("workDate", workDate);
       // Check for schedule conflict
       const existingSchedule = await prisma.workSchedule.findFirst({
         where: {
           user_id: workScheduleData.user_id,
-          work_date: workScheduleData.work_date,
+          work_date: workDate,
           shift_id: workScheduleData.shift_id,
         },
       });
@@ -53,9 +57,12 @@ class WorkScheduleService {
         );
       }
 
-      // Create work schedule
+      // Create work schedule with converted date
       const workSchedule = await prisma.workSchedule.create({
-        data: workScheduleData,
+        data: {
+          ...workScheduleData,
+          work_date: workDate,
+        },
         include: {
           user: true,
           clinic: true,
@@ -68,7 +75,7 @@ class WorkScheduleService {
         where: {
           doctor_id: workSchedule.user_id,
           clinic_id: workSchedule.clinic_id,
-          slot_date: workSchedule.work_date,
+          slot_date: workDate,
           start_time: workSchedule.shift.start_time,
           end_time: workSchedule.shift.end_time,
         },
@@ -78,7 +85,7 @@ class WorkScheduleService {
           data: {
             doctor_id: workSchedule.user_id,
             clinic_id: workSchedule.clinic_id,
-            slot_date: workSchedule.work_date,
+            slot_date: workDate,
             start_time: workSchedule.shift.start_time,
             end_time: workSchedule.shift.end_time,
             is_available: true,
@@ -206,7 +213,7 @@ class WorkScheduleService {
       // Nếu có thay đổi về shift, work_date, user_id hoặc clinic_id, cập nhật available slot
       if (updateData.shift_id || updateData.work_date || updateData.user_id || updateData.clinic_id) {
         // Lấy thông tin shift mới nếu có thay đổi
-        const newShift = updateData.shift_id 
+        const newShift = updateData.shift_id
           ? await prisma.shift.findUnique({ where: { id: updateData.shift_id } })
           : existingSchedule.shift;
 

@@ -46,7 +46,7 @@ class DoctorController {
   updatePassword = async (req, res) => {
     const result = await DoctorService.updatePassword(req.body);
     return new OK({
-      message: "Cập nhật mật khẩu bác sĩ thành công",
+      message: "Cập nhật mật khẩu thành công",
     }).send(res);
   }
 

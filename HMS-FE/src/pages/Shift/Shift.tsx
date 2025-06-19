@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Typography, Button, Form, Input, Modal, Popconfirm, message } from 'antd';
+import { Table, Typography, Button, Form, Input, Modal, Popconfirm, message, TimePicker } from 'antd';
 import { createShiftService, deteleShiftService, getShiftService, updateShiftService } from '../../services/shift.service';
 import { Delete, Eye, PenLine } from 'lucide-react';
+import dayjs from 'dayjs';
 
 const { Title } = Typography;
 
@@ -13,19 +14,23 @@ export type Shift = {
 };
 
 const formatDateToHHmm = (isoString: string) => {
+  // Nếu đã là HH:mm thì trả về luôn
+  if (/^\d{2}:\d{2}$/.test(isoString)) return isoString;
+  // Lấy giờ/phút theo UTC để tránh lệch múi giờ
   const date = new Date(isoString);
-  const hours = date.getUTCHours().toString().padStart(2, '0');
-  const minutes = date.getUTCMinutes().toString().padStart(2, '0');
-  return `${hours}:${minutes}`;
+  const hours = date.getUTCHours();
+  const minutes = date.getUTCMinutes();
+  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
 };
 
 const convertHHmmToISOString = (time: string) => {
   const [hoursRaw, minutesRaw] = time.split(':');
   const hours = Number(hoursRaw);
   const minutes = Number(minutesRaw);
-  const now = new Date();
-  now.setHours(Number.isNaN(hours) ? 0 : hours, Number.isNaN(minutes) ? 0 : minutes, 0, 0);
-  return now.toISOString();
+  // Tạo ngày UTC với giờ nhập vào
+  const today = new Date();
+  today.setUTCHours(hours, minutes, 0, 0);
+  return today.toISOString();
 };
 
 function ShiftManager() {
@@ -58,7 +63,11 @@ function ShiftManager() {
   const openModal = (shift?: Shift) => {
     if (shift) {
       setEditingShift(shift);
-      form.setFieldsValue(shift);
+      form.setFieldsValue({
+        ...shift,
+        start_time: shift.start_time ? dayjs(formatDateToHHmm(shift.start_time), 'HH:mm') : null,
+        end_time: shift.end_time ? dayjs(formatDateToHHmm(shift.end_time), 'HH:mm') : null,
+      });
     } else {
       setEditingShift(null);
       form.resetFields();
@@ -81,17 +90,22 @@ function ShiftManager() {
   const handleSubmit = async (values: any) => {
     const payload = {
       name: values.name,
-      start_time: convertHHmmToISOString(values.start_time),
-      end_time: convertHHmmToISOString(values.end_time),
+      start_time: convertHHmmToISOString(values.start_time.format('HH:mm')),
+      end_time: convertHHmmToISOString(values.end_time.format('HH:mm')),
     };
-
+    console.log(payload);
     if (editingShift) {
       try {
-        await updateShiftService( payload, editingShift.id.toString());
-            setShifts(prev =>
-            prev.map(s => (s.id === editingShift.id ? { ...s, ...values } : s))
-            );
-            message.success('Đã cập nhật ca làm');
+        await updateShiftService(payload, editingShift.id.toString());
+        setShifts(prev =>
+          prev.map(s => (s.id === editingShift.id ? { 
+            ...s, 
+            name: values.name,
+            start_time: values.start_time.format('HH:mm'),
+            end_time: values.end_time.format('HH:mm')
+          } : s))
+        );
+        message.success('Đã cập nhật ca làm');
         setModalVisible(false);
         setChange(!change);
       } catch {
@@ -100,20 +114,31 @@ function ShiftManager() {
       return;
     }
 
-      const res = await createShiftService(payload);
-      const newShift = res.data.data;
-      setShifts(prev => [
-        ...prev,
-        {
-          id: newShift.id,
-          name: newShift.name,
-          start_time: formatDateToHHmm(newShift.start_time),
-          end_time: formatDateToHHmm(newShift.end_time),
-        },
-      ]);
-      message.success('Đã thêm ca làm');
-      setChange(!change);
-      setModalVisible(false);
+    console.log(payload);
+    const res = await createShiftService(payload);
+    const newShift = res.data.data;
+    setShifts(prev => [
+      ...prev,
+      {
+        id: newShift.id,
+        name: newShift.name,
+        start_time: formatDateToHHmm(newShift.start_time),
+        end_time: formatDateToHHmm(newShift.end_time),
+      },
+    ]);
+    message.success('Đã thêm ca làm');
+    setChange(!change);
+    setModalVisible(false);
+  };
+
+  const handleTimeChange = () => {
+    const start = form.getFieldValue('start_time');
+    const end = form.getFieldValue('end_time');
+    if (start && end) {
+      form.setFieldsValue({
+        name: `${start.format('HH:mm')} - ${end.format('HH:mm')}`
+      });
+    }
   };
 
   const columns = [
@@ -188,13 +213,37 @@ function ShiftManager() {
       >
         <Form form={form} layout="vertical" onFinish={handleSubmit}>
           <Form.Item name="name" label="Tên ca" rules={[{ required: true, message: 'Vui lòng nhập tên ca' }]}> 
-            <Input placeholder="Nhập tên ca (ví dụ: Sáng)" />
+            <Input placeholder="Nhập tên ca (ví dụ: Sáng)" disabled />
           </Form.Item>
-          <Form.Item name="start_time" label="Giờ bắt đầu" rules={[{ required: true, message: 'Vui lòng nhập giờ bắt đầu' }]}> 
-            <Input placeholder="HH:mm (ví dụ: 07:00)" />
+          <Form.Item
+            name="start_time"
+            label="Giờ bắt đầu"
+            rules={[{ required: true, message: 'Vui lòng nhập giờ bắt đầu' }, ({ getFieldValue }) => ({
+              validator(_, value) {
+                const end = getFieldValue('end_time');
+                if (!value || !end || value.isBefore(end)) {
+                  return Promise.resolve();
+                }
+                return Promise.reject(new Error('Giờ bắt đầu phải nhỏ hơn giờ kết thúc'));
+              },
+            })]}
+          >
+            <TimePicker format="HH:mm" minuteStep={5} style={{ width: '100%' }} onChange={handleTimeChange} />
           </Form.Item>
-          <Form.Item name="end_time" label="Giờ kết thúc" rules={[{ required: true, message: 'Vui lòng nhập giờ kết thúc' }]}> 
-            <Input placeholder="HH:mm (ví dụ: 11:00)" />
+          <Form.Item
+            name="end_time"
+            label="Giờ kết thúc"
+            rules={[{ required: true, message: 'Vui lòng nhập giờ kết thúc' }, ({ getFieldValue }) => ({
+              validator(_, value) {
+                const start = getFieldValue('start_time');
+                if (!value || !start || value.isAfter(start)) {
+                  return Promise.resolve();
+                }
+                return Promise.reject(new Error('Giờ kết thúc phải lớn hơn giờ bắt đầu'));
+              },
+            })]}
+          >
+            <TimePicker format="HH:mm" minuteStep={5} style={{ width: '100%' }} onChange={handleTimeChange} />
           </Form.Item>
         </Form>
       </Modal>

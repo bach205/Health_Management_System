@@ -1,24 +1,26 @@
 const { verifyToken } = require('../helper/jwt');
 
 const authenticate = (req, res, next) => {
-    try {
-        const authHeader = req.headers.authorization;
 
+    try {
+
+        const authHeader = req.headers.authorization;
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
             return res.status(401).json({ message: 'No token provided' });
         }
 
         const token = authHeader.split(' ')[1];
-        const decoded = verifyToken(token);
 
+        const decoded = verifyToken(token);
         req.user = decoded;
         next();
     } catch (error) {
+        console.log(error)
         return res.status(401).json({ message: 'Invalid token' });
     }
 };
 
-const authorize = (...roles) => {
+const authorize = (roles) => {
     return (req, res, next) => {
         if (!roles.includes(req.user.role)) {
             return res.status(403).json({

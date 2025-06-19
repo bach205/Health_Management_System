@@ -3,6 +3,7 @@ const { BadRequestError } = require("../core/error.response");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 const QueueService = require("./queue.service");
+const { sendStaffNewPasswordEmail } = require("../utils/staff.email");
 
 class AppointmentService {
   /**
@@ -197,7 +198,7 @@ class AppointmentService {
         TIME_FORMAT(a.appointment_time, '%H:%i:%s') as formatted_time,
         p.identity_number,
         u.full_name as patient_name,
-        u.email as patient_email,
+        u.email as email,
         d.full_name as doctor_name,
         c.name as clinic_name
       FROM appointments a
@@ -218,23 +219,72 @@ class AppointmentService {
    */
   // viết lại nhé anh Bách
   async nurseBookAppointment(data) {
+    console.log("Nurse booking appointment with data:", data);
     // 1. Kiểm tra slot còn trống không
-    console.log(new Date(data.appointment_date));
-    const slot = await prisma.availableSlot.findFirst({
-      where: {
-        doctor_id: data.doctor_id,
-        clinic_id: data.clinic_id,
-        slot_date: new Date(data.appointment_date), // '2025-06-21'
-        start_time: new Date(`1970-01-01T${data.appointment_time}`), // '10:00:00'
-        is_available: true,
-      },
-    });
+    let slot = await prisma.$queryRaw`
+  SELECT * FROM available_slots
+  WHERE doctor_id = ${data.doctor_id}
+    AND clinic_id = ${data.clinic_id}
+    AND DATE(slot_date) = ${data.appointment_date}
+    AND start_time = ${data.appointment_time}
+    AND is_available = true
+  LIMIT 1;
+`;
+    slot = slot[0]
     if (!slot)
       throw new BadRequestError(
         "Khung giờ này đã được đặt hoặc không tồn tại!"
       );
 
-    // 2. Kiểm tra bệnh nhân đã có lịch trùng chưa
+    // 2. Kiểm tra email bệnh nhân đã tồn tại chưa
+    let patient = await prisma.user.findUnique({
+      where: { email: data.email },
+      include: { patient: true }
+    });
+    console.log("Creating new user with email:", patient);
+    // 3. Nếu chưa tồn tại, tạo tài khoản mới cho bệnh nhân
+    if (!patient) {
+      // Tạo mật khẩu ngẫu nhiên
+      const randomPassword = crypto.randomBytes(4).toString('hex');
+      const hashedPassword = await bcrypt.hash(
+        randomPassword,
+        parseInt(process.env.BCRYPT_SALT_ROUNDS)
+      );
+
+      // Tạo user và patient trong transaction
+      const result = await prisma.$transaction(async (prisma) => {
+        // Tạo user
+
+        const user = await prisma.user.create({
+          data: {
+            email: data.email,
+            password: hashedPassword,
+            phone: data.patient_phone || "",
+            role: "patient",
+            sso_provider: "local",
+            is_active: true,
+          },
+        });
+
+        // Tạo patient
+        const patient = await prisma.patient.create({
+          data: {
+            id: user.id,
+            identity_number: data.identity_number || null,
+          },
+        });
+
+        return { user, patient, password: randomPassword };
+      });
+      patient = result.user;
+      data.patient_id = patient.id;
+      data.generated_password = result.password;
+      sendStaffNewPasswordEmail(patient.email, randomPassword)
+    } else {
+      data.patient_id = patient.id;
+    }
+
+    // 4. Kiểm tra bệnh nhân đã có lịch trùng chưa
     const exist = await prisma.appointment.findFirst({
       where: {
         patient_id: data.patient_id,
@@ -246,7 +296,7 @@ class AppointmentService {
     if (exist)
       throw new BadRequestError("Bệnh nhân đã có lịch hẹn vào khung giờ này!");
 
-    // 3. Tạo lịch hẹn với priority là 1 (nurse booked - ưu tiên khi trùng giờ)
+    // 5. Tạo lịch hẹn
     const appointment = await prisma.appointment.create({
       data: {
         patient_id: data.patient_id,
@@ -257,7 +307,6 @@ class AppointmentService {
         reason: data.reason,
         note: data.note,
         status: "pending",
-        priority: 1, // Higher priority for nurse booked appointments (when same time)
       },
       include: {
         patient: true,
@@ -266,7 +315,7 @@ class AppointmentService {
       }
     });
 
-    // 4. Cập nhật slot thành không còn trống
+    // 6. Cập nhật slot thành không còn trống
     await prisma.availableSlot.update({
       where: { id: slot.id },
       data: { is_available: false },
@@ -274,9 +323,10 @@ class AppointmentService {
 
     return {
       appointment,
-      generated_password: data.generated_password
+      generated_password: data.generated_password // Trả về mật khẩu nếu tạo tài khoản mới
     };
   }
+
 }
 
 module.exports = new AppointmentService();

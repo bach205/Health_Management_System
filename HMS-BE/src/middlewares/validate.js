@@ -1,9 +1,13 @@
 module.exports = function validate(schemas) {
     return (req, res, next) => {
+        console.log(req.body);
         const validationErrors = [];
         if (schemas.body) {
             const { error } = schemas.body.validate(req.body, { abortEarly: false });
-            if (error) validationErrors.push(...error.details.map((d) => d.message));
+            if (error) {
+                validationErrors.push(...error.details.map((d) => d.message));
+               
+            }
         }
 
         if (schemas.query) {

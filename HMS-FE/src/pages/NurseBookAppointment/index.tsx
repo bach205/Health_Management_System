@@ -60,7 +60,7 @@ const NurseBookAppointment: React.FC = () => {
   const [selectedClinic, setSelectedClinic] = useState<number | null>(null);
   const [availableDates, setAvailableDates] = useState<string[]>([]);
   const [availableTimes, setAvailableTimes] = useState<TimeSlot[]>([]);
-  const [clinics, setClinics] = useState<{id: number, name: string}[]>([]);
+  const [clinics, setClinics] = useState<{ id: number, name: string }[]>([]);
 
   useEffect(() => {
     const fetchDoctorsAndSlots = async () => {
@@ -69,7 +69,7 @@ const NurseBookAppointment: React.FC = () => {
         console.log(response);
         if (response.success) {
           setAvailableSlots(response.data);
-          
+
           // Build doctors with clinics array
           const doctorsMap = new Map<number, Doctor>();
           const clinicsMap = new Map<number, string>();
@@ -88,7 +88,7 @@ const NurseBookAppointment: React.FC = () => {
                 doctor.clinics.push({ id: slot.clinic_id, name: slot.clinic_name });
               }
             }
-            
+
             // Add to clinics map
             if (!clinicsMap.has(slot.clinic_id)) {
               clinicsMap.set(slot.clinic_id, slot.clinic_name);
@@ -108,7 +108,7 @@ const NurseBookAppointment: React.FC = () => {
   const handleDoctorChange = (doctorId: number) => {
     setSelectedDoctor(doctorId);
     setSelectedClinic(null);
-    
+
     // Reset form fields
     form.setFieldsValue({
       clinic_id: null,
@@ -120,13 +120,13 @@ const NurseBookAppointment: React.FC = () => {
   // Update available dates and times when clinic is selected
   const handleClinicChange = (clinicId: number) => {
     setSelectedClinic(clinicId);
-    const doctorSlots = availableSlots.filter(slot => 
-      slot.doctor_id === selectedDoctor && 
+    const doctorSlots = availableSlots.filter(slot =>
+      slot.doctor_id === selectedDoctor &&
       slot.clinic_id === clinicId
     );
-    
+
     // Get unique dates
-    const dates = Array.from(new Set(doctorSlots.map(slot => 
+    const dates = Array.from(new Set(doctorSlots.map(slot =>
       dayjs(slot.slot_date).format('YYYY-MM-DD')
     )));
     setAvailableDates(dates);
@@ -144,16 +144,16 @@ const NurseBookAppointment: React.FC = () => {
 
     const selectedDate = dayjs(date).format('YYYY-MM-DD');
     const times = availableSlots
-      .filter(slot => 
-        slot.doctor_id === selectedDoctor && 
+      .filter(slot =>
+        slot.doctor_id === selectedDoctor &&
         slot.clinic_id === selectedClinic &&
         dayjs(slot.slot_date).format('YYYY-MM-DD') === selectedDate
       )
       .map(slot => ({
-        value: dayjs.utc(slot.start_time).format('HH:mm'),
+        value: dayjs.utc(slot.start_time).format('HH:mm:ss'),
         label: `${dayjs.utc(slot.start_time).format('HH:mm')} - ${dayjs.utc(slot.end_time).format('HH:mm')}`
       }));
-      console.log(times);
+    console.log(times);
     setAvailableTimes(times);
 
     // Reset time field
@@ -170,9 +170,9 @@ const NurseBookAppointment: React.FC = () => {
         doctor_id: selectedDoctor,
         clinic_id: selectedClinic,
         appointment_date: dayjs(values.appointment_date).format('YYYY-MM-DD'),
-        appointment_time: values.appointment_time
+        appointment_time: values.appointment_time // Ensure HH:mm:ss format
       });
-
+      
       if (response.success) {
         message.success('Đặt lịch thành công');
         navigate('/nurse/appointments');
@@ -241,7 +241,7 @@ const NurseBookAppointment: React.FC = () => {
                 label="Bác sĩ"
                 rules={[{ required: true, message: 'Vui lòng chọn bác sĩ' }]}
               >
-                <Select 
+                <Select
                   placeholder="Chọn bác sĩ"
                   onChange={handleDoctorChange}
                 >
@@ -259,7 +259,7 @@ const NurseBookAppointment: React.FC = () => {
                 label="Phòng khám"
                 rules={[{ required: true, message: 'Vui lòng chọn phòng khám' }]}
               >
-                <Select 
+                <Select
                   placeholder="Chọn phòng khám"
                   onChange={handleClinicChange}
                   disabled={!selectedDoctor}
@@ -285,7 +285,7 @@ const NurseBookAppointment: React.FC = () => {
                 label="Ngày khám"
                 rules={[{ required: true, message: 'Vui lòng chọn ngày khám' }]}
               >
-                <DatePicker 
+                <DatePicker
                   className="w-full"
                   disabledDate={(current) => {
                     return !availableDates.includes(dayjs(current).format('YYYY-MM-DD'));
@@ -301,7 +301,7 @@ const NurseBookAppointment: React.FC = () => {
                 label="Giờ khám"
                 rules={[{ required: true, message: 'Vui lòng chọn giờ khám' }]}
               >
-                <Select 
+                <Select
                   placeholder="Chọn khung giờ"
                   disabled={!form.getFieldValue('appointment_date')}
                 >
