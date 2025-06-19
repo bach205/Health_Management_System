@@ -1,5 +1,7 @@
 import type { IUserBase } from "../types/index.type.ts";
 import instance from "../api/mainRequest.ts";
+import axios from "axios";
+import { API_URL } from "../config/constants";
 
 const BASE_URL = "api/v1/nurse";
 
@@ -26,5 +28,22 @@ export const banNurse = async (id: string) => {
 
 export const resetPassword = async (id: string) => {
     return await instance.put(`${BASE_URL}/reset-password/${id}`);
+};
+
+export const nurseRescheduleAppointmentService = async (data: any) => {
+  try {
+    const response = await axios.post(
+      `${API_URL}/appointments/nurse/reschedule`,
+      data,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      }
+    );
+    return response;
+  } catch (error) {
+    throw error;
+  }
 };
 
