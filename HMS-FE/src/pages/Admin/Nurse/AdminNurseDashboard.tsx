@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { Table, Tag, Space, Flex, Button, Form, Input, Select, notification, Tooltip, Popconfirm } from "antd";
-import { Ban, CirclePlus, Eye, RefreshCcw, RotateCcw, Search, Trash, UserRoundPen } from "lucide-react";
+import { Table, Tag, Space, Flex, Button, Form, Input, Select, notification, Tooltip, Popconfirm, Image, Avatar } from "antd";
+import { Ban, CirclePlus, Eye, RefreshCcw, RotateCcw, Search, Trash, User, UserRoundPen } from "lucide-react";
 import { specialtyOptions, TYPE_EMPLOYEE_STR, PASSWORD_DEFAULT } from "../../../constants/user.const";
 import ModalCreateUser from "../../../components/modal/ModalCreateUser";
 import ModalUpdateUser from "../../../components/modal/ModalUpdateUser";
@@ -23,7 +23,7 @@ const AdminNurseDashboard = () => {
   const [formUpdate] = Form.useForm();
   const [formView] = Form.useForm();
   const [curNurseId, setCurNurseId] = useState(0);
-
+  const [selectedNurse, setSelectedNurse] = useState<IUserBase | null>(null);
   // Fetch shifts on component mount
   useEffect(() => {
     const fetchShifts = async () => {
@@ -48,6 +48,16 @@ const AdminNurseDashboard = () => {
       render: (_: any, __: any, index: number) => index + 1,
     },
     {
+      title: "Ảnh",
+      dataIndex: "avatar",
+      key: "avatar",
+      width: 60,
+      align: "center" as const,
+      render: (avatar: string) => {
+        return avatar ? <Avatar src={avatar} /> : <Avatar icon={<User size={17.5} />} />
+      },
+    },
+    {
       title: "Email",
       dataIndex: "email",
       key: "email",
@@ -57,7 +67,7 @@ const AdminNurseDashboard = () => {
     {
       title: "Họ tên",
       dataIndex: "full_name",
-      width: 170,
+      width: 120,
       key: "full_name",
     },
 
@@ -72,7 +82,7 @@ const AdminNurseDashboard = () => {
       },
     },
     {
-      width: 120,
+      width: 90,
       title: "Điện thoại",
       dataIndex: "phone",
       key: "phone",
@@ -164,12 +174,14 @@ const AdminNurseDashboard = () => {
 
   const handleView = async (record: IUserBase) => {
     // console.log(record)
+
     try {
       // setIsShowSpecialty(record.role === TYPE_EMPLOYEE.doctor);
       formView.setFieldsValue({
         ...record,
         date_of_birth: record.date_of_birth ? dayjs(record.date_of_birth) : null,
       });
+      setSelectedNurse(record);
       setIsViewVisible(true);
     } catch (error) {
       console.log(error);
@@ -203,6 +215,7 @@ const AdminNurseDashboard = () => {
         ...record,
         date_of_birth: record.date_of_birth ? dayjs(record.date_of_birth) : null,
       });
+      setSelectedNurse(record);
       setCurNurseId(record.id);
       setIsUpdateVisible(true);
     } catch (error) {
@@ -392,8 +405,8 @@ const AdminNurseDashboard = () => {
       />
 
       <ModalCreateUser role="nurse" form={formCreate} handleOk={handleCreateOk} isVisible={isCreateVisible} handleCancel={handleCreateCancel}></ModalCreateUser>
-      <ModalUpdateUser role="nurse" form={formUpdate} handleOk={handleUpdateOk} isVisible={isUpdateVisible} handleCancel={handleUpdateCancel}></ModalUpdateUser>
-      <ModalViewUser role="nurse" form={formView} isVisible={isViewVisible} handleCancel={handleViewCancel}></ModalViewUser>
+      <ModalUpdateUser user={selectedNurse} reload={reload} setReload={setReload} role="nurse" form={formUpdate} handleOk={handleUpdateOk} isVisible={isUpdateVisible} handleCancel={handleUpdateCancel}></ModalUpdateUser>
+      <ModalViewUser user={selectedNurse} role="nurse" form={formView} isVisible={isViewVisible} handleCancel={handleViewCancel}></ModalViewUser>
     </div>
   );
 }

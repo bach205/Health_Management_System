@@ -491,8 +491,8 @@ class AuthService {
     const base64Data = base64.split(',')[1] || base64;
   
     const sizeInKB = (base64Data.length * 3) / 4 / 1024;
-    if (sizeInKB > 760) {
-      throw new BadRequestError("Ảnh quá lớn, vui lòng chọn ảnh nhỏ hơn 750KB");
+    if (sizeInKB > 800) {
+      throw new BadRequestError("Ảnh quá lớn, vui lòng chọn ảnh nhỏ hơn 800KB");
     }
   
     console.log(updateData.id, updateData.avatar.length)
