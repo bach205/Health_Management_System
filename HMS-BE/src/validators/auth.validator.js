@@ -3,16 +3,16 @@ const Joi = require("joi");
 const registerSchema = Joi.object({
   email: Joi.string().email().required(),
   password: Joi.string()
-  .min(8)
-  .pattern(
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
-  )
-  .required()
-  .messages({
-    "string.pattern.base":
-      "Mật khẩu phải chứa ít nhất 1 chữ hoa, 1 chữ thường, 1 số và 1 ký tự đặc biệt",
-    "string.min": "Mật khẩu phải có ít nhất 8 ký tự",
-  }),
+    .min(8)
+    .pattern(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
+    )
+    .required()
+    .messages({
+      "string.pattern.base":
+        "Mật khẩu phải chứa ít nhất 1 chữ hoa, 1 chữ thường, 1 số và 1 ký tự đặc biệt",
+      "string.min": "Mật khẩu phải có ít nhất 8 ký tự",
+    }),
   role: Joi.string().valid("patient").default("patient"), // Chỉ cho phép role patient
 }).unknown(true);
 
