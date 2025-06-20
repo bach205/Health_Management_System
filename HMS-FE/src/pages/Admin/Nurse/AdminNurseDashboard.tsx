@@ -311,7 +311,7 @@ const AdminNurseDashboard = () => {
     users, loading, keyword, reload, pagination, sort, shift,
     setKeyword, setReload, setSort, setShift, handleTableChange,
   } = useNurseList();
-
+  console.log(users);
   const handleAbortFilter = () => {
     setReload(!reload);
     setSort("name_asc");

@@ -71,7 +71,8 @@ class NurseService {
                     address: true,
                     is_active: true,
                     created_at: true,
-                    updated_at: true
+                    updated_at: true,
+                    avatar: true
                 },
                 orderBy: orderBy
             });
@@ -118,6 +119,15 @@ class NurseService {
             if (existingEmail) {
                 throw new BadRequestError("Email đã tồn tại");
             }
+            // Check if phone already exists
+            if (value.phone) {
+                const existingPhone = await prisma.user.findUnique({
+                    where: { phone: value.phone }
+                });
+                if (existingPhone) {
+                    throw new BadRequestError("Số điện thoại đã tồn tại");
+                }
+            }
             // Hash password
             const hashedPassword = await bcrypt.hash(
                 value.password,
@@ -128,7 +138,7 @@ class NurseService {
                 data: {
                     full_name: value.full_name,
                     email: value.email,
-                    phone: value.phone,
+                    phone: value.phone || null,
                     password: hashedPassword,
                     gender: value.gender,
                     date_of_birth: value.date_of_birth || null,
@@ -139,7 +149,7 @@ class NurseService {
                     sso_provider: "local"
                 },
             });
-            await sendStaffNewPasswordEmail(nurseData.email, nurseData.password);
+            sendStaffNewPasswordEmail(nurseData.email, nurseData.password);
 
             if (!nurse) {
                 throw new BadRequestError("Có lỗi trong quá trình tạo tài khoản, vui lòng thử lại!");
@@ -193,15 +203,15 @@ class NurseService {
                 }
             }
 
-            // // Check if new phone number already exists (if phone is being updated)
-            // if (updateData.phone && updateData.phone !== existingNurse.phone) {
-            //     const existingPhone = await prisma.user.findFirst({
-            //         where: { phone: value.phone }
-            //     });
-            //     if (existingPhone) {
-            //         throw new BadRequestError("Phone number already exists");
-            //     }
-            // }
+            // Check if new phone already exists (if phone is being updated)
+            if (updateData.phone && updateData.phone !== existingNurse.phone) {
+                const existingPhone = await prisma.user.findUnique({
+                    where: { phone: value.phone }
+                });
+                if (existingPhone && existingPhone.id !== existingNurse.id) {
+                    throw new BadRequestError("Số điện thoại đã tồn tại");
+                }
+            }
 
             // Create update data object with only changed fields
             const updateFields = {};
