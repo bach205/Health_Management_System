@@ -44,7 +44,6 @@ class AuthService {
         data: {
           email: userData.email,
           password: hashedPassword,
-          phone: userData.phone,
           role: "patient", // Sử dụng string literal
           sso_provider: "local",
         },
@@ -259,10 +258,10 @@ class AuthService {
         throw new BadRequestError("User not found");
       }
 
-      // Kiểm tra email trong token có khớp với user không
-      if (user.email !== decoded.email) {
-        throw new BadRequestError("Invalid token");
-      }
+      // // Kiểm tra email trong token có khớp với user không
+      // if (user.email !== decoded.email) {
+      //   throw new BadRequestError("Invalid token");
+      // }
 
       // Kiểm tra mật khẩu cũ
       const isValidOldPassword = await bcrypt.compare(
@@ -486,25 +485,111 @@ class AuthService {
       throw new BadRequestError("Người dùng không tồn tại");
     }
     const base64 = updateData.avatar; // ví dụ dạng "data:image/png;base64,iVBORw0KGgoAAAANS..."
-  
+
     // Lấy phần sau "base64,", vì chỉ phần đó là dữ liệu
     const base64Data = base64.split(',')[1] || base64;
-  
+
     const sizeInKB = (base64Data.length * 3) / 4 / 1024;
     if (sizeInKB > 760) {
       throw new BadRequestError("Ảnh quá lớn, vui lòng chọn ảnh nhỏ hơn 750KB");
     }
-  
+
     console.log(updateData.id, updateData.avatar.length)
     const updatedUser = await prisma.user.update({
       data: { avatar: base64 },
-      where: { 
+      where: {
         id: +updateData.id
-       },
+      },
     });
     // console.log(updatedUser)
 
     return updatedUser;
+  }
+
+  async loginWithPhone({ phone, password }) {
+    if (!phone || !password) {
+      throw new BadRequestError("Vui lòng nhập số điện thoại và mật khẩu");
+    }
+    // Find user by phone
+    const user = await prisma.user.findUnique({
+      where: { phone },
+    });
+    if (!user) {
+      throw new BadRequestError("Số điện thoại hoặc mật khẩu không đúng");
+    }
+    // Verify password
+    const isValidPassword = await bcrypt.compare(password, user.password);
+    if (!isValidPassword) {
+      throw new BadRequestError("Số điện thoại hoặc mật khẩu không đúng");
+    }
+    // Check if user is active
+    if (!user.is_active) {
+      throw new BadRequestError("Tài khoản đã bị khóa");
+    }
+    // Generate tokens
+    const tokens = generateToken(user);
+    return {
+      user: {
+        id: user.id,
+        email: user.email,
+        phone: user.phone,
+        full_name: user.full_name,
+        role: user.role,
+      },
+      ...tokens,
+    };
+  }
+
+  async registerWithPhone(userData) {
+    // Validate input
+    if (!userData.phone || !userData.password) {
+      throw new BadRequestError("Vui lòng nhập số điện thoại và mật khẩu");
+    }
+    // Check if phone exists
+    const existingPhone = await prisma.user.findUnique({
+      where: { phone: userData.phone },
+    });
+    if (existingPhone) {
+      throw new BadRequestError("Số điện thoại đã được đăng ký");
+    }
+    // Hash password
+    const hashedPassword = await bcrypt.hash(
+      userData.password,
+      parseInt(process.env.BCRYPT_SALT_ROUNDS)
+    );
+    // Create user và patient
+    const result = await prisma.$transaction(async (prisma) => {
+      const user = await prisma.user.create({
+        data: {
+          password: hashedPassword,
+          phone: userData.phone,
+          full_name: userData.full_name || null,
+          role: "patient",
+          sso_provider: "local",
+        },
+      });
+      const patient = await prisma.patient.create({
+        data: {
+          id: user.id,
+          identity_number: userData.identity_number || null,
+        },
+      });
+      return { user, patient };
+    });
+    // Generate tokens
+    const tokens = generateToken(result.user);
+    return {
+      user: {
+        id: result.user.id,
+        phone: result.user.phone,
+        full_name: result.user.full_name,
+        role: result.user.role,
+      },
+      patient: {
+        id: result.patient.id,
+      },
+      ...tokens,
+    };
   }
 }
 
