@@ -43,6 +43,14 @@ CREATE TABLE doctors (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+-- Table for nurses
+CREATE TABLE nurses (
+    user_id INT PRIMARY KEY COMMENT 'References users.id',
+    specialty VARCHAR(255) COMMENT 'Nursing specialty',
+    bio TEXT COMMENT 'Nurse biography',
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
 -- Table for shifts
 CREATE TABLE shifts (
     id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Shift ID',
@@ -515,3 +523,56 @@ INSERT INTO queues (patient_id, clinic_id, record_id, appointment_id, status, pr
 (13, 4, NULL, 18, 'waiting', 2, TRUE, 'QR015');
 
 ALTER TABLE `users` ADD COLUMN `avatar` LONGTEXT NULL;
+
+-- Thêm 10 tài khoản bác sĩ mới (tên thật, email chuyên nghiệp)
+INSERT INTO users (email, password, full_name, phone, role, date_of_birth, gender, address, sso_provider, is_active) VALUES
+('nguyenhoanglong@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Nguyễn Hoàng Long', '0901000001', 'doctor', '1980-01-01', 'male', 'Hà Nội', 'local', TRUE),
+('tranthithao@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Trần Thị Thảo', '0901000002', 'doctor', '1981-02-02', 'female', 'TP.HCM', 'local', TRUE),
+('levanphuc@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Lê Văn Phúc', '0901000003', 'doctor', '1982-03-03', 'male', 'Đà Nẵng', 'local', TRUE),
+('phamthiminh@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Phạm Thị Minh', '0901000004', 'doctor', '1983-04-04', 'female', 'Cần Thơ', 'local', TRUE),
+('dohoangnam@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Đỗ Hoàng Nam', '0901000005', 'doctor', '1984-05-05', 'male', 'Hải Phòng', 'local', TRUE),
+('buithithu@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Bùi Thị Thu', '0901000006', 'doctor', '1985-06-06', 'female', 'Huế', 'local', TRUE),
+('hoangvanquan@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Hoàng Văn Quân', '0901000007', 'doctor', '1986-07-07', 'male', 'Vũng Tàu', 'local', TRUE),
+('nguyenthithanh@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Nguyễn Thị Thanh', '0901000008', 'doctor', '1987-08-08', 'female', 'Quảng Ninh', 'local', TRUE),
+('phamvantruong@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Phạm Văn Trường', '0901000009', 'doctor', '1988-09-09', 'male', 'Bình Dương', 'local', TRUE),
+('vuthithao@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Vũ Thị Thảo', '0901000010', 'doctor', '1989-10-10', 'female', 'Nam Định', 'local', TRUE);
+
+-- Thêm 10 tài khoản y tá mới (tên thật, email chuyên nghiệp)
+INSERT INTO users (email, password, full_name, phone, role, date_of_birth, gender, address, sso_provider, is_active) VALUES
+('nguyenthithu@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Nguyễn Thị Thu', '0911000001', 'nurse', '1990-01-01', 'female', 'Hà Nội', 'local', TRUE),
+('levanminh@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Lê Văn Minh', '0911000002', 'nurse', '1991-02-02', 'male', 'TP.HCM', 'local', TRUE),
+('phamthithao@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Phạm Thị Thảo', '0911000003', 'nurse', '1992-03-03', 'female', 'Đà Nẵng', 'local', TRUE),
+('tranvanphuoc@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Trần Văn Phước', '0911000004', 'nurse', '1993-04-04', 'male', 'Cần Thơ', 'local', TRUE),
+('dothithanh@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Đỗ Thị Thanh', '0911000005', 'nurse', '1994-05-05', 'female', 'Hải Phòng', 'local', TRUE),
+('buivantrung@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Bùi Văn Trung', '0911000006', 'nurse', '1995-06-06', 'male', 'Huế', 'local', TRUE),
+('hoangthithu@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Hoàng Thị Thu', '0911000007', 'nurse', '1996-07-07', 'female', 'Vũng Tàu', 'local', TRUE),
+('nguyenvanphat@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Nguyễn Văn Phát', '0911000008', 'nurse', '1997-08-08', 'male', 'Quảng Ninh', 'local', TRUE),
+('phamthithu2@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Phạm Thị Thu', '0911000009', 'nurse', '1998-09-09', 'female', 'Bình Dương', 'local', TRUE),
+('vuvantrung@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Vũ Văn Trung', '0911000010', 'nurse', '1999-10-10', 'male', 'Nam Định', 'local', TRUE);
+
+-- Thêm thông tin chi tiết cho các bác sĩ mới
+INSERT INTO doctors (user_id, specialty, bio) VALUES
+(16, 'Nội tổng quát', 'Bác sĩ có kinh nghiệm làm việc tại khoa nội tổng quát.'),
+(17, 'Nhi khoa', 'Chuyên gia về chăm sóc sức khỏe trẻ em và trẻ sơ sinh.'),
+(18, 'Tiêu hóa', 'Bác sĩ chuyên khoa tiêu hóa với nhiều năm kinh nghiệm.'),
+(19, 'Da liễu', 'Chuyên gia về các bệnh lý da và thẩm mỹ da.'),
+(20, 'Tai mũi họng', 'Bác sĩ chuyên khoa tai mũi họng, phẫu thuật nội soi.'),
+(21, 'Mắt', 'Chuyên gia về các bệnh lý mắt và phẫu thuật khúc xạ.'),
+(22, 'Ung bướu', 'Bác sĩ chuyên điều trị các bệnh lý ung bướu.'),
+(23, 'Tiết niệu', 'Chuyên gia về các bệnh lý hệ tiết niệu và nam khoa.'),
+(24, 'Nội tiết', 'Bác sĩ chuyên điều trị các rối loạn hormone và tiểu đường.'),
+(25, 'Chẩn đoán hình ảnh', 'Chuyên gia về đọc và phân tích hình ảnh y khoa.');
+
+-- Thêm thông tin chi tiết cho các y tá mới
+INSERT INTO nurses (user_id, specialty, bio) VALUES
+(26, 'Nội tổng quát', 'Y tá có kinh nghiệm chăm sóc bệnh nhân nội trú.'),
+(27, 'Nhi khoa', 'Y tá chuyên chăm sóc trẻ em và tư vấn cho phụ huynh.'),
+(28, 'Chăm sóc đặc biệt', 'Y tá được đào tạo chuyên sâu về chăm sóc bệnh nhân nặng.'),
+(29, 'Phòng mổ', 'Y tá có kinh nghiệm hỗ trợ trong các ca phẫu thuật.'),
+(30, 'Cấp cứu', 'Y tá có kỹ năng xử lý các tình huống khẩn cấp.'),
+(31, 'Hồi sức', 'Y tá chuyên chăm sóc bệnh nhân sau phẫu thuật.'),
+(32, 'Tim mạch', 'Y tá có kinh nghiệm chăm sóc bệnh nhân tim mạch.'),
+(33, 'Ung bướu', 'Y tá chuyên chăm sóc và hỗ trợ bệnh nhân ung thư.'),
+(34, 'Phòng khám', 'Y tá có kinh nghiệm làm việc tại phòng khám đa khoa.'),
+(35, 'Chăm sóc tại nhà', 'Y tá chuyên cung cấp dịch vụ chăm sóc sức khỏe tại nhà.');
+
