@@ -27,6 +27,12 @@ export const updatePassword = async (data: any) => {
   const response = await instance.post(`${baseURL}/reset-password`, data);
   return response;
 };
+
+export const updatePatientPassword = async (data: any) => {
+  const response = await instance.post(`${patientURL}/reset-password`, data);
+  return response;
+};
+
 export const fetchUserImage = async (id: number) => {
   const response = await instance.get(`${BASE_URL}/${id}/avatar`)
   return response;
