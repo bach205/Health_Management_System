@@ -143,7 +143,7 @@ const AdminPatientDashboard = () => {
         }
     };
 
-    const handleView = async (record: IPatient) => {
+    const handleView = async (record: any) => {
         try {
             setCurrentUser(record);
             formView.setFieldsValue({

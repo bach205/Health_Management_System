@@ -16,7 +16,7 @@ const ModalViewUser = ({ role, isVisible, handleCancel, form, user }: IProps) =>
   const [specialty, setSpecialty] = useState<string>("internal");
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState('');
-  console.log(user);
+  // console.log(user);
   return (
     <Modal
       open={isVisible}
@@ -94,6 +94,13 @@ const ModalViewUser = ({ role, isVisible, handleCancel, form, user }: IProps) =>
             <Select.Option value="other"><span className="text-black">Khác</span></Select.Option>
           </Select>
         </Form.Item>
+        {
+          role === "patient" && (
+            <Form.Item name="identity_number" label="Số định danh" >
+              <Input placeholder="Số Định danh" className="text-black!" maxLength={12} />
+            </Form.Item>
+          )
+        }
 
         {role === "doctor" && (
           <>

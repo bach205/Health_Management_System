@@ -33,8 +33,6 @@ class PatientService {
                 {
                     OR: [
                         { full_name: { contains: keyword } },
-                        { email: { contains: keyword } },
-                        { phone: { contains: keyword } }
                     ]
                 }
             ]
@@ -57,6 +55,12 @@ class PatientService {
                 break;
             case "name_desc":
                 orderBy.full_name = "desc";
+                break;
+            case "update_desc":
+                orderBy.updated_at = "desc";
+                break;
+            case "update_asc":
+                orderBy.updated_at = "asc";
                 break;
             default:
                 orderBy.created_at = "desc";
@@ -86,7 +90,7 @@ class PatientService {
     }
 
     async createPatient(data) {
-        const { email, password, full_name, date_of_birth, gender, phone, address, identity_number } = data;
+        const { email, password, full_name, date_of_birth, gender, phone, address, identity_number, avatar } = data;
 
         // Check if email exists
         const existingUser = await prisma.user.findUnique({
@@ -123,11 +127,12 @@ class PatientService {
                 address,
                 role: "patient",
                 is_active: true,
+                avatar,
                 patient: {
                     create: {
                         identity_number
                     }
-                }
+                },
             },
             include: {
                 patient: true

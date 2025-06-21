@@ -3,12 +3,12 @@ import { getDoctors } from "../services/doctor.service";
 import type { IDoctor, IPagination } from "../types/index.type";
 import { message } from "antd";
 
-export const useDoctorList = (initialPagination?: Partial<IPagination>) => {
+export const useDoctorList = ( initialPagination?: Partial<IPagination>,initialSpecialty?: string[]) => {
     const [users, setUsers] = useState<IDoctor[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [keyword, setKeyword] = useState<string>("");
     const [reload, setReload] = useState<boolean>(false);
-    const [specialty, setSpecialty] = useState<string>("all");
+    const [specialty, setSpecialty] = useState<string[]>(initialSpecialty || []);
     const [sort, setSort] = useState<string>("newest");
     const [isActive, setIsActive] = useState<string>("all");
     const [pagination, setPagination] = useState<IPagination>({
@@ -29,7 +29,7 @@ export const useDoctorList = (initialPagination?: Partial<IPagination>) => {
                     limit: pagination.pageSize,
                     isActive,
                 };
-
+                console.log("searchOptions", searchOptions)
                 const res = await getDoctors(searchOptions);
                 setUsers(res.data.metadata.doctors);
                 setPagination((prev) => ({
@@ -86,6 +86,7 @@ export const useDoctorList = (initialPagination?: Partial<IPagination>) => {
         setSort,
         pagination,
         setPagination,
+        setLoading,
         isActive,
         setIsActive,
         handleTableChange,

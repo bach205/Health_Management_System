@@ -300,7 +300,7 @@ const AdminDoctorDashboard = () => {
 
   const handleResetFilter = () => {
     setKeyword("");
-    setSpecialty("all");
+    setSpecialty([]);
     setSort("newest");
     setIsActive("all");
     setReload(!reload);
@@ -343,12 +343,25 @@ const AdminDoctorDashboard = () => {
       <Flex gap={10} justify="space-between" style={{ marginBottom: 10 }}>
         <Form>
           <Flex gap={10}>
-            <Form.Item label="Lọc theo khoa" style={{ width: '220px' }} name="specialty" valuePropName="specialty" >
+            <Form.Item label="Lọc theo khoa" style={{ width: '500px' }} name="specialty" valuePropName="specialty" >
               <Select
-                style={{ width: 120 }}
-                value={specialty}
-                onChange={(value) => setSpecialty(value)}
-                options={filterOptions}
+                mode="multiple"
+                defaultValue={['']}
+                placeholder="Chọn chuyên khoa"
+                value={specialty.length > 0 ? specialty : []}
+                onChange={(value: string[]) => {
+
+                  setSpecialty(value);
+                }}
+                className="min-w-[200px]"
+                options={[
+                  ...specialtyOptions
+                    .filter((opt) => opt.value !== "")
+                    .map((opt) => ({
+                      label: opt.label,
+                      value: opt.value,
+                    })),
+                ]}
               />
             </Form.Item>
             <Form.Item label="Sắp xếp" style={{ width: '220px' }} name="sort" valuePropName="sort" >

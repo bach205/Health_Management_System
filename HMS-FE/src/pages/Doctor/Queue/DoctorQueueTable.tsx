@@ -10,7 +10,7 @@ import ExaminationRecordModal from "../../../components/doctor/ExaminationRecord
 import { useAuthStore } from "../../../store/authStore";
 import { useSocket } from "../../../hooks/useSocket";
 import { updateQueueStatus } from "../../../services/queue.service";
-import { Button, Dropdown, Flex, Menu, Select, Table, Tag, Tooltip, Typography } from "antd";
+import { Button, Dropdown, Flex, Menu, message, Select, Table, Tag, Tooltip, Typography } from "antd";
 import ModalPatientExaminationOrder from "./ModalPatientExaminationOrder";
 import DoctorExaminationOrderModal from "./DoctorExaminationOrderModal";
 import { RefreshCcw } from "lucide-react";
@@ -75,15 +75,22 @@ const QueueTable = () => {
         }
     );
     const handleStatusUpdate = async (queueId: string, newStatus: string) => {
-        // const queue = queues.find((queue: any) => queue.id === queueId);
-        // if (queue) {
-        //     if (dayjs.utc(queue.appointment.appointment_time).isBefore(dayjs())) {
-        //         toast.error("Chưa đến giờ khám");
-        //         return;
-        //     }
-        // }
+        const queue:any = queues.find((queue: any) => queue.id === queueId);
+        console.log(queue)
+        console.log(" appointmentTime",dayjs.utc(queue.appointment.appointment_time).hour(), "now", dayjs().hour())
+        console.log("not time",dayjs.utc(queue.appointment.appointment_time).hour() > dayjs().hour())
+        if (queue) {
+            const appointmentTime = dayjs.utc(queue.appointment.appointment_time);
+            const appontmentdate = dayjs.utc(queue.appointment.appointment_date)
+            
+            // Kiểm tra xem giờ khám, ngày khám có đã qua hay không
+            if (appointmentTime.hour() > dayjs().hour() || appontmentdate > dayjs()) {
+                message.error("Chưa đến giờ khám");
+                return;
+            }
+        }
         try {
-            await updateQueueStatus(queueId, newStatus);
+            // await updateQueueStatus(queueId, newStatus);
             // Không cần fetchQueue nữa vì socket sẽ handle việc update UI
         } catch (error: any) {
             toast.error(error?.response?.data?.message || "Lỗi khi cập nhật trạng thái");
@@ -172,6 +179,7 @@ const QueueTable = () => {
             dataIndex: "id",
             key: "id",
             width: 100,
+            render: (_: any, record: any, index: number) => index + 1,
         },
         {
             title: "Bệnh nhân",

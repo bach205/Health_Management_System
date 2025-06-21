@@ -27,6 +27,7 @@ class DoctorController {
     }).send(res);
   }
 
+
   updateDoctor = async (req, res) => {
     const result = await DoctorService.updateDoctor(req.body);
     return new OK({

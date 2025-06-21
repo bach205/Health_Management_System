@@ -105,6 +105,7 @@ class DoctorService {
                     address: value.address?.trim() || "",
                     is_active: true,
                     sso_provider: "local",
+                    avatar: value.avatar,
                     doctor: {
                         create: {
                             specialty: value.specialty?.trim() || "",
@@ -131,52 +132,86 @@ class DoctorService {
 
     getDoctors = async (pagination = {}) => {
         function sort(sortBy) {
-            if (sortBy === "newest") {
-                return {
-                    created_at: "desc",
-                }
-            } else if (sortBy === "oldest") {
-                return {
-                    created_at: "asc",
-                }
-            }
-            else if (sortBy === "name_asc") {
-                return {
-                    full_name: "asc",
-                }
-            }
-            else if (sortBy === "name_desc") {
-                return {
-                    full_name: "desc",
-                }
+            switch (sortBy) {
+                case "newest":
+                    return {
+                        created_at: "desc",
+                    }
+                case "oldest":
+                    return {
+                        created_at: "asc",
+                    }
+                case "name_asc":
+                    return {
+                        full_name: "asc",
+                    }
+                case "name_desc":
+                    return {
+                        full_name: "desc",
+                    }
+                case "update_desc":
+                    return {
+                        updated_at: "desc",
+                    }
+                case "update_asc":
+                    return {
+                        updated_at: "asc",
+                    }
+                default:
+                    return {
+                        created_at: "desc",
+                    }
             }
         }
         const { searchKey, specialty, sortBy, skip, limit, isActive } = pagination;
-        console.log(searchKey, specialty, sortBy, skip, limit, isActive)
+        console.log(searchKey, "specialty", specialty, sortBy, skip, limit, isActive)
+        const specialties = specialty?.filter(specialty => specialty.trim() !== "");
+
         try {
-            const whereClause = {
-                AND: [
-                    { role: "doctor" }, // chỉ lấy user là doctor
-                    searchKey && { full_name: { contains: searchKey, }, },
-                    isActive !== "all" && { is_active: isActive },
-                    specialty !== "all"
-                        ? {
-                            doctor: {
-                                specialty: {
-                                    equals: specialty,
-                                },
-                            },
-                        }
-                        : {
-                            doctor: {
-                                specialty: {
-                                    contains: "",
-                                },
+            const isFilterAll = specialty.includes("all");
+            const isFilterNone = specialty.includes("none");
+            const isFilterSome = specialties.length > 0;
+            const specialtyCondition = (isFilterNone || isFilterSome || isFilterAll) ? {
+                OR: [
+                    isFilterSome && {
+                        doctor: {
+                            specialty: {
+                                in: specialties,
                             },
                         },
+                    },
+
+                    isFilterNone && {
+                        doctor: {
+                            OR: [
+                                { specialty: null },
+                                { specialty: "" },
+                                { specialty: undefined },
+                            ],
+                        },
+                    },
+                ].filter(Boolean),
+            }
+                : undefined;
+            const allCondition = isFilterAll ? {
+                doctor: {
+                    AND: [
+                        { specialty: { not: null, }, },
+                        { specialty: { not: "", }, },
+                        { specialty: { not: undefined, }, },
+                    ]
+                }
+            } : undefined;
+            const whereClause = {
+                AND: [
+                    { role: "doctor" },
+                    searchKey && { full_name: { contains: searchKey } },
+                    isActive !== "all" && { is_active: isActive },
+                    isFilterAll ? allCondition : specialtyCondition,
 
                 ].filter(Boolean),
             };
+
             const total = await prisma.user.count({
                 where: whereClause,
             });
@@ -191,6 +226,15 @@ class DoctorService {
                 take: limit || undefined,
             });
 
+
+            const test = doctors.map(doctor => {
+                return {
+                    id: doctor.id,
+                    full_name: doctor.full_name,
+                    specialty: doctor.doctor?.specialty,
+                }
+            })
+            console.log(test)
             return { total, doctors };
         } catch (error) {
             console.log(error)
