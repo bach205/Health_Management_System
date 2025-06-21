@@ -14,8 +14,8 @@
     full_name    String?
     phone        String?
     role         Role
-    address      String?
-    date_of_birth   DateTime?
+    address      String?     @db.Text
+    date_of_birth   DateTime? @db.Date
     gender          Gender?
     avatar          String?   @db.LongText
     sso_provider SsoProvider @default(local)
@@ -25,6 +25,7 @@
 
     patient            Patient?
     doctor             Doctor?
+    nurse              Nurse?
     workSchedules      WorkSchedule[]
     examinationOrders  ExaminationOrder[]  @relation("DoctorExaminationOrder")
     primaryRecords     ExaminationRecord[] @relation("PrimaryDoctor")
@@ -78,7 +79,7 @@
   model Clinic {
     id          Int     @id @default(autoincrement())
     name        String
-    description String?
+    description String? @db.Text
 
     workSchedules      WorkSchedule[]
     fromOrders         ExaminationOrder[]  @relation("FromClinic")
@@ -94,18 +95,28 @@
   model Doctor {
     user_id   Int     @id
     specialty String?
-    bio       String?
+    bio       String? @db.Text
 
     user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
     @@map("doctors")
   }
 
+  model Nurse {
+    user_id   Int     @id
+    specialty String?
+    bio       String? @db.Text
+
+    user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+    @@map("nurses")
+  }
+
   model Shift {
     id         Int       @id @default(autoincrement())
     name       String?
-    start_time DateTime?
-    end_time   DateTime?
+    start_time DateTime? @db.Time
+    end_time   DateTime? @db.Time
 
     workSchedules WorkSchedule[]
 
@@ -116,7 +127,7 @@
     id        Int      @id @default(autoincrement())
     user_id   Int
     clinic_id Int
-    work_date DateTime
+    work_date DateTime @db.Date
     shift_id  Int
 
     user   User   @relation(fields: [user_id], references: [id])
@@ -146,9 +157,9 @@
   model ExaminationRecord {
     id                 Int      @id @default(autoincrement())
     patient_id         Int
-    symptoms           String?
+    symptoms           String?  @db.Text
     primary_doctor_id  Int?
-    final_diagnosis    String?
+    final_diagnosis    String?  @db.Text
     created_by_user_id Int?
     created_at         DateTime @default(now())
     updated_at         DateTime @updatedAt
@@ -170,8 +181,8 @@
     record_id   Int
     clinic_id   Int
     doctor_id   Int
-    result      String?
-    note        String?
+    result      String?           @db.Text
+    note        String?           @db.Text
     examined_at DateTime?
     status      ExaminationStatus @default(pending)
 
@@ -200,7 +211,7 @@
     registered_online Boolean   @default(false)
     qr_code           String?
     called_at         DateTime?
-    created_at        DateTime   @default(now()) @db.DateTime
+    created_at        DateTime   @default(now())
 
     patient          Patient    @relation(fields: [patient_id], references: [id])
     clinic           Clinic     @relation(fields: [clinic_id], references: [id])
@@ -235,7 +246,7 @@
     dosage          String?
     frequency       String?
     duration        String?
-    note            String?
+    note            String? @db.Text
 
     prescription Prescription @relation(fields: [prescription_id], references: [id])
 
@@ -249,7 +260,7 @@
     amount       Decimal
     method       PaymentMethod?
     payment_time DateTime       @default(now())
-    note         String?
+    note         String?        @db.Text
     is_refund    Boolean        @default(false)
 
     patient Patient            @relation(fields: [patient_id], references: [id])
@@ -278,11 +289,13 @@
   model InvoiceItem {
     id          Int      @id @default(autoincrement())
     record_id   Int
-    description String?
+    description String?  @db.Text
     amount      Decimal
     created_at  DateTime @default(now())
 
     record ExaminationRecord @relation(fields: [record_id], references: [id])
+
+    @@map("invoice_items")
   }
 
   model PasswordResetToken {
@@ -310,8 +323,8 @@
     priority        Int              @default(0)  // 0: normal booking, 1: nurse booking, 2: urgent
     reason          String?          @db.Text     // Lý do khám
     note            String?          @db.Text     // Ghi chú thêm
-    created_at      DateTime         @default(now()) @db.DateTime
-    updated_at      DateTime         @updatedAt @db.DateTime
+    created_at      DateTime         @default(now())
+    updated_at      DateTime         @updatedAt
 
     patient         Patient          @relation(fields: [patient_id], references: [id])
     clinic          Clinic           @relation(fields: [clinic_id], references: [id])
@@ -336,7 +349,7 @@
     start_time   DateTime @db.Time
     end_time     DateTime @db.Time
     is_available Boolean  @default(true)
-    created_at   DateTime @default(now()) @db.DateTime
+    created_at   DateTime @default(now())
 
     doctor       User     @relation(fields: [doctor_id], references: [id])
     clinic       Clinic   @relation(fields: [clinic_id], references: [id])
