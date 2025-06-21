@@ -96,6 +96,8 @@ class AuthController {
   }
 
   async resetPassword(req, res) {
+    console.log("Reset password request received:", req.body);
+    
     try {
       const { token, oldPassword, newPassword, confirmPassword } = req.body;
       const result = await AuthService.resetPassword(

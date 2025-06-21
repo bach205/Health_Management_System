@@ -7,7 +7,7 @@ import ModalViewUser from "../../../components/modal/ModalViewUser";
 import { sortOptions } from "../../../constants/user.const";
 import type { IPatient } from "../../../types/index.type";
 import UserListTitle from "../../../components/ui/UserListTitle";
-import { createPatient, updatePatient, updatePassword, updateStatus } from "../../../services/patient.service";
+import { createPatient, updatePatient, updatePassword, updateStatus, updatePatientPassword } from "../../../services/patient.service";
 import ModalCreatePatient from "../../../components/modal/ModalCreatePatient";
 const AdminPatientDashboard = () => {
     const [isCreateVisible, setIsCreateVisible] = useState<boolean>(false);
@@ -163,7 +163,7 @@ const AdminPatientDashboard = () => {
 
     const handleResetPassword = async (id: number) => {
         try {
-            await updatePassword(id);
+            await updatePatientPassword(id);
             notification.success({ message: "Khôi phục mật khẩu thành công" });
             setReload(!reload);
         } catch (error: any) {

@@ -53,8 +53,8 @@ authRouter.post(
 
 authRouter.post(
   "/reset-password",
-  authenticate,
-  validate({ body: resetPasswordSchema }),
+  // authenticate,
+  // validate({ body: resetPasswordSchema }),
   asyncHandler(AuthController.resetPassword),
   authController.resetPassword
 );
