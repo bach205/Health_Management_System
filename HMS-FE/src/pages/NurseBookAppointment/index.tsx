@@ -221,6 +221,7 @@ const NurseBookAppointment: React.FC = () => {
                 name="email"
                 label="Email"
                 rules={[
+                  { required: true, message: 'Vui lòng chọn bác sĩ' },
                   { type: 'email', message: 'Email không hợp lệ' }
                 ]}
               >
