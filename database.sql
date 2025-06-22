@@ -36,10 +36,12 @@ CREATE TABLE clinics (
 );
 
 -- Table for doctors
+-- Thông tin mở rộng từ user (bác sĩ)
 CREATE TABLE doctors (
-    user_id INT PRIMARY KEY COMMENT 'References users.id',
-    specialty VARCHAR(255) COMMENT 'Medical specialty',
-    bio TEXT COMMENT 'Doctor biography',
+    user_id INT PRIMARY KEY COMMENT 'Tham chiếu đến users(id)',
+    specialty VARCHAR(255) COMMENT 'Chuyên môn',
+    bio TEXT COMMENT 'Giới thiệu',
+	rating DECIMAL(2,1) DEFAULT 0.0 COMMENT '(tối đa 9.9) Đánh giá trung bình, sửa rating trên backend', 
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
