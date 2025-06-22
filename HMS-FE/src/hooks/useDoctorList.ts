@@ -31,6 +31,7 @@ export const useDoctorList = ( initialPagination?: Partial<IPagination>,initialS
                 };
                 console.log("searchOptions", searchOptions)
                 const res = await getDoctors(searchOptions);
+                console.log(res.data.metadata);
                 setUsers(res.data.metadata.doctors);
                 setPagination((prev) => ({
                     ...prev,
