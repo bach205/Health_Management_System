@@ -486,21 +486,21 @@ class AuthService {
       throw new BadRequestError("Người dùng không tồn tại");
     }
     const base64 = updateData.avatar; // ví dụ dạng "data:image/png;base64,iVBORw0KGgoAAAANS..."
-  
+
     // Lấy phần sau "base64,", vì chỉ phần đó là dữ liệu
     const base64Data = base64.split(',')[1] || base64;
-  
+
     const sizeInKB = (base64Data.length * 3) / 4 / 1024;
     if (sizeInKB > 760) {
       throw new BadRequestError("Ảnh quá lớn, vui lòng chọn ảnh nhỏ hơn 750KB");
     }
-  
+
     console.log(updateData.id, updateData.avatar.length)
     const updatedUser = await prisma.user.update({
       data: { avatar: base64 },
-      where: { 
+      where: {
         id: +updateData.id
-       },
+      },
     });
     // console.log(updatedUser)
 

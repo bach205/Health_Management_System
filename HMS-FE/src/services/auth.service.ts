@@ -5,7 +5,6 @@ const baseURL = `/api/v1/auth`;
 export const registerService = async (body: object) => {
   const data = JSON.stringify(body);
   const response = await mainRequest.post(`${baseURL}/register`, data);
-
   return response;
 };
 

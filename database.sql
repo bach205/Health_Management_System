@@ -551,3 +551,10 @@ ADD INDEX idx_priority (priority);
 
 -- câu lệnh prisma
 npx prisma migrate dev --name add-priority-to-appointment
+
+
+--20/6/2025 modify
+ALTER TABLE users
+ADD avatar LONGTEXT;
+select * from appointments
+

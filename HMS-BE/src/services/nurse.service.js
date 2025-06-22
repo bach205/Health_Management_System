@@ -118,6 +118,17 @@ class NurseService {
             if (existingEmail) {
                 throw new BadRequestError("Email đã tồn tại");
             }
+            // Check if phone already exists
+            /*
+            if (value.phone) {
+                const existingPhone = await prisma.user.findUnique({
+                    where: { phone: value.phone }
+                });
+                if (existingPhone) {
+                    throw new BadRequestError("Số điện thoại đã tồn tại");
+                }
+            }
+            */
             // Hash password
             const hashedPassword = await bcrypt.hash(
                 value.password,
@@ -193,15 +204,17 @@ class NurseService {
                 }
             }
 
-            // // Check if new phone number already exists (if phone is being updated)
-            // if (updateData.phone && updateData.phone !== existingNurse.phone) {
-            //     const existingPhone = await prisma.user.findFirst({
-            //         where: { phone: value.phone }
-            //     });
-            //     if (existingPhone) {
-            //         throw new BadRequestError("Phone number already exists");
-            //     }
-            // }
+            // Check if new phone already exists (if phone is being updated)
+            /*
+            if (updateData.phone && updateData.phone !== existingNurse.phone) {
+                const existingPhone = await prisma.user.findUnique({
+                    where: { phone: value.phone }
+                });
+                if (existingPhone && existingPhone.id !== existingNurse.id) {
+                    throw new BadRequestError("Số điện thoại đã tồn tại");
+                }
+            }
+            */
 
             // Create update data object with only changed fields
             const updateFields = {};

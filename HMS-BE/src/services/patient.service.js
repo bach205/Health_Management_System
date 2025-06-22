@@ -28,7 +28,7 @@ class PatientService {
 
     async getPatients({ keyword = "", sort = "newest", isActive = "all", page = 1, pageSize = 10 }) {
         const where = {
-            role: "patient",    
+            role: "patient",
             AND: [
                 {
                     OR: [
@@ -97,8 +97,20 @@ class PatientService {
             throw new BadRequestError("Email đã tồn tại");
         }
 
+        // Check if phone exists
+        /*
+        if (phone) {
+            const existingPhone = await prisma.user.findUnique({
+                where: { phone }
+            });
+            if (existingPhone) {
+                throw new BadRequestError("Số điện thoại đã tồn tại");
+            }
+        }
+        */
+
         // Hash password
-        const hashedPassword = await bcrypt.hash(password, 
+        const hashedPassword = await bcrypt.hash(password,
             parseInt(process.env.BCRYPT_SALT_ROUNDS)
         );
 
@@ -152,6 +164,18 @@ class PatientService {
                 throw new BadRequestError("Email đã tồn tại");
             }
         }
+
+        // Check if phone exists (if phone is being changed)
+        /*
+        if (phone !== existingPatient.phone) {
+            const phoneExists = await prisma.user.findUnique({
+                where: { phone }
+            });
+            if (phoneExists && phoneExists.id !== existingPatient.id) {
+                throw new BadRequestError("Số điện thoại đã tồn tại");
+            }
+        }
+        */
 
         const updatedPatient = await prisma.user.update({
             where: {
@@ -220,7 +244,7 @@ class PatientService {
 
         // Generate random password
         const newPassword = this.#createRandomPassword();
-        const hashedPassword = await bcrypt.hash(newPassword, 
+        const hashedPassword = await bcrypt.hash(newPassword,
             parseInt(process.env.BCRYPT_SALT_ROUNDS)
         );
 
@@ -234,7 +258,7 @@ class PatientService {
         });
 
         // Send email with new password
-         sendStaffNewPasswordEmail(patient.email, newPassword);
+        sendStaffNewPasswordEmail(patient.email, newPassword);
 
         return true;
     }

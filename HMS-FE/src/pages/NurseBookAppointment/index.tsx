@@ -172,10 +172,10 @@ const NurseBookAppointment: React.FC = () => {
         appointment_date: dayjs(values.appointment_date).format('YYYY-MM-DD'),
         appointment_time: values.appointment_time // Ensure HH:mm:ss format
       });
-      
+
       if (response.success) {
         message.success('Đặt lịch thành công');
-        navigate('/nurse/appointments');
+        // navigate('/nurse/appointments');
       }
     } catch (error: any) {
       message.error(error.response?.data?.message || 'Đặt lịch thất bại');
@@ -204,7 +204,7 @@ const NurseBookAppointment: React.FC = () => {
                 <Input prefix={<UserOutlined />} placeholder="Nhập tên bệnh nhân" />
               </Form.Item>
             </Col>
-            <Col span={12}>
+            {/* <Col span={12}>
               <Form.Item
                 name="phoneNumber"
                 label="Số điện thoại"
@@ -215,16 +215,12 @@ const NurseBookAppointment: React.FC = () => {
               >
                 <Input prefix={<PhoneOutlined />} placeholder="Nhập số điện thoại" />
               </Form.Item>
-            </Col>
-          </Row>
-
-          <Row gutter={16}>
+            </Col> */}
             <Col span={12}>
               <Form.Item
                 name="email"
                 label="Email"
                 rules={[
-                  { required: true, message: 'Vui lòng nhập email' },
                   { type: 'email', message: 'Email không hợp lệ' }
                 ]}
               >
@@ -232,6 +228,20 @@ const NurseBookAppointment: React.FC = () => {
               </Form.Item>
             </Col>
           </Row>
+
+          {/* <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                name="email"
+                label="Email"
+                rules={[
+                  { type: 'email', message: 'Email không hợp lệ' }
+                ]}
+              >
+                <Input prefix={<MailOutlined />} placeholder="Nhập email" />
+              </Form.Item>
+            </Col>
+          </Row> */}
 
           {/* Thông tin lịch hẹn */}
           <Row gutter={16}>
