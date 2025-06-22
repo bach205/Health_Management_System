@@ -90,10 +90,12 @@ class AppointmentService {
       SELECT s.*, 
         u.full_name as doctor_name,
         u.role as doctor_role,
-        c.name as clinic_name
+        c.name as clinic_name,
+        d.specialty as doctor_specialty
       FROM available_slots s
       LEFT JOIN users u ON s.doctor_id = u.id
       LEFT JOIN clinics c ON s.clinic_id = c.id
+      LEFT JOIN doctors d ON s.doctor_id = d.user_id
       WHERE s.is_available = 1
       AND u.role = 'doctor'
     `;

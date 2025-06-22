@@ -228,6 +228,34 @@ class AuthController {
       });
     }
   }
+
+  async refreshToken(req, res) {
+    try {
+      const { refreshToken } = req.body;
+      if (!refreshToken) {
+        return res.status(400).json({
+          success: false,
+          message: "Refresh token is required",
+          error: "REFRESH_TOKEN_REQUIRED"
+        });
+      }
+
+      const result = await AuthService.refreshToken(refreshToken);
+      return new OK({
+        message: "Token refreshed successfully",
+        metadata: {
+          accessToken: result.accessToken,
+          refreshToken: result.refreshToken,
+        },
+      }).send(res);
+    } catch (error) {
+      return res.status(error.status || 400).json({
+        success: false,
+        message: error.message || "Refresh token failed",
+        error: error.name,
+      });
+    }
+  }
 }
 
 module.exports = new AuthController();

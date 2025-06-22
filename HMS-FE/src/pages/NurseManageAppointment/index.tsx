@@ -74,6 +74,7 @@ const NurseManageAppointment: React.FC = () => {
   });
   const [rescheduleModalVisible, setRescheduleModalVisible] = useState(false);
   const [rescheduleAppointment, setRescheduleAppointment] = useState<Appointment | null>(null);
+  const [showRescheduleButton, setShowRescheduleButton] = useState(false);
   const isMobile = useIsMobile();
 
   // Fetch appointments
@@ -149,7 +150,9 @@ const NurseManageAppointment: React.FC = () => {
       setRejectModalVisible(false);
       setRejectReason('');
       setSelectedAppointment(null);
-      fetchAppointments();
+      setShowRescheduleButton(false);
+      // Reload the page after successful cancellation
+      window.location.reload();
     } catch (error) {
       message.error('Không thể hủy lịch hẹn');
     } finally {
@@ -160,6 +163,27 @@ const NurseManageAppointment: React.FC = () => {
   const showRejectModal = (appointment: Appointment) => {
     setSelectedAppointment(appointment);
     setRejectModalVisible(true);
+    setShowRescheduleButton(false);
+    setRejectReason('');
+  };
+
+  const handleRejectReasonChange = (value: string) => {
+    setRejectReason(value);
+  };
+
+  const handleRescheduleClick = () => {
+    if (selectedAppointment) {
+      setRescheduleAppointment(selectedAppointment);
+      setRescheduleModalVisible(true);
+      setRejectModalVisible(false);
+      setRejectReason('');
+      setShowRescheduleButton(false);
+    }
+  };
+
+  const showRescheduleModal = (appointment: Appointment) => {
+    setRescheduleAppointment(appointment);
+    setRescheduleModalVisible(true);
   };
 
   const getStatusTag = (status: Appointment['status']) => {
@@ -226,13 +250,6 @@ const NurseManageAppointment: React.FC = () => {
       key: 'status',
       sorter: (a: Appointment, b: Appointment) => a.status.localeCompare(b.status),
       render: (status: Appointment['status']) => getStatusTag(status),
-      filters: [
-        { text: 'Chờ xác nhận', value: 'pending' },
-        { text: 'Đã xác nhận', value: 'confirmed' },
-        { text: 'Đã hủy', value: 'cancelled' },
-        { text: 'Đã hoàn thành', value: 'completed' },
-      ],
-      onFilter: (value: boolean | Key, record: Appointment) => record.status === value,
       className: 'whitespace-nowrap',
     },
     {
@@ -248,15 +265,33 @@ const NurseManageAppointment: React.FC = () => {
           >
             Xác nhận
           </Button>
-          {record.status !== "pending" ? (
+          {record.status === "cancelled" ? (
+            <Button
+              type="primary"
+              onClick={() => showRescheduleModal(record)}
+              block
+            >
+              Đổi lịch khám
+            </Button>
+          ) : record.status === "pending" ? (
+            <Button danger onClick={() => showRejectModal(record)} block>
+              Hủy
+            </Button>
+          ) : record.status === "confirmed" || record.status === "completed" ? (
+            <Button
+              disabled
+              block
+              style={{ color: '#999', borderColor: '#d9d9d9' }}
+            >
+              Không thể thao tác
+            </Button>
+          ) : (
             <Button
               onClick={() => showRejectModal(record)}
               block
             >
               Đổi lịch khám
             </Button>
-          ) : (
-            <Button danger onClick={() => showRejectModal(record)} block disabled={String(record.status) === "cancelled"}>Hủy</Button>
           )}
         </Space>
       ),
@@ -314,63 +349,34 @@ const NurseManageAppointment: React.FC = () => {
         </div>
 
         <Modal
-          title={selectedAppointment && selectedAppointment.status !== "pending" ? "Đổi lịch khám" : "Lý do hủy lịch hẹn"}
+          title="Lý do hủy lịch hẹn"
           open={rejectModalVisible}
           footer={null}
           onCancel={() => {
             setRejectModalVisible(false);
             setRejectReason('');
             setSelectedAppointment(null);
+            setShowRescheduleButton(false);
           }}
           width={window.innerWidth < 640 ? '98vw' : 800}
           bodyStyle={{ maxHeight: window.innerWidth < 640 ? 350 : 500, overflowY: 'auto', padding: window.innerWidth < 640 ? 12 : 24 }}
           className="max-w-full"
         >
-          {selectedAppointment && selectedAppointment.status !== "pending" ? null : (
-            <>
-              <Input.TextArea
-                rows={4}
-                value={rejectReason}
-                onChange={e => setRejectReason(e.target.value)}
-                placeholder="Nhập lý do hủy lịch hẹn"
-              />
-              <div className="flex justify-end gap-2 mt-4">
-                <Button
-                  type="primary"
-                  onClick={() => {
-                    setRescheduleAppointment(selectedAppointment);
-                    setRescheduleModalVisible(true);
-                    setRejectModalVisible(false);
-                  }}
-                  disabled={!selectedAppointment}
-                >
-                  Đặt lại lịch
-                </Button>
-                <Button
-                  danger
-                  onClick={handleRejectAppointment}
-                  loading={loading}
-                >
-                  Hủy luôn
-                </Button>
-              </div>
-            </>
-          )}
-          {selectedAppointment && selectedAppointment.status !== "pending" && (
-            <div className="flex justify-end gap-2 mt-4">
-              <Button
-                type="primary"
-                onClick={() => {
-                  setRescheduleAppointment(selectedAppointment);
-                  setRescheduleModalVisible(true);
-                  setRejectModalVisible(false);
-                }}
-                disabled={!selectedAppointment}
-              >
-                Đổi lịch khám
-              </Button>
-            </div>
-          )}
+          <Input.TextArea
+            rows={4}
+            value={rejectReason}
+            onChange={e => handleRejectReasonChange(e.target.value)}
+            placeholder="Nhập lý do hủy lịch hẹn"
+          />
+          <div className="flex justify-end gap-2 mt-4">
+            <Button
+              danger
+              onClick={handleRejectAppointment}
+              loading={loading}
+            >
+              Hủy luôn
+            </Button>
+          </div>
         </Modal>
 
         <Modal
@@ -384,6 +390,10 @@ const NurseManageAppointment: React.FC = () => {
           width={window.innerWidth < 640 ? '98vw' : 800}
           bodyStyle={{ maxHeight: window.innerWidth < 640 ? 400 : 500, overflowY: 'auto', padding: window.innerWidth < 640 ? 12 : 24 }}
           className="max-w-full"
+          centered
+          maskClosable={false}
+          destroyOnClose
+          style={{ top: '40%', transform: 'translateY(-50%)' }}
         >
           {rescheduleAppointment && (
             <NurseRescheduleAppointment
