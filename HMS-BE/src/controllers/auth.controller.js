@@ -96,6 +96,8 @@ class AuthController {
   }
 
   async resetPassword(req, res) {
+    console.log("Reset password request received:", req.body);
+    
     try {
       const { token, oldPassword, newPassword, confirmPassword } = req.body;
       const result = await AuthService.resetPassword(
@@ -184,6 +186,47 @@ class AuthController {
       message: "Cập nhật avatar thành công",
       metadata: result,
     }).send(res);
+  }
+
+  async loginWithPhone(req, res) {
+    try {
+      const result = await AuthService.loginWithPhone(req.body);
+      return new OK({
+        message: "Đăng nhập thành công",
+        metadata: {
+          user: result.user,
+          accessToken: result.accessToken,
+          refreshToken: result.refreshToken,
+        },
+      }).send(res);
+    } catch (error) {
+      return res.status(error.status || 400).json({
+        success: false,
+        message: error.message || "Đăng nhập thất bại",
+        error: error.name,
+      });
+    }
+  }
+
+  async registerWithPhone(req, res) {
+    try {
+      const result = await AuthService.registerWithPhone(req.body);
+      return new CREATED({
+        message: "Đăng ký thành công",
+        metadata: {
+          user: result.user,
+          patient: result.patient,
+          accessToken: result.accessToken,
+          refreshToken: result.refreshToken,
+        },
+      }).send(res);
+    } catch (error) {
+      return res.status(error.status || 400).json({
+        success: false,
+        message: error.message || "Đăng ký thất bại",
+        error: error.name,
+      });
+    }
   }
 }
 

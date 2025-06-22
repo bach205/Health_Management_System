@@ -53,8 +53,8 @@ authRouter.post(
 
 authRouter.post(
   "/reset-password",
-  authenticate,
-  validate({ body: resetPasswordSchema }),
+  // authenticate,
+  // validate({ body: resetPasswordSchema }),
   asyncHandler(AuthController.resetPassword),
   authController.resetPassword
 );
@@ -88,6 +88,19 @@ authRouter.post(
   asyncHandler(AuthController.updateAvatar),
   authController.updateAvatar
 );
+
+authRouter.post(
+  "/login-phone",
+  asyncHandler(AuthController.loginWithPhone),
+  authController.loginWithPhone
+);
+
+authRouter.post(
+  "/register-phone",
+  asyncHandler(AuthController.registerWithPhone),
+  authController.registerWithPhone
+);
+
 // Ví dụ check authen bên trong router
 // authRouter.get("/users", authenticateToken, authorizeRoles("admin"), asyncHandler(AuthController.getUsers));
 

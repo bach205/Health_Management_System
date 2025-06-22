@@ -119,7 +119,10 @@ class NurseService {
                 throw new BadRequestError("Email đã tồn tại");
             }
             // Check if phone already exists
+<<<<<<< HEAD
             /*
+=======
+>>>>>>> 59c8a726ed9b7d9eda93aa6197cc47a7892682d9
             if (value.phone) {
                 const existingPhone = await prisma.user.findUnique({
                     where: { phone: value.phone }
@@ -128,7 +131,10 @@ class NurseService {
                     throw new BadRequestError("Số điện thoại đã tồn tại");
                 }
             }
+<<<<<<< HEAD
             */
+=======
+>>>>>>> 59c8a726ed9b7d9eda93aa6197cc47a7892682d9
             // Hash password
             const hashedPassword = await bcrypt.hash(
                 value.password,
@@ -139,7 +145,7 @@ class NurseService {
                 data: {
                     full_name: value.full_name,
                     email: value.email,
-                    phone: value.phone,
+                    phone: value.phone || null,
                     password: hashedPassword,
                     gender: value.gender,
                     date_of_birth: value.date_of_birth || null,
@@ -150,7 +156,7 @@ class NurseService {
                     sso_provider: "local"
                 },
             });
-            await sendStaffNewPasswordEmail(nurseData.email, nurseData.password);
+            sendStaffNewPasswordEmail(nurseData.email, nurseData.password);
 
             if (!nurse) {
                 throw new BadRequestError("Có lỗi trong quá trình tạo tài khoản, vui lòng thử lại!");
@@ -205,7 +211,10 @@ class NurseService {
             }
 
             // Check if new phone already exists (if phone is being updated)
+<<<<<<< HEAD
             /*
+=======
+>>>>>>> 59c8a726ed9b7d9eda93aa6197cc47a7892682d9
             if (updateData.phone && updateData.phone !== existingNurse.phone) {
                 const existingPhone = await prisma.user.findUnique({
                     where: { phone: value.phone }
@@ -214,7 +223,10 @@ class NurseService {
                     throw new BadRequestError("Số điện thoại đã tồn tại");
                 }
             }
+<<<<<<< HEAD
             */
+=======
+>>>>>>> 59c8a726ed9b7d9eda93aa6197cc47a7892682d9
 
             // Create update data object with only changed fields
             const updateFields = {};

@@ -1,256 +1,274 @@
+-- Create and use the hospital database
 CREATE DATABASE hospital;
 USE hospital;
-
--- Bảng người dùng hệ thống
+-- drop database hospital
+-- Table for system users
 CREATE TABLE users (
-    id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Khóa chính của người dùng',
-    email VARCHAR(255) UNIQUE NOT NULL COMMENT 'Email đăng nhập, duy nhất',
-    password_hash VARCHAR(255) COMMENT 'Mã hóa mật khẩu (nếu dùng local)',
-    full_name VARCHAR(255) COMMENT 'Tên đầy đủ',
-    date_of_birth DATE COMMENT 'Ngày sinh',
-	gender ENUM('male', 'female', 'other') COMMENT 'Giới tính',
-    phone VARCHAR(20) COMMENT 'Số điện thoại',
-	address TEXT COMMENT 'Địa chỉ liên hệ',
-    role ENUM('doctor', 'nurse', 'receptionist', 'admin', 'patient') NOT NULL COMMENT 'Vai trò người dùng',
-    sso_provider ENUM('google', 'facebook', 'local') DEFAULT 'local' COMMENT 'Nguồn xác thực',
-    is_active BOOLEAN DEFAULT TRUE COMMENT 'Trạng thái hoạt động của tài khoản',
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT 'Thời gian tạo',
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Thời gian cập nhật'
+    id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Primary key for users',
+    email VARCHAR(255) UNIQUE NOT NULL COMMENT 'Unique login email',
+    password VARCHAR(255) COMMENT 'Hashed password (for local authentication)',
+    full_name VARCHAR(255) COMMENT 'Full name',
+    date_of_birth DATE COMMENT 'Date of birth',
+    gender ENUM('male', 'female', 'other') COMMENT 'Gender',
+    phone VARCHAR(20) COMMENT 'Phone number',
+    address TEXT COMMENT 'Contact address',
+    role ENUM('doctor', 'nurse', 'receptionist', 'admin', 'patient') NOT NULL COMMENT 'User role',
+    sso_provider ENUM('google', 'facebook', 'local') DEFAULT 'local' COMMENT 'Authentication provider',
+    is_active BOOLEAN DEFAULT TRUE COMMENT 'Account status',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT 'Creation timestamp',
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Update timestamp'
 );
 
-ALTER TABLE users CHANGE COLUMN password_hash password VARCHAR(255);
-
--- Bệnh nhân
+-- Table for patients
 CREATE TABLE patients (
-    id INT PRIMARY KEY COMMENT 'Khóa chính bệnh nhân (đồng thời là id của users)',
-    identity_number VARCHAR(50) COMMENT 'CCCD/BHYT nếu có',
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT 'Ngày đăng ký',
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Cập nhật gần nhất',
+    id INT PRIMARY KEY COMMENT 'Primary key for patients (references users.id)',
+    identity_number VARCHAR(50) COMMENT 'ID card or insurance number',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT 'Registration date',
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Last update',
     FOREIGN KEY (id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- Phòng khám
+-- Table for clinics
 CREATE TABLE clinics (
-    id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Mã phòng khám',
-    name VARCHAR(255) NOT NULL COMMENT 'Tên chuyên khoa',
-    description TEXT COMMENT 'Mô tả phòng khám'
+    id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Clinic ID',
+    name VARCHAR(255) NOT NULL COMMENT 'Specialty name',
+    description TEXT COMMENT 'Clinic description'
 );
 
+-- Table for doctors
 -- Thông tin mở rộng từ user (bác sĩ)
 CREATE TABLE doctors (
     user_id INT PRIMARY KEY COMMENT 'Tham chiếu đến users(id)',
     specialty VARCHAR(255) COMMENT 'Chuyên môn',
     bio TEXT COMMENT 'Giới thiệu',
+	rating DECIMAL(2,1) DEFAULT 0.0 COMMENT '(tối đa 9.9) Đánh giá trung bình, sửa rating trên backend', 
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- Ca làm việc
+-- Table for nurses
+CREATE TABLE nurses (
+    user_id INT PRIMARY KEY COMMENT 'References users.id',
+    specialty VARCHAR(255) COMMENT 'Nursing specialty',
+    bio TEXT COMMENT 'Nurse biography',
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Table for shifts
 CREATE TABLE shifts (
-    id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'ID ca làm',
-    name VARCHAR(100) COMMENT 'Tên ca (VD: sáng, chiều)',
-    start_time TIME COMMENT 'Giờ bắt đầu',
-    end_time TIME COMMENT 'Giờ kết thúc'
+    id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Shift ID',
+    name VARCHAR(100) COMMENT 'Shift name (e.g., morning, afternoon)',
+    start_time TIME COMMENT 'Start time',
+    end_time TIME COMMENT 'End time'
 );
 
--- Lịch làm việc của nhân sự
+-- Table for work schedules
 CREATE TABLE work_schedules (
-    id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'ID lịch làm việc',
-    user_id INT NOT NULL COMMENT 'Người làm việc (doctor/nurse)',
-    clinic_id INT NOT NULL COMMENT 'Phòng khám',
-    work_date DATE NOT NULL COMMENT 'Ngày làm việc',
-    shift_id INT NOT NULL COMMENT 'Ca làm cụ thể',
-    FOREIGN KEY (user_id) REFERENCES users(id),
-    FOREIGN KEY (clinic_id) REFERENCES clinics(id),
-    FOREIGN KEY (shift_id) REFERENCES shifts(id)
+    id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Work schedule ID',
+    user_id INT NOT NULL COMMENT 'Staff member (doctor/nurse)',
+    clinic_id INT NOT NULL COMMENT 'Clinic',
+    work_date DATE NOT NULL COMMENT 'Work date',
+    shift_id INT NOT NULL COMMENT 'Specific shift',
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (clinic_id) REFERENCES clinics(id) ON DELETE CASCADE,
+    FOREIGN KEY (shift_id) REFERENCES shifts(id) ON DELETE CASCADE
 );
 
--- Yêu cầu khám phòng khác
+-- Table for examination orders
 CREATE TABLE examination_orders (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    doctor_id INT NOT NULL COMMENT 'Bác sĩ chỉ định',
-    patient_id INT NOT NULL COMMENT 'Bệnh nhân',
-    from_clinic_id INT NOT NULL COMMENT 'Phòng hiện tại',
-    to_clinic_id INT NOT NULL COMMENT 'Phòng chuyển đến',
-    total_cost DECIMAL(10,2) DEFAULT 0 COMMENT 'Tổng chi phí dự kiến của đợt khám',
+    doctor_id INT NOT NULL COMMENT 'Referring doctor',
+    patient_id INT NOT NULL COMMENT 'Patient',
+    from_clinic_id INT NOT NULL COMMENT 'Current clinic',
+    to_clinic_id INT NOT NULL COMMENT 'Referred clinic',
+    total_cost DECIMAL(10,2) DEFAULT 0 COMMENT 'Estimated total cost',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (doctor_id) REFERENCES users(id),
-    FOREIGN KEY (patient_id) REFERENCES patients(id),
-    FOREIGN KEY (from_clinic_id) REFERENCES clinics(id),
-    FOREIGN KEY (to_clinic_id) REFERENCES clinics(id)
+    FOREIGN KEY (doctor_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
+    FOREIGN KEY (from_clinic_id) REFERENCES clinics(id) ON DELETE CASCADE,
+    FOREIGN KEY (to_clinic_id) REFERENCES clinics(id) ON DELETE CASCADE
 );
 
--- Hồ sơ khám tổng quát
+-- Table for examination records
 CREATE TABLE examination_records (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    patient_id INT NOT NULL COMMENT 'Bệnh nhân',
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT 'Thời gian bắt đầu hồ sơ khám',
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Cập nhật hồ sơ',
-    symptoms TEXT COMMENT 'Triệu chứng ban đầu',
-    primary_doctor_id INT COMMENT 'Bác sĩ tổng kết',
-    final_diagnosis TEXT COMMENT 'Chẩn đoán cuối cùng',
-    created_by_user_id INT COMMENT 'Người tạo hồ sơ khám (nếu khác bệnh nhân)',
-    FOREIGN KEY (patient_id) REFERENCES patients(id),
-    FOREIGN KEY (primary_doctor_id) REFERENCES users(id),
-    FOREIGN KEY (created_by_user_id) REFERENCES users(id)
+    patient_id INT NOT NULL COMMENT 'Patient',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT 'Record creation time',
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Record update time',
+    symptoms TEXT COMMENT 'Initial symptoms',
+    primary_doctor_id INT COMMENT 'Primary doctor',
+    final_diagnosis TEXT COMMENT 'Final diagnosis',
+    created_by_user_id INT COMMENT 'User who created the record',
+    FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
+    FOREIGN KEY (primary_doctor_id) REFERENCES users(id) ON DELETE SET NULL,
+    FOREIGN KEY (created_by_user_id) REFERENCES users(id) ON DELETE SET NULL
 );
 
--- Chi tiết khám từng phòng
+-- Table for examination details
 CREATE TABLE examination_details (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    record_id INT NOT NULL COMMENT 'Hồ sơ khám tổng',
-    clinic_id INT NOT NULL COMMENT 'Phòng khám cụ thể',
-    doctor_id INT NOT NULL COMMENT 'Bác sĩ khám phòng',
-    result TEXT COMMENT 'Kết quả khám',
-    note TEXT COMMENT 'Ghi chú thêm',
-    examined_at DATETIME COMMENT 'Thời gian hoàn thành khám',
-    status ENUM('pending', 'in_progress', 'done', 'cancelled') DEFAULT 'pending' COMMENT 'Trạng thái khám',
-    FOREIGN KEY (record_id) REFERENCES examination_records(id),
-    FOREIGN KEY (clinic_id) REFERENCES clinics(id),
-    FOREIGN KEY (doctor_id) REFERENCES users(id)
+    record_id INT NOT NULL COMMENT 'General examination record',
+    clinic_id INT NOT NULL COMMENT 'Specific clinic',
+    doctor_id INT NOT NULL COMMENT 'Doctor at clinic',
+    result TEXT COMMENT 'Examination result',
+    note TEXT COMMENT 'Additional notes',
+    examined_at DATETIME COMMENT 'Examination completion time',
+    status ENUM('pending', 'in_progress', 'done', 'cancelled') DEFAULT 'pending' COMMENT 'Examination status',
+    FOREIGN KEY (record_id) REFERENCES examination_records(id) ON DELETE CASCADE,
+    FOREIGN KEY (clinic_id) REFERENCES clinics(id) ON DELETE CASCADE,
+    FOREIGN KEY (doctor_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- Hàng đợi bệnh nhân
+-- Table for patient queues
 CREATE TABLE queues (
     id INT AUTO_INCREMENT PRIMARY KEY,
     patient_id INT NOT NULL,
     clinic_id INT NOT NULL,
-    record_id INT COMMENT 'Hồ sơ khám liên quan (nếu có)',
-    status ENUM('waiting', 'in_progress', 'done', 'skipped') DEFAULT 'waiting' COMMENT 'Trạng thái trong hàng đợi',
-    priority TINYINT DEFAULT 0 COMMENT 'Ưu tiên (0 thấp - 10 cao)',
-    registered_online BOOLEAN DEFAULT FALSE COMMENT 'Đăng ký qua mạng hay không',
-    qr_code VARCHAR(255) COMMENT 'Mã QR checkin',
-    called_at DATETIME COMMENT 'Thời điểm được gọi vào',
+    record_id INT COMMENT 'Related examination record',
+    appointment_id INT COMMENT 'Related appointment',
+    status ENUM('waiting', 'in_progress', 'done', 'skipped') DEFAULT 'waiting' COMMENT 'Queue status',
+    priority TINYINT DEFAULT 0 COMMENT 'Priority (0 low - 10 high)',
+    registered_online BOOLEAN DEFAULT FALSE COMMENT 'Online registration',
+    qr_code VARCHAR(255) COMMENT 'Check-in QR code',
+    called_at DATETIME COMMENT 'Time called',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (patient_id) REFERENCES patients(id),
-    FOREIGN KEY (clinic_id) REFERENCES clinics(id),
-    FOREIGN KEY (record_id) REFERENCES examination_records(id)
+    FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
+    FOREIGN KEY (clinic_id) REFERENCES clinics(id) ON DELETE CASCADE,
+    FOREIGN KEY (record_id) REFERENCES examination_records(id) ON DELETE SET NULL
+    -- FOREIGN KEY for appointment_id will be added after appointments table
 );
 
--- Đơn thuốc tổng
+-- Table for prescriptions
 CREATE TABLE prescriptions (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    record_id INT NOT NULL COMMENT 'Liên kết hồ sơ khám',
+    record_id INT NOT NULL COMMENT 'Linked examination record',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (record_id) REFERENCES examination_records(id)
+    FOREIGN KEY (record_id) REFERENCES examination_records(id) ON DELETE CASCADE
 );
 
--- Chi tiết thuốc
+-- Table for prescription items
 CREATE TABLE prescription_items (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    prescription_id INT NOT NULL COMMENT 'Thuộc đơn nào',
-    medicine_name VARCHAR(255) NOT NULL COMMENT 'Tên thuốc',
-    dosage VARCHAR(100) COMMENT 'Liều lượng',
-    frequency VARCHAR(100) COMMENT 'Số lần uống mỗi ngày',
-    duration VARCHAR(100) COMMENT 'Thời gian sử dụng',
-    note TEXT COMMENT 'Ghi chú bác sĩ',
-    FOREIGN KEY (prescription_id) REFERENCES prescriptions(id)
+    prescription_id INT NOT NULL COMMENT 'Related prescription',
+    medicine_name VARCHAR(255) NOT NULL COMMENT 'Medicine name',
+    dosage VARCHAR(100) COMMENT 'Dosage',
+    frequency VARCHAR(100) COMMENT 'Frequency per day',
+    duration VARCHAR(100) COMMENT 'Duration of use',
+    note TEXT COMMENT 'Doctor’s notes',
+    FOREIGN KEY (prescription_id) REFERENCES prescriptions(id) ON DELETE CASCADE
 );
 
--- Bảng thông tin thanh toán
+-- Table for payments
 CREATE TABLE payments (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    patient_id INT NOT NULL COMMENT 'Người thanh toán',
-    record_id INT COMMENT 'Liên kết hồ sơ khám (nếu có)',
-    amount DECIMAL(10,2) NOT NULL COMMENT 'Số tiền thanh toán',
-    method ENUM('cash', 'card', 'bank_transfer', 'e_wallet') COMMENT 'Phương thức thanh toán',
-    payment_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT 'Thời điểm thanh toán',
-    note TEXT COMMENT 'Ghi chú (VD: đợt thanh toán, hoàn tiền, bổ sung)',
-    is_refund BOOLEAN DEFAULT FALSE COMMENT 'Có phải hoàn tiền không',
-    FOREIGN KEY (patient_id) REFERENCES patients(id),
-    FOREIGN KEY (record_id) REFERENCES examination_records(id)
+    patient_id INT NOT NULL COMMENT 'Payer',
+    record_id INT COMMENT 'Linked examination record',
+    amount DECIMAL(10,2) NOT NULL COMMENT 'Payment amount',
+    method ENUM('cash', 'card', 'bank_transfer', 'e_wallet') COMMENT 'Payment method',
+    payment_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT 'Payment timestamp',
+    note TEXT COMMENT 'Notes (e.g., installment, refund)',
+    is_refund BOOLEAN DEFAULT FALSE COMMENT 'Is a refund',
+    FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
+    FOREIGN KEY (record_id) REFERENCES examination_records(id) ON DELETE SET NULL
 );
 
--- Bảng này dùng để ghi nhận số dư hiện tại, hỗ trợ kiểm soát bệnh nhân còn nợ hay còn dư tiền để trừ tiếp/bổ sung.
+-- Table for payment balances
 CREATE TABLE payment_balances (
-    patient_id INT PRIMARY KEY COMMENT 'Khóa chính là bệnh nhân',
-    balance DECIMAL(10,2) DEFAULT 0 COMMENT 'Số dư (âm nếu còn nợ)',
+    patient_id INT PRIMARY KEY COMMENT 'Primary key is patient ID',
+    balance DECIMAL(10,2) DEFAULT 0 COMMENT 'Balance (negative if owed)',
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (patient_id) REFERENCES patients(id)
+    FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE
 );
 
--- Chi tiết từng khoản phí theo lượt khám
+-- Table for invoice items
 CREATE TABLE invoice_items (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    record_id INT NOT NULL COMMENT 'Liên kết hồ sơ khám',
-    description TEXT COMMENT 'Mô tả phí (khám, xét nghiệm, thuốc...)',
-    amount DECIMAL(10,2) NOT NULL COMMENT 'Chi phí mục này',
+    record_id INT NOT NULL COMMENT 'Linked examination record',
+    description TEXT COMMENT 'Fee description (consultation, test, medicine)',
+    amount DECIMAL(10,2) NOT NULL COMMENT 'Item cost',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (record_id) REFERENCES examination_records(id)
+    FOREIGN KEY (record_id) REFERENCES examination_records(id) ON DELETE CASCADE
 );
 
-INSERT INTO users (
-    email,
-    password,
-    full_name,
-    phone,
-    role,
-    date_of_birth,
-    gender,
-    address,
-    sso_provider,
-    is_active,
-    created_at,
-    updated_at
-) VALUES (
-    'admin@example.com',
-    '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2',  -- admin123
-    'Admin',
-    '0123456789',
-    'admin', -- hoặc 'admin' nếu enum có
-    '1990-01-01',
-    'other',
-    'Hanoi',
-    'local',
-    1,
-    NOW(),
-    NOW()
+-- Table for appointments
+CREATE TABLE appointments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    patient_id INT NOT NULL,
+    clinic_id INT NOT NULL,
+    doctor_id INT NOT NULL,
+    appointment_date DATE NOT NULL,
+    appointment_time TIME NOT NULL,
+    status ENUM('pending', 'confirmed', 'cancelled', 'completed') DEFAULT 'pending',
+    reason TEXT COMMENT 'Reason for visit',
+    note TEXT COMMENT 'Additional notes',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
+    FOREIGN KEY (clinic_id) REFERENCES clinics(id) ON DELETE CASCADE,
+    FOREIGN KEY (doctor_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- Insert bảng user
--- pasword là password123
+-- Table for available slots
+CREATE TABLE available_slots (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    doctor_id INT NOT NULL,
+    clinic_id INT NOT NULL,
+    slot_date DATE NOT NULL,
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
+    is_available BOOLEAN DEFAULT TRUE,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (doctor_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (clinic_id) REFERENCES clinics(id) ON DELETE CASCADE
+);
+
+-- Add appointment_id column to queues and foreign key constraint
+ALTER TABLE queues
+ADD CONSTRAINT fk_queues_appointments
+FOREIGN KEY (appointment_id) REFERENCES appointments(id) ON DELETE SET NULL;
+
+-- Add priority column to appointments (fixing the original error)
+
+ALTER TABLE appointments
+ADD COLUMN priority INT DEFAULT 0 COMMENT '0: normal booking, 1: nurse booking, 2: urgent' AFTER status;
+
+
+
+-- Update queues with appointment_id where possible
+UPDATE queues q
+JOIN appointments a ON q.patient_id = a.patient_id 
+    AND q.clinic_id = a.clinic_id
+    AND DATE(q.created_at) = a.appointment_date
+SET q.appointment_id = a.id
+WHERE q.appointment_id IS NULL;
+
+-- Insert sample data into users
 INSERT INTO users (email, password, full_name, phone, role, date_of_birth, gender, address, sso_provider, is_active) VALUES
-('doctor1@example.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Nguyễn Văn A', '0987654321', 'doctor', '1985-03-15', 'male', 'Hà Nội', 'local', TRUE),
-('doctor2@example.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Trần Thị B', '0987654322', 'doctor', '1988-07-22', 'female', 'TP.HCM', 'local', TRUE),
-('nurse1@example.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Lê Văn C', '0987654323', 'nurse', '1990-11-10', 'male', 'Đà Nẵng', 'local', TRUE),
-('nurse2@example.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Phạm Thị D', '0987654324', 'nurse', '1992-04-05', 'female', 'Hà Nội', 'local', TRUE),
-('receptionist1@example.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Hoàng Văn E', '0987654325', 'receptionist', '1995-09-12', 'male', 'TP.HCM', 'local', TRUE),
-('receptionist2@example.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Vũ Thị F', '0987654326', 'receptionist', '1993-12-20', 'female', 'Đà Nẵng', 'local', TRUE),
-('patient1@example.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Trần Văn H', '0987654328', 'patient', '1998-02-14', 'male', 'TP.HCM', 'google', TRUE),
-('patient2@example.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Lê Thị I', '0987654329', 'patient', '1996-08-25', 'female', 'Hà Nội', 'local', TRUE),
-('patient3@example.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Phạm Văn J', '0987654330', 'patient', '1990-05-17', 'male', 'Đà Nẵng', 'facebook', TRUE),
-('patient4@example.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Hoàng Thị K', '0987654331', 'patient', '1987-03-09', 'female', 'TP.HCM', 'local', TRUE),
-('patient5@example.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Vũ Văn L', '0987654332', 'patient', '1994-10-01', 'male', 'Hà Nội', 'google', TRUE),
-('patient6@example.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Nguyễn Thị M', '0987654333', 'patient', '1999-07-07', 'female', 'Đà Nẵng', 'local', TRUE),
-('doctor3@example.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Trần Văn N', '0987654334', 'doctor', '1983-01-25', 'male', 'TP.HCM', 'local', TRUE),
-('nurse3@example.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Lê Thị O', '0987654335', 'nurse', '1991-06-15', 'female', 'Hà Nội', 'local', TRUE);
+('admin@example.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Admin', '0123456789', 'admin', '1990-01-01', 'other', 'Hanoi', 'local', TRUE),
+('drnguyenvanminh@gmail.com', '$2b$10$WmOLM2QL2s5Y3QYTum5kJOQN9jIfBIjjIP71lxDedBLEsUO5bmFU2', 'Nguyễn Văn Minh', '0987654321', 'doctor', '1985-03-15', 'male', 'Hà Nội', 'local', TRUE),
+('drtranthilan@gmail.com', '$2b$10$lDLp1RH5ZZ.tJ3MwjJZjMuEvK8oJfdIk4o9MMxLxlPmikyj.P3muK', 'Trần Thị Lan', '0987654322', 'doctor', '1988-07-22', 'female', 'TP.HCM', 'local', TRUE),
+('nurselevanhai@gmail.com', '$2b$10$DWhHRcJ6oWS.X/Yh9DEkAOsB2Vg9uAQmbaC667MhBZnGxeahklRXe', 'Lê Văn Hải', '0987654323', 'nurse', '1990-11-10', 'male', 'Đà Nẵng', 'local', TRUE),
+('nursephamthihong@gmail.com', '$2b$10$SJupulIuCV59ERzfYZqAxeVmXJ6cqOgAhwza.zjiRcZUd0XmMZsCW', 'Phạm Thị Hồng', '0987654324', 'nurse', '1992-04-05', 'female', 'Hà Nội', 'local', TRUE),
+('receptionhoangvanduc@gmail.com', '$2b$10$YtadcrWr4QG9tW8xHqgxweSA1FKEmkJd.p8doH6wVllr4NiUWHt..', 'Hoàng Văn Đức', '0987654325', 'receptionist', '1995-09-12', 'male', 'TP.HCM', 'local', TRUE),
+('receptionvuthianh@gmail.com', '$2b$10$C8XYHl53FkSxrLfh4Dqace.Kh5S7ZuFegCg3O9xl5cbjZoPw741ge', 'Vũ Thị Ánh', '0987654326', 'receptionist', '1993-12-20', 'female', 'Đà Nẵng', 'local', TRUE),
+('tranvanhung@gmail.com', '$2b$10$GxnPuU4OqeCml44HiYk/heRKFk8h0AbY/qM6rmc0A7mrQ4883Elmq', 'Trần Văn Hùng', '0987654328', 'patient', '1998-02-14', 'male', 'TP.HCM', 'local', TRUE),
+('lethithu@gmail.com', '$2b$10$UbIucGc/ZC6mIkCGP7CCjuESGDoq1PMGSyDzD0K3UQ3XGd.whndxK', 'Lê Thị Thu', '0987654329', 'patient', '1996-08-25', 'female', 'Hà Nội', 'local', TRUE),
+('phamvantuan@gmail.com', '$2b$10$W3olOAm.7geI1AY9648vDOUcp/rosMdoWYV1uXeIVd8p9DLwePCzm', 'Phạm Văn Tuấn', '0987654330', 'patient', '1990-05-17', 'male', 'Đà Nẵng', 'facebook', TRUE),
+('hoangthimai@gmail.com', '$2b$10$YJ49PgM.igiHDjkBqZO/zOR.K.V9cOd.it3hoMqw10rDsgSPz9zVO', 'Hoàng Thị Mai', '0987654331', 'patient', '1987-03-09', 'female', 'TP.HCM', 'local', TRUE),
+('vuvanlong@gmail.com', '$2b$10$3OuIqvhF/R0OgNScZhcCEO9P02jHNhFat2ClD.4VB77dxl5QT9yOG', 'Vũ Văn Long', '0987654332', 'patient', '1994-10-01', 'male', 'Hà Nội', 'google', TRUE),
+('nguyenthilinh@gmail.com', '$2b$10$DrvOTxC7TE8HM2oIBtF52u36y.8FpDMnb.FFOpy72srPpAGRWw5EO', 'Nguyễn Thị Linh', '0987654333', 'patient', '1999-07-07', 'female', 'Đà Nẵng', 'local', TRUE),
+('drtrannam@gmail.com', '$2b$10$DrUljwk8Amt2CYCG9N3JWejWeMp3k2bIgxG.zPvwSVlyJY7g1wXL2', 'Trần Văn Nam', '0987654334', 'doctor', '1983-01-25', 'male', 'TP.HCM', 'local', TRUE),
+('nurselethuyen@gmail.com', '$2b$10$vkB5NNh89QrcCfKthf2Xy.B7FViJFW4guWQGJ.91K2aC8yc965a0y', 'Lê Thị Thuyền', '0987654335', 'nurse', '1991-06-15', 'female', 'Hà Nội', 'local', TRUE);
 
--- Alter table user
-UPDATE users SET sso_provider = 'local' WHERE email = 'patient1@example.com';
-UPDATE users SET password = '$2b$10$WmOLM2QL2s5Y3QYTum5kJOQN9jIfBIjjIP71lxDedBLEsUO5bmFU2' WHERE email = 'doctor1@example.com';
-UPDATE users SET password = '$2b$10$lDLp1RH5ZZ.tJ3MwjJZjMuEvK8oJfdIk4o9MMxLxlPmikyj.P3muK' WHERE email = 'doctor2@example.com';
-UPDATE users SET password = '$2b$10$DWhHRcJ6oWS.X/Yh9DEkAOsB2Vg9uAQmbaC667MhBZnGxeahklRXe' WHERE email = 'nurse1@example.com';
-UPDATE users SET password = '$2b$10$SJupulIuCV59ERzfYZqAxeVmXJ6cqOgAhwza.zjiRcZUd0XmMZsCW' WHERE email = 'nurse2@example.com';
-UPDATE users SET password = '$2b$10$YtadcrWr4QG9tW8xHqgxweSA1FKEmkJd.p8doH6wVllr4NiUWHt..' WHERE email = 'receptionist1@example.com';
-UPDATE users SET password = '$2b$10$C8XYHl53FkSxrLfh4Dqace.Kh5S7ZuFegCg3O9xl5cbjZoPw741ge' WHERE email = 'receptionist2@example.com';
-UPDATE users SET password = '$2b$10$GxnPuU4OqeCml44HiYk/heRKFk8h0AbY/qM6rmc0A7mrQ4883Elmq' WHERE email = 'patient1@example.com';
-UPDATE users SET password = '$2b$10$UbIucGc/ZC6mIkCGP7CCjuESGDoq1PMGSyDzD0K3UQ3XGd.whndxK' WHERE email = 'patient2@example.com';
-UPDATE users SET password = '$2b$10$W3olOAm.7geI1AY9648vDOUcp/rosMdoWYV1uXeIVd8p9DLwePCzm' WHERE email = 'patient3@example.com';
-UPDATE users SET password = '$2b$10$YJ49PgM.igiHDjkBqZO/zOR.K.V9cOd.it3hoMqw10rDsgSPz9zVO' WHERE email = 'patient4@example.com';
-UPDATE users SET password = '$2b$10$3OuIqvhF/R0OgNScZhcCEO9P02jHNhFat2ClD.4VB77dxl5QT9yOG' WHERE email = 'patient5@example.com';
-UPDATE users SET password = '$2b$10$DrvOTxC7TE8HM2oIBtF52u36y.8FpDMnb.FFOpy72srPpAGRWw5EO' WHERE email = 'patient6@example.com';
-UPDATE users SET password = '$2b$10$DrUljwk8Amt2CYCG9N3JWejWeMp3k2bIgxG.zPvwSVlyJY7g1wXL2' WHERE email = 'doctor3@example.com';
-UPDATE users SET password = '$2b$10$vkB5NNh89QrcCfKthf2Xy.B7FViJFW4guWQGJ.91K2aC8yc965a0y' WHERE email = 'nurse3@example.com';
-
--- Insert bảng patient
+-- Insert sample data into patients
 INSERT INTO patients (id, identity_number) VALUES
-(8, '123456789001'),  -- Liên kết với patient1@example.com (id=8)
-(9, '123456789002'),  -- Liên kết với patient2@example.com (id=9)
-(10, '123456789003'), -- Liên kết với patient3@example.com (id=10)
-(11, '123456789004'), -- Liên kết với patient4@example.com (id=11)
-(12, '123456789005'), -- Liên kết với patient5@example.com (id=12)
-(13, '123456789006'); -- Liên kết với patient6@example.com (id=13)
+(8, '123456789001'),
+(9, '123456789002'),
+(10, '123456789003'),
+(11, '123456789004'),
+(12, '123456789005'),
+(13, '123456789006');
 
--- Insert bảng clinics
+-- Insert sample data into clinics
 INSERT INTO clinics (name, description) VALUES
 ('Tim mạch', 'Chuyên về các bệnh liên quan đến tim'),
 ('Thần kinh', 'Chuyên về các rối loạn hệ thần kinh'),
@@ -266,68 +284,114 @@ INSERT INTO clinics (name, description) VALUES
 ('Tiết niệu', 'Hệ tiết niệu và sinh sản nam'),
 ('Nội tiết', 'Rối loạn liên quan đến hormone');
 
--- Insert bảng doctors
+-- Insert sample data into doctors
 INSERT INTO doctors (user_id, specialty, bio) VALUES
-(1, 'Tim mạch', 'Bác sĩ tim mạch với 10 năm kinh nghiệm'),
-(2, 'Thần kinh', 'Chuyên gia về rối loạn thần kinh'),
+(2, 'Tim mạch', 'Bác sĩ tim mạch với 10 năm kinh nghiệm'),
+(3, 'Thần kinh', 'Chuyên gia về rối loạn thần kinh'),
 (14, 'Chấn thương chỉnh hình', 'Chuyên gia phẫu thuật thay khớp');
 
--- Insert bảng shifts
+-- Insert sample data into shifts
 INSERT INTO shifts (name, start_time, end_time) VALUES
-('Sáng', '08:00:00', '12:00:00'),
-('Chiều', '13:00:00', '17:00:00'),
-('Tối', '18:00:00', '22:00:00'),
-('Đêm', '22:00:00', '06:00:00'),
-('Cả ngày', '08:00:00', '17:00:00'),
-('Sáng sớm', '06:00:00', '10:00:00'),
-('Chiều muộn', '15:00:00', '19:00:00'),
-('Giữa trưa', '10:00:00', '14:00:00'),
-('Đêm muộn', '00:00:00', '08:00:00'),
-('Sáng cuối tuần', '09:00:00', '13:00:00');
+('08:00-12:00', '08:00:00', '12:00:00'),
+('13:00-17:00', '13:00:00', '17:00:00'),
+('18:00-22:00', '18:00:00', '22:00:00'),
+('22:00-06:00', '22:00:00', '06:00:00'),
+('08:00-17:00', '08:00:00', '17:00:00'),
+('06:00-10:00', '06:00:00', '10:00:00'),
+('15:00-19:00', '15:00:00', '19:00:00'),
+('10:00-14:00', '10:00:00', '14:00:00'),
+('00:00-08:00', '00:00:00', '08:00:00'),
+('09:00-13:00', '09:00:00', '13:00:00');
 
--- Insert bảng work_schedules
+-- Insert sample data into work_schedules
 INSERT INTO work_schedules (user_id, clinic_id, work_date, shift_id) VALUES
-(2, 1, '2025-06-03', 1), -- Bác sĩ 1, Tim mạch, Sáng
-(33, 2, '2025-06-03', 2), -- Bác sĩ 2, Thần kinh, Chiều
-(3, 4, '2025-06-03', 1), -- Y tá 1, Nhi khoa, Sáng
-(4, 5, '2025-06-03', 3), -- Y tá 2, Da liễu, Tối
-(14, 3, '2025-06-04', 1), -- Bác sĩ 3, Chấn thương chỉnh hình, Sáng
-(5, 6, '2025-06-04', 2), -- Lễ tân 1, Mắt, Chiều
-(6, 7, '2025-06-04', 3), -- Lễ tân 2, Tai mũi họng, Tối
-(7, 8, '2025-06-05', 1); -- Quản trị viên 2, Nội tổng quát, Sáng
--- Insert bảng examination_records
+(2, 2, '2025-06-16', 2),
+(2, 2, '2025-06-17', 1),
+(2, 2, '2025-06-18', 2),
+(2, 2, '2025-06-19', 2),
+(2, 2, '2025-06-20', 1),
+(2, 2, '2025-06-21', 2),
+(2, 2, '2025-06-23', 2),
+(2, 2, '2025-06-24', 1),
+(2, 2, '2025-06-25', 2),
+(2, 2, '2025-06-26', 1),
+(2, 2, '2025-06-27', 2),
+(2, 2, '2025-06-28', 1),
+(14, 3, '2025-06-16', 1),
+(14, 3, '2025-06-17', 2),
+(14, 3, '2025-06-18', 1),
+(14, 3, '2025-06-19', 1),
+(14, 3, '2025-06-20', 2),
+(14, 3, '2025-06-21', 1),
+(14, 3, '2025-06-23', 1),
+(14, 3, '2025-06-24', 1),
+(14, 3, '2025-06-25', 2),
+(14, 3, '2025-06-26', 1),
+(14, 3, '2025-06-27', 1),
+(14, 3, '2025-06-28', 2),
+(3, 1, '2025-06-16', 1),
+(3, 2, '2025-06-16', 2),
+(3, 3, '2025-06-17', 1),
+(3, 4, '2025-06-17', 2),
+(3, 1, '2025-06-18', 1),
+(3, 2, '2025-06-19', 2),
+(3, 3, '2025-06-20', 1),
+(4, 5, '2025-06-16', 1),
+(4, 6, '2025-06-16', 2),
+(4, 7, '2025-06-17', 1),
+(4, 8, '2025-06-17', 2),
+(4, 9, '2025-06-18', 1),
+(4, 10, '2025-06-19', 2),
+(4, 11, '2025-06-20', 1),
+(15, 1, '2025-06-16', 3),
+(15, 2, '2025-06-17', 3),
+(15, 8, '2025-06-21', 5),
+(15, 8, '2025-06-22', 5),
+(5, 1, '2025-06-16', 5),
+(5, 2, '2025-06-17', 5),
+(5, 3, '2025-06-18', 5),
+(5, 8, '2025-06-19', 5),
+(5, 1, '2025-06-20', 5),
+(6, 4, '2025-06-16', 2),
+(6, 5, '2025-06-17', 2),
+(6, 6, '2025-06-18', 2),
+(6, 7, '2025-06-19', 2),
+(6, 8, '2025-06-21', 2),
+(6, 8, '2025-06-22', 2);
+
+-- Insert sample data into examination_records
 INSERT INTO examination_records (patient_id, symptoms, primary_doctor_id, final_diagnosis, created_by_user_id) VALUES
-(8, 'Đau đầu, sốt cao 39 độ, ho nhiều', 1, 'Viêm phổi cấp', 1),
-(9, 'Đau bụng dữ dội, buồn nôn', 2, 'Viêm ruột thừa cấp', 2),
+(8, 'Đau đầu, sốt cao 39 độ, ho nhiều', 2, 'Viêm phổi cấp', 2),
+(9, 'Đau bụng dữ dội, buồn nôn', 3, 'Viêm ruột thừa cấp', 3),
 (10, 'Đau khớp gối, khó đi lại', 14, 'Thoái hóa khớp gối', 14),
-(11, 'Sốt phát ban, đau họng', 3, 'Sốt xuất huyết', 3),
-(12, 'Nổi mẩn đỏ toàn thân, ngứa', 4, 'Dị ứng thuốc', 4),
-(13, 'Mờ mắt, nhức mắt', 5, 'Cận thị tiến triển', 5);
+(11, 'Sốt phát ban, đau họng', 2, 'Sốt xuất huyết', 2),
+(12, 'Nổi mẩn đỏ toàn thân, ngứa', 3, 'Dị ứng thuốc', 3),
+(13, 'Mờ mắt, nhức mắt', 14, 'Cận thị tiến triển', 14);
 
--- Insert bảng examination_details
+-- Insert sample data into examination_details
 INSERT INTO examination_details (record_id, clinic_id, doctor_id, result, note, examined_at, status) VALUES
-(1, 1, 1, 'Phổi có dấu hiệu viêm, cần chụp X-quang', 'Bệnh nhân cần nhập viện điều trị', '2025-06-01 09:30:00', 'done'),
-(1, 9, 8, 'X-quang phổi cho thấy viêm phổi thùy dưới', 'Cần điều trị kháng sinh', '2025-06-01 10:15:00', 'done'),
-(2, 2, 2, 'Đau vùng hố chậu phải, dấu hiệu McBurney dương tính', 'Cần phẫu thuật cấp cứu', '2025-06-02 14:00:00', 'done'),
+(1, 1, 2, 'Phổi có dấu hiệu viêm, cần chụp X-quang', 'Bệnh nhân cần nhập viện điều trị', '2025-06-01 09:30:00', 'done'),
+(1, 9, 2, 'X-quang phổi cho thấy viêm phổi thùy dưới', 'Cần điều trị kháng sinh', '2025-06-01 10:15:00', 'done'),
+(2, 2, 3, 'Đau vùng hố chậu phải, dấu hiệu McBurney dương tính', 'Cần phẫu thuật cấp cứu', '2025-06-02 14:00:00', 'done'),
 (3, 3, 14, 'X-quang khớp gối cho thấy thoái hóa độ 2', 'Cần tập vật lý trị liệu', '2025-06-03 08:45:00', 'done'),
-(4, 4, 3, 'Xét nghiệm máu dương tính với sốt xuất huyết', 'Theo dõi tiểu cầu', '2025-06-04 11:20:00', 'done'),
-(5, 5, 4, 'Test dị ứng dương tính với penicillin', 'Tránh sử dụng nhóm thuốc beta-lactam', '2025-06-05 15:30:00', 'done'),
-(6, 6, 5, 'Đo thị lực: 3/10, cần đeo kính -2.5', 'Tái khám sau 3 tháng', '2025-06-06 09:00:00', 'done');
+(4, 4, 2, 'Xét nghiệm máu dương tính với sốt xuất huyết', 'Theo dõi tiểu cầu', '2025-06-04 11:20:00', 'done'),
+(5, 5, 3, 'Test dị ứng dương tính với penicillin', 'Tránh sử dụng nhóm thuốc beta-lactam', '2025-06-05 15:30:00', 'done'),
+(6, 6, 14, 'Đo thị lực: 3/10, cần đeo kính -2.5', 'Tái khám sau 3 tháng', '2025-06-06 09:00:00', 'done');
 
--- Insert bảng queues
--- INSERT INTO queues (patient_id, clinic_id, record_id, appointment_id, status, priority, registered_online, qr_code, called_at) VALUES
--- (8, 1, 1, 1, 'done', 1, true, 'QR001', '2025-06-01 09:00:00'),
--- (9, 2, 2, 2, 'done', 2, false, 'QR002', '2025-06-02 14:00:00'),
--- (10, 3, 3, 3, 'done', 0, true, 'QR003', '2025-06-03 08:30:00'),
--- (11, 4, 4, 4, 'done', 1, false, 'QR004', '2025-06-04 11:00:00'),
--- (12, 5, 5, 5, 'done', 0, true, 'QR005', '2025-06-05 15:00:00'),
--- (13, 6, 6, 6, 'done', 0, false, 'QR006', '2025-06-06 08:45:00');
+-- Insert sample data into queues
+INSERT INTO queues (patient_id, clinic_id, record_id, appointment_id, status, priority, registered_online, qr_code, called_at) VALUES
+(8, 1, 1, NULL, 'done', 1, TRUE, 'QR001', '2025-06-01 09:00:00'),
+(9, 2, 2, NULL, 'done', 2, FALSE, 'QR002', '2025-06-02 14:00:00'),
+(10, 3, 3, NULL, 'done', 0, TRUE, 'QR003', '2025-06-03 08:30:00'),
+(11, 4, 4, NULL, 'done', 1, FALSE, 'QR004', '2025-06-04 11:00:00'),
+(12, 5, 5, NULL, 'done', 0, TRUE, 'QR005', '2025-06-05 15:00:00'),
+(13, 6, 6, NULL, 'done', 0, FALSE, 'QR006', '2025-06-06 08:45:00');
 
--- Insert bảng prescriptions
+-- Insert sample data into prescriptions
 INSERT INTO prescriptions (record_id) VALUES
 (1), (2), (3), (4), (5), (6);
 
--- Insert bảng prescription_items
+-- Insert sample data into prescription_items
 INSERT INTO prescription_items (prescription_id, medicine_name, dosage, frequency, duration, note) VALUES
 (1, 'Amoxicillin 500mg', '1 viên', '3 lần/ngày', '7 ngày', 'Uống sau ăn'),
 (1, 'Paracetamol 500mg', '1 viên', '4 lần/ngày', '5 ngày', 'Khi sốt trên 38.5 độ'),
@@ -337,16 +401,16 @@ INSERT INTO prescription_items (prescription_id, medicine_name, dosage, frequenc
 (5, 'Loratadine 10mg', '1 viên', '1 lần/ngày', '7 ngày', 'Uống buổi tối'),
 (6, 'Atropin 1%', '1 giọt', '2 lần/ngày', '7 ngày', 'Nhỏ mắt');
 
--- Insert bảng payments
+-- Insert sample data into payments
 INSERT INTO payments (patient_id, record_id, amount, method, payment_time, note, is_refund) VALUES
-(8, 1, 1500000.00, 'card', '2025-06-01 11:00:00', 'Thanh toán lần 1', false),
-(9, 2, 2500000.00, 'cash', '2025-06-02 15:00:00', 'Thanh toán toàn bộ', false),
-(10, 3, 800000.00, 'bank_transfer', '2025-06-03 10:00:00', 'Thanh toán lần 1', false),
-(11, 4, 1200000.00, 'e_wallet', '2025-06-04 12:00:00', 'Thanh toán toàn bộ', false),
-(12, 5, 500000.00, 'card', '2025-06-05 16:00:00', 'Thanh toán lần 1', false),
-(13, 6, 300000.00, 'cash', '2025-06-06 10:00:00', 'Thanh toán toàn bộ', false);
+(8, 1, 1500000.00, 'card', '2025-06-01 11:00:00', 'Thanh toán lần 1', FALSE),
+(9, 2, 2500000.00, 'cash', '2025-06-02 15:00:00', 'Thanh toán toàn bộ', FALSE),
+(10, 3, 800000.00, 'bank_transfer', '2025-06-03 10:00:00', 'Thanh toán lần 1', FALSE),
+(11, 4, 1200000.00, 'e_wallet', '2025-06-04 12:00:00', 'Thanh toán toàn bộ', FALSE),
+(12, 5, 500000.00, 'card', '2025-06-05 16:00:00', 'Thanh toán lần 1', FALSE),
+(13, 6, 300000.00, 'cash', '2025-06-06 10:00:00', 'Thanh toán toàn bộ', FALSE);
 
--- Insert bảng payment_balances
+-- Insert sample data into payment_balances
 INSERT INTO payment_balances (patient_id, balance) VALUES
 (8, 0.00),
 (9, 0.00),
@@ -355,7 +419,7 @@ INSERT INTO payment_balances (patient_id, balance) VALUES
 (12, 0.00),
 (13, 0.00);
 
--- Insert bảng invoice_items
+-- Insert sample data into invoice_items
 INSERT INTO invoice_items (record_id, description, amount) VALUES
 (1, 'Khám bệnh', 300000.00),
 (1, 'Chụp X-quang phổi', 500000.00),
@@ -374,79 +438,147 @@ INSERT INTO invoice_items (record_id, description, amount) VALUES
 (5, 'Thuốc chống dị ứng', 100000.00),
 (6, 'Khám bệnh', 300000.00),
 (6, 'Đo thị lực', 0.00);
--- Bảng lịch hẹn khám
-CREATE TABLE appointments (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    patient_id INT NOT NULL,
-    clinic_id INT NOT NULL,
-    doctor_id INT NOT NULL,
-    appointment_date DATE NOT NULL,
-    appointment_time TIME NOT NULL,
-    status ENUM('pending', 'confirmed', 'cancelled', 'completed') DEFAULT 'pending',
-    reason TEXT COMMENT 'Lý do khám',
-    note TEXT COMMENT 'Ghi chú thêm',
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (patient_id) REFERENCES patients(id),
-    FOREIGN KEY (clinic_id) REFERENCES clinics(id),
-    FOREIGN KEY (doctor_id) REFERENCES users(id)
-);
 
--- Thêm dữ liệu mẫu cho lịch hẹn khám
-INSERT INTO appointments (patient_id, clinic_id, doctor_id, appointment_date, appointment_time, status, reason, note) VALUES
--- Lịch hẹn đang chờ xác nhận
-(8, 1, 1, '2025-06-10', '09:00:00', 'pending', 'Đau ngực, khó thở', 'Bệnh nhân có tiền sử bệnh tim'),
-(9, 2, 2, '2025-06-11', '14:00:00', 'pending', 'Đau đầu, chóng mặt', 'Bệnh nhân bị stress nhiều'),
+-- Insert sample data into appointments
+INSERT INTO appointments (patient_id, clinic_id, doctor_id, appointment_date, appointment_time, status, priority, reason, note) VALUES
+(8, 1, 2, '2025-06-10', '09:00:00', 'pending', 0, 'Đau ngực, khó thở', 'Bệnh nhân có tiền sử bệnh tim'),
+(9, 2, 3, '2025-06-11', '14:00:00', 'pending', 0, 'Đau đầu, chóng mặt', 'Bệnh nhân bị stress nhiều'),
+(10, 3, 14, '2025-06-12', '08:30:00', 'confirmed', 0, 'Đau khớp gối', 'Cần chụp X-quang'),
+(11, 4, 2, '2025-06-13', '10:00:00', 'confirmed', 0, 'Sốt cao, phát ban', 'Cần xét nghiệm máu'),
+(12, 5, 3, '2025-06-14', '15:00:00', 'cancelled', 0, 'Dị ứng da', 'Bệnh nhân hủy do bận việc'),
+(13, 6, 14, '2025-06-15', '09:30:00', 'completed', 0, 'Khám mắt định kỳ', 'Đã đeo kính cận'),
+(8, 1, 2, '2025-06-20', '08:30:00', 'confirmed', 0, 'Tái khám sau điều trị viêm phổi', 'Kiểm tra phục hồi sau 3 tuần điều trị'),
+(9, 8, 2, '2025-06-18', '10:00:00', 'pending', 0, 'Khám tổng quát định kỳ', 'Bệnh nhân có tiền sử phẫu thuật ruột thừa'),
+(10, 3, 14, '2025-06-25', '14:30:00', 'confirmed', 0, 'Tái khám khớp gối', 'Đánh giá hiệu quả vật lý trị liệu'),
+(11, 7, 3, '2025-06-16', '09:00:00', 'pending', 0, 'Đau tai, nghe kém', 'Triệu chứng xuất hiện sau cảm lạnh'),
+(12, 11, 2, '2025-06-17', '15:30:00', 'confirmed', 0, 'Đau bụng, khó tiêu', 'Bệnh nhân có tiền sử dị ứng thuốc'),
+(13, 12, 14, '2025-06-19', '11:00:00', 'pending', 0, 'Khám tuyến tiền liệt', 'Nam giới trên 50 tuổi, khám định kỳ'),
+(8, 9, 2, '2025-06-22', '08:00:00', 'confirmed', 0, 'Chụp CT ngực kiểm tra', 'Theo dõi sau điều trị viêm phổi'),
+(9, 10, 3, '2025-06-23', '13:30:00', 'pending', 0, 'Tư vấn dinh dưỡng ung thư', 'Phòng ngừa ung thư đại tràng'),
+(10, 13, 14, '2025-06-24', '10:30:00', 'confirmed', 0, 'Khám tiểu đường', 'Kiểm tra đường huyết định kỳ'),
+(11, 1, 2, '2025-06-21', '09:30:00', 'confirmed', 0, 'Khám tim định kỳ', 'Bệnh nhân có gia đình bị bệnh tim'),
+(12, 2, 3, '2025-06-21', '14:00:00', 'pending', 0, 'Đau đầu mãn tính', 'Stress công việc, cần tư vấn'),
+(13, 4, 14, '2025-06-22', '10:00:00', 'confirmed', 0, 'Khám sức khỏe trẻ em', 'Tiêm chủng định kỳ'),
+(8, 5, 2, '2025-06-15', '16:00:00', 'cancelled', 0, 'Khám da dị ứng', 'Bệnh nhân đã khỏi, không cần khám'),
+(9, 6, 3, '2025-06-16', '11:30:00', 'cancelled', 0, 'Khám mắt', 'Xung đột lịch trình, sẽ đặt lại'),
+(10, 7, 14, '2025-06-17', '15:00:00', 'cancelled', 0, 'Khám tai mũi họng', 'Triệu chứng đã thuyên giảm'),
+(11, 8, 2, '2025-06-02', '08:30:00', 'completed', 0, 'Khám tổng quát', 'Đã hoàn thành, kết quả bình thường'),
+(12, 9, 3, '2025-06-03', '14:30:00', 'completed', 0, 'Chụp X-quang lưng', 'Phát hiện thoái hóa cột sống nhẹ'),
+(13, 10, 14, '2025-06-04', '16:00:00', 'completed', 0, 'Tư vấn phòng chống ung thư', 'Đã tư vấn lối sống lành mạnh'),
+(8, 8, 2, '2025-06-09', '07:30:00', 'completed', 2, 'Cấp cứu đau bụng', 'Đã xử lý, không nghiêm trọng'),
+(9, 1, 3, '2025-06-08', '20:00:00', 'completed', 2, 'Đau ngực cấp', 'Tim bình thường, do căng thẳng');
 
--- Lịch hẹn đã xác nhận
-(10, 3, 14, '2025-06-12', '08:30:00', 'confirmed', 'Đau khớp gối', 'Cần chụp X-quang'),
-(11, 4, 3, '2025-06-13', '10:00:00', 'confirmed', 'Sốt cao, phát ban', 'Cần xét nghiệm máu'),
+-- Insert sample data into available_slots
+INSERT INTO available_slots (doctor_id, clinic_id, slot_date, start_time, end_time, is_available) VALUES
+(2, 1, '2025-06-10', '08:00:00', '08:30:00', TRUE),
+(2, 1, '2025-06-10', '08:30:00', '09:00:00', TRUE),
+(2, 1, '2025-06-10', '09:00:00', '09:30:00', FALSE),
+(2, 1, '2025-06-10', '09:30:00', '10:00:00', TRUE),
+(3, 2, '2025-06-11', '13:00:00', '13:30:00', TRUE),
+(3, 2, '2025-06-11', '13:30:00', '14:00:00', TRUE),
+(3, 2, '2025-06-11', '14:00:00', '14:30:00', FALSE),
+(3, 2, '2025-06-11', '14:30:00', '15:00:00', TRUE),
+(14, 3, '2025-06-12', '08:00:00', '08:30:00', TRUE),
+(14, 3, '2025-06-12', '08:30:00', '09:00:00', FALSE),
+(14, 3, '2025-06-12', '09:00:00', '09:30:00', TRUE),
+(14, 3, '2025-06-12', '09:30:00', '10:00:00', TRUE),
+(2, 1, '2025-06-20', '08:00:00', '08:30:00', TRUE),
+(2, 1, '2025-06-20', '08:30:00', '09:00:00', FALSE),
+(2, 1, '2025-06-20', '09:00:00', '09:30:00', TRUE),
+(2, 1, '2025-06-20', '09:30:00', '10:00:00', TRUE),
+(2, 8, '2025-06-18', '09:30:00', '10:00:00', TRUE),
+(2, 8, '2025-06-18', '10:00:00', '10:30:00', FALSE),
+(2, 8, '2025-06-18', '10:30:00', '11:00:00', TRUE),
+(14, 3, '2025-06-25', '14:00:00', '14:30:00', TRUE),
+(14, 3, '2025-06-25', '14:30:00', '15:00:00', FALSE),
+(14, 3, '2025-06-25', '15:00:00', '15:30:00', TRUE),
+(3, 7, '2025-06-16', '08:30:00', '09:00:00', TRUE),
+(3, 7, '2025-06-16', '09:00:00', '09:30:00', FALSE),
+(3, 7, '2025-06-16', '09:30:00', '10:00:00', TRUE),
+(2, 11, '2025-06-17', '15:00:00', '15:30:00', TRUE),
+(2, 11, '2025-06-17', '15:30:00', '16:00:00', FALSE),
+(2, 11, '2025-06-17', '16:00:00', '16:30:00', TRUE),
+(14, 12, '2025-06-19', '10:30:00', '11:00:00', TRUE),
+(14, 12, '2025-06-19', '11:00:00', '11:30:00', FALSE),
+(14, 12, '2025-06-19', '11:30:00', '12:00:00', TRUE);
 
--- Lịch hẹn đã hủy
-(12, 5, 4, '2025-06-14', '15:00:00', 'cancelled', 'Dị ứng da', 'Bệnh nhân hủy do bận việc'),
+-- Update available_slots to reflect booked appointments
+UPDATE available_slots 
+SET is_available = FALSE 
+WHERE (doctor_id = 2 AND clinic_id = 1 AND slot_date = '2025-06-20' AND start_time = '08:30:00')
+   OR (doctor_id = 2 AND clinic_id = 8 AND slot_date = '2025-06-18' AND start_time = '10:00:00')
+   OR (doctor_id = 14 AND clinic_id = 3 AND slot_date = '2025-06-25' AND start_time = '14:30:00')
+   OR (doctor_id = 3 AND clinic_id = 7 AND slot_date = '2025-06-16' AND start_time = '09:00:00')
+   OR (doctor_id = 2 AND clinic_id = 11 AND slot_date = '2025-06-17' AND start_time = '15:30:00')
+   OR (doctor_id = 14 AND clinic_id = 12 AND slot_date = '2025-06-19' AND start_time = '11:00:00');
 
--- Lịch hẹn đã hoàn thành
-(13, 6, 5, '2025-06-15', '09:30:00', 'completed', 'Khám mắt định kỳ', 'Đã đeo kính cận');
+-- Insert additional sample data into queues
+INSERT INTO queues (patient_id, clinic_id, record_id, appointment_id, status, priority, registered_online, qr_code) VALUES
+(11, 7, NULL, 10, 'waiting', 0, TRUE, 'QR007'),
+(12, 11, NULL, 11, 'waiting', 1, FALSE, 'QR008'),
+(13, 12, NULL, 12, 'waiting', 0, TRUE, 'QR009'),
+(8, 9, NULL, 13, 'waiting', 1, TRUE, 'QR010'),
+(9, 10, NULL, 14, 'waiting', 0, FALSE, 'QR011'),
+(10, 13, NULL, 15, 'waiting', 0, TRUE, 'QR012'),
+(11, 1, NULL, 16, 'waiting', 1, TRUE, 'QR013'),
+(12, 2, NULL, 17, 'waiting', 0, FALSE, 'QR014'),
+(13, 4, NULL, 18, 'waiting', 2, TRUE, 'QR015');
 
--- Thêm bảng available_slots để quản lý các khung giờ khám có sẵn
-CREATE TABLE available_slots (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    doctor_id INT NOT NULL,
-    clinic_id INT NOT NULL,
-    slot_date DATE NOT NULL,
-    start_time TIME NOT NULL,
-    end_time TIME NOT NULL,
-    is_available BOOLEAN DEFAULT TRUE,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (doctor_id) REFERENCES users(id),
-    FOREIGN KEY (clinic_id) REFERENCES clinics(id)
-);
+ALTER TABLE `users` ADD COLUMN `avatar` LONGTEXT NULL;
 
--- Thêm dữ liệu mẫu cho các khung giờ khám
-INSERT INTO available_slots (doctor_id, clinic_id, slot_date, start_time, end_time) VALUES
--- Khung giờ của bác sĩ chỉnh hình
-(14, 3, '2025-06-20', '08:00:00', '08:30:00'),
-(14, 3, '2025-06-20', '08:30:00', '09:00:00'),
-(14, 3, '2025-06-20', '09:00:00', '09:30:00'),
-(14, 3, '2025-06-2020', '09:30:00', '10:00:00');
+-- Thêm 10 tài khoản bác sĩ mới (tên thật, email chuyên nghiệp)
+INSERT INTO users (email, password, full_name, phone, role, date_of_birth, gender, address, sso_provider, is_active) VALUES
+('nguyenhoanglong@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Nguyễn Hoàng Long', '0901000001', 'doctor', '1980-01-01', 'male', 'Hà Nội', 'local', TRUE),
+('tranthithao@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Trần Thị Thảo', '0901000002', 'doctor', '1981-02-02', 'female', 'TP.HCM', 'local', TRUE),
+('levanphuc@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Lê Văn Phúc', '0901000003', 'doctor', '1982-03-03', 'male', 'Đà Nẵng', 'local', TRUE),
+('phamthiminh@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Phạm Thị Minh', '0901000004', 'doctor', '1983-04-04', 'female', 'Cần Thơ', 'local', TRUE),
+('dohoangnam@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Đỗ Hoàng Nam', '0901000005', 'doctor', '1984-05-05', 'male', 'Hải Phòng', 'local', TRUE),
+('buithithu@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Bùi Thị Thu', '0901000006', 'doctor', '1985-06-06', 'female', 'Huế', 'local', TRUE),
+('hoangvanquan@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Hoàng Văn Quân', '0901000007', 'doctor', '1986-07-07', 'male', 'Vũng Tàu', 'local', TRUE),
+('nguyenthithanh@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Nguyễn Thị Thanh', '0901000008', 'doctor', '1987-08-08', 'female', 'Quảng Ninh', 'local', TRUE),
+('phamvantruong@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Phạm Văn Trường', '0901000009', 'doctor', '1988-09-09', 'male', 'Bình Dương', 'local', TRUE),
+('vuthithao@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Vũ Thị Thảo', '0901000010', 'doctor', '1989-10-10', 'female', 'Nam Định', 'local', TRUE);
 
--- Thêm cột appointment_id vào bảng queues
-ALTER TABLE queues 
-ADD COLUMN appointment_id INT COMMENT 'Liên kết với lịch hẹn (nếu có)' AFTER record_id;
+-- Thêm 10 tài khoản y tá mới (tên thật, email chuyên nghiệp)
+INSERT INTO users (email, password, full_name, phone, role, date_of_birth, gender, address, sso_provider, is_active) VALUES
+('nguyenthithu@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Nguyễn Thị Thu', '0911000001', 'nurse', '1990-01-01', 'female', 'Hà Nội', 'local', TRUE),
+('levanminh@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Lê Văn Minh', '0911000002', 'nurse', '1991-02-02', 'male', 'TP.HCM', 'local', TRUE),
+('phamthithao@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Phạm Thị Thảo', '0911000003', 'nurse', '1992-03-03', 'female', 'Đà Nẵng', 'local', TRUE),
+('tranvanphuoc@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Trần Văn Phước', '0911000004', 'nurse', '1993-04-04', 'male', 'Cần Thơ', 'local', TRUE),
+('dothithanh@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Đỗ Thị Thanh', '0911000005', 'nurse', '1994-05-05', 'female', 'Hải Phòng', 'local', TRUE),
+('buivantrung@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Bùi Văn Trung', '0911000006', 'nurse', '1995-06-06', 'male', 'Huế', 'local', TRUE),
+('hoangthithu@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Hoàng Thị Thu', '0911000007', 'nurse', '1996-07-07', 'female', 'Vũng Tàu', 'local', TRUE),
+('nguyenvanphat@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Nguyễn Văn Phát', '0911000008', 'nurse', '1997-08-08', 'male', 'Quảng Ninh', 'local', TRUE),
+('phamthithu2@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Phạm Thị Thu', '0911000009', 'nurse', '1998-09-09', 'female', 'Bình Dương', 'local', TRUE),
+('vuvantrung@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Vũ Văn Trung', '0911000010', 'nurse', '1999-10-10', 'male', 'Nam Định', 'local', TRUE);
 
--- Thêm foreign key constraint
-ALTER TABLE queues
-ADD CONSTRAINT fk_queues_appointments
-FOREIGN KEY (appointment_id) REFERENCES appointments(id);
+-- Thêm thông tin chi tiết cho các bác sĩ mới
+INSERT INTO doctors (user_id, specialty, bio) VALUES
+(16, 'Nội tổng quát', 'Bác sĩ có kinh nghiệm làm việc tại khoa nội tổng quát.'),
+(17, 'Nhi khoa', 'Chuyên gia về chăm sóc sức khỏe trẻ em và trẻ sơ sinh.'),
+(18, 'Tiêu hóa', 'Bác sĩ chuyên khoa tiêu hóa với nhiều năm kinh nghiệm.'),
+(19, 'Da liễu', 'Chuyên gia về các bệnh lý da và thẩm mỹ da.'),
+(20, 'Tai mũi họng', 'Bác sĩ chuyên khoa tai mũi họng, phẫu thuật nội soi.'),
+(21, 'Mắt', 'Chuyên gia về các bệnh lý mắt và phẫu thuật khúc xạ.'),
+(22, 'Ung bướu', 'Bác sĩ chuyên điều trị các bệnh lý ung bướu.'),
+(23, 'Tiết niệu', 'Chuyên gia về các bệnh lý hệ tiết niệu và nam khoa.'),
+(24, 'Nội tiết', 'Bác sĩ chuyên điều trị các rối loạn hormone và tiểu đường.'),
+(25, 'Chẩn đoán hình ảnh', 'Chuyên gia về đọc và phân tích hình ảnh y khoa.');
 
--- Cập nhật dữ liệu hiện có (nếu cần)
-UPDATE queues q
-JOIN appointments a ON q.patient_id = a.patient_id 
-    AND q.clinic_id = a.clinic_id
-    AND DATE(q.created_at) = a.appointment_date
-SET q.appointment_id = a.id
-WHERE q.appointment_id IS NULL;
+-- Thêm thông tin chi tiết cho các y tá mới
+INSERT INTO nurses (user_id, specialty, bio) VALUES
+(26, 'Nội tổng quát', 'Y tá có kinh nghiệm chăm sóc bệnh nhân nội trú.'),
+(27, 'Nhi khoa', 'Y tá chuyên chăm sóc trẻ em và tư vấn cho phụ huynh.'),
+(28, 'Chăm sóc đặc biệt', 'Y tá được đào tạo chuyên sâu về chăm sóc bệnh nhân nặng.'),
+(29, 'Phòng mổ', 'Y tá có kinh nghiệm hỗ trợ trong các ca phẫu thuật.'),
+(30, 'Cấp cứu', 'Y tá có kỹ năng xử lý các tình huống khẩn cấp.'),
+(31, 'Hồi sức', 'Y tá chuyên chăm sóc bệnh nhân sau phẫu thuật.'),
+(32, 'Tim mạch', 'Y tá có kinh nghiệm chăm sóc bệnh nhân tim mạch.'),
+(33, 'Ung bướu', 'Y tá chuyên chăm sóc và hỗ trợ bệnh nhân ung thư.'),
+(34, 'Phòng khám', 'Y tá có kinh nghiệm làm việc tại phòng khám đa khoa.'),
+(35, 'Chăm sóc tại nhà', 'Y tá chuyên cung cấp dịch vụ chăm sóc sức khỏe tại nhà.');
 
+<<<<<<< HEAD
 
 -- Thêm thêm sample data cho bảng appointments
 INSERT INTO appointments (patient_id, clinic_id, doctor_id, appointment_date, appointment_time, status, reason, note) VALUES
@@ -558,3 +690,5 @@ ALTER TABLE users
 ADD avatar LONGTEXT;
 select * from appointments
 
+=======
+>>>>>>> 59c8a726ed9b7d9eda93aa6197cc47a7892682d9
