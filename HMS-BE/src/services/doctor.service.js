@@ -76,6 +76,7 @@ class DoctorService {
             }
 
             // Check if phone already exists
+            /*
             if (value.phone) {
                 const existingPhone = await prisma.user.findUnique({
                     where: { phone: value.phone }
@@ -84,6 +85,7 @@ class DoctorService {
                     throw new BadRequestError("Số điện thoại đã tồn tại");
                 }
             }
+            */
 
             // Hash password
             const hashedPassword = await bcrypt.hash(
@@ -236,6 +238,7 @@ class DoctorService {
             }
 
             // Check if phone already exists (if phone is being updated)
+            /*
             if (value.phone && value.phone !== user.phone) {
                 const existingPhone = await prisma.user.findUnique({
                     where: { phone: value.phone }
@@ -244,6 +247,7 @@ class DoctorService {
                     throw new BadRequestError("Số điện thoại đã tồn tại");
                 }
             }
+            */
 
             // Update user + doctor
             const doctor = await prisma.user.update({
