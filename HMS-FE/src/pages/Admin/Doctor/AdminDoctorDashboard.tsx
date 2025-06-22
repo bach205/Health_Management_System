@@ -82,7 +82,6 @@ const AdminDoctorDashboard = () => {
       dataIndex: "doctor",
       key: "doctor",
       render: (record: any) => {
-
         return record && record.specialty && record.specialty.length > 0 ? specialtyOptions.find(option => option.value === record.specialty)?.label : 'Không xác định';
       },
     },
@@ -311,7 +310,7 @@ const AdminDoctorDashboard = () => {
     users, loading, keyword, reload, specialty, sort, pagination, isActive,
     setKeyword, setReload, setSpecialty, setSort, setIsActive, handleTableChange,
   } = useDoctorList();
-
+  
 
   return (
     <div>

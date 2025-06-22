@@ -21,10 +21,10 @@ const Register = () => {
   const handlePhoneChange = (e: any) => {
     setPhone(e.target.value);
   };
-  
+
   const handleRePasswordChange = (e: any) => {
     setRepassword(e.target.value);
-    if(e.target.value !== password) {
+    if (e.target.value !== password) {
       setCheckPassword(true);
     } else {
       setCheckPassword(false);
@@ -38,16 +38,21 @@ const Register = () => {
       password: password.trim(),
       phone: phone.trim(),
     };
-    const data = await registerService(values);
-    if(data.data.message == 'Đăng ký thành công') {
-      toast.success("Đăng ký thành công");
-      navigate("/login");
-    } else {
+    try {
+      const data = await registerService(values);
+      if (data.data.message == 'Đăng ký thành công') {
+        toast.success("Đăng ký thành công");
+        navigate("/login");
+      } else {
+        toast.error("Đăng ký thất bại");
+      }
+    } catch (e) {
+      console.log(e)
       toast.error("Đăng ký thất bại");
     }
   };
 
-    
+
   return (
     <form className="min-h-[80vh] flex items-center" onSubmit={onSubmitHandler}>
       <div className="flex flex-col gap-3 m-auto items-start p-8 min-w-[340px] sm:min-w-96 border rounded-xl text-zinc-600 text-sm shadow-lg">
@@ -87,11 +92,11 @@ const Register = () => {
             required
           />
         </div>
-        {checkpassword ? 
+        {checkpassword ?
           <p className="text-red-500 text-sm">
             Mật khẩu không khớp, vui lòng nhập lại
           </p>
-        : ""}
+          : ""}
         <div className="w-full">
           <p>Số điện thoại</p>
           <input
@@ -110,9 +115,9 @@ const Register = () => {
         </button>
         <p>
           Đã có tài khoản?{" "}
-        <span className="text-primary cursor-pointer hover:underline">
-          <Link to="/login" className="text-primary hover:underline">Đăng Nhập</Link>         
-        </span>
+          <span className="text-primary cursor-pointer hover:underline">
+            <Link to="/login" className="text-primary hover:underline">Đăng Nhập</Link>
+          </span>
         </p>
       </div>
     </form>

@@ -253,6 +253,7 @@ const AdminNurseDashboard = () => {
   //Submit create nurse
   const handleCreateOk = async () => {
     try {
+      setIsCreateVisible(false);
       const values = await formCreate.validateFields();
       if (!values.create_password) {
         values.password = undefined;
@@ -267,8 +268,6 @@ const AdminNurseDashboard = () => {
     } catch (error: any) {
       console.log(error);
       notification.error({ message: error.response.data.message });
-    } finally {
-      setIsCreateVisible(false);
     }
   };
 
