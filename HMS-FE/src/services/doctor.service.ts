@@ -30,9 +30,14 @@ export const getDoctorsInClinic = (clinicId: number) => {
     return instance.get(`${BASE_URL}/clinic/${clinicId}`);
 };
 
-export const getDoctorAvailableSlots = (doctorId: number) => {
+export const getDoctorAvailableSlotsByDoctorId = (doctorId: number) => {
     return instance.get(`${BASE_URL}/available-slots/${doctorId}`);
 };
+export const getDoctorAvailableSlotsByDate = (doctorId: number, date: string, clinicId: number) => {
+    return instance.get(`api/v1/appointment/slots?doctor_id=${doctorId}&slot_date=${date}&clinic_id=${clinicId}`);
+};
+
+
 
 export const updateDoctorProfile = (doctor: any) => {
     return instance.post(`${BASE_URL}/update-info`, doctor);

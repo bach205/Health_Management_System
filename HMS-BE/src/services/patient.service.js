@@ -27,14 +27,13 @@ class PatientService {
     }
 
     async getPatients({ keyword = "", sort = "newest", isActive = "all", page = 1, pageSize = 10 }) {
+        console.log(keyword, sort, isActive, page, pageSize)
         const where = {
             role: "patient",
             AND: [
                 {
                     OR: [
                         { full_name: { contains: keyword } },
-                        { email: { contains: keyword } },
-                        { phone: { contains: keyword } }
                     ]
                 }
             ]
@@ -57,6 +56,12 @@ class PatientService {
                 break;
             case "name_desc":
                 orderBy.full_name = "desc";
+                break;
+            case "update_desc":
+                orderBy.updated_at = "desc";
+                break;
+            case "update_asc":
+                orderBy.updated_at = "asc";
                 break;
             default:
                 orderBy.created_at = "desc";
@@ -86,7 +91,7 @@ class PatientService {
     }
 
     async createPatient(data) {
-        const { email, password, full_name, date_of_birth, gender, phone, address, identity_number } = data;
+        const { email,  full_name, date_of_birth, gender, phone, address, identity_number, avatar } = data;
 
         // Check if email exists
         const existingUser = await prisma.user.findUnique({
@@ -110,7 +115,7 @@ class PatientService {
         */
 
         // Hash password
-        const hashedPassword = await bcrypt.hash(password,
+        const hashedPassword = await bcrypt.hash(data.password,
             parseInt(process.env.BCRYPT_SALT_ROUNDS)
         );
 
@@ -125,16 +130,25 @@ class PatientService {
                 address,
                 role: "patient",
                 is_active: true,
+                avatar,
                 patient: {
                     create: {
                         identity_number
                     }
-                }
+                },
             },
             include: {
                 patient: true
             }
         });
+        if (sendEmail) {
+            sendStaffNewPasswordEmail(newPatient.email, newPatient.password);
+        }
+        
+        if (!newPatient) {  
+            throw new BadRequestError("Có lỗi xảy ra, vui lòng thử lại!");
+        }
+
 
         return newPatient;
     }
@@ -190,7 +204,7 @@ class PatientService {
                 address,
                 patient: {
                     update: {
-                        where: { user_id: parseInt(id) },
+                        where: { id: parseInt(id) },
                         data: { identity_number }
                     }
                 }
@@ -305,7 +319,7 @@ class PatientService {
             getRandom(special),
         ];
 
-        const totalLength = 6;
+        const totalLength = 8;
 
         const all = upper + lower + digits + special;
         while (mustInclude.length < totalLength) {

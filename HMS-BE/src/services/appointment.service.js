@@ -86,6 +86,7 @@ class AppointmentService {
    */
   // chạy thành công 
   async getAvailableSlots({ doctor_id, clinic_id, slot_date }) {
+    console.log(doctor_id, clinic_id, slot_date)
     let query = `
       SELECT s.*, 
         u.full_name as doctor_name,

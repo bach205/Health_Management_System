@@ -18,6 +18,7 @@ export interface IUserBase {
   address: string;
   sso_provider?: "google" | "facebook" | "local";
   is_active: boolean;
+  avatar?: string;
 }
 
 export interface IDoctor extends IUserBase {
@@ -25,6 +26,7 @@ export interface IDoctor extends IUserBase {
   doctor: {
     specialty?: string; // Khoa
     bio?: string;
+    rating?: number;
   }
 }
 

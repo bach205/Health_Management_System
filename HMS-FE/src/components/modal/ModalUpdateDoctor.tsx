@@ -95,7 +95,7 @@ const ModalUpdateDoctor = ({ role, isVisible, handleOk, handleCancel, form, user
               />
             </Form.Item>
             <Form.Item name="bio" label="Tiểu sử">
-              <Input placeholder="Tiểu sử bác sĩ" />
+              <Input.TextArea placeholder="Tiểu sử bác sĩ" />
             </Form.Item>
           </>
         )}

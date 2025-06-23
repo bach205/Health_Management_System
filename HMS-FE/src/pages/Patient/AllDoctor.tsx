@@ -15,33 +15,43 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { specialtyOptions } from "../../constants/user.const";
 import { useDoctorList } from "../../hooks/useDoctorList";
 import { Search, Stethoscope } from "lucide-react";
+import Rating from "./Rating";
 
 const AllDoctor: React.FC = () => {
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
+    const [doctors, setDoctors] = useState<any[]>([]);
     const {
         users,
         specialty,
         pagination,
         loading,
+        setLoading,
         setSpecialty,
         setPagination,
         keyword,
         setKeyword,
         reload,
         setReload,
-    } = useDoctorList({ pageSize: 8, current: 1 });
+    } = useDoctorList({ pageSize: 8, current: 1 }, ['all']);
 
     useEffect(() => {
+        setLoading(true);
         const specialityQuery = searchParams.get("speciality");
-        if (specialityQuery === "") {
-            setSpecialty("all");
+        // console.log('specialityQuery', specialityQuery)
+        if (specialityQuery === "" || specialityQuery === null) {
+            setSpecialty(['all']);
             return;
         }
         if (specialityQuery) {
-            setSpecialty(specialityQuery);
+            setSpecialty([specialityQuery]);
         }
-    }, []);
+    }, [reload]);
+
+    useEffect(() => {
+        setDoctors(users);
+    }, [users]);
+
     return (
         <div className="flex flex-col gap-4 w-full">
             <div className="text-center text-2xl pt-10 pb-5 text-gray-500 uppercase"><p>Danh sách bác sĩ theo chuyên khoa</p></div>
@@ -50,16 +60,40 @@ const AllDoctor: React.FC = () => {
                     <div className="flex items-center justify-start w-full">
                         <p className="text-gray-500 text-sm mr-2">Lọc theo chuyên khoa:</p>
                         <Select
-                            value={specialty === "all" ? "" : specialty}
-                            onChange={(value: string) => {
-                                setSpecialty(value === "" ? "all" : value);
-                                setSearchParams({ speciality: value });
+                            mode="multiple"
+                            defaultValue={[]}
+                            placeholder="Chọn chuyên khoa"
+                            value={specialty.length > 0 ? specialty : []}
+                            onChange={(value: string[]) => {
+                                if (value.length === 0) {
+                                    setSpecialty(['all']);
+                                    setSearchParams({ speciality: "" });
+                                    return;
+                                }
+                                if (value[0] === "all" && value.length === 1) {
+                                    setSpecialty(['all']);
+                                    setSearchParams({ speciality: "" });
+                                    return;
+                                }
+
+                                if (value[value.length - 1] === ("all") && value.length > 1) {
+                                    setSpecialty(['all']);
+                                    setSearchParams({ speciality: "" });
+                                    return;
+                                }
+
+                                const queryOptions = value.filter((opt) => opt !== "all");
+                                setSpecialty(queryOptions);
+                                setSearchParams({ speciality: queryOptions });
                             }}
-                            className="min-w-[200px]"
+                            className="w-1/3"
                             options={[
-                                { label: "Tất cả", value: "" },
+                                {
+                                    label: "Tất cả",
+                                    value: "all",
+                                },
                                 ...specialtyOptions
-                                    .filter((opt) => opt.value !== "")
+                                    .filter((opt) => opt.value !== "none")
                                     .map((opt) => ({
                                         label: opt.label,
                                         value: opt.value,
@@ -68,8 +102,8 @@ const AllDoctor: React.FC = () => {
                         />
                     </div>
                     <Input
-                        placeholder="Tìm kiếm bác sĩ"
-                        className="w-[200px]!"
+                        placeholder="Tìm Bác Sĩ theo tên"
+                        className="w-[250px]!"
                         value={keyword}
                         onChange={(e) => setKeyword(e.target.value)}
                     />
@@ -80,9 +114,6 @@ const AllDoctor: React.FC = () => {
 
             </Flex>
 
-            {/* Dropdown filter nằm ngay trên danh sách */}
-
-
             {/* Danh sách bác sĩ */}
             {loading ? (
                 <div className="text-center w-full">
@@ -90,7 +121,7 @@ const AllDoctor: React.FC = () => {
                 </div>
             ) : (
                 <Row className="w-full" gutter={[16, 16]}>
-                    {users?.filter((user) => user.doctor.specialty !== "").map((user, index) => (
+                    {users?.map((user, index) => (
                         <Tooltip title={`Đặt lịch với bác sĩ ${user.full_name}`} color="#646CFF" mouseEnterDelay={0.35} >
                             <Col
                                 span={24}
@@ -103,11 +134,11 @@ const AllDoctor: React.FC = () => {
                                 }
                                 key={index}
                             >
-                                <div className="border border-blue-200 rounded-xl overflow-hidden cursor-pointer hover:translate-y-[-10px] transition-all duration-500">
-                                    <div className="flex justify-center items-center bg-blue-50">
+                                <div className="border border-blue-200 rounded-xl overflow-hidden cursor-pointer hover:-translate-y-2 transition-all duration-500">
+                                    <div className="flex justify-center items-center bg-blue-50 h-[324.4px] w-full overflow-hidden">
                                         <img
-                                            className="bg-blue-50 w-full"
-                                            src={"https://placehold.jp/150x150.png"}
+                                            className="h-full w-full object-cover"
+                                            src={user.avatar || "https://placehold.jp/150x150.png"}
                                             alt={`Picture of ${user.full_name}`}
                                         />
                                     </div>
@@ -124,36 +155,15 @@ const AllDoctor: React.FC = () => {
                                             </div>
                                         )}
                                         <p className="text-gray-900 text-lg font-medium">{user.full_name}</p>
-                                        <Flex gap={10} align="center" className="w-full">
-                                            <div className="flex items-center gap-1" data-rating="4.8">
-                                                <label className="inline-block w-[12px] relative h-[20px]">
-                                                    <div className="text-gray-500 absolute top-0 left-0 ">★</div>
-                                                    <div className="text-yellow-500 absolute top-0 left-0 w-[12px] overflow-hidden">★</div>
-                                                </label>
-                                                <label className="inline-block w-[12px] relative h-[20px]">
-                                                    <div className="text-gray-500 absolute top-0 left-0 ">★</div>
-                                                    <div className="text-yellow-500 absolute top-0 left-0 w-[12px] overflow-hidden">★</div>
-                                                </label>
-                                                <label className="inline-block w-[12px] relative h-[20px]">
-                                                    <div className="text-gray-500 absolute top-0 left-0 ">★</div>
-                                                    <div className="text-yellow-500 absolute top-0 left-0 w-[12px] overflow-hidden">★</div>
-                                                </label>
-                                                <label className="inline-block w-[12px] relative h-[20px]">
-                                                    <div className="text-gray-500 absolute top-0 left-0 ">★</div>
-                                                    <div className="text-yellow-500 absolute top-0 left-0 w-[12px] overflow-hidden">★</div>
-                                                </label>
+                                        {
+                                            // user.doctor?.rating && (
+                                            <Rating rating={user.doctor?.rating || 0} />
+                                            // )
+                                        }
 
-                                                <label className="inline-block w-[12px] relative h-[20px]">
-                                                    <div className="text-gray-500 absolute top-0 left-0 ">★</div>
-                                                    <div className="text-yellow-500 absolute top-0 left-0 w-[6px] overflow-hidden">★</div>
-                                                </label>
-
-                                            </div>
-                                            <p className="text-gray-600 text-sm"><span className="font-medium">4.8</span> trên 5</p>
-                                        </Flex>
                                         <Flex gap={10} align="center" className="mt-2! w-full">
                                             <Stethoscope className="w-5 h-5" color="#646CFF" />
-                                            <p className="text-gray-600 text-md ">{specialtyOptions.find((opt) => opt.value === user.doctor.specialty)?.label || "Khoa"}</p>
+                                            <p className="text-gray-600 text-md ">{specialtyOptions.find((opt) => opt.value === user.doctor?.specialty)?.label || "Không xác định"}</p>
                                         </Flex>
                                     </div>
                                 </div>
@@ -184,5 +194,6 @@ const AllDoctor: React.FC = () => {
         </div>
     );
 };
+
 
 export default AllDoctor;

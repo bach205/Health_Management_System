@@ -96,6 +96,7 @@
     user_id   Int     @id
     specialty String?
     bio       String? @db.Text
+    rating Decimal @default(0.0) @db.Decimal(2, 1)
 
     user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 

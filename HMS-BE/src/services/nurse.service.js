@@ -71,7 +71,8 @@ class NurseService {
                     address: true,
                     is_active: true,
                     created_at: true,
-                    updated_at: true
+                    updated_at: true,
+                    avatar: true
                 },
                 orderBy: orderBy
             });

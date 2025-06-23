@@ -145,11 +145,15 @@ const PatientBookAppointment: React.FC = () => {
       <Card className="mb-4">
         <div className="flex flex-col sm:flex-row gap-4">
           <div>
-            <img
-              className="w-full sm:w-72 rounded-lg object-cover"
-              src={assets.profile_pic}
-              alt={doctor?.full_name}
-            />
+            {
+              doctor?.metadata?.avatar && (
+                <img
+                  className="w-full sm:w-72 rounded-lg object-cover"
+                  src={doctor?.metadata?.avatar}
+                  alt={doctor?.full_name}
+                />
+              )
+            }
           </div>
           <div className="flex-1">
             <Space direction="vertical" size="small" className="w-full">
@@ -163,7 +167,7 @@ const PatientBookAppointment: React.FC = () => {
                 </Text>
               </Space>
               {doctor?.metadata?.doctor?.specialty && (
-                <Text type="secondary">Chuyên khoa: {doctor.metadata.doctor.specialty}</Text>
+                <Text type="secondary">Chuyên khoa: {specialtyOptions.find(item => item.value === doctor.metadata.doctor.specialty)?.label || "Không xác định"}</Text>
               )}
               {doctor?.metadata?.doctor?.bio && (
                 <Text type="secondary">Tiểu sử: {doctor.metadata.doctor.bio}</Text>

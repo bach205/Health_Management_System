@@ -1,7 +1,7 @@
-import { Modal, Form, Input, Select, InputNumber, Button, message } from "antd";
+import { Modal, Form, Input, Select, InputNumber, Button, message, DatePicker } from "antd";
 import { useEffect, useState } from "react";
 import { getClinicService } from "../../../services/clinic.service";
-import { getDoctorsInClinic, getDoctorAvailableSlots } from "../../../services/doctor.service";
+import { getDoctorsInClinic, getDoctorAvailableSlotsByDoctorId, getDoctorAvailableSlotsByDate } from "../../../services/doctor.service";
 import mainRequest from "../../../api/mainRequest";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
@@ -35,6 +35,7 @@ const ResultExaminationModal = ({
   const [clinics, setClinics] = useState<any[]>([]);
   const [doctorsInClinic, setDoctorsInClinic] = useState<any[]>([]);
   const [availableSlots, setAvailableSlots] = useState<any[]>([]);
+  const [slotDate, setSlotDate] = useState<string>("");
 
   const to_clinic_id = Form.useWatch("to_clinic_id", form);
   const to_doctor_id = Form.useWatch("to_doctor_id", form);
@@ -43,6 +44,7 @@ const ResultExaminationModal = ({
     form.resetFields();
     setDoctorsInClinic([]);
     setAvailableSlots([]);
+    setSlotDate("");
     onClose();
   };
 
@@ -68,29 +70,38 @@ const ResultExaminationModal = ({
     }
   }, [to_clinic_id]);
 
-  useEffect(() => {
-    if (to_doctor_id) {
-      getDoctorAvailableSlots(Number(to_doctor_id))
-        .then((res) => {
-          setAvailableSlots([{
+
+  const fetchAvailableSlots = async (slot_date: string) => {
+    try {
+ 
+      const response = await getDoctorAvailableSlotsByDate(Number(to_doctor_id), slot_date, Number(to_clinic_id));
+      console.log(response)
+      if (response?.data?.data?.length > 0) {
+        setAvailableSlots([{
+          slot_date: "",
+          start_time: "",
+        }, ...response?.data?.data]);
+      } else {
+        setAvailableSlots([
+          {
             slot_date: "",
             start_time: "",
-          }, ...res.data.metadata]);
-        })
-        .catch(() => {
-          setAvailableSlots([{
-            slot_date: "",
-            start_time: "",
-          }]);
-          toast.error("Không lấy được lịch trống của bác sĩ");
-        });
-    } else {
-      setAvailableSlots([{
-        slot_date: "",
-        start_time: "",
-      }]);
+          }
+        ]);
+      }
+      console.log(availableSlots)
+    } catch (error) {
+      console.log(error);
+      setAvailableSlots([
+        {
+          slot_date: "",
+          start_time: "",
+        }
+      ]);
+      toast.error("Không lấy được lịch trống của bác sĩ");
     }
-  }, [to_doctor_id]);
+  }
+
 
   const handleFinish = async (values: any) => {
     try {
@@ -114,7 +125,6 @@ const ResultExaminationModal = ({
         message.error("Vui lòng chọn ca khám");
         return;
       }
-
       await mainRequest.post("/api/v1/examination-detail", {
         ...values,
         patient_id: patientId,
@@ -125,11 +135,11 @@ const ResultExaminationModal = ({
         examined_at: new Date().toISOString(),
         ...(values.to_clinic_id
           ? {
-              to_clinic_id: Number(values.to_clinic_id),
-              to_doctor_id: Number(values.to_doctor_id),
-              total_cost: values.total_cost || 0,
-              ...slotInfo,
-            }
+            to_clinic_id: Number(values.to_clinic_id),
+            to_doctor_id: Number(values.to_doctor_id),
+            total_cost: values.total_cost || 0,
+            ...slotInfo,
+          }
           : {}),
       });
 
@@ -150,16 +160,32 @@ const ResultExaminationModal = ({
       to_clinic_id: value,
       to_doctor_id: "",
       slot: "",
+      slot_date: "",
     });
   };
 
   const handleChangeDoctor = (value: any) => {
     setAvailableSlots([]);
+    setSlotDate("");
     form.setFieldsValue({
       to_doctor_id: value,
+      slot_date: "",
       slot: "",
     });
   };
+
+  const handleChangeDate = (date: any) => {
+    if (date) {
+      console.log(dayjs(date).format("YYYY-MM-DD"))
+      setSlotDate(dayjs(date).format("YYYY-MM-DD"));
+      fetchAvailableSlots(dayjs(date).format("YYYY-MM-DD"));
+      setAvailableSlots([]);
+      form.setFieldsValue({
+        slot_date: dayjs(date),
+        slot: "",
+      });
+    }
+  }
 
   return (
     <Modal
@@ -206,19 +232,18 @@ const ResultExaminationModal = ({
           <div className="mb-2 text-sm">
             Số lượng bệnh nhân:{" "}
             <span
-              className={`text-white px-2 py-1 rounded ${
-                clinicSelected.patient_volume === "high"
-                  ? "bg-red-500"
-                  : clinicSelected.patient_volume === "medium"
+              className={`text-white px-2 py-1 rounded ${clinicSelected.patient_volume === "high"
+                ? "bg-red-500"
+                : clinicSelected.patient_volume === "medium"
                   ? "bg-yellow-500"
                   : "bg-green-500"
-              }`}
+                }`}
             >
               {clinicSelected.patient_volume === "high"
                 ? "Đông"
                 : clinicSelected.patient_volume === "medium"
-                ? "Vừa phải"
-                : "Ít"}
+                  ? "Vừa phải"
+                  : "Ít"}
             </span>
           </div>
         )}
@@ -239,49 +264,38 @@ const ResultExaminationModal = ({
                 ))}
               </Select>
             </Form.Item>
+            {
+              to_doctor_id && (
+                <Form.Item label="Ngày khám" name="slot_date" rules={[{ required: true, message: "Vui lòng chọn ngày khám" },]} >
+                  <DatePicker minDate={dayjs()} onChange={handleChangeDate} />
+                </Form.Item>
+              )
+            }
 
-            {to_doctor_id && (
+            {to_doctor_id && slotDate && (
               <Form.Item
                 label="Chọn ca khám"
                 name="slot"
                 rules={[{ required: true, message: "Vui lòng chọn ca khám" },
 
-                  // {
-                  //   message: 'Vui lòng chọn ca khám',
-                  //   validator: (_, value) => {
-                  //     if (value) {
-                  //       return Promise.resolve();
-                  //     } else {
-                  //       return Promise.reject('Vui lòng chọn ca khám');
-                  //     }
-                  //    }
-                  //  }
                 ]}
 
               >
                 <Select placeholder="Chọn ca khám">
                   {/* <Option value={""}>-</Option> */}
-                  {availableSlots.length > 1
-                    ? availableSlots.map((slot, index) => (
-                        <Option
-                          key={index}
-                          value={JSON.stringify({
-                            slot_date: slot.slot_date,
-                            start_time: slot.start_time,
-                          })}
-                        >
-                          {slot.start_time
-                            ? `${dayjs.utc(slot.start_time).format("HH:mm")} - ${dayjs
-                                .utc(slot.end_time)
-                                .format("HH:mm")}`
-                            : "-"}
-                        </Option>
-                      ))
-                    : [
-                        <Option key="none" value="">
-                          -
-                        </Option>,
-                      ]}
+                  {availableSlots.length > 1 ?
+                   availableSlots.map((slot, index) => (
+                    <Option
+                      key={index}
+                      value={JSON.stringify({
+                        slot_date: slot.slot_date,
+                        start_time: slot.start_time,
+                      })}
+                    >
+                      {slot.start_time ? `${dayjs.utc(slot.start_time).format("HH:mm")} - ${dayjs.utc(slot.end_time).format("HH:mm")}` : "-"}
+                    </Option>
+                  ))
+                    : [<Option key="none" value=""> - </Option>,]}
                 </Select>
               </Form.Item>
             )}
