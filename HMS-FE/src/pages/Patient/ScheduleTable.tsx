@@ -151,7 +151,7 @@ const ScheduleTable = ({ data = [], setReload, loading = false, visible, selecte
       render: (time: any) => time ? time.slice(0,5) : "",
     },
     {
-      title: "Chuyên khoa",
+      title: "Phòng khám",
       dataIndex: "clinic_name",
       key: "clinic_name",
       width: 160,
@@ -265,7 +265,7 @@ const ScheduleTable = ({ data = [], setReload, loading = false, visible, selecte
 
             <Row gutter={[16, 16]}>
               <Col span={12}>
-                <div className="font-medium text-gray-700">Chuyên khoa:</div>
+                <div className="font-medium text-gray-700">Phòng khám:</div>
                 <div>{selectedRecord.clinic_name || "Chưa xác định"}</div>
               </Col>
               <Col span={12}>

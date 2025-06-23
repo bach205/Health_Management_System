@@ -198,7 +198,6 @@ class ExaminationDetailService {
     return prisma.availableSlot.findMany({
       where: {
         doctor_id: +doctorId,
-        is_available: true,
       },
       include: {
         doctor: {
