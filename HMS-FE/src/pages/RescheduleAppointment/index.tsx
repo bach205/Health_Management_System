@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Button, Form, Input, Card, Space, Typography, message } from "antd";
-import { nurseRescheduleAppointmentService, getAvailableTimeSlotsBySpecialtyService } from "../../services/appointment.service";
+import { nurseRescheduleAppointmentService, getAllAvailableSlotsService } from "../../services/appointment.service";
 import dayjs from "dayjs";
+import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
+
+dayjs.extend(isSameOrAfter);
+
 const { Title, Text } = Typography;
 
 interface AvailableSlot {
@@ -44,13 +48,28 @@ const NurseRescheduleAppointment: React.FC<Props> = ({ appointment, onSuccess })
         const specialty = appointment.doctor_specialty;
         console.log('specialty:', specialty);
         if (!specialty) {
-          message.error("Không xác định được chuyên môn của bác sĩ");
+          message.error("Không xác định được chuyên môn");
           setLoading(false);
           return;
         }
-        const slotsRes = await getAvailableTimeSlotsBySpecialtyService(specialty);
-        setSlots(slotsRes.data || slotsRes.metadata || []);
+        
+        // Lấy tất cả slot trống theo chuyên môn
+        const slotsRes = await getAllAvailableSlotsService();
+        const allSlots = slotsRes.data || slotsRes.metadata || [];
+        
+        // Lọc chỉ lấy slot của cùng chuyên môn với lịch hẹn cũ và từ hôm nay trở đi
+        const today = dayjs().startOf('day');
+        const filteredSlots = allSlots.filter((slot: AvailableSlot) => {
+          const slotDate = dayjs(slot.slot_date);
+          return slot.doctor_specialty === specialty && slotDate.isSameOrAfter(today);
+        });
+        
+        setSlots(filteredSlots);
+        
+        // Không tự động set phòng khám, để người dùng chọn
+        setSelectedClinic(null);
       } catch (err) {
+        console.error('Error fetching slots:', err);
         message.error("Không thể tải dữ liệu");
       } finally {
         setLoading(false);
@@ -84,11 +103,11 @@ const NurseRescheduleAppointment: React.FC<Props> = ({ appointment, onSuccess })
     }
   };
 
-  // Lấy danh sách phòng khám từ slots
+  // Lấy danh sách phòng khám từ slots (chỉ những phòng khám có slot cùng chuyên môn)
   const clinics = Array.from(
     new Map(
       slots
-        .filter(slot => slot.clinic_id && slot.clinic_name)
+        .filter(slot => slot.clinic_id && slot.clinic_name && slot.doctor_specialty === appointment.doctor_specialty)
         .map(slot => [slot.clinic_id, { id: slot.clinic_id, name: slot.clinic_name }])
     ).values()
   );

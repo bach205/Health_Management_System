@@ -36,7 +36,7 @@ const sendStaffNewPasswordEmail = async (staffEmail, newPassword) => {
     }
 }
 
-const sendEmailStaffResetPassword = async (staffEmail, newPassword) => {
+const sendPatientNewPasswordEmail = async (staffEmail, newPassword) => {
     try {
         const mailOptions = {
             from: process.env.EMAIL_USER,
@@ -59,7 +59,8 @@ const sendEmailStaffResetPassword = async (staffEmail, newPassword) => {
     }
 }
 
+
 module.exports = {
     sendStaffNewPasswordEmail,
-    sendEmailStaffResetPassword
+    sendPatientNewPasswordEmail
 };

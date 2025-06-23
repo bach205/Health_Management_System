@@ -36,21 +36,16 @@ CREATE TABLE clinics (
 );
 
 -- Table for doctors
+-- Thông tin mở rộng từ user (bác sĩ)
 CREATE TABLE doctors (
-    user_id INT PRIMARY KEY COMMENT 'References users.id',
-    specialty VARCHAR(255) COMMENT 'Medical specialty',
-    bio TEXT COMMENT 'Doctor biography',
-    rating DECIMAL(2,1) DEFAULT 0.0 COMMENT '(tối đa 9.9) Đánh giá trung bình, sửa rating trên backend', 
+    user_id INT PRIMARY KEY COMMENT 'Tham chiếu đến users(id)',
+    specialty VARCHAR(255) COMMENT 'Chuyên môn',
+    bio TEXT COMMENT 'Giới thiệu',
+	rating DECIMAL(2,1) DEFAULT 0.0 COMMENT '(tối đa 9.9) Đánh giá trung bình, sửa rating trên backend', 
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- Table for nurses
-CREATE TABLE nurses (
-    user_id INT PRIMARY KEY COMMENT 'References users.id',
-    specialty VARCHAR(255) COMMENT 'Nursing specialty',
-    bio TEXT COMMENT 'Nurse biography',
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
+
 
 -- Table for shifts
 CREATE TABLE shifts (
@@ -563,17 +558,3 @@ INSERT INTO doctors (user_id, specialty, bio) VALUES
 (23, 'Tiết niệu', 'Chuyên gia về các bệnh lý hệ tiết niệu và nam khoa.'),
 (24, 'Nội tiết', 'Bác sĩ chuyên điều trị các rối loạn hormone và tiểu đường.'),
 (25, 'Chẩn đoán hình ảnh', 'Chuyên gia về đọc và phân tích hình ảnh y khoa.');
-
--- Thêm thông tin chi tiết cho các y tá mới
-INSERT INTO nurses (user_id, specialty, bio) VALUES
-(26, 'Nội tổng quát', 'Y tá có kinh nghiệm chăm sóc bệnh nhân nội trú.'),
-(27, 'Nhi khoa', 'Y tá chuyên chăm sóc trẻ em và tư vấn cho phụ huynh.'),
-(28, 'Chăm sóc đặc biệt', 'Y tá được đào tạo chuyên sâu về chăm sóc bệnh nhân nặng.'),
-(29, 'Phòng mổ', 'Y tá có kinh nghiệm hỗ trợ trong các ca phẫu thuật.'),
-(30, 'Cấp cứu', 'Y tá có kỹ năng xử lý các tình huống khẩn cấp.'),
-(31, 'Hồi sức', 'Y tá chuyên chăm sóc bệnh nhân sau phẫu thuật.'),
-(32, 'Tim mạch', 'Y tá có kinh nghiệm chăm sóc bệnh nhân tim mạch.'),
-(33, 'Ung bướu', 'Y tá chuyên chăm sóc và hỗ trợ bệnh nhân ung thư.'),
-(34, 'Phòng khám', 'Y tá có kinh nghiệm làm việc tại phòng khám đa khoa.'),
-(35, 'Chăm sóc tại nhà', 'Y tá chuyên cung cấp dịch vụ chăm sóc sức khỏe tại nhà.');
-
