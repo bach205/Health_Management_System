@@ -40,6 +40,7 @@ CREATE TABLE doctors (
     user_id INT PRIMARY KEY COMMENT 'References users.id',
     specialty VARCHAR(255) COMMENT 'Medical specialty',
     bio TEXT COMMENT 'Doctor biography',
+    rating DECIMAL(2,1) DEFAULT 0.0 COMMENT '(tối đa 9.9) Đánh giá trung bình, sửa rating trên backend', 
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 

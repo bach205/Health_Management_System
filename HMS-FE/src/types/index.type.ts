@@ -26,6 +26,7 @@ export interface IDoctor extends IUserBase {
   doctor: {
     specialty?: string; // Khoa
     bio?: string;
+    rating?: number;
   }
 }
 

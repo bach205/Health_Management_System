@@ -27,6 +27,7 @@ class PatientService {
     }
 
     async getPatients({ keyword = "", sort = "newest", isActive = "all", page = 1, pageSize = 10 }) {
+        console.log(keyword, sort, isActive, page, pageSize)
         const where = {
             role: "patient",
             AND: [
@@ -90,7 +91,7 @@ class PatientService {
     }
 
     async createPatient(data) {
-        const { email, password, full_name, date_of_birth, gender, phone, address, identity_number, avatar } = data;
+        const { email,  full_name, date_of_birth, gender, phone, address, identity_number, avatar } = data;
 
         // Check if email exists
         const existingUser = await prisma.user.findUnique({
@@ -110,9 +111,14 @@ class PatientService {
                 throw new BadRequestError("Số điện thoại đã tồn tại");
             }
         }
-
+        let sendEmail = false;
+        if (!data.password || data.password.trim() === '') {
+            const password = this.#createRandomPassword();
+            data.password = password.toString();
+            sendEmail = true;
+        }
         // Hash password
-        const hashedPassword = await bcrypt.hash(password,
+        const hashedPassword = await bcrypt.hash(data.password,
             parseInt(process.env.BCRYPT_SALT_ROUNDS)
         );
 
@@ -138,6 +144,14 @@ class PatientService {
                 patient: true
             }
         });
+        if (sendEmail) {
+            sendStaffNewPasswordEmail(newPatient.email, newPatient.password);
+        }
+        
+        if (!newPatient) {  
+            throw new BadRequestError("Có lỗi xảy ra, vui lòng thử lại!");
+        }
+
 
         return newPatient;
     }
@@ -191,7 +205,7 @@ class PatientService {
                 address,
                 patient: {
                     update: {
-                        where: { user_id: parseInt(id) },
+                        where: { id: parseInt(id) },
                         data: { identity_number }
                     }
                 }
@@ -306,7 +320,7 @@ class PatientService {
             getRandom(special),
         ];
 
-        const totalLength = 6;
+        const totalLength = 8;
 
         const all = upper + lower + digits + special;
         while (mustInclude.length < totalLength) {

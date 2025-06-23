@@ -3,6 +3,7 @@ import { useState } from "react";
 import { specialtyOptions, TYPE_EMPLOYEE_STR } from "../../constants/user.const";
 import type { IUserBase } from "../../types/index.type";
 import dayjs from "dayjs";
+import Rating from "../../pages/Patient/Rating";
 
 interface IProps {
   isVisible: boolean;
@@ -127,6 +128,9 @@ const ModalViewUser = ({ role, isVisible, handleCancel, form, user }: IProps) =>
             <Form.Item
               name="bio" label="Tiểu sử">
               <Input className="text-black!" placeholder="Tiểu sử bác sĩ" />
+            </Form.Item>
+            <Form.Item label="Đánh giá">
+              <Rating rating={user?.doctor?.rating || 0} />
             </Form.Item>
           </>
         )}

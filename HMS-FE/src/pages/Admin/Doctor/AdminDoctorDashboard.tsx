@@ -28,12 +28,12 @@ const AdminDoctorDashboard = () => {
   // Table column
   const columns: any = [
     {
-      title: "ID",
-      dataIndex: "id",
-      key: "id",
+      title: "STT",
+      dataIndex: "index",
+      key: "index",
       width: 60,
       align: "center" as const,
-      render: (id: number) => id,
+      render: (_: any, __: any, index: number) => index + 1,
     },
     {
       title: "Ảnh",

@@ -12,7 +12,7 @@ const useQueue = () => {
 
   const fetchQueue = async (clinicId: string, pagination?: PaginationParams) => {
     try {
-      const response = await getQueueClinic(clinicId);
+      const response = await getQueueClinic(clinicId, pagination);
       setQueues(response.metadata.queueClinic);
       setTotalElements(response.metadata.total);
       setTotalPages(response.metadata.totalPages);

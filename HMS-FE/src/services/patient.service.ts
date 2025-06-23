@@ -28,8 +28,8 @@ export const updatePassword = async (id: number) => {
   return response;
 };
 
-export const updatePatientPassword = async (data: any) => {
-  const response = await instance.post(`${patientURL}/reset-password`, data);
+export const updatePatientPassword = async (id: number) => {
+  const response = await instance.post(`${patientURL}/update-password`, { id });
   return response;
 };
 

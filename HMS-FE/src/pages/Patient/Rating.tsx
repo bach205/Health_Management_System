@@ -1,7 +1,9 @@
 import { Flex } from "antd";
 
-const Rating = ({ rating }: { rating: number }) => {
+const Rating = ({ rating = 0 }: { rating: number }) => {
+    rating = +rating;
     return (
+        rating > 0 ?
         <Flex gap={10} align="center" className="w-full">
             <div className="flex items-center gap-1" data-rating={rating}>
                 {
@@ -19,7 +21,7 @@ const Rating = ({ rating }: { rating: number }) => {
                                 )}
 
                                 {isHalf && (
-                                    <div style={{ width: `${width}px` }} className={`text-yellow-500 absolute top-0 left-0  overflow-hidden`}>★</div>
+                                    <div style={{ width: `${+width}px` }} className={`text-yellow-500 absolute top-0 left-0  overflow-hidden`}>★</div>
                                 )}
 
                             </div>
@@ -29,28 +31,10 @@ const Rating = ({ rating }: { rating: number }) => {
 
             </div>
             <p className="text-gray-600 text-sm"><span className="font-medium">{rating}</span> trên 5</p>
-            {/* <label className="inline-block w-[12px] relative h-[20px]">
-                    <div className="text-gray-500 absolute top-0 left-0 ">★</div>
-                    <div className="text-yellow-500 absolute top-0 left-0 w-[12px] overflow-hidden">★</div>
-                </label>
-                <label className="inline-block w-[12px] relative h-[20px]">
-                    <div className="text-gray-500 absolute top-0 left-0 ">★</div>
-                    <div className="text-yellow-500 absolute top-0 left-0 w-[12px] overflow-hidden">★</div>
-                </label>
-                <label className="inline-block w-[12px] relative h-[20px]">
-                    <div className="text-gray-500 absolute top-0 left-0 ">★</div>
-                    <div className="text-yellow-500 absolute top-0 left-0 w-[12px] overflow-hidden">★</div>
-                </label>
-                <label className="inline-block w-[12px] relative h-[20px]">
-                    <div className="text-gray-500 absolute top-0 left-0 ">★</div>
-                    <div className="text-yellow-500 absolute top-0 left-0 w-[12px] overflow-hidden">★</div>
-                </label>
 
-                <label className="inline-block w-[12px] relative h-[20px]">
-                    <div className="text-gray-500 absolute top-0 left-0 ">★</div>
-                    <div className="text-yellow-500 absolute top-0 left-0 w-[6px] overflow-hidden">★</div>
-                </label> */}
         </Flex>
+        :
+        <p className="text-gray-600 text-sm">Chưa có đánh giá</p>
     );
 }
 export default Rating;

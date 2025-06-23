@@ -86,7 +86,7 @@ const AllDoctor: React.FC = () => {
                                 setSpecialty(queryOptions);
                                 setSearchParams({ speciality: queryOptions });
                             }}
-                            className="w-[500px]"
+                            className="w-1/3"
                             options={[
                                 {
                                     label: "Tất cả",
@@ -102,8 +102,8 @@ const AllDoctor: React.FC = () => {
                         />
                     </div>
                     <Input
-                        placeholder="Tìm kiếm bác sĩ"
-                        className="w-[200px]!"
+                        placeholder="Tìm Bác Sĩ theo tên"
+                        className="w-[250px]!"
                         value={keyword}
                         onChange={(e) => setKeyword(e.target.value)}
                     />
@@ -134,10 +134,10 @@ const AllDoctor: React.FC = () => {
                                 }
                                 key={index}
                             >
-                                <div className="border border-blue-200 rounded-xl overflow-hidden cursor-pointer hover:translate-y-[-10px] transition-all duration-500">
+                                <div className="border border-blue-200 rounded-xl overflow-hidden cursor-pointer hover:-translate-y-2 transition-all duration-500">
                                     <div className="flex justify-center items-center bg-blue-50 h-[324.4px] w-full overflow-hidden">
                                         <img
-                                            className="bg-blue-50 w-full"
+                                            className="h-full w-full object-cover"
                                             src={user.avatar || "https://placehold.jp/150x150.png"}
                                             alt={`Picture of ${user.full_name}`}
                                         />
@@ -157,7 +157,7 @@ const AllDoctor: React.FC = () => {
                                         <p className="text-gray-900 text-lg font-medium">{user.full_name}</p>
                                         {
                                             // user.doctor?.rating && (
-                                            <Rating rating={4.5} />
+                                            <Rating rating={user.doctor?.rating || 0} />
                                             // )
                                         }
 

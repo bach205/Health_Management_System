@@ -4,23 +4,16 @@ import { getClinicService } from "../../../services/clinic.service";
 import { toast } from "react-toastify";
 import useQueue from "../../../hooks/useQueue";
 import { getQueueStatus } from "../../../types/queue.type";
-import ExaminationOrderModal from "../../../components/doctor/ExaminationOrderModal";
-import ResultExaminationModal from "../../../components/doctor/ResultExaminationModal";
-import ExaminationRecordModal from "../../../components/doctor/ExaminationRecordModal";
 import { useAuthStore } from "../../../store/authStore";
 import { useSocket } from "../../../hooks/useSocket";
-import { updateQueueStatus } from "../../../services/queue.service";
-import { Button, Dropdown, Flex, Menu, message, Select, Space, Table, Tag, Tooltip, Typography } from "antd";
-import ModalPatientExaminationOrder from "./ModalPatientExaminationOrder";
-import DoctorExaminationOrderModal from "./DoctorExaminationOrderModal";
+import { Button, Flex, Select, Space, Table, Tag, Tooltip, Typography } from "antd";
 import { RefreshCcw } from "lucide-react";
 import dayjs from "dayjs";
-import DoctorExaminationRecordModal from "./DoctorExaminationRecord";
 
 const { Option } = Select;
 const { Text } = Typography;
 
-const QueueTable = () => {
+const PatientQueueTable = () => {
     const {
         queues,
         pagination,
@@ -75,31 +68,7 @@ const QueueTable = () => {
             }
         }
     );
-    const handleStatusUpdate = async (queueId: string, newStatus: string) => {
-        const queue: any = queues.find((queue: any) => queue.id === queueId);
-        console.log(queue)
-        console.log(" appointmentTime", dayjs.utc(queue.appointment.appointment_time).hour(), "now", dayjs().hour())
-        console.log("not time", dayjs.utc(queue.appointment.appointment_time).hour() > dayjs().hour())
-        console.log(" time", dayjs.utc(queue.appointment.appointment_date), "now", dayjs())
 
-        if (queue) {
-            const appointmentTime = dayjs.utc(queue.appointment.appointment_time);
-            const appontmentdate = dayjs.utc(queue.appointment.appointment_date)
-
-            // Kiểm tra xem giờ khám, ngày khám có đã qua hay không
-            if (appointmentTime.hour() > dayjs().hour() || appontmentdate > dayjs()) {
-                message.error("Chưa đến giờ khám");
-                return;
-            }
-        }
-        try {
-            await updateQueueStatus(queueId, newStatus);
-            // Không cần fetchQueue nữa vì socket sẽ handle việc update UI
-        } catch (error: any) {
-            toast.error(error?.response?.data?.message || "Lỗi khi cập nhật trạng thái");
-        }
-    };
-    // Cập nhật Menu.Item để sử dụng handleStatusUpdate
     // const menu = (record: any) => (
     //     <Menu>
     //         {record.status === "waiting" && (
@@ -145,21 +114,6 @@ const QueueTable = () => {
         else reset();
     }, [selectedClinic]);
 
-    const handleFinishExam = (patient: any) => {
-        setSelectedPatient(patient);
-        setShowRecordModal(true);
-    };
-
-    const handleAssignClinic = (patient: any) => {
-        setSelectedPatient(patient);
-        setShowDoctorExaminationOrderModal(true);
-        // setShowResultModal(true);
-    };
-
-    const handleViewExaminationOrder = (patient: any) => {
-        setSelectedPatient(patient);
-        setShowModalPatientExaminationOrder(true);
-    };
 
     const getQueueStatusColor = (status: string) => {
         switch (status) {
@@ -189,14 +143,14 @@ const QueueTable = () => {
             title: "Bệnh nhân",
             dataIndex: ["patient", "user", "full_name"],
             key: "full_name",
-            width: 150,
+            width: 200,
             render: (_: any, record: any) => record?.patient?.user?.full_name || "-",
         },
         {
             title: "Bác sĩ khám",
             dataIndex: ["appointment", "doctor", "full_name"],
             key: "full_name",
-            width: 150,
+            width: 200,
             render: (_: any, record: any) => record?.appointment?.doctor?.full_name || "-",
         },
         {
@@ -221,51 +175,6 @@ const QueueTable = () => {
             key: "status",
             width: 150,
             render: (status: string) => <Tag color={getQueueStatusColor(status)}>{getQueueStatus(status)}</Tag>,
-        },
-        {
-            title: "Thao tác",
-            key: "action",
-            fixed: "right",
-            ellipsis: true,
-            width: 200,
-            render: (_: any, record: any) => {
-                return (
-
-                    <Space wrap size={'small'}>
-                        {record.status === "waiting" && (
-                            <>
-                                <Button
-                                    key="start"
-                                    onClick={() => handleStatusUpdate(record.id, "in_progress")}
-                                    type="primary"
-                                >
-                                    Bắt đầu khám
-                                </Button>
-                                <Button
-                                    key="skip"
-                                    onClick={() => handleStatusUpdate(record.id, "skipped")}
-                                    danger
-                                >
-                                    Bỏ qua
-                                </Button>
-                            </>
-                        )}
-                        {record.status === "in_progress" && (
-                            <>
-                                <Button color="pink" key="viewExaminationOrder" onClick={() => handleViewExaminationOrder(record.patient)}>
-                                    Xem lịch sử chuyển phòng
-                                </Button>
-                                <Button type="primary" key="finish" onClick={() => handleFinishExam(record.patient)}>
-                                    Khám xong
-                                </Button>
-                                <Button type="dashed" key="assign" onClick={() => handleAssignClinic(record.patient)}>
-                                    Chỉ định phòng tiếp
-                                </Button>
-                            </>
-                        )}
-                    </Space>
-                );
-            },
         },
     ];
 
@@ -341,78 +250,9 @@ const QueueTable = () => {
                 size="middle"
                 scroll={{ y: 400 }}
             />
-            <ModalPatientExaminationOrder
-                open={showModalPatientExaminationOrder}
-                onClose={() => setShowModalPatientExaminationOrder(false)}
-                patient={selectedPatient}
-            />
-            <DoctorExaminationOrderModal
-                open={showDoctorExaminationOrderModal}
-                onClose={() => setShowDoctorExaminationOrderModal(false)}
-                patientId={selectedPatient?.id}
-                clinicId={Number(selectedClinic)}
-                doctorId={(Number)(currentDoctorId)}
-                currentUserId={(Number)(user?.id)}
-                onSuccess={() => {
-                    setShowDoctorExaminationOrderModal(false);
-                    setSelectedPatient(null);
-                    fetchQueue(selectedClinic);
-                }}
-            />
-            <ExaminationOrderModal
-                open={showAssignModal && !!selectedPatient}
-                onClose={() => {
-                    setShowAssignModal(false);
-                    setSelectedPatient(null);
-                }}
-                patient={selectedPatient}
-                clinics={clinics}
-                selectedClinicId={selectedClinic}
-                onSuccess={() => {
-                    setShowAssignModal(false);
-                    setSelectedPatient(null);
-                    fetchQueue(selectedClinic);
-                }}
-            />
-            {/* <ExaminationRecordModal
-                open={showRecordModal}
-                onClose={() => setShowRecordModal(false)}
-                patientId={selectedPatient?.id}
-                doctorId={Number(currentDoctorId)}
-                onSuccess={() => {
-                    setShowRecordModal(false);
-                    setSelectedPatient(null);
-                    fetchQueue(selectedClinic);
-                }}
-            />
-             */}
-            <DoctorExaminationRecordModal
-                open={showRecordModal}
-                onClose={() => setShowRecordModal(false)}
-                patientId={selectedPatient?.id}
-                doctorId={Number(currentDoctorId)}
-                onSuccess={() => {
-                    setShowRecordModal(false);
-                    setSelectedPatient(null);
-                    fetchQueue(selectedClinic);
-                }}
-            />
-
-            <ResultExaminationModal
-                open={showResultModal}
-                onClose={() => setShowResultModal(false)}
-                patientId={selectedPatient?.id}
-                clinicId={Number(selectedClinic)}
-                doctorId={Number(currentDoctorId)}
-                currentUserId={Number(user?.id)}
-                onSuccess={() => {
-                    setShowResultModal(false);
-                    setSelectedPatient(null);
-                    fetchQueue(selectedClinic);
-                }}
-            />
+ 
         </div>
     );
 };
 
-export default QueueTable;
+export default PatientQueueTable;

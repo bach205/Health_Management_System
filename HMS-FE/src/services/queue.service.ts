@@ -1,10 +1,23 @@
 import mainRequest from "../api/mainRequest";
 const BASE_URL = "api/v1/queue";
 
-export const getQueueClinic = async (clinicId: string) => {
-  const response = await mainRequest.get(`${BASE_URL}/clinic/${clinicId}`);
+interface PaginationParams {
+  pageNumber?: number;
+  pageSize?: number;
+}
+
+export const getQueueClinic = async (clinicId: string, params?: PaginationParams) => {
+  const query = new URLSearchParams();
+
+  if (params?.pageNumber) query.append("pageNumber", String(params.pageNumber));
+  if (params?.pageSize) query.append("pageSize", String(params.pageSize));
+
+  const response = await mainRequest.get(
+    `${BASE_URL}/clinic/${clinicId}?${query.toString()}`
+  );
   return response.data;
 };
+
 
 export const getQueueStatus = async (clinicId: string) => {
   const response = await mainRequest.get(`${BASE_URL}/${clinicId}`);

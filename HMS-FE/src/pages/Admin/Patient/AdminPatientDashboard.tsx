@@ -9,13 +9,16 @@ import type { IPatient } from "../../../types/index.type";
 import UserListTitle from "../../../components/ui/UserListTitle";
 import { createPatient, updatePatient, updatePassword, updateStatus, updatePatientPassword } from "../../../services/patient.service";
 import ModalCreatePatient from "../../../components/modal/ModalCreatePatient";
+import ModalUpdatePatient from "../../../components/modal/ModalUpdatePatient";
 const AdminPatientDashboard = () => {
     const [isCreateVisible, setIsCreateVisible] = useState<boolean>(false);
     const [isViewVisible, setIsViewVisible] = useState<boolean>(false);
     const [currentUser, setCurrentUser] = useState<IPatient | null>(null);
+    const [isUpdateVisible, setIsUpdateVisible] = useState<boolean>(false);
 
     const [formCreate] = Form.useForm();
     const [formView] = Form.useForm();
+    const [formUpdate] = Form.useForm();
 
     // Table column
     const columns: any = [
@@ -34,9 +37,9 @@ const AdminPatientDashboard = () => {
             width: 60,
             align: "center" as const,
             render: (avatar: string) => {
-              return avatar ? <Avatar src={avatar} /> : <Avatar icon={<User size={17.5} />} />
+                return avatar ? <Avatar src={avatar} /> : <Avatar icon={<User size={17.5} />} />
             },
-          },
+        },
         {
             title: "Email",
             dataIndex: "email",
@@ -47,11 +50,11 @@ const AdminPatientDashboard = () => {
         {
             title: "Họ tên",
             dataIndex: "full_name",
-            width: 170,
+            width: 150,
             key: "full_name",
         },
         {
-            width: 90,
+            width: 80,
             ellipsis: true,
             title: "Giới tính",
             dataIndex: "gender",
@@ -74,7 +77,7 @@ const AdminPatientDashboard = () => {
             render: (record: any) => record?.identity_number || '',
         },
         {
-            width: 150,
+            width: 120,
             title: "Trạng thái",
             dataIndex: "is_active",
             key: "is_active",
@@ -103,6 +106,9 @@ const AdminPatientDashboard = () => {
                             icon={<Eye size={17.5} />}
                         />
                     </Tooltip>
+                    <Tooltip title="Cập nhật thông tin">
+                        <Button type="text" icon={<UserRoundPen size={17.5} />} onClick={() => handleEdit(record)} />
+                    </Tooltip>
                     <Popconfirm
                         title="Khôi phục mật khẩu"
                         description="Mật khẩu sẽ được khôi phục và gửi về email"
@@ -114,6 +120,7 @@ const AdminPatientDashboard = () => {
                             <Button type="text" icon={<RotateCcw size={17.5} />} />
                         </Tooltip>
                     </Popconfirm>
+
                     <Popconfirm
                         title={record?.is_active ? "Khóa tài khoản?" : "Mở khóa tài khoản?"}
                         description="Bạn chắc chắn muốn thực hiện hành động này?"
@@ -159,7 +166,24 @@ const AdminPatientDashboard = () => {
         }
     };
 
-
+    const handleEdit = async (record: any) => {
+        try {
+            // if (!record.date_of_birth) {
+            //   record.date_of_birth = dayjs().subtract(18, "year").toString();
+            // }
+            console.log(record)
+            setCurrentUser(record);
+            formUpdate.setFieldsValue({
+                ...record,
+                date_of_birth: record.date_of_birth ? dayjs(record.date_of_birth) : null,
+                identity_number: record.patient?.identity_number,
+            });
+            setIsUpdateVisible(true);
+        } catch (error) {
+            console.log(error);
+            notification.error({ message: "Có lỗi xảy ra" });
+        }
+    };
 
     const handleResetPassword = async (id: number) => {
         try {
@@ -209,6 +233,41 @@ const AdminPatientDashboard = () => {
             }
         }
     };
+    //Submit update doctor
+    const handleUpdateOk = async () => {
+        try {
+            const values = await formUpdate.validateFields();
+            if (!currentUser?.id) {
+                notification.error({ message: "Không tìm thấy thông tin bệnh nhân" });
+                return;
+            }
+            // gọi API cập nhật
+            const updatedPatient = {
+                ...values,
+                id: currentUser.id,
+                full_name: values.full_name?.trim(),
+                email: values.email?.trim(),
+                phone: values.phone?.trim(),
+                identity_number: values.identity_number?.trim(),
+                address: values.address?.trim(),
+            };
+            await updatePatient(updatedPatient);
+            setReload(!reload);
+            notification.success({ message: "Cập nhật tài khoản thành công" });
+
+            setIsUpdateVisible(false);
+        } catch (error: any) {
+            console.log(error);
+            if (error?.response?.data) {
+                notification.error({ message: error.response.data.message });
+            } else if (error?.errorFields?.length > 0) {
+                notification.error({ message: error.errorFields[0].errors[0] });
+            } else {
+                notification.error({ message: "Có lỗi xảy ra" });
+            }
+        }
+    };
+
 
     const handleResetFilter = () => {
         setKeyword("");
@@ -224,6 +283,9 @@ const AdminPatientDashboard = () => {
     } = usePatientList();
 
     // console.log(users);
+    const handleUpdateCancel = () => {
+        setIsUpdateVisible(false);
+    };
 
     return (
         <div>
@@ -295,6 +357,16 @@ const AdminPatientDashboard = () => {
                 handleOk={handleCreateOk}
                 isVisible={isCreateVisible}
                 handleCancel={handleCreateCancel}
+            />
+            <ModalUpdatePatient
+                role="patient"
+                form={formUpdate}
+                handleOk={handleUpdateOk}
+                isVisible={isUpdateVisible}
+                handleCancel={handleUpdateCancel}
+                user={currentUser}
+                reload={reload}
+                setReload={setReload}
             />
 
             <ModalViewUser
