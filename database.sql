@@ -16,7 +16,8 @@ CREATE TABLE users (
     sso_provider ENUM('google', 'facebook', 'local') DEFAULT 'local' COMMENT 'Authentication provider',
     is_active BOOLEAN DEFAULT TRUE COMMENT 'Account status',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT 'Creation timestamp',
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Update timestamp'
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Update timestamp',
+    avatar LONGTEXT NULL
 );
 
 -- Table for patients
@@ -28,41 +29,24 @@ CREATE TABLE patients (
     FOREIGN KEY (id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- Table for specialties
-CREATE TABLE specialties (
-    id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Specialty ID',
-    name VARCHAR(255) NOT NULL UNIQUE COMMENT 'Specialty name',
-    description TEXT COMMENT 'Specialty description',
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT 'Creation timestamp'
-);
-
 -- Table for clinics
 CREATE TABLE clinics (
     id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Clinic ID',
     name VARCHAR(255) NOT NULL COMMENT 'Specialty name',
-    description TEXT COMMENT 'Clinic description',
-    specialty_id INT COMMENT 'Related specialty',
-    FOREIGN KEY (specialty_id) REFERENCES specialties(id) ON DELETE SET NULL
+    description TEXT COMMENT 'Clinic description'
 );
 
 -- Table for doctors
 -- Thông tin mở rộng từ user (bác sĩ)
 CREATE TABLE doctors (
     user_id INT PRIMARY KEY COMMENT 'Tham chiếu đến users(id)',
-    specialty_id INT COMMENT 'Chuyên môn',
+    specialty VARCHAR(255) COMMENT 'Chuyên môn',
     bio TEXT COMMENT 'Giới thiệu',
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (specialty_id) REFERENCES specialties(id) ON DELETE SET NULL
+	rating DECIMAL(2,1) DEFAULT 0.0 COMMENT '(tối đa 9.9) Đánh giá trung bình, sửa rating trên backend', 
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- Table for nurses
-CREATE TABLE nurses (
-    user_id INT PRIMARY KEY COMMENT 'Tham chiếu đến users(id)',
-    specialty_id INT COMMENT 'Chuyên môn',
-    bio TEXT COMMENT 'Giới thiệu',
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (specialty_id) REFERENCES specialties(id) ON DELETE SET NULL
-);
+
 
 -- Table for shifts
 CREATE TABLE shifts (
@@ -232,15 +216,15 @@ CREATE TABLE available_slots (
     FOREIGN KEY (clinic_id) REFERENCES clinics(id) ON DELETE CASCADE
 );
 
--- Table for ratings and reviews
-CREATE TABLE ratings (
+-- Table for doctor ratings and comments
+CREATE TABLE doctor_ratings (
     id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Rating ID',
     doctor_id INT NOT NULL COMMENT 'Doctor being rated',
     patient_id INT NOT NULL COMMENT 'Patient giving the rating',
     appointment_id INT COMMENT 'Related appointment (optional)',
     rating DECIMAL(2,1) NOT NULL COMMENT 'Rating from 1.0 to 5.0',
-    comment TEXT COMMENT 'Patient review/comment',
-    is_anonymous BOOLEAN DEFAULT FALSE COMMENT 'Whether the review is anonymous',
+    comment TEXT COMMENT 'Patient comment/review',
+    is_anonymous BOOLEAN DEFAULT FALSE COMMENT 'Whether the rating is anonymous',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT 'Rating creation time',
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Rating update time',
     FOREIGN KEY (doctor_id) REFERENCES users(id) ON DELETE CASCADE,
@@ -270,7 +254,7 @@ WHERE q.appointment_id IS NULL;
 -- Insert sample data into users
 INSERT INTO users (email, password, full_name, phone, role, date_of_birth, gender, address, sso_provider, is_active) VALUES
 ('admin@example.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Admin', '0123456789', 'admin', '1990-01-01', 'other', 'Hanoi', 'local', TRUE),
-('drnguyenvanminh@gmail.com', '$2b$10$WmOLM2QL2s5Y3QYTum5kJOQN9jIfBIjjIP71lxDedBLEsUO5bmFU2', 'Nguyễn Văn Minh', '0987654321', 'doctor', '1985-03-15', 'male', 'Hà Nội', 'local', TRUE),
+('drnguyenvanminh@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Nguyễn Văn Minh', '0987654321', 'doctor', '1985-03-15', 'male', 'Hà Nội', 'local', TRUE),
 ('drtranthilan@gmail.com', '$2b$10$lDLp1RH5ZZ.tJ3MwjJZjMuEvK8oJfdIk4o9MMxLxlPmikyj.P3muK', 'Trần Thị Lan', '0987654322', 'doctor', '1988-07-22', 'female', 'TP.HCM', 'local', TRUE),
 ('nurselevanhai@gmail.com', '$2b$10$DWhHRcJ6oWS.X/Yh9DEkAOsB2Vg9uAQmbaC667MhBZnGxeahklRXe', 'Lê Văn Hải', '0987654323', 'nurse', '1990-11-10', 'male', 'Đà Nẵng', 'local', TRUE),
 ('nursephamthihong@gmail.com', '$2b$10$SJupulIuCV59ERzfYZqAxeVmXJ6cqOgAhwza.zjiRcZUd0XmMZsCW', 'Phạm Thị Hồng', '0987654324', 'nurse', '1992-04-05', 'female', 'Hà Nội', 'local', TRUE),
@@ -282,7 +266,7 @@ INSERT INTO users (email, password, full_name, phone, role, date_of_birth, gende
 ('hoangthimai@gmail.com', '$2b$10$YJ49PgM.igiHDjkBqZO/zOR.K.V9cOd.it3hoMqw10rDsgSPz9zVO', 'Hoàng Thị Mai', '0987654331', 'patient', '1987-03-09', 'female', 'TP.HCM', 'local', TRUE),
 ('vuvanlong@gmail.com', '$2b$10$3OuIqvhF/R0OgNScZhcCEO9P02jHNhFat2ClD.4VB77dxl5QT9yOG', 'Vũ Văn Long', '0987654332', 'patient', '1994-10-01', 'male', 'Hà Nội', 'google', TRUE),
 ('nguyenthilinh@gmail.com', '$2b$10$DrvOTxC7TE8HM2oIBtF52u36y.8FpDMnb.FFOpy72srPpAGRWw5EO', 'Nguyễn Thị Linh', '0987654333', 'patient', '1999-07-07', 'female', 'Đà Nẵng', 'local', TRUE),
-('drtrannam@gmail.com', '$2b$10$DrUljwk8Amt2CYCG9N3JWejWeMp3k2bIgxG.zPvwSVlyJY7g1wXL2', 'Trần Văn Nam', '0987654334', 'doctor', '1983-01-25', 'male', 'TP.HCM', 'local', TRUE),
+('drtrannam@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Trần Văn Nam', '0987654334', 'doctor', '1983-01-25', 'male', 'TP.HCM', 'local', TRUE),
 ('nurselethuyen@gmail.com', '$2b$10$vkB5NNh89QrcCfKthf2Xy.B7FViJFW4guWQGJ.91K2aC8yc965a0y', 'Lê Thị Thuyền', '0987654335', 'nurse', '1991-06-15', 'female', 'Hà Nội', 'local', TRUE);
 
 -- Insert sample data into patients
@@ -294,67 +278,40 @@ INSERT INTO patients (id, identity_number) VALUES
 (12, '123456789005'),
 (13, '123456789006');
 
--- Insert sample data into specialties
-INSERT INTO specialties (name, description) VALUES
-('Tim mạch', 'Chuyên về các bệnh liên quan đến tim và mạch máu'),
-('Thần kinh', 'Chuyên về các rối loạn hệ thần kinh trung ương và ngoại vi'),
-('Chấn thương chỉnh hình', 'Chuyên về xương, khớp và phẫu thuật chỉnh hình'),
-('Nhi khoa', 'Chuyên chăm sóc sức khỏe trẻ em và trẻ sơ sinh'),
-('Da liễu', 'Chuyên về các bệnh lý da và thẩm mỹ da'),
-('Mắt', 'Chuyên chăm sóc mắt và phẫu thuật khúc xạ'),
-('Tai mũi họng', 'Chuyên về tai, mũi, họng và phẫu thuật nội soi'),
-('Nội tổng quát', 'Dịch vụ chăm sóc sức khỏe tổng quát cho người lớn'),
-('Chẩn đoán hình ảnh', 'Chuyên về đọc và phân tích hình ảnh y khoa'),
-('Ung bướu', 'Điều trị và chăm sóc các bệnh lý ung thư'),
-('Tiêu hóa', 'Chuyên về các rối loạn hệ tiêu hóa'),
-('Tiết niệu', 'Chuyên về hệ tiết niệu và sinh sản nam'),
-('Nội tiết', 'Chuyên về các rối loạn hormone và bệnh tiểu đường'),
-('Chăm sóc đặc biệt', 'Chăm sóc bệnh nhân nặng và hồi sức'),
-('Phòng mổ', 'Hỗ trợ trong các ca phẫu thuật'),
-('Cấp cứu', 'Xử lý các tình huống khẩn cấp'),
-('Hồi sức', 'Chăm sóc bệnh nhân sau phẫu thuật'),
-('Chăm sóc tại nhà', 'Cung cấp dịch vụ chăm sóc sức khỏe tại nhà');
-
 -- Insert sample data into clinics
-INSERT INTO clinics (name, description, specialty_id) VALUES
-('Tim mạch', 'Chuyên về các bệnh liên quan đến tim', 1),
-('Thần kinh', 'Chuyên về các rối loạn hệ thần kinh', 2),
-('Chấn thương chỉnh hình', 'Chuyên về xương và khớp', 3),
-('Nhi khoa', 'Chuyên chăm sóc sức khỏe trẻ em', 4),
-('Da liễu', 'Chuyên về các bệnh về da', 5),
-('Mắt', 'Chuyên chăm sóc mắt', 6),
-('Tai mũi họng', 'Chuyên về tai, mũi và họng', 7),
-('Nội tổng quát', 'Dịch vụ chăm sóc sức khỏe tổng quát', 8),
-('Chẩn đoán hình ảnh', 'Dịch vụ chẩn đoán hình ảnh', 9),
-('Ung bướu', 'Điều trị và chăm sóc bệnh ung thư', 10),
-('Tiêu hóa', 'Rối loạn hệ tiêu hóa', 11),
-('Tiết niệu', 'Hệ tiết niệu và sinh sản nam', 12),
-('Nội tiết', 'Rối loạn liên quan đến hormone', 13),
-('Chăm sóc đặc biệt', 'Chăm sóc bệnh nhân nặng và hồi sức', 14),
-('Phòng mổ', 'Hỗ trợ trong các ca phẫu thuật', 15),
-('Cấp cứu', 'Xử lý các tình huống khẩn cấp', 16),
-('Hồi sức', 'Chăm sóc bệnh nhân sau phẫu thuật', 17),
-('Chăm sóc tại nhà', 'Cung cấp dịch vụ chăm sóc sức khỏe tại nhà', 18);
+INSERT INTO clinics (name, description) VALUES
+('Tim mạch', 'Chuyên về các bệnh liên quan đến tim'),
+('Thần kinh', 'Chuyên về các rối loạn hệ thần kinh'),
+('Chấn thương chỉnh hình', 'Chuyên về xương và khớp'),
+('Nhi khoa', 'Chuyên chăm sóc sức khỏe trẻ em'),
+('Da liễu', 'Chuyên về các bệnh về da'),
+('Mắt', 'Chuyên chăm sóc mắt'),
+('Tai mũi họng', 'Chuyên về tai, mũi và họng'),
+('Nội tổng quát', 'Dịch vụ chăm sóc sức khỏe tổng quát'),
+('Chẩn đoán hình ảnh', 'Dịch vụ chẩn đoán hình ảnh'),
+('Ung bướu', 'Điều trị và chăm sóc bệnh ung thư'),
+('Tiêu hóa', 'Rối loạn hệ tiêu hóa'),
+('Tiết niệu', 'Hệ tiết niệu và sinh sản nam'),
+('Nội tiết', 'Rối loạn liên quan đến hormone');
 
 -- Insert sample data into doctors
-INSERT INTO doctors (user_id, specialty_id, bio) VALUES
-(2, 1, 'Bác sĩ tim mạch với 10 năm kinh nghiệm'),
-(3, 2, 'Chuyên gia về rối loạn thần kinh'),
-(14, 3, 'Chuyên gia phẫu thuật thay khớp');
+INSERT INTO doctors (user_id, specialty, bio) VALUES
+(2, 'Tim mạch', 'Bác sĩ tim mạch với 10 năm kinh nghiệm'),
+(3, 'Thần kinh', 'Chuyên gia về rối loạn thần kinh'),
+(14, 'Chấn thương chỉnh hình', 'Chuyên gia phẫu thuật thay khớp');
 
 -- Insert sample data into shifts
 INSERT INTO shifts (name, start_time, end_time) VALUES
-('08:00-8:30', '08:00:00', '8:30:00'),
-('09:00-9:30', '09:00:00', '9:30:00'),
-('10:00-11:00', '10:00:00', '11:00:00'),
-('12:00-13:00', '12:00:00', '13:00:00'),
-('13:00-13:30', '13:00:00', '13:30:00'),
-('14:00-15:00', '14:00:00', '15:00:00'),
-('15:00-15:30', '15:00:00', '15:30:00'),
-('16:00-16:30', '16:00:00', '16:30:00'),
-('17:00-17:30', '17:00:00', '17:30:00'),
-('18:30-19:30', '18:30:00', '19:30:00'),
-('21:00-22:00', '21:00:00', '22:00:00');
+('08:00-12:00', '08:00:00', '12:00:00'),
+('13:00-17:00', '13:00:00', '17:00:00'),
+('18:00-22:00', '18:00:00', '22:00:00'),
+('22:00-06:00', '22:00:00', '06:00:00'),
+('08:00-17:00', '08:00:00', '17:00:00'),
+('06:00-10:00', '06:00:00', '10:00:00'),
+('15:00-19:00', '15:00:00', '19:00:00'),
+('10:00-14:00', '10:00:00', '14:00:00'),
+('00:00-08:00', '00:00:00', '08:00:00'),
+('09:00-13:00', '09:00:00', '13:00:00');
 
 -- Insert sample data into work_schedules
 INSERT INTO work_schedules (user_id, clinic_id, work_date, shift_id) VALUES
@@ -430,15 +387,6 @@ INSERT INTO examination_details (record_id, clinic_id, doctor_id, result, note, 
 (4, 4, 2, 'Xét nghiệm máu dương tính với sốt xuất huyết', 'Theo dõi tiểu cầu', '2025-06-04 11:20:00', 'done'),
 (5, 5, 3, 'Test dị ứng dương tính với penicillin', 'Tránh sử dụng nhóm thuốc beta-lactam', '2025-06-05 15:30:00', 'done'),
 (6, 6, 14, 'Đo thị lực: 3/10, cần đeo kính -2.5', 'Tái khám sau 3 tháng', '2025-06-06 09:00:00', 'done');
-
--- Insert sample data into queues
-INSERT INTO queues (patient_id, clinic_id, record_id, appointment_id, status, priority, registered_online, qr_code, called_at) VALUES
-(8, 1, 1, NULL, 'done', 1, TRUE, 'QR001', '2025-06-01 09:00:00'),
-(9, 2, 2, NULL, 'done', 2, FALSE, 'QR002', '2025-06-02 14:00:00'),
-(10, 3, 3, NULL, 'done', 0, TRUE, 'QR003', '2025-06-03 08:30:00'),
-(11, 4, 4, NULL, 'done', 1, FALSE, 'QR004', '2025-06-04 11:00:00'),
-(12, 5, 5, NULL, 'done', 0, TRUE, 'QR005', '2025-06-05 15:00:00'),
-(13, 6, 6, NULL, 'done', 0, FALSE, 'QR006', '2025-06-06 08:45:00');
 
 -- Insert sample data into prescriptions
 INSERT INTO prescriptions (record_id) VALUES
@@ -565,20 +513,6 @@ WHERE (doctor_id = 2 AND clinic_id = 1 AND slot_date = '2025-06-20' AND start_ti
    OR (doctor_id = 2 AND clinic_id = 11 AND slot_date = '2025-06-17' AND start_time = '15:30:00')
    OR (doctor_id = 14 AND clinic_id = 12 AND slot_date = '2025-06-19' AND start_time = '11:00:00');
 
--- Insert additional sample data into queues
-INSERT INTO queues (patient_id, clinic_id, record_id, appointment_id, status, priority, registered_online, qr_code) VALUES
-(11, 7, NULL, 10, 'waiting', 0, TRUE, 'QR007'),
-(12, 11, NULL, 11, 'waiting', 1, FALSE, 'QR008'),
-(13, 12, NULL, 12, 'waiting', 0, TRUE, 'QR009'),
-(8, 9, NULL, 13, 'waiting', 1, TRUE, 'QR010'),
-(9, 10, NULL, 14, 'waiting', 0, FALSE, 'QR011'),
-(10, 13, NULL, 15, 'waiting', 0, TRUE, 'QR012'),
-(11, 1, NULL, 16, 'waiting', 1, TRUE, 'QR013'),
-(12, 2, NULL, 17, 'waiting', 0, FALSE, 'QR014'),
-(13, 4, NULL, 18, 'waiting', 2, TRUE, 'QR015');
-
-ALTER TABLE `users` ADD COLUMN `avatar` LONGTEXT NULL;
-
 -- Thêm 10 tài khoản bác sĩ mới (tên thật, email chuyên nghiệp)
 INSERT INTO users (email, password, full_name, phone, role, date_of_birth, gender, address, sso_provider, is_active) VALUES
 ('nguyenhoanglong@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Nguyễn Hoàng Long', '0901000001', 'doctor', '1980-01-01', 'male', 'Hà Nội', 'local', TRUE),
@@ -606,73 +540,123 @@ INSERT INTO users (email, password, full_name, phone, role, date_of_birth, gende
 ('vuvantrung@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Vũ Văn Trung', '0911000010', 'nurse', '1999-10-10', 'male', 'Nam Định', 'local', TRUE);
 
 -- Thêm thông tin chi tiết cho các bác sĩ mới
-INSERT INTO doctors (user_id, specialty_id, bio) VALUES
-(16, 8, 'Bác sĩ có kinh nghiệm làm việc tại khoa nội tổng quát.'),
-(17, 4, 'Chuyên gia về chăm sóc sức khỏe trẻ em và trẻ sơ sinh.'),
-(18, 11, 'Bác sĩ chuyên khoa tiêu hóa với nhiều năm kinh nghiệm.'),
-(19, 5, 'Chuyên gia về các bệnh lý da và thẩm mỹ da.'),
-(20, 7, 'Bác sĩ chuyên khoa tai mũi họng, phẫu thuật nội soi.'),
-(21, 6, 'Chuyên gia về các bệnh lý mắt và phẫu thuật khúc xạ.'),
-(22, 10, 'Bác sĩ chuyên điều trị các bệnh lý ung bướu.'),
-(23, 12, 'Chuyên gia về các bệnh lý hệ tiết niệu và nam khoa.'),
-(24, 13, 'Bác sĩ chuyên điều trị các rối loạn hormone và tiểu đường.'),
-(25, 9, 'Chuyên gia về đọc và phân tích hình ảnh y khoa.');
+INSERT INTO doctors (user_id, specialty, bio) VALUES
+(16, 'Nội tổng quát', 'Bác sĩ có kinh nghiệm làm việc tại khoa nội tổng quát.'),
+(17, 'Nhi khoa', 'Chuyên gia về chăm sóc sức khỏe trẻ em và trẻ sơ sinh.'),
+(18, 'Tiêu hóa', 'Bác sĩ chuyên khoa tiêu hóa với nhiều năm kinh nghiệm.'),
+(19, 'Da liễu', 'Chuyên gia về các bệnh lý da và thẩm mỹ da.'),
+(20, 'Tai mũi họng', 'Bác sĩ chuyên khoa tai mũi họng, phẫu thuật nội soi.'),
+(21, 'Mắt', 'Chuyên gia về các bệnh lý mắt và phẫu thuật khúc xạ.'),
+(22, 'Ung bướu', 'Bác sĩ chuyên điều trị các bệnh lý ung bướu.'),
+(23, 'Tiết niệu', 'Chuyên gia về các bệnh lý hệ tiết niệu và nam khoa.'),
+(24, 'Nội tiết', 'Bác sĩ chuyên điều trị các rối loạn hormone và tiểu đường.'),
+(25, 'Chẩn đoán hình ảnh', 'Chuyên gia về đọc và phân tích hình ảnh y khoa.');
 
--- Thêm thông tin chi tiết cho các y tá mới
-INSERT INTO nurses (user_id, specialty_id, bio) VALUES
-(26, 8, 'Y tá có kinh nghiệm chăm sóc bệnh nhân nội trú.'),
-(27, 4, 'Y tá chuyên chăm sóc trẻ em và tư vấn cho phụ huynh.'),
-(28, 14, 'Y tá được đào tạo chuyên sâu về chăm sóc bệnh nhân nặng.'),
-(29, 15, 'Y tá có kinh nghiệm hỗ trợ trong các ca phẫu thuật.'),
-(30, 16, 'Y tá có kỹ năng xử lý các tình huống khẩn cấp.'),
-(31, 17, 'Y tá chuyên chăm sóc bệnh nhân sau phẫu thuật.'),
-(32, 1, 'Y tá có kinh nghiệm chăm sóc bệnh nhân tim mạch.'),
-(33, 10, 'Y tá chuyên chăm sóc và hỗ trợ bệnh nhân ung thư.'),
-(34, 8, 'Y tá có kinh nghiệm làm việc tại phòng khám đa khoa.'),
-(35, 18, 'Y tá chuyên cung cấp dịch vụ chăm sóc sức khỏe tại nhà.');
+-- Thêm 15 appointments mới
+INSERT INTO appointments (patient_id, clinic_id, doctor_id, appointment_date, appointment_time, status, priority, reason, note) VALUES
+-- Patient 8 - Các khoa khác nhau
+(8, 2, 3, '2025-06-26', '09:00:00', 'confirmed', 0, 'Đau đầu, chóng mặt', 'Triệu chứng xuất hiện sau khi làm việc nhiều'),
+(8, 5, 19, '2025-06-27', '14:30:00', 'pending', 0, 'Nổi mẩn đỏ trên da', 'Có thể do dị ứng thời tiết'),
+(8, 7, 20, '2025-06-28', '10:00:00', 'confirmed', 0, 'Đau họng, khó nuốt', 'Triệu chứng kéo dài 3 ngày'),
 
--- Insert sample data into ratings
-INSERT INTO ratings (doctor_id, patient_id, appointment_id, rating, comment, is_anonymous) VALUES
-(2, 8, 1, 4.5, 'Bác sĩ rất tận tâm và chuyên nghiệp. Giải thích rõ ràng về tình trạng bệnh.', FALSE),
-(2, 11, 4, 5.0, 'Bác sĩ Minh rất giỏi, điều trị hiệu quả và quan tâm đến bệnh nhân.', FALSE),
-(3, 9, 2, 4.0, 'Bác sĩ Lan chẩn đoán chính xác và điều trị hiệu quả.', FALSE),
-(3, 12, 5, 4.5, 'Rất hài lòng với dịch vụ khám bệnh.', TRUE),
-(14, 10, 3, 5.0, 'Bác sĩ Nam có tay nghề cao, phẫu thuật thành công.', FALSE),
-(14, 13, 6, 4.0, 'Bác sĩ chuyên môn tốt, tư vấn nhiệt tình.', FALSE),
-(16, 8, 7, 4.5, 'Bác sĩ Long rất tận tâm trong việc khám và điều trị.', FALSE),
-(17, 9, 8, 5.0, 'Bác sĩ Thảo rất giỏi với trẻ em, con tôi rất thích.', FALSE),
-(18, 10, 9, 4.0, 'Bác sĩ Phúc chẩn đoán chính xác bệnh tiêu hóa.', FALSE),
-(19, 11, 10, 4.5, 'Bác sĩ Minh điều trị bệnh da hiệu quả.', FALSE),
-(20, 12, 11, 5.0, 'Bác sĩ Nam phẫu thuật tai mũi họng rất thành công.', FALSE),
-(21, 13, 12, 4.0, 'Bác sĩ Thu khám mắt cẩn thận và tư vấn chi tiết.', FALSE),
-(22, 8, 13, 4.5, 'Bác sĩ Quân rất chuyên nghiệp trong lĩnh vực ung bướu.', FALSE),
-(23, 9, 14, 5.0, 'Bác sĩ Thanh điều trị hiệu quả và quan tâm bệnh nhân.', FALSE),
-(24, 10, 15, 4.0, 'Bác sĩ Trường tư vấn dinh dưỡng rất hữu ích.', FALSE),
-(25, 11, 16, 4.5, 'Bác sĩ Thảo đọc kết quả chẩn đoán hình ảnh rất chính xác.', FALSE);
+-- Patient 9 - Các khoa khác nhau
+(9, 3, 14, '2025-06-26', '15:00:00', 'confirmed', 0, 'Đau lưng, khó vận động', 'Sau khi nâng vật nặng'),
+(9, 6, 21, '2025-06-27', '08:30:00', 'pending', 0, 'Mờ mắt, nhức mắt', 'Làm việc nhiều với máy tính'),
+(9, 11, 18, '2025-06-28', '11:30:00', 'confirmed', 0, 'Đau bụng, buồn nôn', 'Sau khi ăn đồ cay'),
 
--- Insert work schedules for new nurses
-INSERT INTO work_schedules (user_id, clinic_id, work_date, shift_id) VALUES
-(26, 8, '2025-06-16', 1), (26, 8, '2025-06-17', 2), (26, 8, '2025-06-18', 1),
-(27, 4, '2025-06-16', 2), (27, 4, '2025-06-17', 1), (27, 4, '2025-06-18', 2),
-(28, 14, '2025-06-16', 1), (28, 14, '2025-06-17', 2), (28, 14, '2025-06-18', 1),
-(29, 15, '2025-06-16', 2), (29, 15, '2025-06-17', 1), (29, 15, '2025-06-18', 2),
-(30, 16, '2025-06-16', 1), (30, 16, '2025-06-17', 2), (30, 16, '2025-06-18', 1),
-(31, 17, '2025-06-16', 2), (31, 17, '2025-06-17', 1), (31, 17, '2025-06-18', 2),
-(32, 1, '2025-06-16', 1), (32, 1, '2025-06-17', 2), (32, 1, '2025-06-18', 1),
-(33, 10, '2025-06-16', 2), (33, 10, '2025-06-17', 1), (33, 10, '2025-06-18', 2),
-(34, 8, '2025-06-16', 1), (34, 8, '2025-06-17', 2), (34, 8, '2025-06-18', 1),
-(35, 18, '2025-06-16', 2), (35, 18, '2025-06-17', 1), (35, 18, '2025-06-18', 2);
+-- Patient 10 - Các khoa khác nhau
+(10, 1, 2, '2025-06-26', '13:00:00', 'confirmed', 0, 'Đau ngực, khó thở', 'Khi leo cầu thang'),
+(10, 4, 17, '2025-06-27', '16:00:00', 'pending', 0, 'Sốt cao, ho nhiều', 'Trẻ em 5 tuổi'),
+(10, 8, 16, '2025-06-28', '09:00:00', 'confirmed', 0, 'Khám tổng quát định kỳ', 'Kiểm tra sức khỏe hàng năm'),
 
--- Insert work schedules for new doctors
-INSERT INTO work_schedules (user_id, clinic_id, work_date, shift_id) VALUES
-(16, 8, '2025-06-16', 1), (16, 8, '2025-06-17', 2), (16, 8, '2025-06-18', 1),
-(17, 4, '2025-06-16', 2), (17, 4, '2025-06-17', 1), (17, 4, '2025-06-18', 2),
-(18, 11, '2025-06-16', 1), (18, 11, '2025-06-17', 2), (18, 11, '2025-06-18', 1),
-(19, 5, '2025-06-16', 2), (19, 5, '2025-06-17', 1), (19, 5, '2025-06-18', 2),
-(20, 7, '2025-06-16', 1), (20, 7, '2025-06-17', 2), (20, 7, '2025-06-18', 1),
-(21, 6, '2025-06-16', 2), (21, 6, '2025-06-17', 1), (21, 6, '2025-06-18', 2),
-(22, 10, '2025-06-16', 1), (22, 10, '2025-06-17', 2), (22, 10, '2025-06-18', 1),
-(23, 12, '2025-06-16', 2), (23, 12, '2025-06-17', 1), (23, 12, '2025-06-18', 2),
-(24, 13, '2025-06-16', 1), (24, 13, '2025-06-17', 2), (24, 13, '2025-06-18', 1),
-(25, 9, '2025-06-16', 2), (25, 9, '2025-06-17', 1), (25, 9, '2025-06-18', 2);
+-- Patient 11 - Các khoa khác nhau
+(11, 2, 3, '2025-06-26', '10:30:00', 'confirmed', 0, 'Mất ngủ, stress', 'Công việc áp lực cao'),
+(11, 9, 25, '2025-06-27', '14:00:00', 'pending', 0, 'Chụp CT bụng', 'Theo dõi sau phẫu thuật'),
+(11, 12, 23, '2025-06-28', '15:30:00', 'confirmed', 0, 'Đau vùng thắt lưng', 'Nam giới 45 tuổi'),
+
+-- Patient 12 - Các khoa khác nhau
+(12, 1, 2, '2025-06-26', '08:00:00', 'confirmed', 0, 'Tăng huyết áp', 'Có tiền sử gia đình'),
+(12, 10, 22, '2025-06-27', '11:00:00', 'pending', 0, 'Tư vấn phòng chống ung thư', 'Người thân bị ung thư'),
+(12, 13, 24, '2025-06-28', '13:30:00', 'confirmed', 0, 'Kiểm tra đường huyết', 'Tiền sử tiểu đường');
+
+-- Insert additional sample data into queues
+INSERT INTO queues (patient_id, clinic_id, record_id, appointment_id, status, priority, registered_online, qr_code) VALUES
+-- Queue cho các appointment đã confirmed/completed (ID 1-25)
+(10, 3, NULL, 3, 'waiting', 0, TRUE, 'QR001'), -- Appointment confirmed: patient 10, clinic 3, doctor 14
+(11, 4, NULL, 4, 'waiting', 0, TRUE, 'QR002'), -- Appointment confirmed: patient 11, clinic 4, doctor 2  
+(13, 6, NULL, 6, 'done', 0, TRUE, 'QR003'), -- Appointment completed: patient 13, clinic 6, doctor 14
+(8, 1, NULL, 7, 'waiting', 0, TRUE, 'QR004'), -- Appointment confirmed: patient 8, clinic 1, doctor 2
+(10, 3, NULL, 9, 'waiting', 0, TRUE, 'QR005'), -- Appointment confirmed: patient 10, clinic 3, doctor 14
+(12, 11, NULL, 11, 'waiting', 0, TRUE, 'QR006'), -- Appointment confirmed: patient 12, clinic 11, doctor 2
+(8, 9, NULL, 13, 'waiting', 0, TRUE, 'QR007'), -- Appointment confirmed: patient 8, clinic 9, doctor 2
+(10, 13, NULL, 15, 'waiting', 0, TRUE, 'QR008'), -- Appointment confirmed: patient 10, clinic 13, doctor 14
+(11, 1, NULL, 16, 'waiting', 0, TRUE, 'QR009'), -- Appointment confirmed: patient 11, clinic 1, doctor 2
+(13, 4, NULL, 18, 'waiting', 0, TRUE, 'QR010'), -- Appointment confirmed: patient 13, clinic 4, doctor 14
+(11, 8, NULL, 21, 'done', 0, TRUE, 'QR011'), -- Appointment completed: patient 11, clinic 8, doctor 2
+(12, 9, NULL, 22, 'done', 0, TRUE, 'QR012'), -- Appointment completed: patient 12, clinic 9, doctor 3
+(13, 10, NULL, 23, 'done', 0, TRUE, 'QR013'), -- Appointment completed: patient 13, clinic 10, doctor 14
+(8, 8, NULL, 24, 'done', 2, TRUE, 'QR014'), -- Appointment completed: patient 8, clinic 8, doctor 2
+(9, 1, NULL, 25, 'done', 2, TRUE, 'QR015'), -- Appointment completed: patient 9, clinic 1, doctor 3
+
+-- Thêm queue cho các appointment confirmed mới (ID 26-40)
+(8, 2, NULL, 26, 'waiting', 0, TRUE, 'QR051'), -- Appointment confirmed: patient 8, clinic 2, doctor 3
+(8, 7, NULL, 28, 'waiting', 0, TRUE, 'QR053'), -- Appointment confirmed: patient 8, clinic 7, doctor 20
+(9, 3, NULL, 29, 'waiting', 0, TRUE, 'QR054'), -- Appointment confirmed: patient 9, clinic 3, doctor 14
+(9, 11, NULL, 31, 'waiting', 0, TRUE, 'QR056'), -- Appointment confirmed: patient 9, clinic 11, doctor 18
+(10, 1, NULL, 32, 'waiting', 0, TRUE, 'QR057'), -- Appointment confirmed: patient 10, clinic 1, doctor 2
+(10, 8, NULL, 34, 'waiting', 0, TRUE, 'QR059'), -- Appointment confirmed: patient 10, clinic 8, doctor 16
+(11, 2, NULL, 35, 'waiting', 0, TRUE, 'QR060'), -- Appointment confirmed: patient 11, clinic 2, doctor 3
+(11, 12, NULL, 37, 'waiting', 0, TRUE, 'QR062'), -- Appointment confirmed: patient 11, clinic 12, doctor 23
+(12, 1, NULL, 38, 'waiting', 0, TRUE, 'QR063'), -- Appointment confirmed: patient 12, clinic 1, doctor 2
+(12, 13, NULL, 40, 'waiting', 0, TRUE, 'QR065'); -- Appointment confirmed: patient 12, clinic 13, doctor 24
+
+-- Insert sample data into doctor_ratings
+INSERT INTO doctor_ratings (doctor_id, patient_id, appointment_id, rating, comment, is_anonymous) VALUES
+-- Ratings for Dr. Nguyễn Văn Minh (ID: 2) - Tim mạch
+(2, 8, 6, 4.5, 'Bác sĩ rất tận tâm và chuyên nghiệp. Giải thích bệnh tình rõ ràng, dễ hiểu.', FALSE),
+(2, 11, 4, 5.0, 'Bác sĩ Minh rất giỏi, chẩn đoán chính xác và điều trị hiệu quả.', FALSE),
+(2, 12, 11, 4.0, 'Bác sĩ có kinh nghiệm tốt, nhưng thời gian khám hơi nhanh.', FALSE),
+(2, 8, 7, 4.8, 'Tái khám rất tốt, bệnh tình cải thiện rõ rệt.', FALSE),
+(2, 10, 32, 4.2, 'Bác sĩ tận tâm nhưng phòng khám hơi đông.', FALSE),
+
+-- Ratings for Dr. Trần Thị Lan (ID: 3) - Thần kinh  
+(3, 9, 2, 4.7, 'Bác sĩ Lan rất hiểu tâm lý bệnh nhân, tư vấn rất hữu ích.', FALSE),
+(3, 12, 5, 3.5, 'Bác sĩ có chuyên môn tốt nhưng ít nói chuyện.', FALSE),
+(3, 11, 35, 4.9, 'Bác sĩ rất tận tâm, giải thích chi tiết về bệnh tình.', FALSE),
+(3, 9, 25, 4.3, 'Khám cấp cứu nhanh chóng và hiệu quả.', FALSE),
+
+-- Ratings for Dr. Trần Văn Nam (ID: 14) - Chấn thương chỉnh hình
+(14, 10, 3, 4.6, 'Bác sĩ Nam rất giỏi về xương khớp, điều trị hiệu quả.', FALSE),
+(14, 13, 6, 4.4, 'Bác sĩ tận tâm, hướng dẫn tập luyện chi tiết.', FALSE),
+(14, 9, 29, 4.1, 'Bác sĩ có kinh nghiệm tốt nhưng cần cải thiện thái độ.', FALSE),
+(14, 10, 9, 4.8, 'Tái khám rất tốt, khớp gối đã cải thiện nhiều.', FALSE),
+(14, 13, 18, 4.0, 'Bác sĩ chuyên môn tốt nhưng thời gian chờ hơi lâu.', FALSE),
+
+-- Anonymous ratings
+(2, 8, NULL, 4.3, 'Bác sĩ rất tốt, nhưng tôi muốn giữ ẩn danh.', TRUE),
+(3, 9, NULL, 4.7, 'Chất lượng khám bệnh rất tốt.', TRUE),
+(14, 10, NULL, 4.5, 'Bác sĩ có chuyên môn cao.', TRUE),
+
+-- Ratings for new doctors
+(16, 8, 26, 4.2, 'Bác sĩ mới nhưng rất tận tâm.', FALSE),
+(17, 9, 30, 4.6, 'Bác sĩ nhi khoa rất giỏi với trẻ em.', FALSE),
+(18, 11, 31, 4.4, 'Bác sĩ tiêu hóa có kinh nghiệm tốt.', FALSE),
+(19, 8, 27, 4.8, 'Bác sĩ da liễu rất chuyên nghiệp.', FALSE),
+(20, 8, 28, 4.1, 'Bác sĩ tai mũi họng khám kỹ lưỡng.', FALSE),
+(21, 9, 30, 4.3, 'Bác sĩ mắt có chuyên môn tốt.', FALSE),
+(22, 12, 39, 4.7, 'Bác sĩ ung bướu rất tận tâm.', FALSE),
+(23, 11, 37, 4.5, 'Bác sĩ tiết niệu có kinh nghiệm.', FALSE),
+(24, 12, 40, 4.4, 'Bác sĩ nội tiết tư vấn rất hữu ích.', FALSE),
+(25, 11, 36, 4.2, 'Bác sĩ chẩn đoán hình ảnh chuyên nghiệp.', FALSE);
+
+-- Update doctor average ratings based on the ratings data
+UPDATE doctors d 
+SET rating = (
+    SELECT ROUND(AVG(rating), 1)
+    FROM doctor_ratings dr 
+    WHERE dr.doctor_id = d.user_id
+)
+WHERE d.user_id IN (SELECT DISTINCT doctor_id FROM doctor_ratings);
+
+
 
