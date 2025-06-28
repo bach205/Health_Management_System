@@ -28,24 +28,41 @@ CREATE TABLE patients (
     FOREIGN KEY (id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+-- Table for specialties
+CREATE TABLE specialties (
+    id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Specialty ID',
+    name VARCHAR(255) NOT NULL UNIQUE COMMENT 'Specialty name',
+    description TEXT COMMENT 'Specialty description',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT 'Creation timestamp'
+);
+
 -- Table for clinics
 CREATE TABLE clinics (
     id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Clinic ID',
     name VARCHAR(255) NOT NULL COMMENT 'Specialty name',
-    description TEXT COMMENT 'Clinic description'
+    description TEXT COMMENT 'Clinic description',
+    specialty_id INT COMMENT 'Related specialty',
+    FOREIGN KEY (specialty_id) REFERENCES specialties(id) ON DELETE SET NULL
 );
 
 -- Table for doctors
 -- Thông tin mở rộng từ user (bác sĩ)
 CREATE TABLE doctors (
     user_id INT PRIMARY KEY COMMENT 'Tham chiếu đến users(id)',
-    specialty VARCHAR(255) COMMENT 'Chuyên môn',
+    specialty_id INT COMMENT 'Chuyên môn',
     bio TEXT COMMENT 'Giới thiệu',
-	rating DECIMAL(2,1) DEFAULT 0.0 COMMENT '(tối đa 9.9) Đánh giá trung bình, sửa rating trên backend', 
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (specialty_id) REFERENCES specialties(id) ON DELETE SET NULL
 );
 
-
+-- Table for nurses
+CREATE TABLE nurses (
+    user_id INT PRIMARY KEY COMMENT 'Tham chiếu đến users(id)',
+    specialty_id INT COMMENT 'Chuyên môn',
+    bio TEXT COMMENT 'Giới thiệu',
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (specialty_id) REFERENCES specialties(id) ON DELETE SET NULL
+);
 
 -- Table for shifts
 CREATE TABLE shifts (
@@ -147,7 +164,7 @@ CREATE TABLE prescription_items (
     dosage VARCHAR(100) COMMENT 'Dosage',
     frequency VARCHAR(100) COMMENT 'Frequency per day',
     duration VARCHAR(100) COMMENT 'Duration of use',
-    note TEXT COMMENT 'Doctor’s notes',
+    note TEXT COMMENT 'Doctor`s notes',
     FOREIGN KEY (prescription_id) REFERENCES prescriptions(id) ON DELETE CASCADE
 );
 
@@ -215,6 +232,23 @@ CREATE TABLE available_slots (
     FOREIGN KEY (clinic_id) REFERENCES clinics(id) ON DELETE CASCADE
 );
 
+-- Table for ratings and reviews
+CREATE TABLE ratings (
+    id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Rating ID',
+    doctor_id INT NOT NULL COMMENT 'Doctor being rated',
+    patient_id INT NOT NULL COMMENT 'Patient giving the rating',
+    appointment_id INT COMMENT 'Related appointment (optional)',
+    rating DECIMAL(2,1) NOT NULL COMMENT 'Rating from 1.0 to 5.0',
+    comment TEXT COMMENT 'Patient review/comment',
+    is_anonymous BOOLEAN DEFAULT FALSE COMMENT 'Whether the review is anonymous',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT 'Rating creation time',
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Rating update time',
+    FOREIGN KEY (doctor_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
+    FOREIGN KEY (appointment_id) REFERENCES appointments(id) ON DELETE SET NULL,
+    CHECK (rating >= 1.0 AND rating <= 5.0)
+);
+
 -- Add appointment_id column to queues and foreign key constraint
 ALTER TABLE queues
 ADD CONSTRAINT fk_queues_appointments
@@ -224,8 +258,6 @@ FOREIGN KEY (appointment_id) REFERENCES appointments(id) ON DELETE SET NULL;
 
 ALTER TABLE appointments
 ADD COLUMN priority INT DEFAULT 0 COMMENT '0: normal booking, 1: nurse booking, 2: urgent' AFTER status;
-
-
 
 -- Update queues with appointment_id where possible
 UPDATE queues q
@@ -262,40 +294,67 @@ INSERT INTO patients (id, identity_number) VALUES
 (12, '123456789005'),
 (13, '123456789006');
 
+-- Insert sample data into specialties
+INSERT INTO specialties (name, description) VALUES
+('Tim mạch', 'Chuyên về các bệnh liên quan đến tim và mạch máu'),
+('Thần kinh', 'Chuyên về các rối loạn hệ thần kinh trung ương và ngoại vi'),
+('Chấn thương chỉnh hình', 'Chuyên về xương, khớp và phẫu thuật chỉnh hình'),
+('Nhi khoa', 'Chuyên chăm sóc sức khỏe trẻ em và trẻ sơ sinh'),
+('Da liễu', 'Chuyên về các bệnh lý da và thẩm mỹ da'),
+('Mắt', 'Chuyên chăm sóc mắt và phẫu thuật khúc xạ'),
+('Tai mũi họng', 'Chuyên về tai, mũi, họng và phẫu thuật nội soi'),
+('Nội tổng quát', 'Dịch vụ chăm sóc sức khỏe tổng quát cho người lớn'),
+('Chẩn đoán hình ảnh', 'Chuyên về đọc và phân tích hình ảnh y khoa'),
+('Ung bướu', 'Điều trị và chăm sóc các bệnh lý ung thư'),
+('Tiêu hóa', 'Chuyên về các rối loạn hệ tiêu hóa'),
+('Tiết niệu', 'Chuyên về hệ tiết niệu và sinh sản nam'),
+('Nội tiết', 'Chuyên về các rối loạn hormone và bệnh tiểu đường'),
+('Chăm sóc đặc biệt', 'Chăm sóc bệnh nhân nặng và hồi sức'),
+('Phòng mổ', 'Hỗ trợ trong các ca phẫu thuật'),
+('Cấp cứu', 'Xử lý các tình huống khẩn cấp'),
+('Hồi sức', 'Chăm sóc bệnh nhân sau phẫu thuật'),
+('Chăm sóc tại nhà', 'Cung cấp dịch vụ chăm sóc sức khỏe tại nhà');
+
 -- Insert sample data into clinics
-INSERT INTO clinics (name, description) VALUES
-('Tim mạch', 'Chuyên về các bệnh liên quan đến tim'),
-('Thần kinh', 'Chuyên về các rối loạn hệ thần kinh'),
-('Chấn thương chỉnh hình', 'Chuyên về xương và khớp'),
-('Nhi khoa', 'Chuyên chăm sóc sức khỏe trẻ em'),
-('Da liễu', 'Chuyên về các bệnh về da'),
-('Mắt', 'Chuyên chăm sóc mắt'),
-('Tai mũi họng', 'Chuyên về tai, mũi và họng'),
-('Nội tổng quát', 'Dịch vụ chăm sóc sức khỏe tổng quát'),
-('Chẩn đoán hình ảnh', 'Dịch vụ chẩn đoán hình ảnh'),
-('Ung bướu', 'Điều trị và chăm sóc bệnh ung thư'),
-('Tiêu hóa', 'Rối loạn hệ tiêu hóa'),
-('Tiết niệu', 'Hệ tiết niệu và sinh sản nam'),
-('Nội tiết', 'Rối loạn liên quan đến hormone');
+INSERT INTO clinics (name, description, specialty_id) VALUES
+('Tim mạch', 'Chuyên về các bệnh liên quan đến tim', 1),
+('Thần kinh', 'Chuyên về các rối loạn hệ thần kinh', 2),
+('Chấn thương chỉnh hình', 'Chuyên về xương và khớp', 3),
+('Nhi khoa', 'Chuyên chăm sóc sức khỏe trẻ em', 4),
+('Da liễu', 'Chuyên về các bệnh về da', 5),
+('Mắt', 'Chuyên chăm sóc mắt', 6),
+('Tai mũi họng', 'Chuyên về tai, mũi và họng', 7),
+('Nội tổng quát', 'Dịch vụ chăm sóc sức khỏe tổng quát', 8),
+('Chẩn đoán hình ảnh', 'Dịch vụ chẩn đoán hình ảnh', 9),
+('Ung bướu', 'Điều trị và chăm sóc bệnh ung thư', 10),
+('Tiêu hóa', 'Rối loạn hệ tiêu hóa', 11),
+('Tiết niệu', 'Hệ tiết niệu và sinh sản nam', 12),
+('Nội tiết', 'Rối loạn liên quan đến hormone', 13),
+('Chăm sóc đặc biệt', 'Chăm sóc bệnh nhân nặng và hồi sức', 14),
+('Phòng mổ', 'Hỗ trợ trong các ca phẫu thuật', 15),
+('Cấp cứu', 'Xử lý các tình huống khẩn cấp', 16),
+('Hồi sức', 'Chăm sóc bệnh nhân sau phẫu thuật', 17),
+('Chăm sóc tại nhà', 'Cung cấp dịch vụ chăm sóc sức khỏe tại nhà', 18);
 
 -- Insert sample data into doctors
-INSERT INTO doctors (user_id, specialty, bio) VALUES
-(2, 'Tim mạch', 'Bác sĩ tim mạch với 10 năm kinh nghiệm'),
-(3, 'Thần kinh', 'Chuyên gia về rối loạn thần kinh'),
-(14, 'Chấn thương chỉnh hình', 'Chuyên gia phẫu thuật thay khớp');
+INSERT INTO doctors (user_id, specialty_id, bio) VALUES
+(2, 1, 'Bác sĩ tim mạch với 10 năm kinh nghiệm'),
+(3, 2, 'Chuyên gia về rối loạn thần kinh'),
+(14, 3, 'Chuyên gia phẫu thuật thay khớp');
 
 -- Insert sample data into shifts
 INSERT INTO shifts (name, start_time, end_time) VALUES
-('08:00-12:00', '08:00:00', '12:00:00'),
-('13:00-17:00', '13:00:00', '17:00:00'),
-('18:00-22:00', '18:00:00', '22:00:00'),
-('22:00-06:00', '22:00:00', '06:00:00'),
-('08:00-17:00', '08:00:00', '17:00:00'),
-('06:00-10:00', '06:00:00', '10:00:00'),
-('15:00-19:00', '15:00:00', '19:00:00'),
-('10:00-14:00', '10:00:00', '14:00:00'),
-('00:00-08:00', '00:00:00', '08:00:00'),
-('09:00-13:00', '09:00:00', '13:00:00');
+('08:00-8:30', '08:00:00', '8:30:00'),
+('09:00-9:30', '09:00:00', '9:30:00'),
+('10:00-11:00', '10:00:00', '11:00:00'),
+('12:00-13:00', '12:00:00', '13:00:00'),
+('13:00-13:30', '13:00:00', '13:30:00'),
+('14:00-15:00', '14:00:00', '15:00:00'),
+('15:00-15:30', '15:00:00', '15:30:00'),
+('16:00-16:30', '16:00:00', '16:30:00'),
+('17:00-17:30', '17:00:00', '17:30:00'),
+('18:30-19:30', '18:30:00', '19:30:00'),
+('21:00-22:00', '21:00:00', '22:00:00');
 
 -- Insert sample data into work_schedules
 INSERT INTO work_schedules (user_id, clinic_id, work_date, shift_id) VALUES
@@ -547,14 +606,73 @@ INSERT INTO users (email, password, full_name, phone, role, date_of_birth, gende
 ('vuvantrung@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Vũ Văn Trung', '0911000010', 'nurse', '1999-10-10', 'male', 'Nam Định', 'local', TRUE);
 
 -- Thêm thông tin chi tiết cho các bác sĩ mới
-INSERT INTO doctors (user_id, specialty, bio) VALUES
-(16, 'Nội tổng quát', 'Bác sĩ có kinh nghiệm làm việc tại khoa nội tổng quát.'),
-(17, 'Nhi khoa', 'Chuyên gia về chăm sóc sức khỏe trẻ em và trẻ sơ sinh.'),
-(18, 'Tiêu hóa', 'Bác sĩ chuyên khoa tiêu hóa với nhiều năm kinh nghiệm.'),
-(19, 'Da liễu', 'Chuyên gia về các bệnh lý da và thẩm mỹ da.'),
-(20, 'Tai mũi họng', 'Bác sĩ chuyên khoa tai mũi họng, phẫu thuật nội soi.'),
-(21, 'Mắt', 'Chuyên gia về các bệnh lý mắt và phẫu thuật khúc xạ.'),
-(22, 'Ung bướu', 'Bác sĩ chuyên điều trị các bệnh lý ung bướu.'),
-(23, 'Tiết niệu', 'Chuyên gia về các bệnh lý hệ tiết niệu và nam khoa.'),
-(24, 'Nội tiết', 'Bác sĩ chuyên điều trị các rối loạn hormone và tiểu đường.'),
-(25, 'Chẩn đoán hình ảnh', 'Chuyên gia về đọc và phân tích hình ảnh y khoa.');
+INSERT INTO doctors (user_id, specialty_id, bio) VALUES
+(16, 8, 'Bác sĩ có kinh nghiệm làm việc tại khoa nội tổng quát.'),
+(17, 4, 'Chuyên gia về chăm sóc sức khỏe trẻ em và trẻ sơ sinh.'),
+(18, 11, 'Bác sĩ chuyên khoa tiêu hóa với nhiều năm kinh nghiệm.'),
+(19, 5, 'Chuyên gia về các bệnh lý da và thẩm mỹ da.'),
+(20, 7, 'Bác sĩ chuyên khoa tai mũi họng, phẫu thuật nội soi.'),
+(21, 6, 'Chuyên gia về các bệnh lý mắt và phẫu thuật khúc xạ.'),
+(22, 10, 'Bác sĩ chuyên điều trị các bệnh lý ung bướu.'),
+(23, 12, 'Chuyên gia về các bệnh lý hệ tiết niệu và nam khoa.'),
+(24, 13, 'Bác sĩ chuyên điều trị các rối loạn hormone và tiểu đường.'),
+(25, 9, 'Chuyên gia về đọc và phân tích hình ảnh y khoa.');
+
+-- Thêm thông tin chi tiết cho các y tá mới
+INSERT INTO nurses (user_id, specialty_id, bio) VALUES
+(26, 8, 'Y tá có kinh nghiệm chăm sóc bệnh nhân nội trú.'),
+(27, 4, 'Y tá chuyên chăm sóc trẻ em và tư vấn cho phụ huynh.'),
+(28, 14, 'Y tá được đào tạo chuyên sâu về chăm sóc bệnh nhân nặng.'),
+(29, 15, 'Y tá có kinh nghiệm hỗ trợ trong các ca phẫu thuật.'),
+(30, 16, 'Y tá có kỹ năng xử lý các tình huống khẩn cấp.'),
+(31, 17, 'Y tá chuyên chăm sóc bệnh nhân sau phẫu thuật.'),
+(32, 1, 'Y tá có kinh nghiệm chăm sóc bệnh nhân tim mạch.'),
+(33, 10, 'Y tá chuyên chăm sóc và hỗ trợ bệnh nhân ung thư.'),
+(34, 8, 'Y tá có kinh nghiệm làm việc tại phòng khám đa khoa.'),
+(35, 18, 'Y tá chuyên cung cấp dịch vụ chăm sóc sức khỏe tại nhà.');
+
+-- Insert sample data into ratings
+INSERT INTO ratings (doctor_id, patient_id, appointment_id, rating, comment, is_anonymous) VALUES
+(2, 8, 1, 4.5, 'Bác sĩ rất tận tâm và chuyên nghiệp. Giải thích rõ ràng về tình trạng bệnh.', FALSE),
+(2, 11, 4, 5.0, 'Bác sĩ Minh rất giỏi, điều trị hiệu quả và quan tâm đến bệnh nhân.', FALSE),
+(3, 9, 2, 4.0, 'Bác sĩ Lan chẩn đoán chính xác và điều trị hiệu quả.', FALSE),
+(3, 12, 5, 4.5, 'Rất hài lòng với dịch vụ khám bệnh.', TRUE),
+(14, 10, 3, 5.0, 'Bác sĩ Nam có tay nghề cao, phẫu thuật thành công.', FALSE),
+(14, 13, 6, 4.0, 'Bác sĩ chuyên môn tốt, tư vấn nhiệt tình.', FALSE),
+(16, 8, 7, 4.5, 'Bác sĩ Long rất tận tâm trong việc khám và điều trị.', FALSE),
+(17, 9, 8, 5.0, 'Bác sĩ Thảo rất giỏi với trẻ em, con tôi rất thích.', FALSE),
+(18, 10, 9, 4.0, 'Bác sĩ Phúc chẩn đoán chính xác bệnh tiêu hóa.', FALSE),
+(19, 11, 10, 4.5, 'Bác sĩ Minh điều trị bệnh da hiệu quả.', FALSE),
+(20, 12, 11, 5.0, 'Bác sĩ Nam phẫu thuật tai mũi họng rất thành công.', FALSE),
+(21, 13, 12, 4.0, 'Bác sĩ Thu khám mắt cẩn thận và tư vấn chi tiết.', FALSE),
+(22, 8, 13, 4.5, 'Bác sĩ Quân rất chuyên nghiệp trong lĩnh vực ung bướu.', FALSE),
+(23, 9, 14, 5.0, 'Bác sĩ Thanh điều trị hiệu quả và quan tâm bệnh nhân.', FALSE),
+(24, 10, 15, 4.0, 'Bác sĩ Trường tư vấn dinh dưỡng rất hữu ích.', FALSE),
+(25, 11, 16, 4.5, 'Bác sĩ Thảo đọc kết quả chẩn đoán hình ảnh rất chính xác.', FALSE);
+
+-- Insert work schedules for new nurses
+INSERT INTO work_schedules (user_id, clinic_id, work_date, shift_id) VALUES
+(26, 8, '2025-06-16', 1), (26, 8, '2025-06-17', 2), (26, 8, '2025-06-18', 1),
+(27, 4, '2025-06-16', 2), (27, 4, '2025-06-17', 1), (27, 4, '2025-06-18', 2),
+(28, 14, '2025-06-16', 1), (28, 14, '2025-06-17', 2), (28, 14, '2025-06-18', 1),
+(29, 15, '2025-06-16', 2), (29, 15, '2025-06-17', 1), (29, 15, '2025-06-18', 2),
+(30, 16, '2025-06-16', 1), (30, 16, '2025-06-17', 2), (30, 16, '2025-06-18', 1),
+(31, 17, '2025-06-16', 2), (31, 17, '2025-06-17', 1), (31, 17, '2025-06-18', 2),
+(32, 1, '2025-06-16', 1), (32, 1, '2025-06-17', 2), (32, 1, '2025-06-18', 1),
+(33, 10, '2025-06-16', 2), (33, 10, '2025-06-17', 1), (33, 10, '2025-06-18', 2),
+(34, 8, '2025-06-16', 1), (34, 8, '2025-06-17', 2), (34, 8, '2025-06-18', 1),
+(35, 18, '2025-06-16', 2), (35, 18, '2025-06-17', 1), (35, 18, '2025-06-18', 2);
+
+-- Insert work schedules for new doctors
+INSERT INTO work_schedules (user_id, clinic_id, work_date, shift_id) VALUES
+(16, 8, '2025-06-16', 1), (16, 8, '2025-06-17', 2), (16, 8, '2025-06-18', 1),
+(17, 4, '2025-06-16', 2), (17, 4, '2025-06-17', 1), (17, 4, '2025-06-18', 2),
+(18, 11, '2025-06-16', 1), (18, 11, '2025-06-17', 2), (18, 11, '2025-06-18', 1),
+(19, 5, '2025-06-16', 2), (19, 5, '2025-06-17', 1), (19, 5, '2025-06-18', 2),
+(20, 7, '2025-06-16', 1), (20, 7, '2025-06-17', 2), (20, 7, '2025-06-18', 1),
+(21, 6, '2025-06-16', 2), (21, 6, '2025-06-17', 1), (21, 6, '2025-06-18', 2),
+(22, 10, '2025-06-16', 1), (22, 10, '2025-06-17', 2), (22, 10, '2025-06-18', 1),
+(23, 12, '2025-06-16', 2), (23, 12, '2025-06-17', 1), (23, 12, '2025-06-18', 2),
+(24, 13, '2025-06-16', 1), (24, 13, '2025-06-17', 2), (24, 13, '2025-06-18', 1),
+(25, 9, '2025-06-16', 2), (25, 9, '2025-06-17', 1), (25, 9, '2025-06-18', 2);
+

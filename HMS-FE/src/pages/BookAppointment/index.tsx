@@ -7,7 +7,7 @@ import { bookAppointmentService, getAvailableTimeSlotsService } from "../../serv
 import { getDoctorById } from "../../services/doctor.service";
 import dayjs from "dayjs";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
-
+import { specialtyOptions } from "../../constants/user.const";
 dayjs.extend(isSameOrAfter);
 
 const { Title, Text } = Typography;
