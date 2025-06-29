@@ -36,21 +36,16 @@ CREATE TABLE clinics (
 );
 
 -- Table for doctors
+-- Thông tin mở rộng từ user (bác sĩ)
 CREATE TABLE doctors (
-    user_id INT PRIMARY KEY COMMENT 'References users.id',
-    specialty VARCHAR(255) COMMENT 'Medical specialty',
-    bio TEXT COMMENT 'Doctor biography',
-    rating DECIMAL(2,1) DEFAULT 0.0 COMMENT '(tối đa 9.9) Đánh giá trung bình, sửa rating trên backend', 
+    user_id INT PRIMARY KEY COMMENT 'Tham chiếu đến users(id)',
+    specialty VARCHAR(255) COMMENT 'Chuyên môn',
+    bio TEXT COMMENT 'Giới thiệu',
+	rating DECIMAL(2,1) DEFAULT 0.0 COMMENT '(tối đa 9.9) Đánh giá trung bình, sửa rating trên backend', 
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- Table for nurses
-CREATE TABLE nurses (
-    user_id INT PRIMARY KEY COMMENT 'References users.id',
-    specialty VARCHAR(255) COMMENT 'Nursing specialty',
-    bio TEXT COMMENT 'Nurse biography',
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
+
 
 -- Table for shifts
 CREATE TABLE shifts (
@@ -248,7 +243,7 @@ INSERT INTO users (email, password, full_name, phone, role, date_of_birth, gende
 ('nurselevanhai@gmail.com', '$2b$10$DWhHRcJ6oWS.X/Yh9DEkAOsB2Vg9uAQmbaC667MhBZnGxeahklRXe', 'Lê Văn Hải', '0987654323', 'nurse', '1990-11-10', 'male', 'Đà Nẵng', 'local', TRUE),
 ('nursephamthihong@gmail.com', '$2b$10$SJupulIuCV59ERzfYZqAxeVmXJ6cqOgAhwza.zjiRcZUd0XmMZsCW', 'Phạm Thị Hồng', '0987654324', 'nurse', '1992-04-05', 'female', 'Hà Nội', 'local', TRUE),
 ('receptionhoangvanduc@gmail.com', '$2b$10$YtadcrWr4QG9tW8xHqgxweSA1FKEmkJd.p8doH6wVllr4NiUWHt..', 'Hoàng Văn Đức', '0987654325', 'receptionist', '1995-09-12', 'male', 'TP.HCM', 'local', TRUE),
-('receptionvuthianh@gmail.com', '$2b$10$C8XYHl53FkSxrLfh4Dqace.Kh5S7ZuFegCg3O9xl5cbjZoPw741ge', 'Vũ Thị Ánh', '0987654326', 'receptionist', '1993-12-20', 'female', 'Đà Nẵng', 'local', TRUE),
+('receptionvuthianh@gmail.com', '$2b$10$C8XYHl53FkSxrLfh4Dqace.Kh5S7ZuFegCg3O9xl5cbjZoPw741ge', 'Vũ Thị Ánh ', '0987654326', 'receptionist', '1993-12-20', 'female', 'Đà Nẵng', 'local', TRUE),
 ('tranvanhung@gmail.com', '$2b$10$GxnPuU4OqeCml44HiYk/heRKFk8h0AbY/qM6rmc0A7mrQ4883Elmq', 'Trần Văn Hùng', '0987654328', 'patient', '1998-02-14', 'male', 'TP.HCM', 'local', TRUE),
 ('lethithu@gmail.com', '$2b$10$UbIucGc/ZC6mIkCGP7CCjuESGDoq1PMGSyDzD0K3UQ3XGd.whndxK', 'Lê Thị Thu', '0987654329', 'patient', '1996-08-25', 'female', 'Hà Nội', 'local', TRUE),
 ('phamvantuan@gmail.com', '$2b$10$W3olOAm.7geI1AY9648vDOUcp/rosMdoWYV1uXeIVd8p9DLwePCzm', 'Phạm Văn Tuấn', '0987654330', 'patient', '1990-05-17', 'male', 'Đà Nẵng', 'facebook', TRUE),
@@ -563,17 +558,3 @@ INSERT INTO doctors (user_id, specialty, bio) VALUES
 (23, 'Tiết niệu', 'Chuyên gia về các bệnh lý hệ tiết niệu và nam khoa.'),
 (24, 'Nội tiết', 'Bác sĩ chuyên điều trị các rối loạn hormone và tiểu đường.'),
 (25, 'Chẩn đoán hình ảnh', 'Chuyên gia về đọc và phân tích hình ảnh y khoa.');
-
--- Thêm thông tin chi tiết cho các y tá mới
-INSERT INTO nurses (user_id, specialty, bio) VALUES
-(26, 'Nội tổng quát', 'Y tá có kinh nghiệm chăm sóc bệnh nhân nội trú.'),
-(27, 'Nhi khoa', 'Y tá chuyên chăm sóc trẻ em và tư vấn cho phụ huynh.'),
-(28, 'Chăm sóc đặc biệt', 'Y tá được đào tạo chuyên sâu về chăm sóc bệnh nhân nặng.'),
-(29, 'Phòng mổ', 'Y tá có kinh nghiệm hỗ trợ trong các ca phẫu thuật.'),
-(30, 'Cấp cứu', 'Y tá có kỹ năng xử lý các tình huống khẩn cấp.'),
-(31, 'Hồi sức', 'Y tá chuyên chăm sóc bệnh nhân sau phẫu thuật.'),
-(32, 'Tim mạch', 'Y tá có kinh nghiệm chăm sóc bệnh nhân tim mạch.'),
-(33, 'Ung bướu', 'Y tá chuyên chăm sóc và hỗ trợ bệnh nhân ung thư.'),
-(34, 'Phòng khám', 'Y tá có kinh nghiệm làm việc tại phòng khám đa khoa.'),
-(35, 'Chăm sóc tại nhà', 'Y tá chuyên cung cấp dịch vụ chăm sóc sức khỏe tại nhà.');
-

@@ -111,12 +111,7 @@ class PatientService {
                 throw new BadRequestError("Số điện thoại đã tồn tại");
             }
         }
-        let sendEmail = false;
-        if (!data.password || data.password.trim() === '') {
-            const password = this.#createRandomPassword();
-            data.password = password.toString();
-            sendEmail = true;
-        }
+
         // Hash password
         const hashedPassword = await bcrypt.hash(data.password,
             parseInt(process.env.BCRYPT_SALT_ROUNDS)
@@ -183,6 +178,7 @@ class PatientService {
         }
 
         // Check if phone exists (if phone is being changed)
+        /*
         if (phone !== existingPatient.phone) {
             const phoneExists = await prisma.user.findUnique({
                 where: { phone }
@@ -191,6 +187,7 @@ class PatientService {
                 throw new BadRequestError("Số điện thoại đã tồn tại");
             }
         }
+        */
 
         const updatedPatient = await prisma.user.update({
             where: {

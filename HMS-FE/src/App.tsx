@@ -37,6 +37,7 @@ import Contact from "./pages/Patient/Contact";
 import AdminPatientDashboard from "./pages/Admin/Patient/AdminPatientDashboard";
 import StaffProfile from "./pages/Doctor/StaffProfile";
 import PatientQueueTable from "./pages/Patient/Queue/PatientQueueTable";
+import MedicineDashboard from "./pages/Admin/Medicine/MedicineDashboard";
 dayjs.extend(plugin);
 dayjs.updateLocale("en", {
   weekStart: 1,
@@ -232,4 +233,12 @@ const PrivateRoutes: PrivateRoute[] = [
     layout: MainLayout,
     allowedRoles: ["patient"],
   },
+  
+  {
+    path: "/medicines",
+    element: <MedicineDashboard />,
+    layout: DashboardLayout,
+    allowedRoles: ["patient", "doctor", "nurse", "admin"],
+  },
+
 ];

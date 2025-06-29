@@ -3,7 +3,7 @@ const { BadRequestError } = require("../core/error.response");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 const QueueService = require("./queue.service");
-const { sendStaffNewPasswordEmail } = require("../utils/staff.email");
+const { sendStaffNewPasswordEmail, sendPatientNewPasswordEmail } = require("../utils/staff.email");
 
 class AppointmentService {
   /**
@@ -243,71 +243,76 @@ class AppointmentService {
 
     // 2. Kiểm tra bệnh nhân đã tồn tại chưa
     let patient = null;
-    if (data.email && data.phoneNumber) {
-      // Nếu có cả email và phone, tìm theo phone trước
-      patient = await prisma.user.findUnique({
-        where: { phone: data.phoneNumber },
-        include: { patient: true }
-      });
-      if (!patient) {
-        throw new BadRequestError("Số điện thoại này chưa có tài khoản. Vui lòng tạo tài khoản trước khi đặt lịch!");
-      }
-      // Nếu user tồn tại, kiểm tra email có trùng không
-      if (patient.email !== data.email) {
-        throw new BadRequestError("Email không khớp với số điện thoại đã đăng ký!");
-      }
-    } else if (data.phoneNumber) {
-      patient = await prisma.user.findUnique({
-        where: { phone: data.phoneNumber },
-        include: { patient: true }
-      });
-      if (!patient) {
-        throw new BadRequestError("Số điện thoại này chưa có tài khoản. Vui lòng tạo tài khoản trước khi đặt lịch!");
-      }
-    }
-    // // 3. Nếu chưa tồn tại (và có email), tạo tài khoản mới cho bệnh nhân
-    // if (!patient && data.email) {
-    //   // Tạo mật khẩu ngẫu nhiên
-    //   const randomPassword = crypto.randomBytes(4).toString('hex');
-    //   const hashedPassword = await bcrypt.hash(
-    //     randomPassword,
-    //     parseInt(process.env.BCRYPT_SALT_ROUNDS)
-    //   );
-
-    //   // Tạo user và patient trong transaction
-    //   const result = await prisma.$transaction(async (prisma) => {
-    //     // Tạo user
-    //     const user = await prisma.user.create({
-    //       data: {
-    //         email: data.email,
-    //         password: hashedPassword,
-    //         phone: data.phoneNumber || null,
-    //         role: "patient",
-    //         sso_provider: "local",
-    //         is_active: true,
-    //       },
-    //     });
-
-    //     // Tạo patient
-    //     const patient = await prisma.patient.create({
-    //       data: {
-    //         id: user.id,
-    //         identity_number: data.identity_number || null,
-    //       },
-    //     });
-
-    //     return { user, patient, password: randomPassword };
+    // if (data.email && data.phoneNumber) {
+    //   // Nếu có cả email và phone, tìm theo phone trước
+    //   patient = await prisma.user.findUnique({
+    //     where: { phone: data.phoneNumber },
+    //     include: { patient: true }
     //   });
-    //   patient = result.user;
-    //   data.patient_id = patient.id;
-    //   data.generated_password = result.password;
-    //   // Gửi email nếu có
-    //   if (patient.email) {
-    //     sendStaffNewPasswordEmail(patient.email, randomPassword);
+    //   if (!patient) {
+    //     throw new BadRequestError("Số điện thoại này chưa có tài khoản. Vui lòng tạo tài khoản trước khi đặt lịch!");
     //   }
-    // } else if (patient) {
-    //   data.patient_id = patient.id;
+    //   // Nếu user tồn tại, kiểm tra email có trùng không
+    //   if (patient.email !== data.email) {
+    //     throw new BadRequestError("Email không khớp với số điện thoại đã đăng ký!");
+    //   }
+    // } else if (data.phoneNumber) {
+    //   patient = await prisma.user.findUnique({
+    //     where: { phone: data.phoneNumber },
+    //     include: { patient: true }
+    //   });
+    //   if (!patient) {
+    //     throw new BadRequestError("Số điện thoại này chưa có tài khoản. Vui lòng tạo tài khoản trước khi đặt lịch!");
+    //   }
     // }
+    // 3. Nếu chưa tồn tại (và có email), tạo tài khoản mới cho bệnh nhân
+    patient = await prisma.user.findUnique({
+      where: { email: data.email },
+      include: { patient: true }
+    });
+    console.log(data.email)
+    if (!patient && data.email) {
+      // Tạo mật khẩu ngẫu nhiên
+      const randomPassword = crypto.randomBytes(4).toString('hex');
+      const hashedPassword = await bcrypt.hash(
+        randomPassword,
+        parseInt(process.env.BCRYPT_SALT_ROUNDS)
+      );
+
+      // Tạo user và patient trong transaction
+      const result = await prisma.$transaction(async (prisma) => {
+        // Tạo user
+        const user = await prisma.user.create({
+          data: {
+            email: data.email,
+            password: hashedPassword,
+            phone: data.phoneNumber || null,
+            role: "patient",
+            sso_provider: "local",
+            is_active: true,
+          },
+        });
+
+        // Tạo patient
+        const patient = await prisma.patient.create({
+          data: {
+            id: user.id,
+            identity_number: data.identity_number || null,
+          },
+        });
+
+        return { user, patient, password: randomPassword };
+      });
+      patient = result.user;
+      data.patient_id = patient.id;
+      data.generated_password = result.password;
+      // Gửi email nếu có
+      if (patient.email) {
+        sendPatientNewPasswordEmail(patient.email, randomPassword);
+      }
+    } else if (patient) {
+      data.patient_id = patient.id;
+    }
     data.patient_id = patient.id;
 
 
