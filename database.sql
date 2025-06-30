@@ -1,7 +1,12 @@
 -- Create and use the hospital database
 CREATE DATABASE hospital;
 USE hospital;
+
+-- Disable safe update mode to allow updates without WHERE clause on key columns
+SET SQL_SAFE_UPDATES = 0;
+
 -- drop database hospital
+
 -- Table for system users
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Primary key for users',
@@ -40,7 +45,7 @@ CREATE TABLE clinics (
 -- Thông tin mở rộng từ user (bác sĩ)
 CREATE TABLE doctors (
     user_id INT PRIMARY KEY COMMENT 'Tham chiếu đến users(id)',
-    specialty VARCHAR(255) COMMENT 'Chuyên môn',
+    specialty VARCHAR(255) COMMENT 'Chuyên môn', -- này tạm thời t để đây
     bio TEXT COMMENT 'Giới thiệu',
 	rating DECIMAL(2,1) DEFAULT 0.0 COMMENT '(tối đa 9.9) Đánh giá trung bình, sửa rating trên backend', 
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
@@ -657,6 +662,120 @@ SET rating = (
     WHERE dr.doctor_id = d.user_id
 )
 WHERE d.user_id IN (SELECT DISTINCT doctor_id FROM doctor_ratings);
+
+-- Add new tables according to Prisma schema
+
+-- Table for specialties
+CREATE TABLE specialties (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) UNIQUE NOT NULL
+);
+
+-- Table for medicines
+CREATE TABLE medicines (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    stock INT NOT NULL DEFAULT 0,
+    price DECIMAL(10,2) NOT NULL DEFAULT 0.00
+);
+
+-- Table for password reset tokens
+CREATE TABLE password_reset_tokens (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    token VARCHAR(255) UNIQUE NOT NULL,
+    userId INT NOT NULL,
+    used BOOLEAN DEFAULT FALSE,
+    expiresAt DATETIME NOT NULL,
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_token (token),
+    INDEX idx_userId (userId)
+);
+
+-- Add new columns to doctors table
+ALTER TABLE doctors 
+ADD COLUMN specialty_id INT NULL AFTER user_id,
+ADD COLUMN price INT DEFAULT 0 AFTER bio,
+ADD FOREIGN KEY (specialty_id) REFERENCES specialties(id) ON DELETE SET NULL;
+
+-- Add new columns to prescription_items table
+ALTER TABLE prescription_items 
+ADD COLUMN medicine_id INT NULL AFTER prescription_id,
+ADD COLUMN quantity INT DEFAULT 1 AFTER medicine_id,
+ADD FOREIGN KEY (medicine_id) REFERENCES medicines(id) ON DELETE SET NULL;
+
+-- Insert sample data into specialties
+INSERT INTO specialties (name) VALUES
+('Tim mạch'),
+('Thần kinh'),
+('Chấn thương chỉnh hình'),
+('Nhi khoa'),
+('Da liễu'),
+('Mắt'),
+('Tai mũi họng'),
+('Nội tổng quát'),
+('Chẩn đoán hình ảnh'),
+('Ung bướu'),
+('Tiêu hóa'),
+('Tiết niệu'),
+('Nội tiết');
+
+-- Insert sample data into medicines
+INSERT INTO medicines (name, stock, price) VALUES
+('Amoxicillin 500mg', 1000, 50000.00),
+('Paracetamol 500mg', 2000, 15000.00),
+('Ceftriaxone 1g', 500, 120000.00),
+('Glucosamine 1500mg', 800, 80000.00),
+('Loratadine 10mg', 1200, 25000.00),
+('Atropin 1%', 300, 35000.00),
+('Ibuprofen 400mg', 1500, 20000.00),
+('Omeprazole 20mg', 1000, 45000.00),
+('Metformin 500mg', 800, 30000.00),
+('Amlodipine 5mg', 600, 40000.00);
+
+-- Update doctors table to use specialty_id instead of specialty string
+UPDATE doctors SET specialty_id = 1 WHERE specialty = 'Tim mạch';
+UPDATE doctors SET specialty_id = 2 WHERE specialty = 'Thần kinh';
+UPDATE doctors SET specialty_id = 3 WHERE specialty = 'Chấn thương chỉnh hình';
+UPDATE doctors SET specialty_id = 4 WHERE specialty = 'Nhi khoa';
+UPDATE doctors SET specialty_id = 5 WHERE specialty = 'Da liễu';
+UPDATE doctors SET specialty_id = 6 WHERE specialty = 'Mắt';
+UPDATE doctors SET specialty_id = 7 WHERE specialty = 'Tai mũi họng';
+UPDATE doctors SET specialty_id = 8 WHERE specialty = 'Nội tổng quát';
+UPDATE doctors SET specialty_id = 9 WHERE specialty = 'Chẩn đoán hình ảnh';
+UPDATE doctors SET specialty_id = 10 WHERE specialty = 'Ung bướu';
+UPDATE doctors SET specialty_id = 11 WHERE specialty = 'Tiêu hóa';
+UPDATE doctors SET specialty_id = 12 WHERE specialty = 'Tiết niệu';
+UPDATE doctors SET specialty_id = 13 WHERE specialty = 'Nội tiết';
+
+-- Update prescription_items to use medicine_id
+UPDATE prescription_items SET medicine_id = 1 WHERE medicine_name LIKE '%Amoxicillin%';
+UPDATE prescription_items SET medicine_id = 2 WHERE medicine_name LIKE '%Paracetamol%';
+UPDATE prescription_items SET medicine_id = 3 WHERE medicine_name LIKE '%Ceftriaxone%';
+UPDATE prescription_items SET medicine_id = 4 WHERE medicine_name LIKE '%Glucosamine%';
+UPDATE prescription_items SET medicine_id = 5 WHERE medicine_name LIKE '%Loratadine%';
+UPDATE prescription_items SET medicine_id = 6 WHERE medicine_name LIKE '%Atropin%';
+
+-- Set quantity for existing prescription items
+UPDATE prescription_items SET quantity = 1 WHERE quantity IS NULL;
+
+-- Add price to doctors (sample prices)
+UPDATE doctors SET price = 300000 WHERE user_id = 2;  -- Tim mạch
+UPDATE doctors SET price = 250000 WHERE user_id = 3;  -- Thần kinh
+UPDATE doctors SET price = 350000 WHERE user_id = 14; -- Chấn thương chỉnh hình
+UPDATE doctors SET price = 200000 WHERE user_id = 16; -- Nội tổng quát
+UPDATE doctors SET price = 180000 WHERE user_id = 17; -- Nhi khoa
+UPDATE doctors SET price = 280000 WHERE user_id = 18; -- Tiêu hóa
+UPDATE doctors SET price = 220000 WHERE user_id = 19; -- Da liễu
+UPDATE doctors SET price = 240000 WHERE user_id = 20; -- Tai mũi họng
+UPDATE doctors SET price = 260000 WHERE user_id = 21; -- Mắt
+UPDATE doctors SET price = 400000 WHERE user_id = 22; -- Ung bướu
+UPDATE doctors SET price = 320000 WHERE user_id = 23; -- Tiết niệu
+UPDATE doctors SET price = 270000 WHERE user_id = 24; -- Nội tiết
+UPDATE doctors SET price = 380000 WHERE user_id = 25; -- Chẩn đoán hình ảnh
+
+-- SET SQL_SAFE_UPDATES = 1;
 
 
 
