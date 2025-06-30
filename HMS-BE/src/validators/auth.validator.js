@@ -2,10 +2,17 @@ const Joi = require("joi");
 
 const registerSchema = Joi.object({
   email: Joi.string().email().required(),
-  password: Joi.string().min(6).required(),
-  // phone: Joi.string()
-  //   .pattern(/^[0-9]{10}$/)
-  //   .optional(),
+  password: Joi.string()
+    .min(8)
+    .pattern(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
+    )
+    .required()
+    .messages({
+      "string.pattern.base":
+        "Mật khẩu phải chứa ít nhất 1 chữ hoa, 1 chữ thường, 1 số và 1 ký tự đặc biệt",
+      "string.min": "Mật khẩu phải có ít nhất 8 ký tự",
+    }),
   role: Joi.string().valid("patient").default("patient"), // Chỉ cho phép role patient
 }).unknown(true);
 
@@ -102,6 +109,7 @@ const createDoctorSchema = Joi.object({
   specialty: Joi.string().optional().allow(null, ""),
   bio: Joi.string().optional().allow(null, ""),
   avatar: Joi.string().optional().allow(null, ""),
+  price: Joi.number().optional().allow(null, ""),
 });
 
 const updateDoctorSchema = Joi.object({

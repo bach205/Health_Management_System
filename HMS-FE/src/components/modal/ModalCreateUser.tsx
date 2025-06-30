@@ -121,7 +121,7 @@ const ModalCreateUser = ({ role, isVisible, handleOk, handleCancel, form }: IPro
           name="create_password"
           label="Mật khẩu"
           valuePropName="checked"
-          tooltip="Nếu không chọn, hệ thống sẽ tự động tạo mật khẩu default"
+          tooltip="Nếu không chọn, hệ thống sẽ tự động tạo mật khẩu random rồi gửi qua email."
         >
           <Checkbox onChange={(e) => setShowPasswordFields(e.target.checked)}>
             Tạo mật khẩu tùy chỉnh
@@ -135,7 +135,11 @@ const ModalCreateUser = ({ role, isVisible, handleOk, handleCancel, form }: IPro
               name="password"
               rules={[
                 { required: true, message: "Vui lòng nhập mật khẩu!" },
-                { min: 6, message: "Mật khẩu phải có ít nhất 6 ký tự!" }
+                { min: 8, message: "Mật khẩu phải có ít nhất 8 ký tự!" },
+                {
+                  pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$/,
+                  message: "Mật khẩu phải chứa chữ hoa, chữ thường, số và ký tự đặc biệt!"
+                }
               ]}
             >
               <Input.Password placeholder="Nhập mật khẩu" />

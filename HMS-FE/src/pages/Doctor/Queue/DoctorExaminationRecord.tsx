@@ -1,4 +1,4 @@
-import { Modal, Form, Input, Button, Checkbox, Flex, InputNumber, Popconfirm, Select, Space, Table, Tag } from "antd";
+import { Modal, Form, Input, Button, Checkbox, Flex, InputNumber, Popconfirm, Select, Space, Table, Tag, Typography } from "antd";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import mainRequest from "../../../api/mainRequest";
@@ -23,10 +23,15 @@ const DoctorExaminationRecordModal = ({
     const [medicinesAdded, setMedicinesAdded] = useState<any[]>([]);
     const [medicine, setMedicine] = useState<any>(null);
     const [quantity, setQuantity] = useState<number>(0);
-    const [outOfPill, setOutOfPill] = useState<boolean>(false);
     const [optionMedicines, setOptionMedicines] = useState<any[]>([]);
     const [isCreate, setIsCreate] = useState(true);
-
+    const [medicineVisible, setMedicineVisible] = useState(false);
+    const handleSetMedicineVisible = (value: boolean) => {
+        setMedicineVisible(value);
+        if (!value) {
+            setMedicinesAdded([]);
+        }
+    };
     useEffect(() => {
         if (open) {
             fetchMedicineList();
@@ -50,7 +55,6 @@ const DoctorExaminationRecordModal = ({
 
     const clearsMedicine = () => {
         setQuantity(0);
-        setOutOfPill(false);
         setMedicine(null);
         setIsCreate(true);
     };
@@ -65,7 +69,6 @@ const DoctorExaminationRecordModal = ({
                 name: medicine.name,
                 quantity,
                 usage: medicine.usage,
-                outOfPill,
             });
             setMedicinesAdded(newList);
             clearsMedicine();
@@ -76,7 +79,6 @@ const DoctorExaminationRecordModal = ({
         const selected = optionMedicines.find((opt) => opt._id === record._id);
         setMedicine(selected);
         setQuantity(record.quantity);
-        setOutOfPill(record.outOfPill);
         setIsCreate(false);
     };
 
@@ -137,93 +139,91 @@ const DoctorExaminationRecordModal = ({
                 >
                     <Input.TextArea rows={3} placeholder="Nhập chẩn đoán cuối cùng..." />
                 </Form.Item>
-                <Form.Item label="Đơn thuốc">
-                    <Flex justify="space-between" gap={8}>
-                        <Select
-                            showSearch
-                            style={{ flex: 1 }}
-                            placeholder="Chọn thuốc"
-                            options={optionMedicines}
-                            value={medicine?._id}
-                            onChange={(_, option: any) => {
-                                setMedicine(option);
-                            }}
-                            disabled={!isCreate}
-                        />
-                        <InputNumber
-                            min={1}
-                            placeholder="Số lượng"
-                            value={quantity}
-                            onChange={(val) => {
-                                setQuantity(val  || 0);
-                                setOutOfPill(val  > +medicine?.quantity);
-                            }}
-                        />
-                        <Space>
-                            <Checkbox
-                            checked={outOfPill}
-                            onChange={(e) => setOutOfPill(e.target.checked)}
-                            
-                        >
-                            Hết thuốc
-                        </Checkbox>
-                        </Space>
-                        <Button
-                            type="primary"
-                            onClick={handleAddMedicine}
-                            disabled={!medicine || quantity <= 0}
-                        >
-                            {isCreate ? "Thêm" : "Cập nhật"}
-                        </Button>
-                    </Flex>
-                </Form.Item>
 
-                <Table
-                    rowKey="_id"
-                    columns={[
-                        {
-                            title: "Tên thuốc",
-                            dataIndex: "name",
-                        },
-                        {
-                            title: "SL",
-                            dataIndex: "quantity",
-                            width: 60,
-                        },
-                        {
-                            title: "Hết thuốc",
-                            dataIndex: "outOfPill",
-                            width: 80,
-                            render: (val) => (
-                                <Tag color={val ? "red" : "blue"}>
-                                    {val ? <CircleX /> : <CircleCheck />}
-                                </Tag>
-                            ),
-                        },
-                        {
-                            title: "Thao tác",
-                            dataIndex: "actions",
-                            width: 100,
-                            render: (_, record) => (
-                                <Space>
-                                    <Button
-                                        size="small"
-                                        icon={<Edit />}
-                                        onClick={() => handleEdit(record)}
+                <Space size={16}>
+                    <Form.Item
+                        layout="horizontal"
+                        valuePropName="checked"
+                        label="Thêm đơn thuốc"
+                        tooltip="Nếu chọn, hồ sơ khám tổng quát có thêm đơn thuốc"
+                    >
+                        <Checkbox onChange={(e) => handleSetMedicineVisible(e.target.checked)}>
+                        </Checkbox>
+                    </Form.Item>
+                </Space>
+
+                {
+                    medicineVisible && (
+                        <>
+                            <Form.Item label="Đơn thuốc">
+                                <Flex justify="space-between" gap={8}>
+                                    <Select
+                                        showSearch
+                                        style={{ flex: 1 }}
+                                        placeholder="Chọn thuốc"
+                                        options={optionMedicines}
+                                        value={medicine?._id}
+                                        onChange={(_, option: any) => {
+                                            setMedicine(option);
+                                        }}
+                                        disabled={!isCreate}
                                     />
-                                    <Popconfirm
-                                        title="Xóa thuốc này?"
-                                        onConfirm={() => handleRemoveMedicine(record)}
+                                    <InputNumber
+                                        min={1}
+                                        placeholder="Số lượng"
+                                        value={quantity}
+                                        onChange={(val) => {
+                                            setQuantity(val || 0);
+                                        }}
+                                    />
+                                    <Button
+                                        type="primary"
+                                        onClick={handleAddMedicine}
+                                        disabled={!medicine || quantity <= 0}
                                     >
-                                        <Button size="small" icon={<Delete/>} danger />
-                                    </Popconfirm>
-                                </Space>
-                            ),
-                        },
-                    ]}
-                    dataSource={medicinesAdded}
-                    pagination={false}
-                />
+                                        {isCreate ? "Thêm" : "Cập nhật"}
+                                    </Button>
+                                </Flex>
+                            </Form.Item>
+
+                            <Table
+                                rowKey="_id"
+                                columns={[
+                                    {
+                                        title: "Tên thuốc",
+                                        dataIndex: "name",
+                                    },
+                                    {
+                                        title: "SL",
+                                        dataIndex: "quantity",
+                                        width: 100,
+                                    },
+                                    {
+                                        title: "Thao tác",
+                                        dataIndex: "actions",
+                                        width: 150,
+                                        render: (_, record) => (
+                                            <Space>
+                                                <Button
+                                                    size="small"
+                                                    icon={<Edit />}
+                                                    onClick={() => handleEdit(record)}
+                                                />
+                                                <Popconfirm
+                                                    title="Xóa thuốc này?"
+                                                    onConfirm={() => handleRemoveMedicine(record)}
+                                                >
+                                                    <Button size="small" icon={<Delete />} danger />
+                                                </Popconfirm>
+                                            </Space>
+                                        ),
+                                    },
+                                ]}
+                                dataSource={medicinesAdded}
+                                pagination={false}
+                            />
+
+                        </>)}
 
             </Form>
         </Modal>

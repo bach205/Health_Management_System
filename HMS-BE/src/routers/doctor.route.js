@@ -10,9 +10,9 @@ const doctorRouter = express.Router();
 const checkUserStatus = require("../middlewares/checkUserStatus");
 
 // Apply middleware to all routes
-doctorRouter.use(authenticate);  
+// doctorRouter.use(authenticate);  
 
-doctorRouter.use(checkUserStatus());
+// doctorRouter.use(checkUserStatus());
 
 doctorRouter.post(
   "/create",

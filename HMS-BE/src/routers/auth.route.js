@@ -101,6 +101,12 @@ authRouter.post(
   authController.registerWithPhone
 );
 
+authRouter.post(
+  "/refresh-token",
+  asyncHandler(AuthController.refreshToken),
+  authController.refreshToken
+);
+
 // Ví dụ check authen bên trong router
 // authRouter.get("/users", authenticateToken, authorizeRoles("admin"), asyncHandler(AuthController.getUsers));
 
