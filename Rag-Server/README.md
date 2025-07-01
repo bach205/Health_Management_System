@@ -24,6 +24,11 @@ HEALTH_CARE_AI/
 ## Setup
 
 1. Create a virtual environment and install dependencies:
+Window
+```bash
+conda env create -f environment_window.yml
+```
+Linux
 ```bash
 conda env create -f environment.yml
 ```
@@ -51,6 +56,11 @@ if you want to use unstructure api, you need to
 #   qpdf \
 #   libreoffice \
 #   pandoc
+```
+
+3.Set up chromaDB (create chromaDB's storage in local)
+```bash
+python setup.py
 ```
 
 ## Running the Application

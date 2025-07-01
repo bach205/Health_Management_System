@@ -1,13 +1,29 @@
 from .config import load_llms_model_merged
 import torch
 import asyncio
+from typing import List
 loaded = load_llms_model_merged()
 model = loaded["model"]
 tokenizer = loaded["tokenizer"]
 
-async def call_chatbot(question):
+def get_messages_format(retrieved_docs,question):
+    context = "\n\n".join(retrieved_docs)
+    return """You are a helpful assistant.
+Use the following context to answer the question.
+If the answer is not in the context, just say you don’t know.
+
+Context:
+{context}
+
+Question:
+{question}
+
+Answer:""".format(context=context, question=question)
+
+async def call_chatbot(question,retrieval_docs):
+  retrival_question =  get_messages_format(retrieval_docs,question)
   prompt = tokenizer.apply_chat_template(
-    [{"role": "user", "content": question}],
+    [{"role": "user", "content": retrival_question}],
     tokenize=False
   )
 
@@ -16,10 +32,11 @@ async def call_chatbot(question):
   print(tokenizer.decode(outputs[0], skip_special_tokens=True))
 
 
-async def stream_chatbot(question:str,queue: asyncio.Queue):
+async def stream_chatbot(question:str,retrieval_docs:List[str],queue: asyncio.Queue):
     print("start streaming")
+    retrival_question =  get_messages_format(retrieval_docs,question)
     prompt = tokenizer.apply_chat_template(
-        [{"role": "user", "content": question}],
+        [{"role": "user", "content": retrival_question}],
         tokenize=False
     )
     

@@ -22,4 +22,36 @@ async def save_chunks_into_chroma(chunks):
 
     collection.add(documents=documents,metadatas=metadatas,ids=chunks_ids)
 
+async def delete_document_by_file_name(file_name):
+    # Xóa row trong MySQL
+    conn = get_mysql_connection()
+    cursor = conn.cursor()
+    delete_query = """
+        DELETE FROM documents WHERE file_name = %s
+    """
+    cursor.execute(delete_query, (file_name,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    # Xóa vector trong ChromaDB theo metadata['source']
+    # Lấy tất cả các id có metadata['source'] == file_name
+    results = collection.get(where={"source": file_name})
+    ids_to_delete = results.get("ids", [])
+    if ids_to_delete:
+        collection.delete(ids=ids_to_delete)
+
+async def get_document_location_by_file_name(file_name):
+    conn = get_mysql_connection()
+    cursor = conn.cursor()
+    select_query = """
+        SELECT file_location FROM documents WHERE file_name = %s
+    """
+    cursor.execute(select_query, (file_name,))
+    result = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    if result:
+        return result[0]
+    return None
 
