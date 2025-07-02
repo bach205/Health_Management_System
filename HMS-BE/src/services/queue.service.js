@@ -276,6 +276,70 @@ class QueueService {
 
     return updated;
   }
+
+  /**
+   * Xác định ca và range STT dựa vào giờ khám (3 ca: sáng, chiều, đêm)
+   * @param {string} time - Chuỗi giờ dạng 'HH:mm:ss'
+   * @returns {{type: string, min: number, max: number} | null}
+   */
+  static getShiftTypeAndRange(time) {
+    if (time >= "08:00:00" && time < "12:00:00") {
+      return { type: "morning", min: 1, max: 100 };
+    }
+    if (time >= "13:00:00" && time < "17:00:00") {
+      return { type: "afternoon", min: 101, max: 200 };
+    }
+    if (time >= "18:00:00" && time < "22:00:00") {
+      return { type: "night", min: 201, max: 300 };
+    }
+    return null;
+  }
+
+  /**
+   * Cấp số thứ tự động cho queue khi xác nhận lịch hẹn hoặc walk-in
+   * @param {Object} params - { appointment_id, patient_id, clinic_id, slot_date, slot_time, registered_online }
+   * @returns {Promise<Object>} Queue mới
+   */
+  static async assignQueueNumber({
+    appointment_id,
+    patient_id,
+    clinic_id,
+    slot_date,
+    slot_time,
+    registered_online = 1 // 1: online, 0: walk-in
+  }) {
+    const shift = this.getShiftTypeAndRange(slot_time);
+    if (!shift) throw new Error("Giờ khám không thuộc ca nào!");
+    const { type, min, max } = shift;
+
+    // Lấy số lớn nhất đã cấp trong ca này, ngày này, phòng khám này
+    const lastQueue = await prisma.queue.findFirst({
+      where: {
+        clinic_id,
+        shift_type: type,
+        slot_date,
+      },
+      orderBy: { queue_number: "desc" }
+    });
+    const nextStt = lastQueue ? lastQueue.queue_number + 1 : min;
+    if (nextStt > max) throw new Error("Đã hết chỗ trong ca này!");
+
+    // Tạo queue mới
+    const newQueue = await prisma.queue.create({
+      data: {
+        appointment_id,
+        patient_id,
+        clinic_id,
+        status: "waiting",
+        registered_online,
+        queue_number: nextStt,
+        shift_type: type,
+        slot_date,
+        created_at: new Date(),
+      }
+    });
+    return newQueue;
+  }
 }
 
 module.exports = QueueService;

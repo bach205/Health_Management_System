@@ -57,8 +57,53 @@ const sendPatientNewPasswordEmail = async (staffEmail, newPassword) => {
     }
 }
 
+/**
+ * Gửi email xác nhận lịch hẹn cho bệnh nhân
+ * @param {string} patientEmail
+ * @param {string} patientName
+ * @param {string} appointmentDate - Định dạng YYYY-MM-DD
+ * @param {string} appointmentTime - Định dạng HH:mm:ss
+ * @param {string} doctorName
+ * @param {string} clinicName
+ */
+const sendPatientAppointmentConfirmationEmail = async (
+  patientEmail,
+  patientName,
+  appointmentDate,
+  appointmentTime,
+  doctorName,
+  clinicName
+) => {
+  try {
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: patientEmail,
+      subject: 'HMS - Xác nhận lịch hẹn khám bệnh',
+      html: `
+        <h2>Xin chào ${patientName},</h2>
+        <p>Bạn đã đặt lịch khám thành công trên hệ thống HMS.</p>
+        <h3>Thông tin lịch hẹn:</h3>
+        <ul>
+          <li><b>Ngày khám:</b> ${appointmentDate}</li>
+          <li><b>Giờ khám:</b> ${appointmentTime}</li>
+          <li><b>Bác sĩ:</b> ${doctorName}</li>
+          <li><b>Phòng khám:</b> ${clinicName}</li>
+        </ul>
+        <p>Vui lòng đến đúng giờ và mang theo giấy tờ tùy thân nếu cần thiết.</p>
+        <p>Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi.<br>HMS Team</p>
+      `
+    };
+    const info = await transporter.sendMail(mailOptions);
+    console.log('Appointment confirmation email sent:', info.response);
+    return true;
+  } catch (error) {
+    console.error('Error sending appointment confirmation email:', error);
+    throw error;
+  }
+};
 
 module.exports = {
     sendStaffNewPasswordEmail,
-    sendPatientNewPasswordEmail
+    sendPatientNewPasswordEmail,
+    sendPatientAppointmentConfirmationEmail
 };
