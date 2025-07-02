@@ -28,20 +28,20 @@ async def streaming_output(question:str,retrieval_docs:List[str]):
     while True:
         item = await queue.get()
         if item is None:
-            yield f"data: <END>"
+            yield f"data: <END>\n\n"
             break
-        yield f"data: {item}"
+        yield f"data: {item}\n\n"
 
-@router.post("/", response_model=Answer)
-async def ask_question(question: Question):
+@router.get("/")
+async def ask_question(question: str):
     """
     Ask a medical question and get an answer using RAG.
     """
     try:
         #add retrival function
-        retrieval_docs = collection.query(query_texts=[question.text],include=["documents"])["documents"][0]
+        retrieval_docs = collection.query(query_texts=[question],include=["documents"])["documents"][0]
         return StreamingResponse(
-            streaming_output(question.text,retrieval_docs),
+            streaming_output(question,retrieval_docs),
             media_type="text/event-stream"
         )
     except Exception as e:

@@ -36,6 +36,7 @@ import About from "./pages/Patient/About";
 import Contact from "./pages/Patient/Contact";
 import AdminPatientDashboard from "./pages/Admin/Patient/AdminPatientDashboard";
 import StaffProfile from "./pages/Doctor/StaffProfile";
+import ChatUI from "./layouts/MainLayout/ChatUI";
 dayjs.extend(plugin);
 dayjs.updateLocale("en", {
   weekStart: 1,
@@ -119,6 +120,11 @@ const PublicRoutes = [
   {
     path: "/contact",
     element: <Contact />,
+    layout: MainLayout,
+  },
+  {
+    path: "/chatbot",
+    element: <ChatUI />,
     layout: MainLayout,
   },
 

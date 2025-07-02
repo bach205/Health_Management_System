@@ -1,4 +1,5 @@
-from fastapi.responses import  FileResponse
+from fastapi.responses import  StreamingResponse,FileResponse
+import time
 from fastapi import APIRouter, UploadFile, File,Form,HTTPException
 from pydantic import BaseModel
 from typing import Union
@@ -48,12 +49,12 @@ async def get_all_documents():
         print(e)
         raise HTTPException(status_code=404, detail="File not found")
 
-# def generate_sse():
-#     for i in range(10):
-#         time.sleep(1)  # Giả lập xử lý
-#         yield f"data: Thông báo số {i + 1}\n\n"
-#     yield "data: Xử lý hoàn tất!\n\n"
+def generate_sse(question):
+    for i in range(0,len(question)):
+        time.sleep(1)  # Giả lập xử lý
+        yield f"data: {question[i]}\n\n"
+    yield "data: <END>\n\n"
 
-# @router.get("/stream_response")
-# def sse_endpoint():
-#     return StreamingResponse(generate_sse(), media_type="text/event-stream")
+@router.get("/stream_response")
+def sse_endpoint(question: str):
+    return StreamingResponse(generate_sse(question), media_type="text/event-stream")
