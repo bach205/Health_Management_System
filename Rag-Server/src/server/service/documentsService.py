@@ -5,7 +5,7 @@ from pathlib import Path
 from docx import Document
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document as LangchainDocument
-from src.server.model.documentsModel import save_documents_to_database,save_chunks_into_chroma, delete_document_by_file_name, get_document_location_by_file_name
+from src.server.model.documentsModel import save_documents_to_database,save_chunks_into_chroma, delete_document_by_file_name, get_document_location_by_file_name,do_query_for_all_documents
 from datetime import datetime
 
 UPLOAD_FOLDER = Path(__file__).parent.parent.parent.parent / "documents"
@@ -96,3 +96,6 @@ async def get_document_file(file_name):
     # if os.path.exists(file_path):
     #     return file_path
     return None
+
+async def query_for_all_documents():
+    return await do_query_for_all_documents()

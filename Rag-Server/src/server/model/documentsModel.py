@@ -5,7 +5,6 @@ from src.config.chroma import collection
 async def save_documents_to_database(file,file_location,user_id):
     conn = get_mysql_connection()
     cursor = conn.cursor()
-    user_id = 1  # Placeholder, replace with actual user id if available
     insert_query = """
         INSERT INTO documents (file_name, user_id, file_location)
         VALUES (%s, %s, %s)
@@ -54,4 +53,17 @@ async def get_document_location_by_file_name(file_name):
     if result:
         return result[0]
     return None
+
+async def do_query_for_all_documents():
+    conn = get_mysql_connection()
+    cursor = conn.cursor()
+    query = "SELECT * FROM documents"
+    cursor.execute(query)
+    result = cursor.fetchall()
+    
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return result
+
 
