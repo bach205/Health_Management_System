@@ -40,6 +40,7 @@ import PatientQueueTable from "./pages/Patient/Queue/PatientQueueTable";
 import MedicineDashboard from "./pages/Admin/Medicine/AdminMedicineDashboard";
 import AdminSpecialtyDashboard from "./pages/Admin/Specialty/AdminSpecialtyDashboard";
 import AdminDashboard from "./pages/Admin/Dashboard/AdminDashboard";
+import ForgetPage from "./pages/ForgetPage";
 dayjs.extend(plugin);
 dayjs.updateLocale("en", {
   weekStart: 1,
@@ -125,7 +126,11 @@ const PublicRoutes = [
     element: <Contact />,
     layout: MainLayout,
   },
-
+  {
+    path: "/reset-password",
+    element: <ForgetPage />,
+    layout: MainLayout,
+  },
 ];
 
 interface PrivateRoute {

@@ -13,15 +13,17 @@ const Resetpass = () => {
         e.preventDefault();
         const values = {
             email: email.trim(),
-
         };
+        // console.log("values: ", values);
+        const data = await auth.handleForgetPassword(values);
+        localStorage.setItem("resetToken", data["metadata"]['resetToken']);
         // const data = await auth.handleLogin(values);
         // if (data === "patient") navigate("/");
         // if (data === "admin") navigate("/admin");
     };
 
     return (
-        <form className="min-h-[80vh] flex items-center" >
+        <form className="min-h-[80vh] flex items-center" onSubmit={onSubmitHandler}>
             <div className="flex flex-col gap-3 m-auto items-start p-8 min-w-[340px] sm:min-w-96 border rounded-xl text-zinc-600 text-sm shadow-lg">
                 <p className="text-2xl font-semibold">Lấy lại mật khẩu</p>
                 <p>Xin mời nhập email của bạn</p>
