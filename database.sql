@@ -776,6 +776,9 @@ UPDATE doctors SET price = 270000 WHERE user_id = 24; -- Nội tiết
 UPDATE doctors SET price = 380000 WHERE user_id = 25; -- Chẩn đoán hình ảnh
 
 -- SET SQL_SAFE_UPDATES = 1;
+ALTER TABLE queues
+  ADD COLUMN queue_number INT,
+  ADD COLUMN shift_type VARCHAR(20)
 
 
 

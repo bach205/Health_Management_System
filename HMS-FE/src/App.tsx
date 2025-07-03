@@ -37,6 +37,7 @@ import Contact from "./pages/Patient/Contact";
 import AdminPatientDashboard from "./pages/Admin/Patient/AdminPatientDashboard";
 import StaffProfile from "./pages/Doctor/StaffProfile";
 import PatientQueueTable from "./pages/Patient/Queue/PatientQueueTable";
+import ForgetPage from "./pages/ForgetPage";
 dayjs.extend(plugin);
 dayjs.updateLocale("en", {
   weekStart: 1,
@@ -122,7 +123,11 @@ const PublicRoutes = [
     element: <Contact />,
     layout: MainLayout,
   },
-
+  {
+    path: "/reset-password",
+    element: <ForgetPage />,
+    layout: MainLayout,
+  },
 ];
 
 interface PrivateRoute {
