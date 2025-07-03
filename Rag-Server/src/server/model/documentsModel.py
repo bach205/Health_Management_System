@@ -59,7 +59,7 @@ async def get_document_location_by_id(id: int):
 
 async def do_query_for_all_documents():
     conn = get_mysql_connection()
-    cursor = conn.cursor()
+    cursor = conn.cursor(dictionary=True)
     query = "SELECT * FROM documents"
     cursor.execute(query)
     result = cursor.fetchall()

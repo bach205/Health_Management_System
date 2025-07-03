@@ -44,6 +44,7 @@ async def get_document(id: int):
 async def get_all_documents():
     try:
         all_docs = await query_for_all_documents()
+
         return my_response(status=200,message="Get all documents succesfully",data=all_docs)
     except Exception as e:
         print(e)
