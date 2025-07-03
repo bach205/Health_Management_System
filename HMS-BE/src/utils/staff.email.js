@@ -21,6 +21,8 @@ const sendStaffNewPasswordEmail = async (staffEmail, newPassword) => {
         <h2>Mật khẩu đăng nhập</h2>
         <p>Mật khẩu đăng nhập của bạn là: ${newPassword}</p>
         <p>Vui lòng đổi mật khẩu sau khi đăng nhập.</p>
+        <p>Để đổi mật khẩu, vui lòng truy cập vào trang web của chúng tôi và đăng nhập.</p>
+        <p>Link đăng nhập: <a href="${process.env.FRONTEND_URL}/login">${process.env.FRONTEND_URL}/login</a></p>
         <p>Chúc bạn một ngày tốt lành,<br>HMS Team</p>
       `
         }
@@ -38,7 +40,7 @@ const sendPatientNewPasswordEmail = async (staffEmail, newPassword) => {
     try {
         const mailOptions = {
             from: process.env.EMAIL_USER,
-            to: staffEmail,
+            to: staffEmail, 
             subject: 'HMS - Mật khẩu đăng nhập',
             html: `
         <h2>Mật khẩu đăng nhập</h2>

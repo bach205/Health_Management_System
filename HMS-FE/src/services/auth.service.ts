@@ -21,6 +21,16 @@ export const loginService = async (body: object) => {
   return response;
 };
 
+export const forgetPasswordService = async (body : object) => {
+  const response = await mainRequest.post(`${baseURL}/forget-password`, body);
+  return response;
+};
+
+export const resetPassword = async (body: { token: string, newPassword: string, confirmPassword: string }) => {
+  const response = await mainRequest.post(`${baseURL}/check-password-match`, body);
+  return response;
+};
+
 //cái này là của facebook login function nhé
 // <script>
 //   window.fbAsyncInit = function() {

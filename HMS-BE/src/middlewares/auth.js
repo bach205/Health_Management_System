@@ -6,7 +6,10 @@ const authenticate = (req, res, next) => {
 
         const authHeader = req.headers.authorization;
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            return res.status(401).json({ message: 'No token provided' });
+            return res.status(401).json({
+                message: 'No token provided',
+                error: 'AUTH_REQUIRED'
+            });
         }
 
         const token = authHeader.split(' ')[1];
@@ -16,15 +19,37 @@ const authenticate = (req, res, next) => {
         next();
     } catch (error) {
         console.log(error)
-        return res.status(401).json({ message: 'Invalid token' });
+
+        // Xử lý lỗi token expired cụ thể
+        if (error.name === 'TokenExpiredError') {
+            return res.status(401).json({
+                message: 'Token has expired. Please login again.',
+                error: 'TOKEN_EXPIRED',
+                expiredAt: error.expiredAt
+            });
+        }
+
+        // Xử lý các lỗi JWT khác
+        if (error.name === 'JsonWebTokenError') {
+            return res.status(401).json({
+                message: 'Invalid token format',
+                error: 'INVALID_TOKEN'
+            });
+        }
+
+        return res.status(401).json({
+            message: 'Invalid token',
+            error: 'AUTH_FAILED'
+        });
     }
 };
 
-const authorize = (roles) => {
+const authorize = (...roles) => {
     return (req, res, next) => {
-        if (!roles.includes(req.user.role)) {
+        console.log("roles: ", req.user.role);
+        if (!roles.includes(req.user.role)) {       
             return res.status(403).json({
-                message: 'You do not have permission to perform this action'
+                message: 'You do not have permission to perform th  is action'
             });
         }
         next();

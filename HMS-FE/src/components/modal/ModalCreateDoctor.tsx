@@ -1,8 +1,11 @@
-import { DatePicker, Form, Input, Modal, Select, Checkbox, type FormInstance } from "antd";
+import { DatePicker, Form, Input, Modal, Select, Checkbox, type FormInstance, type UploadFile, message, Upload, Image } from "antd";
 import { useEffect, useState } from "react";
 import { specialtyOptions, TYPE_EMPLOYEE_STR } from "../../constants/user.const";
 import type { IUserBase } from "../../types/index.type";
 import dayjs from "dayjs";
+import imageCompression from "browser-image-compression";
+import { PlusOutlined } from "@ant-design/icons";
+import { useSpecialtyList } from "../../hooks/useSpecialtyList";
 // import dayjs from "dayjs";
 
 interface IProps {
@@ -13,6 +16,13 @@ interface IProps {
   role: IUserBase["role"];
 }
 
+const getBase64 = (file: File): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = (error) => reject(error);
+  });
 const ModalCreateDoctor = ({ role, isVisible, handleOk, handleCancel, form }: IProps) => {
   const [specialty, setSpecialty] = useState<string>("internal");
   const [showPasswordFields, setShowPasswordFields] = useState(false);
@@ -22,6 +32,63 @@ const ModalCreateDoctor = ({ role, isVisible, handleOk, handleCancel, form }: IP
       confirm_password: "",
     });
   }, [showPasswordFields]);
+  const [identityType, setIdentityType] = useState("citizen");
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const [previewImage, setPreviewImage] = useState('');
+  const [previewOpen, setPreviewOpen] = useState(false);
+
+  const beforeUpload = async (file: File) => {
+    const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
+    const isLt5M = file.size / 1024 / 1024 < 5;
+
+    if (!isJpgOrPng) {
+      message.error('Chỉ cho phép ảnh JPG hoặc PNG!');
+      return Upload.LIST_IGNORE;
+    }
+    if (!isLt5M) {
+      message.error('Ảnh phải nhỏ hơn 5MB!');
+      return Upload.LIST_IGNORE;
+    }
+
+    try {
+      const options = {
+        maxSizeMB: 0.75,
+        maxWidthOrHeight: 1024,
+        useWebWorker: true,
+      };
+      const compressedFile = await imageCompression(file, options);
+      const base64 = await getBase64(compressedFile);
+
+      setFileList([{
+        uid: Date.now().toString(),
+        name: file.name,
+        status: 'done',
+        url: base64,
+      }]);
+      form.setFieldsValue({ avatar: base64 });
+    } catch (err) {
+      console.error(err);
+      message.error("Không thể xử lý ảnh.");
+    }
+
+    return false;
+  };
+
+  const handlePreview = async (file: UploadFile) => {
+    if (!file.url && !file.preview) {
+      file.preview = await getBase64(file.originFileObj as File);
+    }
+    setPreviewImage(file.url || (file.preview as string));
+    setPreviewOpen(true);
+  };
+
+  const uploadButton = (
+    <div>
+      <PlusOutlined />
+      <div style={{ marginTop: 8 }}>Chọn ảnh</div>
+    </div>
+  );
+  const { specialties, loading: specialtyLoading, reload: specialtyReload, handleTableChange: specialtyTableChange } = useSpecialtyList(undefined, true);
   return (
     <Modal
       open={isVisible}
@@ -41,6 +108,35 @@ const ModalCreateDoctor = ({ role, isVisible, handleOk, handleCancel, form }: IP
         style={{ marginTop: 20 }}
         initialValues={{ gender: "male" }}
       >
+         <Form.Item label="Ảnh đại diện" name="avatar" valuePropName="avatar">
+          <div>
+            <Upload
+              listType="picture-card"
+              fileList={fileList}
+              beforeUpload={beforeUpload}
+              onPreview={handlePreview}
+              onRemove={() => {
+                setFileList([]);
+                form.setFieldsValue({ avatar: undefined });
+              }}
+              maxCount={1}
+            >
+              {fileList.length >= 1 ? null : uploadButton}
+            </Upload>
+
+            {previewImage && (
+              <Image
+                wrapperStyle={{ display: 'none' }}
+                preview={{
+                  visible: previewOpen,
+                  onVisibleChange: (visible) => setPreviewOpen(visible),
+                  afterOpenChange: (visible) => !visible && setPreviewImage(''),
+                }}
+                src={previewImage}
+              />
+            )}
+          </div>
+        </Form.Item>
         <Form.Item
           label="Họ tên"
           name="full_name"
@@ -101,7 +197,10 @@ const ModalCreateDoctor = ({ role, isVisible, handleOk, handleCancel, form }: IP
                 style={{ width: 120 }}
                 value={specialty}
                 onChange={(value) => setSpecialty(value)}
-                options={specialtyOptions}
+                options={specialties.map((specialty) => ({
+                  label: specialty.name,
+                  value: specialty.name,
+                }))}
               />
             </Form.Item>
 

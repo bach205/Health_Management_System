@@ -10,13 +10,15 @@ const doctorRouter = express.Router();
 const checkUserStatus = require("../middlewares/checkUserStatus");
 
 // Apply middleware to all routes
-doctorRouter.use(authenticate);
-doctorRouter.use(checkUserStatus());
+// doctorRouter.use(authenticate);  
+
+// doctorRouter.use(checkUserStatus());
 
 doctorRouter.post(
   "/create",
   authenticate,
-  //  authorize("admin"),
+  checkUserStatus(),
+   authorize("admin"),
   // validate({ body: createDoctorSchema }),
   asyncHandler(doctorController.createDoctor),
   doctorController.createDoctor
@@ -24,7 +26,7 @@ doctorRouter.post(
 
 doctorRouter.post(
   "/",
-  authenticate,
+  // authenticate,
   //  authorize("admin"),
   asyncHandler(doctorController.getDoctors),
   doctorController.getDoctors
@@ -33,6 +35,7 @@ doctorRouter.post(
 doctorRouter.get(
   "/",
   authenticate,
+  checkUserStatus(),
   //authorize("admin"),
   asyncHandler(doctorController.getAllDoctors),
   doctorController.getAllDoctors
@@ -41,7 +44,8 @@ doctorRouter.get(
 doctorRouter.post(
   "/update",
   authenticate,
-  authorize("admin"),
+  checkUserStatus(),
+  // authorize("admin"),
   asyncHandler(doctorController.updateDoctor),
   doctorController.updateDoctor
 );
@@ -50,6 +54,7 @@ doctorRouter.post(
   "/update-status",
   authenticate,
   authorize("admin"),
+  checkUserStatus(),
   asyncHandler(doctorController.changeActive),
   doctorController.changeActive
 );
@@ -58,13 +63,14 @@ doctorRouter.post(
   "/update-password",
   authenticate,
   authorize("admin"),
+  checkUserStatus(),
   asyncHandler(doctorController.updatePassword),
   doctorController.updatePassword
 );
 
 doctorRouter.get(
   "/:id",
-  authenticate,
+  // authenticate,
   // authorize("admin"),
   asyncHandler(doctorController.getDoctorById),
   doctorController.getDoctorById
@@ -73,6 +79,7 @@ doctorRouter.get(
 doctorRouter.get(
   "/clinic/:clinicId",
   authenticate,
+  checkUserStatus(),
   authorize("admin", "doctor"),
   asyncHandler(doctorController.getDoctorsInClinic),
   doctorController.getDoctorsInClinic
@@ -81,6 +88,7 @@ doctorRouter.get(
 doctorRouter.get(
   "/available-slots/:doctorId",
   authenticate,
+  checkUserStatus(),
   authorize("admin", "doctor"),
   asyncHandler(doctorController.getDoctorAvailableSlots),
   doctorController.getDoctorAvailableSlots
@@ -89,6 +97,7 @@ doctorRouter.get(
 doctorRouter.post(
   "/update-info",
   authenticate,
+  checkUserStatus(),
   authorize("admin", "doctor"),
   asyncHandler(doctorController.updateDoctorInfo),
   doctorController.updateDoctorInfo
@@ -97,6 +106,7 @@ doctorRouter.post(
 doctorRouter.post(
   "/update-staff-info",
   authenticate,
+  checkUserStatus(),
   authorize("admin", "doctor", "nurse"),
   asyncHandler(doctorController.updateStaffInfo),
   doctorController.updateStaffInfo

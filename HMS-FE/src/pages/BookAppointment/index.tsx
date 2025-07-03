@@ -6,6 +6,10 @@ import { Button, Form, Input, Card, Space, Typography, message } from "antd";
 import { bookAppointmentService, getAvailableTimeSlotsService } from "../../services/appointment.service";
 import { getDoctorById } from "../../services/doctor.service";
 import dayjs from "dayjs";
+import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
+import { specialtyOptions } from "../../constants/user.const";
+dayjs.extend(isSameOrAfter);
+
 const { Title, Text } = Typography;
 
 interface AvailableSlot {
@@ -50,7 +54,16 @@ const PatientBookAppointment: React.FC = () => {
         const data = await getAvailableTimeSlotsService(docId);
         
         console.log(data);
-        setSlots(data.metadata || []);
+        const allSlots = data.metadata || [];
+        
+        // Lọc chỉ lấy slot từ hôm nay trở đi
+        const today = dayjs().startOf('day');
+        const filteredSlots = allSlots.filter((slot: AvailableSlot) => {
+          const slotDate = dayjs(slot.slot_date);
+          return slotDate.isSameOrAfter(today);
+        });
+        
+        setSlots(filteredSlots);
       } catch (err) {
         message.error("Không thể tải lịch khám");
       } finally {
@@ -94,6 +107,7 @@ const PatientBookAppointment: React.FC = () => {
         if (res.status === 201) {
           message.success("Đặt lịch khám thành công");
           setSuccess(!success);
+          setSelectedSlot(null);
           form.resetFields();
         }
       } catch (error: any) {
@@ -131,11 +145,15 @@ const PatientBookAppointment: React.FC = () => {
       <Card className="mb-4">
         <div className="flex flex-col sm:flex-row gap-4">
           <div>
-            <img
-              className="w-full sm:w-72 rounded-lg object-cover"
-              src={assets.profile_pic}
-              alt={doctor?.full_name}
-            />
+            {
+              doctor?.metadata?.avatar && (
+                <img
+                  className="w-full sm:w-72 rounded-lg object-cover"
+                  src={doctor?.metadata?.avatar}
+                  alt={doctor?.full_name}
+                />
+              )
+            }
           </div>
           <div className="flex-1">
             <Space direction="vertical" size="small" className="w-full">
@@ -149,7 +167,7 @@ const PatientBookAppointment: React.FC = () => {
                 </Text>
               </Space>
               {doctor?.metadata?.doctor?.specialty && (
-                <Text type="secondary">Chuyên khoa: {doctor.metadata.doctor.specialty}</Text>
+                <Text type="secondary">Chuyên khoa: {specialtyOptions.find(item => item.value === doctor.metadata.doctor.specialty)?.label || "Không xác định"}</Text>
               )}
               {doctor?.metadata?.doctor?.bio && (
                 <Text type="secondary">Tiểu sử: {doctor.metadata.doctor.bio}</Text>
@@ -212,7 +230,7 @@ const PatientBookAppointment: React.FC = () => {
             );
           })}
           {selectedClinic && dateOptions.length === 0 && (
-            <Text type="secondary">Không có lịch trống cho phòng khám này</Text>
+            <Text type="secondary">Không có lịch cho phòng khám này</Text>
           )}
         </div>
         <Title level={5} className="!mb-4">Chọn giờ khám</Title>
@@ -224,19 +242,28 @@ const PatientBookAppointment: React.FC = () => {
                             new Date(slot.start_time).getUTCMinutes().toString().padStart(2, '0');
             const endTime = new Date(slot.end_time).getUTCHours().toString().padStart(2, '0') + ':' + 
                           new Date(slot.end_time).getUTCMinutes().toString().padStart(2, '0');
+            
+            // Kiểm tra slot có còn trống không
+            const isAvailable = slot.is_available;
+            
             return (
               <Button
                 key={slot.id}
                 type={selectedSlot?.id === slot.id ? "primary" : "default"}
-                onClick={() => setSelectedSlot(slot)}
-                className="rounded-full"
+                onClick={() => isAvailable && setSelectedSlot(slot)}
+                className={`rounded-full group ${!isAvailable ? 'cursor-not-allowed' : ''}`}
+                disabled={!isAvailable}
+                title={!isAvailable ? 'Đã được đặt' : ''}
               >
-                {startTime} ~ {endTime}
+                <span>{startTime} ~ {endTime}</span>
+                {!isAvailable && (
+                  <span className="invisible group-hover:visible text-xs text-gray-500 ml-1">Đã đặt</span>
+                )}
               </Button>
             );
           })}
           {selectedClinic && selectedDate && (!slotsByDate[selectedDate] || slotsByDate[selectedDate].length === 0) && (
-            <Text type="secondary">Không có giờ trống cho ngày này</Text>
+            <Text type="secondary">Không có lịch cho ngày này</Text>
           )}
         </div>
         <Form
@@ -263,7 +290,7 @@ const PatientBookAppointment: React.FC = () => {
           >
             <Input.TextArea
               rows={4}
-              placeholder="Thông tin bổ sung (nếu có)"
+              placeholder="Thông tin bổ sung"
             />
           </Form.Item>
 

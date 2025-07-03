@@ -330,7 +330,7 @@ const AdminNurseDashboard = () => {
       />
 
       <ModalCreateUser role="nurse" form={formCreate} handleOk={handleCreateOk} isVisible={isCreateVisible} handleCancel={handleCreateCancel}></ModalCreateUser>
-      <ModalUpdateUser role="nurse" form={formUpdate} handleOk={handleUpdateOk} isVisible={isUpdateVisible} handleCancel={handleUpdateCancel}></ModalUpdateUser>
+      <ModalUpdateUser reload={reload} setReload={setReload} role="nurse" form={formUpdate} handleOk={handleUpdateOk} isVisible={isUpdateVisible} handleCancel={handleUpdateCancel}></ModalUpdateUser>
       <ModalViewUser role="nurse" form={formView} isVisible={isViewVisible} handleCancel={handleViewCancel}></ModalViewUser>
     </div>
   );

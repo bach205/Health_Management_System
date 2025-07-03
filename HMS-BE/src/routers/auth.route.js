@@ -4,6 +4,7 @@ const asyncHandler = require("../helper/asyncHandler");
 const {
   registerSchema,
   loginSchema,
+  checkPasswordSchema,
   forgetPasswordSchema,
   resetPasswordSchema,
   googleLoginSchema,
@@ -53,8 +54,8 @@ authRouter.post(
 
 authRouter.post(
   "/reset-password",
-  // authenticate,
-  // validate({ body: resetPasswordSchema }),
+  authenticate,
+  validate({ body: resetPasswordSchema }),
   asyncHandler(AuthController.resetPassword),
   authController.resetPassword
 );
@@ -99,6 +100,20 @@ authRouter.post(
   "/register-phone",
   asyncHandler(AuthController.registerWithPhone),
   authController.registerWithPhone
+);
+
+authRouter.post(
+  "/refresh-token",
+  asyncHandler(AuthController.refreshToken),
+  authController.refreshToken
+);
+
+// API kiểm tra mật khẩu mới và xác nhận mật khẩu mới có trùng nhau không (dùng controller)
+authRouter.post(
+  '/check-password-match',
+  validate({ body: checkPasswordSchema }),
+  asyncHandler(AuthController.checkPasswordMatch),
+  AuthController.checkPasswordMatch
 );
 
 // Ví dụ check authen bên trong router

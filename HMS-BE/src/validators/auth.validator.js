@@ -2,10 +2,17 @@ const Joi = require("joi");
 
 const registerSchema = Joi.object({
   email: Joi.string().email().required(),
-  password: Joi.string().min(6).required(),
-  // phone: Joi.string()
-  //   .pattern(/^[0-9]{10}$/)
-  //   .optional(),
+  password: Joi.string()
+    .min(8)
+    .pattern(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
+    )
+    .required()
+    .messages({
+      "string.pattern.base":
+        "Mật khẩu phải chứa ít nhất 1 chữ hoa, 1 chữ thường, 1 số và 1 ký tự đặc biệt",
+      "string.min": "Mật khẩu phải có ít nhất 8 ký tự",
+    }),
   role: Joi.string().valid("patient").default("patient"), // Chỉ cho phép role patient
 }).unknown(true);
 
@@ -63,6 +70,27 @@ const forgetPasswordSchema = Joi.object({
   email: Joi.string().email().required(),
 });
 
+const checkPasswordSchema = Joi.object({
+  token: Joi.string().required(),
+  newPassword: Joi.string()
+    .min(8)
+    .pattern(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
+    )
+    .required()
+    .messages({
+      "string.pattern.base":
+        "Mật khẩu phải chứa ít nhất 1 chữ hoa, 1 chữ thường, 1 số và 1 ký tự đặc biệt",
+      "string.min": "Mật khẩu phải có ít nhất 8 ký tự",
+    }),
+  confirmPassword: Joi.string()
+    .valid(Joi.ref("newPassword"))
+    .required()
+    .messages({
+      "any.only": "Mật khẩu không khớp nhau",
+    }),
+});
+
 const resetPasswordSchema = Joi.object({
   token: Joi.string().required(),
   oldPassword: Joi.string().required().messages({
@@ -101,6 +129,8 @@ const createDoctorSchema = Joi.object({
   address: Joi.string().optional().allow(null, ""),
   specialty: Joi.string().optional().allow(null, ""),
   bio: Joi.string().optional().allow(null, ""),
+  avatar: Joi.string().optional().allow(null, ""),
+  price: Joi.number().optional().allow(null, ""),
 });
 
 const updateDoctorSchema = Joi.object({
@@ -168,4 +198,5 @@ module.exports = {
   googleLoginSchema,
   facebookLoginSchema,
   changePasswordSchema,
+  checkPasswordSchema
 };

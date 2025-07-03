@@ -1,9 +1,10 @@
-import { DatePicker, Form, Input, Modal, Select, Checkbox, type FormInstance } from "antd";
+import { DatePicker, Form, Input, Modal, Select, Checkbox, type FormInstance, type UploadFile, message, Upload, Image } from "antd";
 import { useState } from "react";
 import { TYPE_EMPLOYEE_STR } from "../../constants/user.const";
 import type { IUserBase } from "../../types/index.type";
 import dayjs from "dayjs";
-// import dayjs from "dayjs";
+import imageCompression from "browser-image-compression";
+import { PlusOutlined } from "@ant-design/icons";
 
 interface IProps {
   isVisible: boolean;
@@ -12,9 +13,71 @@ interface IProps {
   form: FormInstance;
   role: IUserBase["role"];
 }
-
+const getBase64 = (file: File): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = (error) => reject(error);
+  });
 const ModalCreatePatient = ({ role, isVisible, handleOk, handleCancel, form }: IProps) => {
   const [showPasswordFields, setShowPasswordFields] = useState(false);
+  const [identityType, setIdentityType] = useState("citizen");
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const [previewImage, setPreviewImage] = useState('');
+  const [previewOpen, setPreviewOpen] = useState(false);
+
+  const beforeUpload = async (file: File) => {
+    const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
+    const isLt5M = file.size / 1024 / 1024 < 5;
+
+    if (!isJpgOrPng) {
+      message.error('Chỉ cho phép ảnh JPG hoặc PNG!');
+      return Upload.LIST_IGNORE;
+    }
+    if (!isLt5M) {
+      message.error('Ảnh phải nhỏ hơn 5MB!');
+      return Upload.LIST_IGNORE;
+    }
+
+    try {
+      const options = {
+        maxSizeMB: 0.75,
+        maxWidthOrHeight: 1024,
+        useWebWorker: true,
+      };
+      const compressedFile = await imageCompression(file, options);
+      const base64 = await getBase64(compressedFile);
+
+      setFileList([{
+        uid: Date.now().toString(),
+        name: file.name,
+        status: 'done',
+        url: base64,
+      }]);
+      form.setFieldsValue({ avatar: base64 });
+    } catch (err) {
+      console.error(err);
+      message.error("Không thể xử lý ảnh.");
+    }
+
+    return false;
+  };
+
+  const handlePreview = async (file: UploadFile) => {
+    if (!file.url && !file.preview) {
+      file.preview = await getBase64(file.originFileObj as File);
+    }
+    setPreviewImage(file.url || (file.preview as string));
+    setPreviewOpen(true);
+  };
+
+  const uploadButton = (
+    <div>
+      <PlusOutlined />
+      <div style={{ marginTop: 8 }}>Chọn ảnh</div>
+    </div>
+  );
 
   return (
     <Modal
@@ -35,6 +98,36 @@ const ModalCreatePatient = ({ role, isVisible, handleOk, handleCancel, form }: I
         style={{ marginTop: 20 }}
         initialValues={{ gender: "male" }}
       >
+        <Form.Item label="Ảnh đại diện" name="avatar" valuePropName="avatar">
+          <div>
+            <Upload
+              listType="picture-card"
+              fileList={fileList}
+              beforeUpload={beforeUpload}
+              onPreview={handlePreview}
+              onRemove={() => {
+                setFileList([]);
+                form.setFieldsValue({ avatar: undefined });
+              }}
+              maxCount={1}
+            >
+              {fileList.length >= 1 ? null : uploadButton}
+            </Upload>
+
+            {previewImage && (
+              <Image
+                wrapperStyle={{ display: 'none' }}
+                preview={{
+                  visible: previewOpen,
+                  onVisibleChange: (visible) => setPreviewOpen(visible),
+                  afterOpenChange: (visible) => !visible && setPreviewImage(''),
+                }}
+                src={previewImage}
+              />
+            )}
+          </div>
+        </Form.Item>
+
         <Form.Item
           label="Họ tên"
           name="full_name"
@@ -92,9 +185,39 @@ const ModalCreatePatient = ({ role, isVisible, handleOk, handleCancel, form }: I
           <DatePicker
             format="DD/MM/YYYY"
             placeholder="Ngày sinh"
-            maxDate={dayjs().subtract(18, "year") as any}
+            maxDate={dayjs()}
           />
         </Form.Item>
+
+        <Form.Item
+          name="identity_type"
+          label="Loại định danh"
+          initialValue="citizen"
+        >
+          <Select onChange={(value) => setIdentityType(value)} style={{ width: "100%" }}>
+            <Select.Option value="passport"><span className="text-black">Chứng minh nhân dân</span></Select.Option>
+            <Select.Option value="citizen"><span className="text-black">Căn cước công dân</span></Select.Option>
+          </Select>
+        </Form.Item>
+
+        {identityType === "citizen" ? (
+          <Form.Item name="identity_number" label="Số CCCD"
+            rules={[
+              { pattern: new RegExp(/^\d{12}$/), message: "Số CCCD không hợp lệ!", whitespace: true }
+            ]}
+          >
+            <Input placeholder="Số CCCD" maxLength={12} />
+          </Form.Item>
+        ) : (
+          <Form.Item name="identity_number" label="Số CMND"
+
+            rules={[
+              { pattern: new RegExp(/^\d{9}(\d{3})?$/), message: "Số CMND không hợp lệ!", whitespace: true }
+            ]}
+          >
+            <Input placeholder="Số CMND" maxLength={12} />
+          </Form.Item>
+        )}
 
         <Form.Item
           name="create_password"
@@ -145,6 +268,7 @@ const ModalCreatePatient = ({ role, isVisible, handleOk, handleCancel, form }: I
         )}
       </Form>
     </Modal>
+
   );
 };
 

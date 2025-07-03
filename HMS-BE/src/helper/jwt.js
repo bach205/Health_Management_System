@@ -24,4 +24,20 @@ const verifyToken = (token) => {
     }
 }
 
-module.exports = { generateToken, verifyToken };
+const refreshAccessToken = (refreshToken) => {
+    try {
+        const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
+        const payload = {
+            id: decoded.id,
+            email: decoded.email,
+            role: decoded.role,
+        }
+        const newAccessToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
+        return newAccessToken;
+    } catch (error) {
+        console.log("Refresh token verification error:", error);
+        throw error;
+    }
+}
+
+module.exports = { generateToken, verifyToken, refreshAccessToken };

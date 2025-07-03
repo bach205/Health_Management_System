@@ -10,11 +10,12 @@ import ExaminationRecordModal from "../../../components/doctor/ExaminationRecord
 import { useAuthStore } from "../../../store/authStore";
 import { useSocket } from "../../../hooks/useSocket";
 import { updateQueueStatus } from "../../../services/queue.service";
-import { Button, Dropdown, Flex, Menu, Select, Table, Tag, Tooltip, Typography } from "antd";
+import { Button, Dropdown, Flex, Menu, message, Select, Space, Table, Tag, Tooltip, Typography } from "antd";
 import ModalPatientExaminationOrder from "./ModalPatientExaminationOrder";
 import DoctorExaminationOrderModal from "./DoctorExaminationOrderModal";
 import { RefreshCcw } from "lucide-react";
 import dayjs from "dayjs";
+import DoctorExaminationRecordModal from "./DoctorExaminationRecord";
 
 const { Option } = Select;
 const { Text } = Typography;
@@ -75,13 +76,22 @@ const QueueTable = () => {
         }
     );
     const handleStatusUpdate = async (queueId: string, newStatus: string) => {
-        // const queue = queues.find((queue: any) => queue.id === queueId);
-        // if (queue) {
-        //     if (dayjs.utc(queue.appointment.appointment_time).isBefore(dayjs())) {
-        //         toast.error("Chưa đến giờ khám");
-        //         return;
-        //     }
-        // }
+        const queue: any = queues.find((queue: any) => queue.id === queueId);
+        console.log(queue)
+        console.log(" appointmentTime", dayjs.utc(queue.appointment.appointment_time).hour(), "now", dayjs().hour())
+        console.log("not time", dayjs.utc(queue.appointment.appointment_time).hour() > dayjs().hour())
+        console.log(" time", dayjs.utc(queue.appointment.appointment_date), "now", dayjs())
+
+        if (queue) {
+            const appointmentTime = dayjs.utc(queue.appointment.appointment_time);
+            const appontmentdate = dayjs.utc(queue.appointment.appointment_date)
+
+            // Kiểm tra xem giờ khám, ngày khám có đã qua hay không
+            if (appointmentTime.hour() > dayjs().hour() || appontmentdate > dayjs()) {
+                message.error("Chưa đến giờ khám");
+                return;
+            }
+        }
         try {
             await updateQueueStatus(queueId, newStatus);
             // Không cần fetchQueue nữa vì socket sẽ handle việc update UI
@@ -90,28 +100,28 @@ const QueueTable = () => {
         }
     };
     // Cập nhật Menu.Item để sử dụng handleStatusUpdate
-    const menu = (record: any) => (
-        <Menu>
-            {record.status === "waiting" && (
-                <>
-                    <Menu.Item
-                        key="start"
-                        onClick={() => handleStatusUpdate(record.id, "in_progress")}
-                    >
-                        Bắt đầu khám
-                    </Menu.Item>
-                    <Menu.Item
-                        key="skip"
-                        onClick={() => handleStatusUpdate(record.id, "skipped")}
-                        danger
-                    >
-                        Bỏ qua
-                    </Menu.Item>
-                </>
-            )}
-            {/* Rest of the menu items... */}
-        </Menu>
-    );
+    // const menu = (record: any) => (
+    //     <Menu>
+    //         {record.status === "waiting" && (
+    //             <>
+    //                 <Menu.Item
+    //                     key="start"
+    //                     onClick={() => handleStatusUpdate(record.id, "in_progress")}
+    //                 >
+    //                     Bắt đầu khám
+    //                 </Menu.Item>
+    //                 <Menu.Item
+    //                     key="skip"
+    //                     onClick={() => handleStatusUpdate(record.id, "skipped")}
+    //                     danger
+    //                 >
+    //                     Bỏ qua
+    //                 </Menu.Item>
+    //             </>
+    //         )}
+    //         {/* Rest of the menu items... */}
+    //     </Menu>
+    // );
     useEffect(() => {
         const fetchClinics = async () => {
             try {
@@ -166,19 +176,28 @@ const QueueTable = () => {
         }
     };
 
-    const columns = [
+    const columns: any = [
         {
             title: "STT",
             dataIndex: "id",
             key: "id",
-            width: 100,
+            align: "center",
+            width: 50,
+            render: (_: any, record: any, index: number) => index + 1,
         },
         {
             title: "Bệnh nhân",
             dataIndex: ["patient", "user", "full_name"],
             key: "full_name",
-            width: 200,
+            width: 150,
             render: (_: any, record: any) => record?.patient?.user?.full_name || "-",
+        },
+        {
+            title: "Bác sĩ khám",
+            dataIndex: ["appointment", "doctor", "full_name"],
+            key: "full_name",
+            width: 150,
+            render: (_: any, record: any) => record?.appointment?.doctor?.full_name || "-",
         },
         {
             title: "Giờ khám",
@@ -187,6 +206,15 @@ const QueueTable = () => {
             width: 100,
             render: (appointment: any) => <Tag>{dayjs.utc(appointment?.appointment_time).format("HH:mm")}</Tag>,
         },
+
+        {
+            title: "Ngày khám",
+            dataIndex: ["appointment"],
+            key: "appointment",
+            width: 100,
+            render: (appointment: any) => <Tag>{dayjs.utc(appointment?.appointment_date).format("DD/MM/YYYY")}</Tag>,
+        },
+
         {
             title: "Trạng thái",
             dataIndex: "status",
@@ -197,9 +225,13 @@ const QueueTable = () => {
         {
             title: "Thao tác",
             key: "action",
+            fixed: "right",
+            ellipsis: true,
+            width: 200,
             render: (_: any, record: any) => {
-                const menu = (
-                    <Flex gap={8}>
+                return (
+
+                    <Space wrap size={'small'}>
                         {record.status === "waiting" && (
                             <>
                                 <Button
@@ -231,10 +263,7 @@ const QueueTable = () => {
                                 </Button>
                             </>
                         )}
-                    </Flex>
-                );
-                return (
-                    menu
+                    </Space>
                 );
             },
         },
@@ -242,7 +271,7 @@ const QueueTable = () => {
 
     return (
         <div className="flex flex-col w-full h-full p-4 gap-4">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
                 <Flex gap={10} align="center">
                     <label htmlFor="clinic-select" className="font-semibold ">
                         Phòng khám:
@@ -266,13 +295,13 @@ const QueueTable = () => {
                 </Flex>
                 {
                     selectedClinic && (
-                        < >
+                        <>
                             <Tooltip title="Làm mới">
                                 <Button onClick={() => fetchQueue(selectedClinic)}>
                                     <RefreshCcw size={17.5} />
                                 </Button>
                             </Tooltip>
-                            <Flex gap={10} align="center">
+                            <Space size={'small'}>
                                 <label htmlFor="clinic-select" className="font-light">
                                     Lọc theo:
                                 </label>
@@ -286,7 +315,7 @@ const QueueTable = () => {
                                     <Option value={"done"}>Đã khám</Option>
                                     <Option value={"skipped"}>Bỏ qua</Option>
                                 </Select>
-                            </Flex>
+                            </Space>
                         </>
                     )
                 }
@@ -301,12 +330,15 @@ const QueueTable = () => {
                     current: pagination.pageNumber,
                     pageSize: pagination.pageSize,
                     total: totalElements,
-                    onChange: (page) =>
+                    onChange: (page, pageSize) => {
                         setPagination({
-                            ...pagination,
                             pageNumber: page,
-                        }),
+                            pageSize,
+                        });
+                        fetchQueue(selectedClinic, { pageNumber: page, pageSize });
+                    },
                 }}
+                size="middle"
                 scroll={{ y: 400 }}
             />
             <ModalPatientExaminationOrder
@@ -342,7 +374,7 @@ const QueueTable = () => {
                     fetchQueue(selectedClinic);
                 }}
             />
-            <ExaminationRecordModal
+            {/* <ExaminationRecordModal
                 open={showRecordModal}
                 onClose={() => setShowRecordModal(false)}
                 patientId={selectedPatient?.id}
@@ -353,6 +385,19 @@ const QueueTable = () => {
                     fetchQueue(selectedClinic);
                 }}
             />
+             */}
+            <DoctorExaminationRecordModal
+                open={showRecordModal}
+                onClose={() => setShowRecordModal(false)}
+                patientId={selectedPatient?.id}
+                doctorId={Number(currentDoctorId)}
+                onSuccess={() => {
+                    setShowRecordModal(false);
+                    setSelectedPatient(null);
+                    fetchQueue(selectedClinic);
+                }}
+            />
+
             <ResultExaminationModal
                 open={showResultModal}
                 onClose={() => setShowResultModal(false)}

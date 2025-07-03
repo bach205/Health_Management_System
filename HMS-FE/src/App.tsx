@@ -38,6 +38,11 @@ import AdminPatientDashboard from "./pages/Admin/Patient/AdminPatientDashboard";
 import StaffProfile from "./pages/Doctor/StaffProfile";
 import ChatUI from "./layouts/MainLayout/ChatUI";
 import DocumnetsManagement from "./pages/Admin/DocumentsManagement";
+import PatientQueueTable from "./pages/Patient/Queue/PatientQueueTable";
+import MedicineDashboard from "./pages/Admin/Medicine/AdminMedicineDashboard";
+import AdminSpecialtyDashboard from "./pages/Admin/Specialty/AdminSpecialtyDashboard";
+import AdminDashboard from "./pages/Admin/Dashboard/AdminDashboard";
+import ForgetPage from "./pages/ForgetPage";
 dayjs.extend(plugin);
 dayjs.updateLocale("en", {
   weekStart: 1,
@@ -128,7 +133,11 @@ const PublicRoutes = [
     element: <ChatUI />,
     layout: MainLayout,
   },
-
+  {
+    path: "/reset-password",
+    element: <ForgetPage />,
+    layout: MainLayout,
+  },
 ];
 
 interface PrivateRoute {
@@ -161,7 +170,7 @@ const PrivateRoutes: PrivateRoute[] = [
   },
   {
     path: "/admin/dashboard",
-    element: <Dashboard />,
+    element: <AdminDashboard />,
     layout: DashboardLayout,
   },
   {
@@ -238,4 +247,26 @@ const PrivateRoutes: PrivateRoute[] = [
     layout: DashboardLayout,
     allowedRoles: ["admin"],
   },
+  {
+    path: "/queue",
+    element: <PatientQueueTable />,
+    layout: MainLayout,
+    allowedRoles: ["patient"],
+  },
+  {
+    path: "/admin/specialties",
+    element: <AdminSpecialtyDashboard />,
+    layout: DashboardLayout,
+    allowedRoles: ["admin"],
+  },
+
+
+  {
+    path: "/admin/medicines",
+    element: <MedicineDashboard />,
+    layout: DashboardLayout,
+    allowedRoles: ["admin"],
+  },
+
+
 ];

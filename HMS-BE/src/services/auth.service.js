@@ -16,19 +16,20 @@ const axios = require("axios");
 class AuthService {
   async register(userData) {
     // Validate input
+    //console.log("userData: ", userData);
     const { error } = registerSchema.validate(userData);
     if (error) {
       throw new BadRequestError(error.details[0].message);
     }
-    console.log(userData);
+
     // Check if user exists
     const existingUser = await prisma.user.findUnique({
       where: { email: userData.email },
     });
-    console.log(existingUser);
+    //   console.log(existingUser);
 
     if (existingUser) {
-      throw new BadRequestError("Email already registered");
+      throw new BadRequestError("Tài khoản đã tồn tại với email này");
     }
 
     // Hash password
@@ -143,7 +144,7 @@ class AuthService {
     // Cập nhật thông tin trong transaction để đảm bảo tính nhất quán
     const result = await prisma.$transaction(async (prisma) => {
       // Cập nhật thông tin user
-      const updatedUser = await prisma.user.update({
+      const updatedUser = await ({
         where: { id: userId },
         data: {
           full_name: updateData.full_name,
@@ -490,8 +491,8 @@ class AuthService {
     const base64Data = base64.split(',')[1] || base64;
 
     const sizeInKB = (base64Data.length * 3) / 4 / 1024;
-    if (sizeInKB > 760) {
-      throw new BadRequestError("Ảnh quá lớn, vui lòng chọn ảnh nhỏ hơn 750KB");
+    if (sizeInKB > 800) {
+      throw new BadRequestError("Ảnh quá lớn, vui lòng chọn ảnh nhỏ hơn 800KB");
     }
 
     console.log(updateData.id, updateData.avatar.length)
@@ -542,46 +543,56 @@ class AuthService {
 
   async registerWithPhone(userData) {
     // Validate input
-    if (!userData.phone || !userData.password) {
-      throw new BadRequestError("Vui lòng nhập số điện thoại và mật khẩu");
+    const { error } = registerSchema.validate(userData);
+    if (error) {
+      throw new BadRequestError(error.details[0].message);
     }
-    // Check if phone exists
-    const existingPhone = await prisma.user.findUnique({
-      where: { phone: userData.phone },
+
+    // Check if user exists
+    const existingUser = await prisma.user.findUnique({
+      where: { email: userData.email },
     });
-    if (existingPhone) {
-      throw new BadRequestError("Số điện thoại đã được đăng ký");
+
+    if (existingUser) {
+      throw new BadRequestError("Email already registered");
     }
+
     // Hash password
     const hashedPassword = await bcrypt.hash(
       userData.password,
       parseInt(process.env.BCRYPT_SALT_ROUNDS)
     );
-    // Create user và patient
+
+    // Create user and patient in a transaction
     const result = await prisma.$transaction(async (prisma) => {
+      // Create user
       const user = await prisma.user.create({
         data: {
+          email: userData.email,
           password: hashedPassword,
-          phone: userData.phone,
-          full_name: userData.full_name || null,
           role: "patient",
           sso_provider: "local",
         },
       });
+
+      // Create patient
       const patient = await prisma.patient.create({
         data: {
           id: user.id,
           identity_number: userData.identity_number || null,
         },
       });
+
       return { user, patient };
     });
+
     // Generate tokens
     const tokens = generateToken(result.user);
+
     return {
       user: {
         id: result.user.id,
-        phone: result.user.phone,
+        email: result.user.email,
         full_name: result.user.full_name,
         role: result.user.role,
       },
@@ -590,6 +601,76 @@ class AuthService {
       },
       ...tokens,
     };
+  }
+
+  async refreshToken(refreshToken) {
+    try {
+      // Verify refresh token
+      const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
+
+      // Check if user still exists and is active
+      const user = await prisma.user.findUnique({
+        where: { id: decoded.id },
+      });
+
+      if (!user) {
+        throw new BadRequestError("User not found");
+      }
+
+      if (!user.is_active) {
+        throw new BadRequestError("Account is deactivated");
+      }
+
+      // Generate new tokens
+      const tokens = generateToken(user);
+
+      return {
+        user: {
+          id: user.id,
+          email: user.email,
+          full_name: user.full_name,
+          role: user.role,
+        },
+        ...tokens,
+      };
+    } catch (error) {
+      if (error.name === 'TokenExpiredError') {
+        throw new BadRequestError("Refresh token has expired. Please login again.");
+      }
+      if (error.name === 'JsonWebTokenError') {
+        throw new BadRequestError("Invalid refresh token");
+      }
+      throw error;
+    }
+  }
+
+  async checkPasswordMatch(newPassword, confirmPassword, token) {
+    try {
+      if (newPassword === confirmPassword) {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const hashedPassword = await bcrypt.hash(
+          newPassword,
+          parseInt(process.env.BCRYPT_SALT_ROUNDS)
+        );
+        // Cập nhật password
+        await prisma.user.update({
+          where: { id: decoded.userId },
+          data: { password: hashedPassword },
+        });
+
+        return {
+          success: true,
+          message: 'Cập nhật mật khẩu thành công',
+        };
+      } else {
+        throw new BadRequestError(
+          'Mật khẩu nhập lại không khớp với mật khẩu mới',
+        );
+      }
+    } catch (error) {
+      throw error;
+    }
+
   }
 }
 

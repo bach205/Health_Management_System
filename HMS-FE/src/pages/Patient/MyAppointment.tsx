@@ -16,6 +16,7 @@ dayjs.extend(isBetween);
 import ScheduleTable from "./ScheduleTable";
 import { getPatientAppointmentsService, updateAppointmentService } from "../../services/appointment.service";
 import ModalUpdateAppointment from "./ModalUpdateAppointment";
+import { useNavigate } from "react-router-dom";
 
 export default function AppointmentsPage() {
     const [viewVisibleAppointmentModal, setViewVisibleAppointmentModal] =
@@ -40,6 +41,7 @@ export default function AppointmentsPage() {
     const [dateRange, setDateRange] = useState<any>(null);
     const [showFilters, setShowFilters] = useState(false);
 
+    const navigate = useNavigate();
     useEffect(() => {
         const fetchAppointments = async () => {
             setLoading(true);
@@ -126,7 +128,7 @@ export default function AppointmentsPage() {
 
         // Status filter
         if (statusFilter) {
-            filtered = filtered.filter((appointment: any) => 
+            filtered = filtered.filter((appointment: any) =>
                 appointment.status === statusFilter
             );
         }
@@ -194,6 +196,9 @@ export default function AppointmentsPage() {
                             </Button>
                         )}
                     </Col>
+                    <Button className="ml-auto" type="default" onClick={() => navigate("/queue")}>
+                        Xem hàng chờ
+                    </Button>
                 </Row>
 
                 {showFilters && (
