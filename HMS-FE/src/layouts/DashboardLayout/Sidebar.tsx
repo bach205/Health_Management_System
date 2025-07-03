@@ -7,6 +7,10 @@ import {
   Calendar,
   CalendarArrowDown,
   ClipboardType,
+  File,
+  FileText,
+  FileTextIcon,
+  LucideFileText,
 } from "lucide-react";
 import type { JSX } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -32,7 +36,7 @@ const Sidebar = ({ isCollapsed, role }: { isCollapsed: boolean, role: string }) 
 
       {SIDEBAR_ITEMS.map((sidebar) => {
         if (sidebar.label === "Quản lý" && role !== "admin") {
-            return null
+          return null
         }
 
         if (sidebar.label === "Phòng khám" && (role !== "admin")) {
@@ -200,6 +204,18 @@ const SIDEBAR_ITEMS = [
         label: "Quản lý lịch hẹn",
         icon: <ClipboardType className="w-4 h-4" />,
         href: "/user-book-appointments",
+      },
+    ],
+  },
+  {
+    id: 6,
+    label: "Documents",
+    items: [
+      {
+        id: "documents",
+        label: "Documents",
+        icon: <FileText className="w-4 h-4" />,
+        href: "/admin/documents",
       },
     ],
   },
