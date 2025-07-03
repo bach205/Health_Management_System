@@ -24,7 +24,7 @@ const ChatUI = () => {
     useEffect(() => {
         if (!isBlock) return;
         console.log(isBlock)
-        const es = new EventSource(`${import.meta.env.VITE_AI_SERVER}/api/v1/documents/stream_response?question=${memInput}`)
+        const es = new EventSource(`${import.meta.env.VITE_AI_SERVER}/api/v1/qa?question=${memInput}`)
         es.onmessage = (event) => {
             let newText = event.data;
             if (newText === "") {
