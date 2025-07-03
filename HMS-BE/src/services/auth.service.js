@@ -16,19 +16,20 @@ const axios = require("axios");
 class AuthService {
   async register(userData) {
     // Validate input
+    //console.log("userData: ", userData);
     const { error } = registerSchema.validate(userData);
     if (error) {
       throw new BadRequestError(error.details[0].message);
     }
-    console.log(userData);
+
     // Check if user exists
     const existingUser = await prisma.user.findUnique({
       where: { email: userData.email },
     });
-    console.log(existingUser);
+    //   console.log(existingUser);
 
     if (existingUser) {
-      throw new BadRequestError("Email already registered");
+      throw new BadRequestError("Tài khoản đã tồn tại với email này");
     }
 
     // Hash password
@@ -143,7 +144,7 @@ class AuthService {
     // Cập nhật thông tin trong transaction để đảm bảo tính nhất quán
     const result = await prisma.$transaction(async (prisma) => {
       // Cập nhật thông tin user
-      const updatedUser = await prisma.user.update({
+      const updatedUser = await ({
         where: { id: userId },
         data: {
           full_name: updateData.full_name,
@@ -606,7 +607,7 @@ class AuthService {
     try {
       // Verify refresh token
       const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
-      
+
       // Check if user still exists and is active
       const user = await prisma.user.findUnique({
         where: { id: decoded.id },
@@ -641,6 +642,35 @@ class AuthService {
       }
       throw error;
     }
+  }
+
+  async checkPasswordMatch(newPassword, confirmPassword, token) {
+    try {
+      if (newPassword === confirmPassword) {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const hashedPassword = await bcrypt.hash(
+          newPassword,
+          parseInt(process.env.BCRYPT_SALT_ROUNDS)
+        );
+        // Cập nhật password
+        await prisma.user.update({
+          where: { id: decoded.userId },
+          data: { password: hashedPassword },
+        });
+
+        return {
+          success: true,
+          message: 'Cập nhật mật khẩu thành công',
+        };
+      } else {
+        throw new BadRequestError(
+          'Mật khẩu nhập lại không khớp với mật khẩu mới',
+        );
+      }
+    } catch (error) {
+      throw error;
+    }
+
   }
 }
 

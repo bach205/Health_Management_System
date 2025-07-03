@@ -4,6 +4,7 @@ const AuthService = require("../services/auth.service");
 class AuthController {
   async register(req, res) {
     try {
+      console.log("req.body: ", req.body);
       const result = await AuthService.register(req.body);
       return new CREATED({
         message: "Đăng ký thành công",
@@ -81,9 +82,13 @@ class AuthController {
       const result = await AuthService.forgetPassword(req.body.email);
       return new OK({
         message: "Đã gửi link đặt lại mật khẩu vào email của bạn",
+
         metadata:
           process.env.NODE_ENV === "development"
-            ? { resetToken: result.resetToken }
+            ?
+            {
+              resetToken: result.resetToken,
+            }
             : {},
       }).send(res);
     } catch (error) {
@@ -97,7 +102,7 @@ class AuthController {
 
   async resetPassword(req, res) {
     console.log("Reset password request received:", req.body);
-    
+
     try {
       const { token, oldPassword, newPassword, confirmPassword } = req.body;
       const result = await AuthService.resetPassword(
@@ -253,6 +258,24 @@ class AuthController {
         success: false,
         message: error.message || "Refresh token failed",
         error: error.name,
+      });
+    }
+  }
+
+  async checkPasswordMatch(req, res) {
+    try {
+      const { newPassword, confirmPassword, token } = req.body;
+      //console.log(req.body);
+      // if(!token) {
+      //   return res.status(401).json('No token provided');
+      // }
+      const result = await AuthService.checkPasswordMatch(newPassword, confirmPassword, token);
+
+      return res.json(result);
+    } catch (error) {
+      return res.status(error.status || 400).json({
+        success: false,
+        message: error.message || "Check password match failed",
       });
     }
   }

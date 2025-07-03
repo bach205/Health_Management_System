@@ -9,8 +9,8 @@ const checkUserStatus = require("../middlewares/checkUserStatus");
 // Lấy danh sách queue của phòng khám
 queueRouter.get("/clinic/:clinicId",
   authenticate,
-  authorize("admin", "doctor", "patient", "nurse"),
   checkUserStatus(),
+  authorize("admin", "doctor", "patient", "nurse"),
   asyncHandler(QueueController.getQueueClinic));
 
 // Chỉ định thêm phòng khám cho bệnh nhân

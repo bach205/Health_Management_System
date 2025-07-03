@@ -7,7 +7,6 @@ const Register = () => {
   let navigate = useNavigate();
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const [phone, setPhone] = useState<string>("");
   const [repassword, setRepassword] = useState<string>("");
   const [checkpassword, setCheckPassword] = useState<boolean>(false);
   const handleEmailChange = (e: any) => {
@@ -17,26 +16,36 @@ const Register = () => {
   const handlePasswordChange = (e: any) => {
     setPassword(e.target.value);
   };
-
-  const handlePhoneChange = (e: any) => {
-    setPhone(e.target.value);
-  };
-
   const handleRePasswordChange = (e: any) => {
     setRepassword(e.target.value);
     if (e.target.value !== password) {
-      setCheckPassword(true);
-    } else {
       setCheckPassword(false);
+    } else {
+      setCheckPassword(true);
     }
   };
 
   const onSubmitHandler = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (email === "") {
+      toast.error("Vui lòng nhập đầy đủ thông tin email");
+      return;
+    }
+    if (password === "") {
+      toast.error("Vui lòng nhập mật khẩu");
+      return;
+    }
+    if (repassword === "") {
+      toast.error("Vui lòng nhập xác nhận mật khẩu");
+      return;
+    }
+    if (checkpassword === false) {
+      toast.error("Mật khẩu không khớp, vui lòng nhập lại");
+      return;
+    }
     const values = {
       email: email.trim(),
       password: password.trim(),
-      phone: phone.trim(),
     };
     try {
       const data = await registerService(values);
@@ -47,8 +56,13 @@ const Register = () => {
         toast.error("Đăng ký thất bại");
       }
     } catch (e) {
-      console.log(e)
-      toast.error("Đăng ký thất bại");
+      const { response } = e as any;
+
+      if (response.data.errors?.length > 0) {
+        toast.error(response.data.errors[0]);
+        return;
+      }
+      toast.error(response?.data?.message || "Đăng ký thất bại");
     }
   };
 
@@ -69,7 +83,6 @@ const Register = () => {
             type="email"
             onChange={handleEmailChange}
             value={email}
-            required
           />
         </div>
         <div className="w-full">
@@ -79,7 +92,7 @@ const Register = () => {
             type="password"
             onChange={handlePasswordChange}
             value={password}
-            required
+
           />
         </div>
         <div className="w-full">
@@ -89,22 +102,7 @@ const Register = () => {
             type="password"
             onChange={handleRePasswordChange}
             value={repassword}
-            required
-          />
-        </div>
-        {checkpassword ?
-          <p className="text-red-500 text-sm">
-            Mật khẩu không khớp, vui lòng nhập lại
-          </p>
-          : ""}
-        <div className="w-full">
-          <p>Số điện thoại</p>
-          <input
-            className="border border-zinc-300 rounded w-full p-2 mt-1"
-            type="text"
-            onChange={handlePhoneChange}
-            value={phone}
-            required
+
           />
         </div>
         <button
