@@ -5,7 +5,7 @@ from pathlib import Path
 from docx import Document
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document as LangchainDocument
-from src.server.model.documentsModel import save_documents_to_database,save_chunks_into_chroma, delete_document_by_file_name, get_document_location_by_file_name,do_query_for_all_documents
+from src.server.model.documentsModel import save_documents_to_database,save_chunks_into_chroma, delete_document_by_id, get_document_location_by_id,do_query_for_all_documents
 from datetime import datetime
 
 UPLOAD_FOLDER = Path(__file__).parent.parent.parent.parent / "documents"
@@ -24,10 +24,10 @@ async def save_documents(file,user_id):
         
         #save documents to database
     
-        await save_documents_to_database(file,file_location,user_id)
+        inserted_id = await save_documents_to_database(file,file_location,user_id)
 
 
-        asyncio.create_task(index_documents(file_location))
+        asyncio.create_task(index_documents(file_location, inserted_id))
     except Exception as e:
         print(e)
         raise Exception(e)
@@ -39,14 +39,14 @@ async def load_docx_to_text(path):
     text = "\n".join([para.text for para in doc.paragraphs])
     return [text]
 
-async def load_docx_to_documents(path: str):
+async def load_docx_to_documents(path: str, doc_id=None):
     doc = Document(path)
     text = "\n".join([p.text for p in doc.paragraphs if p.text.strip() != ""])
-
     metadata = {
         "source": os.path.basename(path),
     }
-
+    if doc_id is not None:
+        metadata["doc_id"] = doc_id
     return [LangchainDocument(page_content=text, metadata=metadata)]
 
 async def chunk_texts(texts):
@@ -69,33 +69,28 @@ async def chunk_docs(docs):
     return chunks
 
 #load documents and chunk them into chunks and save them into chroma
-async def index_documents(path:str):
-    docs = await load_docx_to_documents(path)
+async def index_documents(path:str, doc_id=None):
+    docs = await load_docx_to_documents(path, doc_id)
     chunks = await chunk_docs(docs)
     await save_chunks_into_chroma(chunks)
 
-async def delete_documents(file_name):
+async def delete_documents(id: int):
     try:
-        await delete_document_by_file_name(file_name)
+        await delete_document_by_id(id)
         # Xóa file vật lý trên ổ đĩa
-        file_path = os.path.join(UPLOAD_FOLDER, file_name)
-        if os.path.exists(file_path):
-            os.remove(file_path)
+        file_location, _ = await get_document_location_by_id(id)
+        if file_location and os.path.exists(file_location):
+            os.remove(file_location)
         return True
     except Exception as e:
         print(e)
         raise Exception(e)
 
-async def get_document_file(file_name):
-    # Lấy đường dẫn file từ DB
-    file_location = await get_document_location_by_file_name(file_name)
+async def get_document_file(id: int):
+    file_location, file_name = await get_document_location_by_id(id)
     if file_location and os.path.exists(file_location):
-        return file_location
-    # # fallback: thử tìm trực tiếp trong thư mục documents
-    # file_path = os.path.join(UPLOAD_FOLDER, file_name)
-    # if os.path.exists(file_path):
-    #     return file_path
-    return None
+        return file_location, file_name
+    return None, None
 
 async def query_for_all_documents():
     return await do_query_for_all_documents()

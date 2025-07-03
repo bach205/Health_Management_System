@@ -25,17 +25,17 @@ const DocumnetsManagement = () => {
     const [curNurseId, setCurNurseId] = useState(0);
 
     // Fetch shifts on component mount
-    useEffect(() => {
-        const fetchShifts = async () => {
-            try {
-                const response = await getShiftService();
-                setShifts(response.data.data);
-            } catch (error) {
-                console.error('Error fetching shifts:', error);
-            }
-        };
-        fetchShifts();
-    }, []);
+    // useEffect(() => {
+    //     const fetchShifts = async () => {
+    //         try {
+    //             const response = await getShiftService();
+    //             setShifts(response.data.data);
+    //         } catch (error) {
+    //             console.error('Error fetching shifts:', error);
+    //         }
+    //     };
+    //     fetchShifts();
+    // }, []);
 
     // Table column
     const columns: any = [
@@ -48,48 +48,17 @@ const DocumnetsManagement = () => {
             render: (_: any, __: any, index: number) => index + 1,
         },
         {
-            title: "Email",
-            dataIndex: "email",
-            key: "email",
-            width: 150,
-            ellipsis: true,
-        },
-        {
-            title: "Họ tên",
-            dataIndex: "full_name",
+            title: "File Name",
+            dataIndex: "File_Name",
+            key: "File_Name",
             width: 170,
-            key: "full_name",
-        },
-
-        {
-            width: 90,
             ellipsis: true,
-            title: "Giới tính",
-            dataIndex: "gender",
-            key: "gender",
-            render: (gender: 'male' | 'female') => {
-                return gender === 'male' ? 'Nam' : 'Nữ';
-            },
         },
         {
-            width: 120,
-            title: "Điện thoại",
-            dataIndex: "phone",
-            key: "phone",
-        },
-
-        {
-            width: 100,
-            title: "Trạng thái",
-            dataIndex: "is_active",
-            key: "is_active",
-            render: (_: any, { is_active }: IUserBase) => (
-                <>
-                    <Tag color={is_active ? "green" : "red"}>
-                        {is_active ? "Đang hoạt động" : "Đã khóa"}
-                    </Tag>
-                </>
-            ),
+            title: "Người Đăng",
+            dataIndex: "User_Uploaded",
+            width: 170,
+            key: "User_Uploaded",
         },
         // action
         {

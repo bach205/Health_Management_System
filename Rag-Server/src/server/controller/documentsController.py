@@ -24,17 +24,17 @@ async def document_processing(file: UploadFile = File(...),user_id: int = Form(.
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@router.delete("/file/{file_name}")
-async def delete_document(file_name: str):
+@router.delete("/file/{id}")
+async def delete_document(id: int):
     try:
-        await delete_documents(file_name)
-        return my_response(status = 200, message =  f"Deleted {file_name} successfully")
+        await delete_documents(id)
+        return my_response(status = 200, message =  f"Deleted document id {id} successfully")
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@router.get("/file/{file_name}")
-async def get_document(file_name: str):
-    file_path = await get_document_file(file_name)
+@router.get("/file/{id}")
+async def get_document(id: int):
+    file_path, file_name = await get_document_file(id)
     if file_path:
         return FileResponse(file_path, filename=file_name)
     else:

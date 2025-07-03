@@ -10,9 +10,11 @@ async def save_documents_to_database(file,file_location,user_id):
         VALUES (%s, %s, %s)
     """
     cursor.execute(insert_query, (file.filename, user_id, str(file_location)))
+    inserted_id = cursor.lastrowid
     conn.commit()
     cursor.close()
     conn.close()
+    return inserted_id
 
 async def save_chunks_into_chroma(chunks):
     documents = [doc.page_content for doc in chunks]  # chỉ lấy nội dung văn bản
@@ -21,38 +23,39 @@ async def save_chunks_into_chroma(chunks):
 
     collection.add(documents=documents,metadatas=metadatas,ids=chunks_ids)
 
-async def delete_document_by_file_name(file_name):
-    # Xóa row trong MySQL
+async def delete_document_by_id(doc_id: int):
     conn = get_mysql_connection()
     cursor = conn.cursor()
     delete_query = """
-        DELETE FROM documents WHERE file_name = %s
+        DELETE FROM documents WHERE id = %s
     """
-    cursor.execute(delete_query, (file_name,))
+    cursor.execute(delete_query, (doc_id,))
     conn.commit()
     cursor.close()
     conn.close()
+    # Xóa vector trong ChromaDB nếu cần (nếu metadata lưu id)
+    # Nếu vẫn cần xóa theo file_name, cần truy vấn file_name trước
 
     # Xóa vector trong ChromaDB theo metadata['source']
     # Lấy tất cả các id có metadata['source'] == file_name
-    results = collection.get(where={"source": file_name})
+    results = collection.get(where={"doc_id": doc_id})
     ids_to_delete = results.get("ids", [])
     if ids_to_delete:
         collection.delete(ids=ids_to_delete)
 
-async def get_document_location_by_file_name(file_name):
+async def get_document_location_by_id(id: int):
     conn = get_mysql_connection()
     cursor = conn.cursor()
     select_query = """
-        SELECT file_location FROM documents WHERE file_name = %s
+        SELECT file_location, file_name FROM documents WHERE id = %s
     """
-    cursor.execute(select_query, (file_name,))
+    cursor.execute(select_query, (id,))
     result = cursor.fetchone()
     cursor.close()
     conn.close()
     if result:
-        return result[0]
-    return None
+        return result[0], result[1]  # file_location, file_name
+    return None, None
 
 async def do_query_for_all_documents():
     conn = get_mysql_connection()
