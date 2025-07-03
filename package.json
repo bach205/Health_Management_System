@@ -1,6 +1,10 @@
 {
   "dependencies": {
+<<<<<<< HEAD
     "form-data": "^4.0.3",
     "multer": "^2.0.1"
+=======
+    "mysql2": "^3.14.1"
+>>>>>>> 5391a3740fbd9094b44ae040c2bd13bdff4fb3db
   }
 }
