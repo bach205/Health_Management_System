@@ -5,6 +5,7 @@ import type { IUserBase } from "../../types/index.type";
 import dayjs from "dayjs";
 import imageCompression from "browser-image-compression";
 import { PlusOutlined } from "@ant-design/icons";
+import { useSpecialtyList } from "../../hooks/useSpecialtyList";
 // import dayjs from "dayjs";
 
 interface IProps {
@@ -87,7 +88,7 @@ const ModalCreateDoctor = ({ role, isVisible, handleOk, handleCancel, form }: IP
       <div style={{ marginTop: 8 }}>Chọn ảnh</div>
     </div>
   );
-
+  const { specialties, loading: specialtyLoading, reload: specialtyReload, handleTableChange: specialtyTableChange } = useSpecialtyList(undefined, true);
   return (
     <Modal
       open={isVisible}
@@ -196,7 +197,10 @@ const ModalCreateDoctor = ({ role, isVisible, handleOk, handleCancel, form }: IP
                 style={{ width: 120 }}
                 value={specialty}
                 onChange={(value) => setSpecialty(value)}
-                options={specialtyOptions}
+                options={specialties.map((specialty) => ({
+                  label: specialty.name,
+                  value: specialty.name,
+                }))}
               />
             </Form.Item>
 

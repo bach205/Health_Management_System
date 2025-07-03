@@ -40,7 +40,7 @@ const sendPatientNewPasswordEmail = async (staffEmail, newPassword) => {
     try {
         const mailOptions = {
             from: process.env.EMAIL_USER,
-            to: staffEmail,
+            to: staffEmail, 
             subject: 'HMS - Mật khẩu đăng nhập',
             html: `
         <h2>Mật khẩu đăng nhập</h2>

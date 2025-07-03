@@ -264,7 +264,7 @@ INSERT INTO users (email, password, full_name, phone, role, date_of_birth, gende
 ('nurselevanhai@gmail.com', '$2b$10$DWhHRcJ6oWS.X/Yh9DEkAOsB2Vg9uAQmbaC667MhBZnGxeahklRXe', 'Lê Văn Hải', '0987654323', 'nurse', '1990-11-10', 'male', 'Đà Nẵng', 'local', TRUE),
 ('nursephamthihong@gmail.com', '$2b$10$SJupulIuCV59ERzfYZqAxeVmXJ6cqOgAhwza.zjiRcZUd0XmMZsCW', 'Phạm Thị Hồng', '0987654324', 'nurse', '1992-04-05', 'female', 'Hà Nội', 'local', TRUE),
 ('receptionhoangvanduc@gmail.com', '$2b$10$YtadcrWr4QG9tW8xHqgxweSA1FKEmkJd.p8doH6wVllr4NiUWHt..', 'Hoàng Văn Đức', '0987654325', 'receptionist', '1995-09-12', 'male', 'TP.HCM', 'local', TRUE),
-('receptionvuthianh@gmail.com', '$2b$10$C8XYHl53FkSxrLfh4Dqace.Kh5S7ZuFegCg3O9xl5cbjZoPw741ge', 'Vũ Thị Ánh', '0987654326', 'receptionist', '1993-12-20', 'female', 'Đà Nẵng', 'local', TRUE),
+('receptionvuthianh@gmail.com', '$2b$10$C8XYHl53FkSxrLfh4Dqace.Kh5S7ZuFegCg3O9xl5cbjZoPw741ge', 'Vũ Thị Ánh ', '0987654326', 'receptionist', '1993-12-20', 'female', 'Đà Nẵng', 'local', TRUE),
 ('tranvanhung@gmail.com', '$2b$10$GxnPuU4OqeCml44HiYk/heRKFk8h0AbY/qM6rmc0A7mrQ4883Elmq', 'Trần Văn Hùng', '0987654328', 'patient', '1998-02-14', 'male', 'TP.HCM', 'local', TRUE),
 ('lethithu@gmail.com', '$2b$10$UbIucGc/ZC6mIkCGP7CCjuESGDoq1PMGSyDzD0K3UQ3XGd.whndxK', 'Lê Thị Thu', '0987654329', 'patient', '1996-08-25', 'female', 'Hà Nội', 'local', TRUE),
 ('phamvantuan@gmail.com', '$2b$10$W3olOAm.7geI1AY9648vDOUcp/rosMdoWYV1uXeIVd8p9DLwePCzm', 'Phạm Văn Tuấn', '0987654330', 'patient', '1990-05-17', 'male', 'Đà Nẵng', 'facebook', TRUE),

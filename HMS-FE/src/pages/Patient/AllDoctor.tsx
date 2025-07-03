@@ -12,10 +12,11 @@ import {
 } from "antd";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { specialtyOptions } from "../../constants/user.const";
 import { useDoctorList } from "../../hooks/useDoctorList";
 import { Search, Stethoscope } from "lucide-react";
 import Rating from "./Rating";
+import { useSpecialtyList } from "../../hooks/useSpecialtyList";
+import "./Alldoctor.css";
 
 const AllDoctor: React.FC = () => {
     const navigate = useNavigate();
@@ -52,6 +53,8 @@ const AllDoctor: React.FC = () => {
         setDoctors(users);
     }, [users]);
 
+    const { specialties } = useSpecialtyList({ pageSize: 8, current: 1 }, true);
+
     return (
         <div className="flex flex-col gap-4 w-full">
             <div className="text-center text-2xl pt-10 pb-5 text-gray-500 uppercase"><p>Danh sách bác sĩ theo chuyên khoa</p></div>
@@ -86,17 +89,16 @@ const AllDoctor: React.FC = () => {
                                 setSpecialty(queryOptions);
                                 setSearchParams({ speciality: queryOptions });
                             }}
-                            className="w-1/3"
+                            className="w-2/5"
                             options={[
                                 {
                                     label: "Tất cả",
                                     value: "all",
                                 },
-                                ...specialtyOptions
-                                    .filter((opt) => opt.value !== "none")
+                                ...specialties
                                     .map((opt) => ({
-                                        label: opt.label,
-                                        value: opt.value,
+                                        label: opt.name,
+                                        value: opt.name,
                                     })),
                             ]}
                         />
@@ -122,7 +124,12 @@ const AllDoctor: React.FC = () => {
             ) : (
                 <Row className="w-full" gutter={[16, 16]}>
                     {users?.map((user, index) => (
-                        <Tooltip title={`Đặt lịch với bác sĩ ${user.full_name}`} color="#646CFF" mouseEnterDelay={0.35} >
+                        <Tooltip
+                            title={`Đặt lịch với bác sĩ ${user.full_name}`}
+                            color="#646CFF"
+                            mouseEnterDelay={0.35}
+                            key={index}
+                        >
                             <Col
                                 span={24}
                                 md={12}
@@ -132,45 +139,46 @@ const AllDoctor: React.FC = () => {
                                         ? navigate(`/book-appointment/${user.id}`)
                                         : message.error("Bác sĩ không hoạt động")
                                 }
-                                key={index}
                             >
-                                <div className="border border-blue-200 rounded-xl overflow-hidden cursor-pointer hover:-translate-y-2 transition-all duration-500">
-                                    <div className="flex justify-center items-center bg-blue-50 h-[324.4px] w-full overflow-hidden">
-                                        <img
-                                            className="h-full w-full object-cover"
-                                            src={user.avatar || "https://placehold.jp/150x150.png"}
-                                            alt={`Picture of ${user.full_name}`}
-                                        />
-                                    </div>
-                                    <div className="p-4">
-                                        {user.is_active ? (
-                                            <div className="flex items-center gap-2 text-sm text-center text-green-500">
-                                                <p className="w-2 h-2 bg-green-500 rounded-full"></p>
-                                                <p>Hoạt động</p>
-                                            </div>
-                                        ) : (
-                                            <div className="flex items-center gap-2 text-sm text-center text-red-500">
-                                                <p className="w-2 h-2 bg-red-500 rounded-full"></p>
-                                                <p>Không hoạt động</p>
-                                            </div>
-                                        )}
-                                        <p className="text-gray-900 text-lg font-medium">{user.full_name}</p>
-                                        {
-                                            // user.doctor?.rating && (
+                                <div
+                                    className="card-doctor"
+                                    style={{ animationDelay: `${index * 100}ms` }}
+                                >
+                                    <div className="border border-blue-200 rounded-xl overflow-hidden cursor-pointer transform hover:-translate-y-2 hover:shadow-xl transition-all duration-300 ease-in-out">
+                                        <div className="flex justify-center items-center bg-blue-50 h-[324.4px] w-full overflow-hidden">
+                                            <img
+                                                className="h-full w-full object-cover"
+                                                src={user.avatar || "https://placehold.jp/150x150.png"}
+                                                alt={`Picture of ${user.full_name}`}
+                                            />
+                                        </div>
+                                        <div className="p-4">
+                                            {user.is_active ? (
+                                                <div className="flex items-center gap-2 text-sm text-center text-green-500">
+                                                    <p className="w-2 h-2 bg-green-500 rounded-full"></p>
+                                                    <p>Hoạt động</p>
+                                                </div>
+                                            ) : (
+                                                <div className="flex items-center gap-2 text-sm text-center text-red-500">
+                                                    <p className="w-2 h-2 bg-red-500 rounded-full"></p>
+                                                    <p>Không hoạt động</p>
+                                                </div>
+                                            )}
+                                            <p className="text-gray-900 text-lg font-medium">{user.full_name}</p>
                                             <Rating rating={user.doctor?.rating || 0} />
-                                            // )
-                                        }
-
-                                        <Flex gap={10} align="center" className="mt-2! w-full">
-                                            <Stethoscope className="w-5 h-5" color="#646CFF" />
-                                            <p className="text-gray-600 text-md ">{specialtyOptions.find((opt) => opt.value === user.doctor?.specialty)?.label || "Không xác định"}</p>
-                                        </Flex>
+                                            <Flex gap={10} align="center" className="mt-2! w-full">
+                                                <Stethoscope className="w-5 h-5" color="#646CFF" />
+                                                <p className="text-gray-600 text-md ">
+                                                    {user.doctor?.specialty?.name || "Không xác định"}
+                                                </p>
+                                            </Flex>
+                                        </div>
                                     </div>
                                 </div>
                             </Col>
-
                         </Tooltip>
                     ))}
+
 
                     {users && users.length > 0 ? (
                         <Col span={24}>

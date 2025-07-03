@@ -310,9 +310,9 @@ const AdminPatientDashboard = () => {
                     </Button>
                 </Flex>
 
-                <Button type="primary" icon={<CirclePlus size={16} />} onClick={() => setIsCreateVisible(true)}>
+                {/* <Button type="primary" icon={<CirclePlus size={16} />} onClick={() => setIsCreateVisible(true)}>
                     Thêm bệnh nhân
-                </Button>
+                </Button> */}
             </Flex>
 
             <Form>
