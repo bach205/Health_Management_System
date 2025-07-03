@@ -103,7 +103,7 @@ const ChatUI = () => {
                         onClick={() => setOpen(true)}
                         style={{
 
-                            boxShadow: '0 5px 12px rgba(0, 0, 117, 0.75)',
+                            boxShadow: '0 5px 12px rgba(1, 1, 46, 0.75)',
                             width: 60,
                             height: 60,
                             borderRadius: '50%',
@@ -113,7 +113,7 @@ const ChatUI = () => {
                         <img src={image_url} style={{ borderRadius: "50%" }} />
 
                     </div>
-                    <p style={{ color: "black", fontSize: "15px" }}>Assistant Chatbot</p>
+                    <p style={{ color: "white", fontSize: "15px", backgroundColor: "rgba(1, 1, 46, 0.75)", padding: "5px 10px", borderRadius: "10px" }}>Assistant Chatbot</p>
                 </div>
             )}
 

@@ -37,6 +37,7 @@ import Contact from "./pages/Patient/Contact";
 import AdminPatientDashboard from "./pages/Admin/Patient/AdminPatientDashboard";
 import StaffProfile from "./pages/Doctor/StaffProfile";
 import ChatUI from "./layouts/MainLayout/ChatUI";
+import DocumnetsManagement from "./pages/Admin/DocumentsManagement";
 dayjs.extend(plugin);
 dayjs.updateLocale("en", {
   weekStart: 1,
@@ -228,6 +229,12 @@ const PrivateRoutes: PrivateRoute[] = [
   {
     path: "/admin/patients",
     element: <AdminPatientDashboard />,
+    layout: DashboardLayout,
+    allowedRoles: ["admin"],
+  },
+  {
+    path: "/admin/documents",
+    element: <DocumnetsManagement />,
     layout: DashboardLayout,
     allowedRoles: ["admin"],
   },
