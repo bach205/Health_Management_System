@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import React, { useEffect, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { resetPassword } from '../../services/auth.service'
 import { toast } from 'react-toastify';
 
@@ -12,12 +12,13 @@ const ForgetPage = () => {
   // Lấy token từ query string (?token=...)
 
   const token = localStorage.getItem('resetToken');
-  console.log("token: ", token);
-  if (token === null || token === undefined) {
-    //toast.error('Thiếu mã xác thực (token)');
-    navigate('/login');
-    return;
-  }
+  useEffect(() => {
+    if (token === null || token === undefined) {
+      //toast.error('Thiếu mã xác thực (token)');
+      navigate('/login');
+      return;
+    }
+  }, []);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -36,8 +37,7 @@ const ForgetPage = () => {
 
     setLoading(true);
     try {
-      await resetPassword({ token, newPassword, confirmPassword });
-      ;
+      await resetPassword({ token: token as string, newPassword, confirmPassword });
       toast.success('Đổi mật khẩu thành công!');
       setTimeout(() => {
         navigate('/login');
