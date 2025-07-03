@@ -48,7 +48,7 @@ type Staff = {
 
 const Workschedule = () => {
   const [data, setData] = useState<WorkSchedule[]>([]);
-  const [users, setUsers] = useState<Staff[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
   const [clinics, setClinics] = useState<any[]>([]);
   const [shifts, setShifts] = useState<any[]>([]);
   const [form] = Form.useForm();
