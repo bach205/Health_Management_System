@@ -20,6 +20,7 @@ class DoctorService {
                     select: {
                         specialty: true,
                         bio: true,
+                        price: true,
                     }
                 }
             }
@@ -30,13 +31,15 @@ class DoctorService {
         const doctor = await prisma.user.findUnique({
             where: { id: +id, role: "doctor" },
             include: {
-                doctor: true
+                doctor: {
+                    include: {
+                        specialty: true
+                    }
+                }
             }
         });
         return doctor;
     }
-
-
 
     createDoctor = async (doctorData) => {
         try {
@@ -45,6 +48,7 @@ class DoctorService {
                 'full_name',
                 'email',
                 'gender',
+                'price'
             ];
             let sendEmail = false;
             if (!doctorData.password || doctorData.password.trim() === '') {
@@ -52,14 +56,12 @@ class DoctorService {
                 doctorData.password = password.toString();
                 sendEmail = true;
             }
-            // console.log(doctorData)
 
             for (const field of requiredFields) {
-                if (!doctorData[field] || doctorData[field].trim() === '') {
+                if (!doctorData[field] || doctorData[field].toString().trim() === '') {
                     throw new BadRequestError(`${field.replace('_', ' ')} không được để trống`);
                 }
             }
-
 
             // Validate input data using Joi schema
             const { error, value } = createDoctorSchema.validate(doctorData, { abortEarly: false });
@@ -76,7 +78,6 @@ class DoctorService {
             }
 
             // Check if phone already exists
-            /*
             if (value.phone) {
                 const existingPhone = await prisma.user.findUnique({
                     where: { phone: value.phone }
@@ -85,14 +86,15 @@ class DoctorService {
                     throw new BadRequestError("Số điện thoại đã tồn tại");
                 }
             }
-            */
+            if (value.price < 0) {
+                throw new BadRequestError("Giá không hợp lệ");
+            }
 
             // Hash password
             const hashedPassword = await bcrypt.hash(
                 value.password,
                 parseInt(process.env.BCRYPT_SALT_ROUNDS)
             );
-
 
             // Create doctor
             const doctor = await prisma.user.create({
@@ -110,12 +112,19 @@ class DoctorService {
                     avatar: value.avatar,
                     doctor: {
                         create: {
-                            specialty: value.specialty?.trim() || "",
+                            specialty_id: value.specialty_id || null,
                             bio: value.bio?.trim() || "",
+                            price: value.price,
                         },
                     },
                 },
-                include: { doctor: true },
+                include: {
+                    doctor: {
+                        include: {
+                            specialty: true
+                        }
+                    }
+                },
             });
 
             if (sendEmail) {
@@ -172,24 +181,23 @@ class DoctorService {
         try {
             const isFilterAll = specialty.includes("all");
             const isFilterNone = specialty.includes("none");
+            console.log("isFilterNone", isFilterNone)
             const isFilterSome = specialties.length > 0;
             const specialtyCondition = (isFilterNone || isFilterSome || isFilterAll) ? {
                 OR: [
                     isFilterSome && {
                         doctor: {
                             specialty: {
-                                in: specialties,
+                                name: {
+                                    in: specialties,
+                                }
                             },
                         },
                     },
 
                     isFilterNone && {
                         doctor: {
-                            OR: [
-                                { specialty: null },
-                                { specialty: "" },
-                                { specialty: undefined },
-                            ],
+                            specialty_id: null,
                         },
                     },
                 ].filter(Boolean),
@@ -197,11 +205,9 @@ class DoctorService {
                 : undefined;
             const allCondition = isFilterAll ? {
                 doctor: {
-                    AND: [
-                        { specialty: { not: null, }, },
-                        { specialty: { not: "", }, },
-                        { specialty: { not: undefined, }, },
-                    ]
+                    specialty_id: {
+                        not: null,
+                    },
                 }
             } : undefined;
             const whereClause = {
@@ -221,22 +227,17 @@ class DoctorService {
             const doctors = await prisma.user.findMany({
                 where: whereClause,
                 include: {
-                    doctor: true,
+                    doctor: {
+                        include: {
+                            specialty: true
+                        }
+                    },
                 },
                 orderBy: sort(sortBy),
                 skip: skip || 0,
                 take: limit || undefined,
             });
 
-
-            const test = doctors.map(doctor => {
-                return {
-                    id: doctor.id,
-                    full_name: doctor.full_name,
-                    specialty: doctor.doctor?.specialty,
-                }
-            })
-            console.log(test)
             return { total, doctors };
         } catch (error) {
             console.log(error)
@@ -245,25 +246,24 @@ class DoctorService {
                 message: error.message
             };
         }
-
     };
 
     updateDoctor = async (doctorData) => {
-        // console.log(doctorData)
         try {
             const requiredFields = [
                 'full_name',
                 'gender',
-                'id'
+                'id',
+                'price'
             ];
 
             for (const field of requiredFields) {
-                if (!doctorData[field] || doctorData[field].length === 0) {
+                if (!doctorData[field] || doctorData[field].toString().trim() === '') {
                     throw new BadRequestError(`${field.replace('_', ' ')} không được để trống`);
                 }
             }
 
-            // // Validate input data using Joi schema
+            // Validate input data using Joi schema
             const { error, value } = updateDoctorSchema.validate(doctorData, { abortEarly: false });
             if (error) {
                 console.log(error)
@@ -281,17 +281,9 @@ class DoctorService {
                 throw new BadRequestError("Email đã tồn tại");
             }
 
-            // Check if phone already exists (if phone is being updated)
-            /*
-            if (value.phone && value.phone !== user.phone) {
-                const existingPhone = await prisma.user.findFirst({
-                    where: { phone: value.phone }
-                });
-                if (existingPhone && existingPhone.id !== user.id) {
-                    throw new BadRequestError("Số điện thoại đã tồn tại");
-                }
+            if (value.price < 0) {
+                throw new BadRequestError("Giá không hợp lệ");
             }
-            */
 
             // Update user + doctor
             const doctor = await prisma.user.update({
@@ -307,16 +299,24 @@ class DoctorService {
                         upsert: {
                             update: {
                                 bio: value.bio,
-                                specialty: value.specialty,
+                                specialty_id: value.specialty_id,
+                                price: value.price,
                             },
                             create: {
                                 bio: value.bio || "",
-                                specialty: value.specialty || "",
+                                specialty_id: value.specialty_id,
+                                price: value.price,
                             },
                         },
                     },
                 },
-                include: { doctor: true },
+                include: {
+                    doctor: {
+                        include: {
+                            specialty: true
+                        }
+                    }
+                },
             });
 
             return doctor;
@@ -438,8 +438,6 @@ class DoctorService {
         });
     }
     async updateDoctorInfo(updateData) {
-        // Kiểm tra user có tồn tại và có role doctor không
-        console.log("updateData", updateData)
         const user = await prisma.user.findUnique({
             where: { id: updateData.id },
         });
@@ -449,9 +447,12 @@ class DoctorService {
         if (user.role !== "doctor") {
             throw new BadRequestError("Bác sĩ không tồn tại");
         }
-        // Cập nhật thông tin trong transaction để đảm bảo tính nhất quán
+
+        if (updateData.price !== undefined && updateData.price < 0) {
+            throw new BadRequestError("Giá không hợp lệ");
+        }
+
         const result = await prisma.$transaction(async (prisma) => {
-            // Cập nhật thông tin user
             const updatedUser = await prisma.user.update({
                 where: { id: updateData.id },
                 data: {
@@ -462,13 +463,17 @@ class DoctorService {
                     date_of_birth: updateData.date_of_birth,
                 },
             });
-            //   console.log(updatedUser)
-            // Cập nhật thông tin doctor (sử dụng cùng id với user)
+
             const updatedDoctor = await prisma.doctor.update({
                 where: { user_id: updateData.id },
                 data: {
                     bio: updateData.bio?.trim(),
+                    specialty_id: updateData.specialty_id,
+                    price: updateData.price,
                 },
+                include: {
+                    specialty: true
+                }
             });
 
             return { user: updatedUser, doctor: updatedDoctor };
@@ -510,3 +515,5 @@ class DoctorService {
 }
 
 module.exports = new DoctorService();
+
+

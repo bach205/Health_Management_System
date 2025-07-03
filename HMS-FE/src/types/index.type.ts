@@ -24,7 +24,7 @@ export interface IUserBase {
 export interface IDoctor extends IUserBase {
   role: "doctor";
   doctor: {
-    specialty?: string; // Khoa
+    specialty?: ISpecialty; // Khoa
     bio?: string;
     rating?: number;
   }
@@ -47,11 +47,6 @@ export interface IClinicBase {
   description : String,
 }
 
-export interface IDoctor extends IUserBase {
-  role: "doctor";
-  specialty: string; // Khoa     
-  bio?: string;
-}
 
 
 export interface IPatient extends IUserBase {
@@ -59,5 +54,16 @@ export interface IPatient extends IUserBase {
   identityNumber: string;
 }
 
+export interface ISpecialty {
+  id: number;
+  name: string;
+}
+
+export interface IMedicine {
+  id: number;
+  name: string;
+  stock: number;
+  price: number;
+}
 
 export type EmployeeType = keyof typeof TYPE_EMPLOYEE;

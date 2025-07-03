@@ -130,6 +130,7 @@ const createDoctorSchema = Joi.object({
   specialty: Joi.string().optional().allow(null, ""),
   bio: Joi.string().optional().allow(null, ""),
   avatar: Joi.string().optional().allow(null, ""),
+  price: Joi.number().optional().allow(null, ""),
 });
 
 const updateDoctorSchema = Joi.object({
