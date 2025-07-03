@@ -1,189 +1,113 @@
 generator client {
-    provider = "prisma-client-js"
-  }
-    provider = "prisma-client-js"
-  }
+  provider = "prisma-client-js"
+}
 
-  datasource db {
-    provider = "mysql"
-    url      = env("DATABASE_URL")
-  }
-  datasource db {
-    provider = "mysql"
-    url      = env("DATABASE_URL")
-  }
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
 
-  model User {
-    id           Int         @id @default(autoincrement())
-    email        String      @unique
-    password     String?
-    full_name    String?
-    phone        String?   @unique
-    role         Role
-    address      String?     @db.Text
-    date_of_birth   DateTime? @db.Date
-    gender          Gender?
-    avatar          String?   @db.LongText
-    sso_provider SsoProvider @default(local)
-    is_active    Boolean     @default(true)
-    created_at   DateTime    @default(now())
-    updated_at   DateTime    @updatedAt
-  model User {
-    id           Int         @id @default(autoincrement())
-    email        String      @unique
-    password     String?
-    full_name    String?
-    phone        String?   @unique
-    role         Role
-    address      String?     @db.Text
-    date_of_birth   DateTime? @db.Date
-    gender          Gender?
-    avatar          String?   @db.LongText
-    sso_provider SsoProvider @default(local)
-    is_active    Boolean     @default(true)
-    created_at   DateTime    @default(now())
-    updated_at   DateTime    @updatedAt
+model User {
+  id            Int         @id @default(autoincrement())
+  email         String      @unique
+  password      String?
+  full_name     String?
+  phone         String?     @unique
+  role          Role
+  address       String?     @db.Text
+  date_of_birth DateTime?   @db.Date
+  gender        Gender?
+  avatar        String?     @db.LongText
+  sso_provider  SsoProvider @default(local)
+  is_active     Boolean     @default(true)
+  created_at    DateTime    @default(now())
+  updated_at    DateTime    @updatedAt
 
-    patient            Patient?
-    doctor             Doctor?
-    nurse              Nurse?
-    workSchedules      WorkSchedule[]
-    examinationOrders  ExaminationOrder[]  @relation("DoctorExaminationOrder")
-    primaryRecords     ExaminationRecord[] @relation("PrimaryDoctor")
-    createdRecords     ExaminationRecord[] @relation("CreatedByUser")
-    examinationDetails ExaminationDetail[]
-    passwordResetTokens PasswordResetToken[]
-    appointments       Appointment[]      @relation("DoctorAppointment")
-    availableSlots     AvailableSlot[]
-    patient            Patient?
-    doctor             Doctor?
-    nurse              Nurse?
-    workSchedules      WorkSchedule[]
-    examinationOrders  ExaminationOrder[]  @relation("DoctorExaminationOrder")
-    primaryRecords     ExaminationRecord[] @relation("PrimaryDoctor")
-    createdRecords     ExaminationRecord[] @relation("CreatedByUser")
-    examinationDetails ExaminationDetail[]
-    passwordResetTokens PasswordResetToken[]
-    appointments       Appointment[]      @relation("DoctorAppointment")
-    availableSlots     AvailableSlot[]
+  patient             Patient?
+  doctor              Doctor?
+  nurse               Nurse?
+  workSchedules       WorkSchedule[]
+  examinationOrders   ExaminationOrder[]   @relation("DoctorExaminationOrder")
+  primaryRecords      ExaminationRecord[]  @relation("PrimaryDoctor")
+  createdRecords      ExaminationRecord[]  @relation("CreatedByUser")
+  examinationDetails  ExaminationDetail[]
+  passwordResetTokens PasswordResetToken[]
+  appointments        Appointment[]        @relation("DoctorAppointment")
+  availableSlots      AvailableSlot[]
 
-    @@map("users")
-  }
-    @@map("users")
-  }
+  chatsSent                Chat[]                    @relation("ChatSendBy")
+  chatsReceived            Chat[]                    @relation("ChatTo")
+  conversationParticipants ConversationParticipant[]
 
-  enum Role {
-    doctor
-    nurse
-    receptionist
-    admin
-    patient
-  }
-  enum Role {
-    doctor
-    nurse
-    receptionist
-    admin
-    patient
-  }
+  @@map("users")
+}
 
-  enum SsoProvider {
-    google
-    facebook
-    local
-  }
+enum Role {
+  doctor
+  nurse
+  receptionist
+  admin
+  patient
+}
 
-  enum Gender {
-    male
-    female
-    other
-  }
-  enum SsoProvider {
-    google
-    facebook
-    local
-  }
+enum SsoProvider {
+  google
+  facebook
+  local
+}
 
-  enum Gender {
-    male
-    female
-    other
-  }
+enum Gender {
+  male
+  female
+  other
+}
 
-  model Patient {
-    id              Int       @id
-    identity_number String?
-    created_at      DateTime  @default(now())
-    updated_at      DateTime  @updatedAt
+model Patient {
+  id              Int      @id
+  identity_number String?
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
 
-    user            User      @relation(fields: [id], references: [id], onDelete: Cascade)
-  model Patient {
-    id              Int       @id
-    identity_number String?
-    created_at      DateTime  @default(now())
-    updated_at      DateTime  @updatedAt
+  user User @relation(fields: [id], references: [id], onDelete: Cascade)
 
-    user            User      @relation(fields: [id], references: [id], onDelete: Cascade)
+  examinationOrders ExaminationOrder[]
+  records           ExaminationRecord[]
+  queues            Queue[]
+  payments          Payment[]
+  balance           PaymentBalance?
+  appointments      Appointment[]
 
-    examinationOrders ExaminationOrder[]
-    records           ExaminationRecord[]
-    queues            Queue[]
-    payments          Payment[]
-    balance           PaymentBalance?
-    appointments      Appointment[]
-    examinationOrders ExaminationOrder[]
-    records           ExaminationRecord[]
-    queues            Queue[]
-    payments          Payment[]
-    balance           PaymentBalance?
-    appointments      Appointment[]
+  doctorRatings DoctorRating[]
 
-    doctorRatings DoctorRating[]
-    @@map("patients")
-  }
-    doctorRatings DoctorRating[]
-    @@map("patients")
-  }
+  @@map("patients")
+}
 
-  model Clinic {
-    id          Int     @id @default(autoincrement())
-    name        String
-    description String? @db.Text
-  model Clinic {
-    id          Int     @id @default(autoincrement())
-    name        String
-    description String? @db.Text
+model Clinic {
+  id          Int     @id @default(autoincrement())
+  name        String
+  description String? @db.Text
 
-    workSchedules      WorkSchedule[]
-    fromOrders         ExaminationOrder[]  @relation("FromClinic")
-    toOrders           ExaminationOrder[]  @relation("ToClinic")
-    examinationDetails ExaminationDetail[]
-    queues             Queue[]
-    appointments       Appointment[]
-    availableSlots     AvailableSlot[]
-    workSchedules      WorkSchedule[]
-    fromOrders         ExaminationOrder[]  @relation("FromClinic")
-    toOrders           ExaminationOrder[]  @relation("ToClinic")
-    examinationDetails ExaminationDetail[]
-    queues             Queue[]
-    appointments       Appointment[]
-    availableSlots     AvailableSlot[]
+  workSchedules      WorkSchedule[]
+  fromOrders         ExaminationOrder[]  @relation("FromClinic")
+  toOrders           ExaminationOrder[]  @relation("ToClinic")
+  examinationDetails ExaminationDetail[]
+  queues             Queue[]
+  appointments       Appointment[]
+  availableSlots     AvailableSlot[]
 
-    @@map("clinics")
-  }
-    @@map("clinics")
-  }
+  @@map("clinics")
+}
 
 model Doctor {
-  user_id      Int       @id
+  user_id      Int      @id
   specialty_id Int?
-  bio          String?   @db.Text
-  price        Int?      @default(0)
-  rating       Decimal?  @default(0.0) @db.Decimal(2, 1)
+  bio          String?  @db.Text
+  price        Int?     @default(0)
+  rating       Decimal? @default(0.0) @db.Decimal(2, 1)
 
-  user         User      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "doctors_ibfk_1")
-  specialty    Specialty? @relation(fields: [specialty_id], references: [id], onUpdate: Restrict, map: "doctors_ibfk_2")
-  ratings      DoctorRating[] @relation("DoctorToRating")
+  user      User           @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "doctors_ibfk_1")
+  specialty Specialty?     @relation(fields: [specialty_id], references: [id], onUpdate: Restrict, map: "doctors_ibfk_2")
+  ratings   DoctorRating[] @relation("DoctorToRating")
 
   @@index([specialty_id], map: "specialty_id")
   @@map("doctors")
@@ -198,347 +122,176 @@ model Specialty {
 }
 
 model DoctorRating {
-  id            Int       @id @default(autoincrement())
+  id            Int      @id @default(autoincrement())
   doctorId      Int
   patientId     Int
   appointmentId Int?
-  rating        Decimal    @db.Decimal(2, 1)
+  rating        Decimal  @db.Decimal(2, 1)
   comment       String?
-  isAnonymous   Boolean    @default(false)
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @default(now()) @updatedAt
+  isAnonymous   Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @default(now()) @updatedAt
 
-  doctor        Doctor     @relation("DoctorToRating", fields: [doctorId], references: [user_id], onDelete: Cascade)
-  patient       Patient    @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  appointment   Appointment? @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
+  doctor      Doctor       @relation("DoctorToRating", fields: [doctorId], references: [user_id], onDelete: Cascade)
+  patient     Patient      @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  appointment Appointment? @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
 
-  @@map("doctor_ratings")
   @@index([doctorId])
   @@index([patientId])
   @@index([appointmentId])
-}
-
-
-
-  model Nurse {
-    user_id   Int     @id
-    specialty String?
-    bio       String? @db.Text
-  user_id      Int       @id
-  specialty_id Int?
-  bio          String?   @db.Text
-  price        Int?      @default(0)
-  rating       Decimal?  @default(0.0) @db.Decimal(2, 1)
-
-  user         User      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "doctors_ibfk_1")
-  specialty    Specialty? @relation(fields: [specialty_id], references: [id], onUpdate: Restrict, map: "doctors_ibfk_2")
-  ratings      DoctorRating[] @relation("DoctorToRating")
-
-  @@index([specialty_id], map: "specialty_id")
-  @@map("doctors")
-}
-
-model Specialty {
-  id      Int      @id @default(autoincrement())
-  name    String   @unique(map: "name") @db.VarChar(255)
-  doctors Doctor[]
-
-  @@map("specialties")
-}
-
-model DoctorRating {
-  id            Int       @id @default(autoincrement())
-  doctorId      Int
-  patientId     Int
-  appointmentId Int?
-  rating        Decimal    @db.Decimal(2, 1)
-  comment       String?
-  isAnonymous   Boolean    @default(false)
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @default(now()) @updatedAt
-
-  doctor        Doctor     @relation("DoctorToRating", fields: [doctorId], references: [user_id], onDelete: Cascade)
-  patient       Patient    @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  appointment   Appointment? @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
-
   @@map("doctor_ratings")
-  @@index([doctorId])
-  @@index([patientId])
-  @@index([appointmentId])
 }
 
+model Nurse {
+  user_id   Int     @id
+  specialty String?
+  bio       String? @db.Text
 
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
-  model Nurse {
-    user_id   Int     @id
-    specialty String?
-    bio       String? @db.Text
+  @@map("nurses")
+}
 
-    user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
-    user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+model Shift {
+  id         Int       @id @default(autoincrement())
+  name       String?
+  start_time DateTime? @db.Time
+  end_time   DateTime? @db.Time
 
-    @@map("nurses")
-  }
-    @@map("nurses")
-  }
+  workSchedules WorkSchedule[]
 
-  model Shift {
-    id         Int       @id @default(autoincrement())
-    name       String?
-    start_time DateTime? @db.Time
-    end_time   DateTime? @db.Time
-  model Shift {
-    id         Int       @id @default(autoincrement())
-    name       String?
-    start_time DateTime? @db.Time
-    end_time   DateTime? @db.Time
+  @@map("shifts")
+}
 
-    workSchedules WorkSchedule[]
-    workSchedules WorkSchedule[]
+model WorkSchedule {
+  id        Int      @id @default(autoincrement())
+  user_id   Int
+  clinic_id Int
+  work_date DateTime @db.Date
+  shift_id  Int
 
-    @@map("shifts")
-  }
-    @@map("shifts")
-  }
+  user   User   @relation(fields: [user_id], references: [id])
+  clinic Clinic @relation(fields: [clinic_id], references: [id])
+  shift  Shift  @relation(fields: [shift_id], references: [id])
 
-  model WorkSchedule {
-    id        Int      @id @default(autoincrement())
-    user_id   Int
-    clinic_id Int
-    work_date DateTime @db.Date
-    shift_id  Int
-  model WorkSchedule {
-    id        Int      @id @default(autoincrement())
-    user_id   Int
-    clinic_id Int
-    work_date DateTime @db.Date
-    shift_id  Int
+  @@map("work_schedules")
+}
 
-    user   User   @relation(fields: [user_id], references: [id])
-    clinic Clinic @relation(fields: [clinic_id], references: [id])
-    shift  Shift  @relation(fields: [shift_id], references: [id])
-    user   User   @relation(fields: [user_id], references: [id])
-    clinic Clinic @relation(fields: [clinic_id], references: [id])
-    shift  Shift  @relation(fields: [shift_id], references: [id])
+model ExaminationOrder {
+  id             Int      @id @default(autoincrement())
+  doctor_id      Int
+  patient_id     Int
+  from_clinic_id Int
+  to_clinic_id   Int
+  total_cost     Decimal  @default(0.00)
+  created_at     DateTime @default(now())
 
-    @@map("work_schedules")
-  }
-    @@map("work_schedules")
-  }
+  doctor     User    @relation("DoctorExaminationOrder", fields: [doctor_id], references: [id])
+  patient    Patient @relation(fields: [patient_id], references: [id])
+  fromClinic Clinic  @relation("FromClinic", fields: [from_clinic_id], references: [id])
+  toClinic   Clinic  @relation("ToClinic", fields: [to_clinic_id], references: [id])
 
-  model ExaminationOrder {
-    id             Int      @id @default(autoincrement())
-    doctor_id      Int
-    patient_id     Int
-    from_clinic_id Int
-    to_clinic_id   Int
-    total_cost     Decimal  @default(0.00)
-    created_at     DateTime @default(now())
-  model ExaminationOrder {
-    id             Int      @id @default(autoincrement())
-    doctor_id      Int
-    patient_id     Int
-    from_clinic_id Int
-    to_clinic_id   Int
-    total_cost     Decimal  @default(0.00)
-    created_at     DateTime @default(now())
+  @@map("examination_orders")
+}
 
-    doctor     User    @relation("DoctorExaminationOrder", fields: [doctor_id], references: [id])
-    patient    Patient @relation(fields: [patient_id], references: [id])
-    fromClinic Clinic  @relation("FromClinic", fields: [from_clinic_id], references: [id])
-    toClinic   Clinic  @relation("ToClinic", fields: [to_clinic_id], references: [id])
-    doctor     User    @relation("DoctorExaminationOrder", fields: [doctor_id], references: [id])
-    patient    Patient @relation(fields: [patient_id], references: [id])
-    fromClinic Clinic  @relation("FromClinic", fields: [from_clinic_id], references: [id])
-    toClinic   Clinic  @relation("ToClinic", fields: [to_clinic_id], references: [id])
+model ExaminationRecord {
+  id                 Int      @id @default(autoincrement())
+  patient_id         Int
+  symptoms           String?  @db.Text
+  primary_doctor_id  Int?
+  final_diagnosis    String?  @db.Text
+  created_by_user_id Int?
+  created_at         DateTime @default(now())
+  updated_at         DateTime @updatedAt
 
-    @@map("examination_orders")
-  }
-    @@map("examination_orders")
-  }
+  patient            Patient             @relation(fields: [patient_id], references: [id])
+  primaryDoctor      User?               @relation("PrimaryDoctor", fields: [primary_doctor_id], references: [id])
+  createdByUser      User?               @relation("CreatedByUser", fields: [created_by_user_id], references: [id])
+  examinationDetails ExaminationDetail[]
+  prescriptions      Prescription[]
+  invoiceItems       InvoiceItem[]
+  queues             Queue[]
+  payments           Payment[]
 
-  model ExaminationRecord {
-    id                 Int      @id @default(autoincrement())
-    patient_id         Int
-    symptoms           String?  @db.Text
-    primary_doctor_id  Int?
-    final_diagnosis    String?  @db.Text
-    created_by_user_id Int?
-    created_at         DateTime @default(now())
-    updated_at         DateTime @updatedAt
-  model ExaminationRecord {
-    id                 Int      @id @default(autoincrement())
-    patient_id         Int
-    symptoms           String?  @db.Text
-    primary_doctor_id  Int?
-    final_diagnosis    String?  @db.Text
-    created_by_user_id Int?
-    created_at         DateTime @default(now())
-    updated_at         DateTime @updatedAt
+  @@map("examination_records")
+}
 
-    patient            Patient             @relation(fields: [patient_id], references: [id])
-    primaryDoctor      User?               @relation("PrimaryDoctor", fields: [primary_doctor_id], references: [id])
-    createdByUser      User?               @relation("CreatedByUser", fields: [created_by_user_id], references: [id])
-    examinationDetails ExaminationDetail[]
-    prescriptions      Prescription[]
-    invoiceItems       InvoiceItem[]
-    queues             Queue[]
-    payments           Payment[]
-    patient            Patient             @relation(fields: [patient_id], references: [id])
-    primaryDoctor      User?               @relation("PrimaryDoctor", fields: [primary_doctor_id], references: [id])
-    createdByUser      User?               @relation("CreatedByUser", fields: [created_by_user_id], references: [id])
-    examinationDetails ExaminationDetail[]
-    prescriptions      Prescription[]
-    invoiceItems       InvoiceItem[]
-    queues             Queue[]
-    payments           Payment[]
+model ExaminationDetail {
+  id          Int               @id @default(autoincrement())
+  record_id   Int
+  clinic_id   Int
+  doctor_id   Int
+  result      String?           @db.Text
+  note        String?           @db.Text
+  examined_at DateTime?
+  status      ExaminationStatus @default(pending)
 
-    @@map("examination_records")
-  }
-    @@map("examination_records")
-  }
+  record ExaminationRecord @relation(fields: [record_id], references: [id])
+  clinic Clinic            @relation(fields: [clinic_id], references: [id])
+  doctor User              @relation(fields: [doctor_id], references: [id])
 
-  model ExaminationDetail {
-    id          Int               @id @default(autoincrement())
-    record_id   Int
-    clinic_id   Int
-    doctor_id   Int
-    result      String?           @db.Text
-    note        String?           @db.Text
-    examined_at DateTime?
-    status      ExaminationStatus @default(pending)
-  model ExaminationDetail {
-    id          Int               @id @default(autoincrement())
-    record_id   Int
-    clinic_id   Int
-    doctor_id   Int
-    result      String?           @db.Text
-    note        String?           @db.Text
-    examined_at DateTime?
-    status      ExaminationStatus @default(pending)
+  @@map("examination_details")
+}
 
-    record ExaminationRecord @relation(fields: [record_id], references: [id])
-    clinic Clinic            @relation(fields: [clinic_id], references: [id])
-    doctor User              @relation(fields: [doctor_id], references: [id])
-    record ExaminationRecord @relation(fields: [record_id], references: [id])
-    clinic Clinic            @relation(fields: [clinic_id], references: [id])
-    doctor User              @relation(fields: [doctor_id], references: [id])
+enum ExaminationStatus {
+  pending
+  in_progress
+  done
+  cancelled
+}
 
-    @@map("examination_details")
-  }
-    @@map("examination_details")
-  }
+model Queue {
+  id                Int         @id @default(autoincrement())
+  patient_id        Int
+  clinic_id         Int
+  record_id         Int?
+  appointment_id    Int?
+  status            QueueStatus @default(waiting)
+  priority          Int         @default(0)
+  registered_online Boolean     @default(false)
+  qr_code           String?
+  called_at         DateTime?
+  created_at        DateTime    @default(now())
 
-  enum ExaminationStatus {
-    pending
-    in_progress
-    done
-    cancelled
-  }
-  enum ExaminationStatus {
-    pending
-    in_progress
-    done
-    cancelled
-  }
+  patient     Patient            @relation(fields: [patient_id], references: [id])
+  clinic      Clinic             @relation(fields: [clinic_id], references: [id])
+  record      ExaminationRecord? @relation(fields: [record_id], references: [id])
+  appointment Appointment?       @relation(fields: [appointment_id], references: [id])
 
-  model Queue {
-    id                Int       @id @default(autoincrement())
-    patient_id        Int
-    clinic_id         Int
-    record_id         Int?
-    appointment_id    Int?
-    status            QueueStatus @default(waiting)
-    priority          Int       @default(0)
-    registered_online Boolean   @default(false)
-    qr_code           String?
-    called_at         DateTime?
-    created_at        DateTime   @default(now())
-  model Queue {
-    id                Int       @id @default(autoincrement())
-    patient_id        Int
-    clinic_id         Int
-    record_id         Int?
-    appointment_id    Int?
-    status            QueueStatus @default(waiting)
-    priority          Int       @default(0)
-    registered_online Boolean   @default(false)
-    qr_code           String?
-    called_at         DateTime?
-    created_at        DateTime   @default(now())
+  @@map("queues")
+}
 
-    patient          Patient    @relation(fields: [patient_id], references: [id])
-    clinic           Clinic     @relation(fields: [clinic_id], references: [id])
-    record           ExaminationRecord? @relation(fields: [record_id], references: [id])
-    appointment      Appointment? @relation(fields: [appointment_id], references: [id])
-    patient          Patient    @relation(fields: [patient_id], references: [id])
-    clinic           Clinic     @relation(fields: [clinic_id], references: [id])
-    record           ExaminationRecord? @relation(fields: [record_id], references: [id])
-    appointment      Appointment? @relation(fields: [appointment_id], references: [id])
+enum QueueStatus {
+  waiting
+  in_progress
+  done
+  skipped
+}
 
-    @@map("queues")
-  }
-    @@map("queues")
-  }
+model Prescription {
+  id         Int      @id @default(autoincrement())
+  record_id  Int
+  created_at DateTime @default(now())
 
-  enum QueueStatus {
-    waiting
-    in_progress
-    done
-    skipped
-  }
-  enum QueueStatus {
-    waiting
-    in_progress
-    done
-    skipped
-  }
+  record ExaminationRecord  @relation(fields: [record_id], references: [id])
+  items  PrescriptionItem[]
 
-  model Prescription {
-    id         Int      @id @default(autoincrement())
-    record_id  Int
-    created_at DateTime @default(now())
-  model Prescription {
-    id         Int      @id @default(autoincrement())
-    record_id  Int
-    created_at DateTime @default(now())
-
-    record ExaminationRecord  @relation(fields: [record_id], references: [id])
-    items  PrescriptionItem[]
-    record ExaminationRecord  @relation(fields: [record_id], references: [id])
-    items  PrescriptionItem[]
-
-    @@map("prescriptions")
-  }
-    @@map("prescriptions")
-  }
+  @@map("prescriptions")
+}
 
 model PrescriptionItem {
-  id              Int          @id @default(autoincrement())
-  id              Int          @id @default(autoincrement())
+  id              Int     @id @default(autoincrement())
   prescription_id Int
   medicine_id     Int?
-  quantity        Int?         @default(1)
-  medicine_name   String       @db.VarChar(255)
-  dosage          String?      @db.VarChar(100)
-  frequency       String?      @db.VarChar(100)
-  duration        String?      @db.VarChar(100)
-  note            String?      @db.Text
-  medicine_id     Int?
-  quantity        Int?         @default(1)
-  medicine_name   String       @db.VarChar(255)
-  dosage          String?      @db.VarChar(100)
-  frequency       String?      @db.VarChar(100)
-  duration        String?      @db.VarChar(100)
-  note            String?      @db.Text
+  quantity        Int?    @default(1)
+  medicine_name   String  @db.VarChar(255)
+  dosage          String? @db.VarChar(100)
+  frequency       String? @db.VarChar(100)
+  duration        String? @db.VarChar(100)
+  note            String? @db.Text
 
-  prescription    Prescription @relation(fields: [prescription_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "prescription_items_ibfk_1")
-  medicine        Medicine?    @relation(fields: [medicine_id], references: [id], onUpdate: Restrict, map: "prescription_items_ibfk_2")
-
-  @@index([medicine_id], map: "medicine_id")
-  @@index([prescription_id], map: "prescription_id")
-  prescription    Prescription @relation(fields: [prescription_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "prescription_items_ibfk_1")
-  medicine        Medicine?    @relation(fields: [medicine_id], references: [id], onUpdate: Restrict, map: "prescription_items_ibfk_2")
+  prescription Prescription @relation(fields: [prescription_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "prescription_items_ibfk_1")
+  medicine     Medicine?    @relation(fields: [medicine_id], references: [id], onUpdate: Restrict, map: "prescription_items_ibfk_2")
 
   @@index([medicine_id], map: "medicine_id")
   @@index([prescription_id], map: "prescription_id")
@@ -546,171 +299,127 @@ model PrescriptionItem {
 }
 
 model Medicine {
-  id                 Int                @id @default(autoincrement())
-  name               String             @db.VarChar(255)
-  stock              Int                @default(0)
-  price              Decimal            @default(0.00) @db.Decimal(10, 2)
+  id    Int     @id @default(autoincrement())
+  name  String  @db.VarChar(255)
+  stock Int     @default(0)
+  price Decimal @default(0.00) @db.Decimal(10, 2)
 
   prescription_items PrescriptionItem[]
 
   @@map("medicines")
 }
 
+model Payment {
+  id           Int            @id @default(autoincrement())
+  patient_id   Int
+  record_id    Int?
+  amount       Decimal
+  method       PaymentMethod?
+  payment_time DateTime       @default(now())
+  note         String?        @db.Text
+  is_refund    Boolean        @default(false)
 
-model Medicine {
-  id                 Int                @id @default(autoincrement())
-  name               String             @db.VarChar(255)
-  stock              Int                @default(0)
-  price              Decimal            @default(0.00) @db.Decimal(10, 2)
+  patient Patient            @relation(fields: [patient_id], references: [id])
+  record  ExaminationRecord? @relation(fields: [record_id], references: [id])
 
-  prescription_items PrescriptionItem[]
-
-  @@map("medicines")
+  @@map("payments")
 }
 
+enum PaymentMethod {
+  cash
+  card
+  bank_transfer
+  e_wallet
+}
 
-  model Payment {
-    id           Int            @id @default(autoincrement())
-    patient_id   Int
-    record_id    Int?
-    amount       Decimal
-    method       PaymentMethod?
-    payment_time DateTime       @default(now())
-    note         String?        @db.Text
-    is_refund    Boolean        @default(false)
-  model Payment {
-    id           Int            @id @default(autoincrement())
-    patient_id   Int
-    record_id    Int?
-    amount       Decimal
-    method       PaymentMethod?
-    payment_time DateTime       @default(now())
-    note         String?        @db.Text
-    is_refund    Boolean        @default(false)
+model PaymentBalance {
+  patient_id Int      @id
+  balance    Decimal  @default(0.00)
+  updated_at DateTime @updatedAt
 
-    patient Patient            @relation(fields: [patient_id], references: [id])
-    record  ExaminationRecord? @relation(fields: [record_id], references: [id])
-    patient Patient            @relation(fields: [patient_id], references: [id])
-    record  ExaminationRecord? @relation(fields: [record_id], references: [id])
+  patient Patient @relation(fields: [patient_id], references: [id])
 
-    @@map("payments")
-  }
-    @@map("payments")
-  }
+  @@map("payment_balances")
+}
 
-  enum PaymentMethod {
-    cash
-    card
-    bank_transfer
-    e_wallet
-  }
-  enum PaymentMethod {
-    cash
-    card
-    bank_transfer
-    e_wallet
-  }
+model InvoiceItem {
+  id          Int      @id @default(autoincrement())
+  record_id   Int
+  description String?  @db.Text
+  amount      Decimal
+  created_at  DateTime @default(now())
 
-  model PaymentBalance {
-    patient_id Int      @id
-    balance    Decimal  @default(0.00)
-    updated_at DateTime @updatedAt
-  model PaymentBalance {
-    patient_id Int      @id
-    balance    Decimal  @default(0.00)
-    updated_at DateTime @updatedAt
+  record ExaminationRecord @relation(fields: [record_id], references: [id])
 
-    patient Patient @relation(fields: [patient_id], references: [id])
-    patient Patient @relation(fields: [patient_id], references: [id])
+  @@map("invoice_items")
+}
 
-    @@map("payment_balances")
-  }
-    @@map("payment_balances")
-  }
+model PasswordResetToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  used      Boolean  @default(false)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  model InvoiceItem {
-    id          Int      @id @default(autoincrement())
-    record_id   Int
-    description String?  @db.Text
-    amount      Decimal
-    created_at  DateTime @default(now())
-  model InvoiceItem {
-    id          Int      @id @default(autoincrement())
-    record_id   Int
-    description String?  @db.Text
-    amount      Decimal
-    created_at  DateTime @default(now())
+  @@index([token])
+  @@index([userId])
+}
 
-    record ExaminationRecord @relation(fields: [record_id], references: [id])
+model Appointment {
+  id               Int               @id @default(autoincrement())
+  patient_id       Int
+  clinic_id        Int
+  doctor_id        Int
+  appointment_date DateTime          @db.Date
+  appointment_time DateTime          @db.Time
+  status           AppointmentStatus @default(pending)
+  priority         Int               @default(0) // 0: normal booking, 1: nurse booking, 2: urgent
+  reason           String?           @db.Text // Lý do khám
+  note             String?           @db.Text // Ghi chú thêm
+  created_at       DateTime          @default(now())
+  updated_at       DateTime          @updatedAt
 
-    @@map("invoice_items")
-  }
+  patient Patient @relation(fields: [patient_id], references: [id])
+  clinic  Clinic  @relation(fields: [clinic_id], references: [id])
+  doctor  User    @relation("DoctorAppointment", fields: [doctor_id], references: [id])
+  queues  Queue[] // Một appointment có thể có nhiều queue
 
-  model PasswordResetToken {
-    id        Int      @id @default(autoincrement())
-    token     String   @unique
-    userId    Int
-    user      User     @relation(fields: [userId], references: [id])
-    used      Boolean  @default(false)
-    expiresAt DateTime
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  doctorRatings DoctorRating[]
 
-    @@index([token])
-    @@index([userId])
-  }
+  @@map("appointments")
+}
 
-  model Appointment {
-    id              Int               @id @default(autoincrement())
-    patient_id      Int
-    clinic_id       Int
-    doctor_id       Int
-    appointment_date DateTime         @db.Date
-    appointment_time DateTime         @db.Time
-    status          AppointmentStatus @default(pending)
-    priority        Int              @default(0)  // 0: normal booking, 1: nurse booking, 2: urgent
-    reason          String?          @db.Text     // Lý do khám
-    note            String?          @db.Text     // Ghi chú thêm
-    created_at      DateTime         @default(now())
-    updated_at      DateTime         @updatedAt
+enum AppointmentStatus {
+  pending // Chờ xác nhận
+  confirmed // Đã xác nhận
+  cancelled // Đã hủy
+  completed // Đã hoàn thành
+}
 
-    patient         Patient          @relation(fields: [patient_id], references: [id])
-    clinic          Clinic           @relation(fields: [clinic_id], references: [id])
-    doctor          User             @relation("DoctorAppointment", fields: [doctor_id], references: [id])
-    queues          Queue[]          // Một appointment có thể có nhiều queue
-  
-    doctorRatings DoctorRating[]
-    @@map("appointments")
-  }
+model AvailableSlot {
+  id           Int      @id @default(autoincrement())
+  doctor_id    Int
+  clinic_id    Int
+  slot_date    DateTime @db.Date
+  start_time   DateTime @db.Time
+  end_time     DateTime @db.Time
+  is_available Boolean  @default(true)
+  created_at   DateTime @default(now())
 
-  enum AppointmentStatus {
-    pending    // Chờ xác nhận
-    confirmed  // Đã xác nhận
-    cancelled  // Đã hủy
-    completed  // Đã hoàn thành
-  }
+  doctor User   @relation(fields: [doctor_id], references: [id])
+  clinic Clinic @relation(fields: [clinic_id], references: [id])
 
-  model AvailableSlot {
-    id           Int      @id @default(autoincrement())
-    doctor_id    Int
-    clinic_id    Int
-    slot_date    DateTime @db.Date
-    start_time   DateTime @db.Time
-    end_time     DateTime @db.Time
-    is_available Boolean  @default(true)
-    created_at   DateTime @default(now())
-
-    doctor       User     @relation(fields: [doctor_id], references: [id])
-    clinic       Clinic   @relation(fields: [clinic_id], references: [id])
-
-    @@map("available_slots")
-  }
+  @@map("available_slots")
+}
 
 model Conversation {
-  id           Int                       @id @default(autoincrement())
-  name         String?                   @db.VarChar(255)
-  created_at   DateTime?                 @default(now())
-  updated_at   DateTime?                 @default(now()) @updatedAt
+  id         Int       @id @default(autoincrement())
+  name       String?   @db.VarChar(255)
+  created_at DateTime? @default(now())
+  updated_at DateTime? @default(now()) @updatedAt
 
   chats        Chat[]
   participants ConversationParticipant[]
@@ -719,35 +428,33 @@ model Conversation {
 }
 
 model ConversationParticipant {
-  id             Int          @id @default(autoincrement())
+  id             Int @id @default(autoincrement())
   conversationId Int
   userId         Int
 
-  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([conversationId, userId], map: "unique_participant")
   @@index([userId], map: "user_id")
-
   @@map("conversation_participants")
 }
 
 model Chat {
-  id             Int          @id @default(autoincrement())
-  text           String       @db.Text
-  file           String?      @db.Text
+  id             Int       @id @default(autoincrement())
+  text           String    @db.Text
+  file           String?   @db.Text
   toId           Int
   sendById       Int
   conversationId Int
-  created_at     DateTime?    @default(now())
+  created_at     DateTime? @default(now())
 
-  to             User         @relation("ChatTo", fields: [toId], references: [id], onDelete: Cascade)
-  sendBy         User         @relation("ChatSendBy", fields: [sendById], references: [id], onDelete: Cascade)
-  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  to           User         @relation("ChatTo", fields: [toId], references: [id], onDelete: Cascade)
+  sendBy       User         @relation("ChatSendBy", fields: [sendById], references: [id], onDelete: Cascade)
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
   @@index([conversationId], map: "conversation_id")
   @@index([sendById], map: "send_by_id")
   @@index([toId], map: "to_id")
-
   @@map("chats")
 }
