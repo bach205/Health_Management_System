@@ -36,6 +36,8 @@ import About from "./pages/Patient/About";
 import Contact from "./pages/Patient/Contact";
 import AdminPatientDashboard from "./pages/Admin/Patient/AdminPatientDashboard";
 import StaffProfile from "./pages/Doctor/StaffProfile";
+import ChatUI from "./layouts/MainLayout/ChatUI";
+import DocumnetsManagement from "./pages/Admin/DocumentsManagement";
 import PatientQueueTable from "./pages/Patient/Queue/PatientQueueTable";
 import MedicineDashboard from "./pages/Admin/Medicine/AdminMedicineDashboard";
 import AdminSpecialtyDashboard from "./pages/Admin/Specialty/AdminSpecialtyDashboard";
@@ -124,6 +126,11 @@ const PublicRoutes = [
   {
     path: "/contact",
     element: <Contact />,
+    layout: MainLayout,
+  },
+  {
+    path: "/chatbot",
+    element: <ChatUI />,
     layout: MainLayout,
   },
   {
@@ -235,6 +242,12 @@ const PrivateRoutes: PrivateRoute[] = [
     allowedRoles: ["admin"],
   },
   {
+    path: "/admin/documents",
+    element: <DocumnetsManagement />,
+    layout: DashboardLayout,
+    allowedRoles: ["admin"],
+  },
+  {
     path: "/queue",
     element: <PatientQueueTable />,
     layout: MainLayout,
@@ -246,8 +259,8 @@ const PrivateRoutes: PrivateRoute[] = [
     layout: DashboardLayout,
     allowedRoles: ["admin"],
   },
- 
-  
+
+
   {
     path: "/admin/medicines",
     element: <MedicineDashboard />,
