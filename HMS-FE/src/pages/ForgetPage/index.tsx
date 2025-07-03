@@ -14,7 +14,7 @@ const ForgetPage = () => {
   const token = localStorage.getItem('resetToken');
   useEffect(() => {
     if (token === null || token === undefined) {
-      //toast.error('Thiếu mã xác thực (token)');
+      toast.error('Token đã hết hạn');
       navigate('/login');
       return;
     }
@@ -28,10 +28,6 @@ const ForgetPage = () => {
     }
     if (!confirmPassword) {
       toast.error('Vui lòng nhập xác nhận mật khẩu');
-      return;
-    }
-    if (newPassword !== confirmPassword) {
-      toast.error('Mật khẩu xác nhận không khớp');
       return;
     }
 
@@ -68,7 +64,7 @@ const ForgetPage = () => {
             type="password"
             onChange={e => setNewPassword(e.target.value)}
             value={newPassword}
-            required
+           
           />
         </div>
         <div className="w-full">
@@ -78,7 +74,7 @@ const ForgetPage = () => {
             type="password"
             onChange={e => setConfirmPassword(e.target.value)}
             value={confirmPassword}
-            required
+         
           />
         </div>
         <button

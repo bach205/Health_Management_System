@@ -23,6 +23,7 @@ import {
 import { getClinicService } from '../../services/clinic.service';
 import { getShiftService } from '../../services/shift.service';
 import { Delete, PenLine, View } from 'lucide-react';
+import { getAllNurse } from '../../services/nurse.service';
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -37,9 +38,17 @@ export type WorkSchedule = {
   shift_name: string;
 };
 
+type Staff = {
+  email : string,
+  full_name : string,
+  gender : string,
+  id : number,
+  phone : string,
+}
+
 const Workschedule = () => {
   const [data, setData] = useState<WorkSchedule[]>([]);
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<Staff[]>([]);
   const [clinics, setClinics] = useState<any[]>([]);
   const [shifts, setShifts] = useState<any[]>([]);
   const [form] = Form.useForm();
@@ -53,6 +62,17 @@ const Workschedule = () => {
 
       const res = await getWorkSchedulesService();
       const user = await getDoctorService();
+      // const nurse = await getAllNurse();
+      // doctor.data.metadata.map((item : any) => {
+      //     users.push({
+      //       email : item.email,
+      //       full_name : item.full_name,
+      //       gender : item.gender,
+      //       id : item.id,
+      //       phone : item.phone,
+      //     })
+      // })
+      // co
       const clinic = await getClinicService();
       const shift = await getShiftService();
       console.log(user.data.metadata);
