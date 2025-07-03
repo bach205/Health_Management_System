@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Input, Button, Avatar, List, Typography } from 'antd';
 import { SendOutlined } from '@ant-design/icons';
-
+import avatarImage from '../../assets/chatbot/chatbot_avatar.png';
 
 const { Text } = Typography;
-
+const image_url = avatarImage
 const ChatUI = () => {
     const currentUser = 'Me';
     const chatbotRole = "Assistant"
@@ -26,7 +26,6 @@ const ChatUI = () => {
         console.log(isBlock)
         const es = new EventSource(`${import.meta.env.VITE_AI_SERVER}/api/v1/documents/stream_response?question=${memInput}`)
         es.onmessage = (event) => {
-            console.log("1" + event.data)
             let newText = event.data;
             if (newText === "") {
                 newText = " ";
@@ -60,6 +59,12 @@ const ChatUI = () => {
         }
         es.onerror = (err) => {
             console.error('Error:', err);
+            // Thêm tin nhắn mới nếu user cuối không phải là "Me"
+            setMessages([...messages, {
+                id: Date.now(),
+                user: chatbotRole,
+                content: "Có lỗi xảy ra, xin vui lòng thử lại sau", // nếu đã có sẵn input
+            }])
             handleEsClose();
             es.close();
         };
@@ -80,27 +85,35 @@ const ChatUI = () => {
     return (
         <>
             {!open && (
-                <div
-                    onClick={() => setOpen(true)}
-                    style={{
-                        position: 'fixed',
-                        bottom: 24,
-                        right: 24,
-                        width: 60,
-                        height: 60,
-                        borderRadius: '50%',
-                        backgroundColor: '#1890ff',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: '#fff',
-                        fontSize: 24,
-                        cursor: 'pointer',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
-                        zIndex: 1000,
-                    }}
-                >
-                    💬
+                <div style={{
+                    position: 'fixed',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#fff',
+                    fontSize: 24,
+
+
+                    flexDirection: "column",
+                    zIndex: 1000,
+                    bottom: 24,
+                    right: 24,
+                }}>
+                    <div
+                        onClick={() => setOpen(true)}
+                        style={{
+
+                            boxShadow: '0 5px 12px rgba(0, 0, 117, 0.75)',
+                            width: 60,
+                            height: 60,
+                            borderRadius: '50%',
+                            cursor: 'pointer',
+                        }}
+                    >
+                        <img src={image_url} style={{ borderRadius: "50%" }} />
+
+                    </div>
+                    <p style={{ color: "black", fontSize: "15px" }}>Assistant Chatbot</p>
                 </div>
             )}
 
@@ -155,9 +168,8 @@ const ChatUI = () => {
                                         marginBottom: 12,
                                     }}
                                 >
-                                    <Avatar style={{ backgroundColor: '#1890ff', margin: '0 8px' }}>
-                                        {msg.user[0]}
-                                    </Avatar>
+                                    {msg.user === chatbotRole && <Avatar style={{ backgroundColor: '#1890ff', margin: '0 8px' }} src={image_url}>
+                                    </Avatar>}
                                     <div
                                         style={{
                                             background: msg.user === currentUser ? '#e6f7ff' : '#f5f5f5',
@@ -188,10 +200,16 @@ const ChatUI = () => {
                             style={{ overflowY: 'auto' }}
                         />
                         <Button
-                            type="primary"
+                            type={isBlock ? 'default' : 'primary'}
                             shape="circle"
                             icon={<SendOutlined />}
                             onClick={handleSend}
+                            disabled={isBlock}
+                            style={{
+                                backgroundColor: isBlock ? '#ffffff' : undefined,
+                                color: isBlock ? '#000000' : undefined, // chữ màu đen nếu nền trắng
+                                borderColor: isBlock ? '#d9d9d9' : undefined // viền xám nhạt
+                            }}
                         />
                     </div>
                 </div>
