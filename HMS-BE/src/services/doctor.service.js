@@ -181,6 +181,7 @@ class DoctorService {
         try {
             const isFilterAll = specialty.includes("all");
             const isFilterNone = specialty.includes("none");
+            console.log("isFilterNone", isFilterNone)
             const isFilterSome = specialties.length > 0;
             const specialtyCondition = (isFilterNone || isFilterSome || isFilterAll) ? {
                 OR: [

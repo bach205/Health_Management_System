@@ -13,6 +13,7 @@ import UserListTitle from "../../../components/ui/UserListTitle";
 import { createDoctor, updateDoctor, updatePassword, updateStatus } from "../../../services/doctor.service";
 import ModalCreateDoctor from "../../../components/modal/ModalCreateDoctor";
 import ModalUpdateDoctor from "../../../components/modal/ModalUpdateDoctor";
+import { useSpecialtyList } from "../../../hooks/useSpecialtyList";
 
 const AdminDoctorDashboard = () => {
   const [isCreateVisible, setIsCreateVisible] = useState<boolean>(false);
@@ -82,7 +83,7 @@ const AdminDoctorDashboard = () => {
       dataIndex: "doctor",
       key: "doctor",
       render: (record: any) => {
-        return record && record.specialty && record.specialty.length > 0 ? specialtyOptions.find(option => option.value === record.specialty)?.label : 'Không xác định';
+        return record && record.specialty ? record.specialty.name : 'Không có';
       },
     },
     {
@@ -123,7 +124,7 @@ const AdminDoctorDashboard = () => {
                 icon={<UserRoundPen size={17.5} />}
               ></Button>
             </Tooltip>
-          )}
+          )}  
 
           <Popconfirm
             title="Khôi phục mật khẩu"
@@ -174,7 +175,7 @@ const AdminDoctorDashboard = () => {
       formView.setFieldsValue({
         ...record,
         date_of_birth: record.date_of_birth ? dayjs(record.date_of_birth) : null,
-        specialty: record.doctor?.specialty,
+        specialty: record.doctor?.specialty?.id,
         bio: record.doctor?.bio
       });
       setIsViewVisible(true);
@@ -194,7 +195,7 @@ const AdminDoctorDashboard = () => {
         ...record,
         date_of_birth: record.date_of_birth ? dayjs(record.date_of_birth) : null,
         bio: record.doctor?.bio,
-        specialty: record.doctor?.specialty,
+        specialty: record.doctor?.specialty?.id,
       });
       setIsUpdateVisible(true);
     } catch (error) {
@@ -310,8 +311,7 @@ const AdminDoctorDashboard = () => {
     users, loading, keyword, reload, specialty, sort, pagination, isActive,
     setKeyword, setReload, setSpecialty, setSort, setIsActive, handleTableChange,
   } = useDoctorList();
-  
-
+  const { specialties, loading: specialtyLoading, reload: specialtyReload, handleTableChange: specialtyTableChange } = useSpecialtyList(undefined, true);
   return (
     <div>
       <UserListTitle title="bác sĩ" />
@@ -354,12 +354,16 @@ const AdminDoctorDashboard = () => {
                 }}
                 className="min-w-[200px]"
                 options={[
-                  ...specialtyOptions
-                    .filter((opt) => opt.value !== "")
+                  ...specialties
+                    .filter((opt) => opt.name !== "")
                     .map((opt) => ({
-                      label: opt.label,
-                      value: opt.value,
+                      label: opt.name,
+                      value: opt.name,
                     })),
+                  {
+                    label: "Không có",
+                    value: "none",
+                  }
                 ]}
               />
             </Form.Item>

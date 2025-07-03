@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
-import { getDoctors } from "../services/doctor.service";
-import type { IDoctor, IPagination } from "../types/index.type";
+import type { IMedicine, IPagination } from "../types/index.type";
 import { message } from "antd";
+import { getMedicines } from "../services/medicine.service";
 
-export const useMedicineList = ( initialPagination?: Partial<IPagination>) => {
-    const [medicines, setMedicines] = useState([]);
+export const useMedicineList = (initialPagination?: Partial<IPagination>, sortBy?: string) => {
+    const [medicines, setMedicines] = useState<IMedicine[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [keyword, setKeyword] = useState<string>("");
     const [reload, setReload] = useState<boolean>(false);
-    const [sort, setSort] = useState<string>("newest");
+    const [sort, setSort] = useState<string>(sortBy || "name_asc");
     const [isActive, setIsActive] = useState<string>("all");
     const [pagination, setPagination] = useState<IPagination>({
         total: 0,
@@ -28,7 +28,7 @@ export const useMedicineList = ( initialPagination?: Partial<IPagination>) => {
                     isActive,
                 };
                 console.log("searchOptions", searchOptions)
-                const res = await getDoctors(searchOptions);
+                const res = await getMedicines(searchOptions);
                 console.log(res.data.metadata);
                 setMedicines(res.data.metadata.medicines);
                 setPagination((prev) => ({

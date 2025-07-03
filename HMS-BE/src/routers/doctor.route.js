@@ -18,7 +18,7 @@ doctorRouter.post(
   "/create",
   authenticate,
   checkUserStatus(),
-  //  authorize("admin"),
+   authorize("admin"),
   // validate({ body: createDoctorSchema }),
   asyncHandler(doctorController.createDoctor),
   doctorController.createDoctor

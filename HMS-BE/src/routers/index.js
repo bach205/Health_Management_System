@@ -14,7 +14,7 @@ const examinationDetailRouter = require("./examinationDetail.route");
 const patientRouter = require("./patient.route");
 // const prescriptionItemRouter = require("./prescriptionItem.route");
 const medicineRouter = require("./medicine.router");
-
+const specialtyRouter = require("./specialty.router");
 router.use("/nurse", nurseRouter);
 router.use("/doctor", doctorRouter);
 router.use("/patient", patientRouter);
@@ -29,4 +29,5 @@ router.use("/examination-order", examinationOrderRouter);
 router.use("/examination-detail", examinationDetailRouter);
 // router.use("/prescription-item", prescriptionItemRouter);
 router.use("/medicine", medicineRouter);
+router.use("/specialty", specialtyRouter);
 module.exports = router;

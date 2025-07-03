@@ -15,10 +15,6 @@ class MedicineService {
   async getMedicines(pagination = {}) {
     function sort(sortBy) {
       switch (sortBy) {
-        case "newest":
-          return { created_at: "desc" };
-        case "oldest":
-          return { created_at: "asc" };
         case "name_asc":
           return { name: "asc" };
         case "name_desc":
@@ -32,7 +28,7 @@ class MedicineService {
         case "stock_desc":
           return { stock: "desc" };
         default:
-          return { created_at: "desc" };
+          return { name: "asc" };
       }
     }
   
@@ -44,15 +40,15 @@ class MedicineService {
           searchKey && {
             name: {
               contains: searchKey,
-              mode: "insensitive",
+              // mode: "insensitive",
             },
           },
-          minStock != null && {
-            stock: { gte: Number(minStock) },
-          },
-          maxStock != null && {
-            stock: { lte: Number(maxStock) },
-          },
+          // minStock != null && {
+          //   stock: { gte: Number(minStock) },
+          // },
+          // maxStock != null && {
+          //   stock: { lte: Number(maxStock) },
+          // },
         ].filter(Boolean),
       };
   
@@ -131,7 +127,10 @@ class MedicineService {
 
     try {
       const existing = await prisma.medicine.findUnique({ where: { id } });
+      const existingName = await prisma.medicine.findFirst({ where: { name: name.trim() } });
       if (!existing) throw new BadRequestError("Thuốc không tồn tại");
+      
+      if ( existingName && existingName.id !== id) throw new BadRequestError("Tên thuốc đã tồn tại");
 
       const updated = await prisma.medicine.update({
         where: { id },

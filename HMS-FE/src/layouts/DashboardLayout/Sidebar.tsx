@@ -8,6 +8,7 @@ import {
   CalendarArrowDown,
   ClipboardType,
   Pill,
+  Stethoscope,
 } from "lucide-react";
 import type { JSX } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -108,7 +109,7 @@ const SIDEBAR_ITEMS = [
         id: "dashboard",
         label: "Dashboard",
         icon: <LayoutDashboard className="w-4 h-4" />,
-        href: "/dashboard",
+        href: "/admin/dashboard",
       },
     ],
   },
@@ -151,7 +152,13 @@ const SIDEBAR_ITEMS = [
         id: "medicines",
         label: "Quản lý thuốc",
         icon: <Pill className="w-4 h-4" />,
-        href: "/medicines", 
+        href: "/admin/medicines", 
+      },
+      {
+        id: "specialties",
+        label: "Quản lý chuyên khoa",
+        icon: <Stethoscope className="w-4 h-4" />,
+        href: "/admin/specialties",
       },
     ],
   },

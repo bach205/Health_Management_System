@@ -7,7 +7,7 @@ const medicineController = require("../controllers/medicine.controller");
 const medicineRouter = express.Router();
 
 medicineRouter.use(authenticate);
-medicineRouter.use(checkUserStatus());
+// medicineRouter.use(checkUserStatus());
 
 medicineRouter.get(
     "/",
@@ -22,7 +22,7 @@ medicineRouter.get(
 );
 medicineRouter.post(
     "/",
-    authenticate,
+    authorize("admin"),
     asyncHandler(medicineController.getMedicines)
 );
 

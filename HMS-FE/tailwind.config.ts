@@ -1,4 +1,5 @@
 export default {
+  
   future: {
     focusWithin: true,
   },

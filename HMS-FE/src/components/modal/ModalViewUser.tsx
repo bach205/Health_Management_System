@@ -4,7 +4,7 @@ import { specialtyOptions, TYPE_EMPLOYEE_STR } from "../../constants/user.const"
 import type { IUserBase } from "../../types/index.type";
 import dayjs from "dayjs";
 import Rating from "../../pages/Patient/Rating";
-
+import { useSpecialtyList } from "../../hooks/useSpecialtyList";
 interface IProps {
   isVisible: boolean;
   handleCancel: () => void;
@@ -18,6 +18,8 @@ const ModalViewUser = ({ role, isVisible, handleCancel, form, user }: IProps) =>
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState('');
   // console.log(user);
+
+  const { specialties, loading: specialtyLoading, reload: specialtyReload, handleTableChange: specialtyTableChange } = useSpecialtyList(undefined, true);
   return (
     <Modal
       open={isVisible}
@@ -113,12 +115,12 @@ const ModalViewUser = ({ role, isVisible, handleCancel, form, user }: IProps) =>
             >
               <Select
                 style={{ width: 120 }}
-                value={specialty}
+                value={user?.doctor?.specialty?.name}
                 onChange={(value) => setSpecialty(value)}
               >
-                {specialtyOptions.map((option) => (
-                  <Select.Option key={option.value} value={option.value}>
-                    <span className="text-black">{option.label}</span>
+                {specialties.map((specialty) => (
+                  <Select.Option key={specialty.id} value={specialty.name}>
+                    <span className="text-black">{specialty.name}</span>
                   </Select.Option>
                 ))}
               </Select>

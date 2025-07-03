@@ -37,7 +37,9 @@ import Contact from "./pages/Patient/Contact";
 import AdminPatientDashboard from "./pages/Admin/Patient/AdminPatientDashboard";
 import StaffProfile from "./pages/Doctor/StaffProfile";
 import PatientQueueTable from "./pages/Patient/Queue/PatientQueueTable";
-import MedicineDashboard from "./pages/Admin/Medicine/MedicineDashboard";
+import MedicineDashboard from "./pages/Admin/Medicine/AdminMedicineDashboard";
+import AdminSpecialtyDashboard from "./pages/Admin/Specialty/AdminSpecialtyDashboard";
+import AdminDashboard from "./pages/Admin/Dashboard/AdminDashboard";
 dayjs.extend(plugin);
 dayjs.updateLocale("en", {
   weekStart: 1,
@@ -156,7 +158,7 @@ const PrivateRoutes: PrivateRoute[] = [
   },
   {
     path: "/admin/dashboard",
-    element: <Dashboard />,
+    element: <AdminDashboard />,
     layout: DashboardLayout,
   },
   {
@@ -233,12 +235,20 @@ const PrivateRoutes: PrivateRoute[] = [
     layout: MainLayout,
     allowedRoles: ["patient"],
   },
+  {
+    path: "/admin/specialties",
+    element: <AdminSpecialtyDashboard />,
+    layout: DashboardLayout,
+    allowedRoles: ["admin"],
+  },
+ 
   
   {
-    path: "/medicines",
+    path: "/admin/medicines",
     element: <MedicineDashboard />,
     layout: DashboardLayout,
-    allowedRoles: ["patient", "doctor", "nurse", "admin"],
+    allowedRoles: ["admin"],
   },
+
 
 ];

@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import mainRequest from "../../../api/mainRequest";
 import { CircleCheck, CircleX, Delete, Edit } from "lucide-react";
+import { useMedicineList } from "../../../hooks/useMedicineList";
+import type { IMedicine } from "../../../types/index.type";
 interface ExaminationRecordModalProps {
     open: boolean;
     onClose: () => void;
@@ -20,8 +22,8 @@ const DoctorExaminationRecordModal = ({
 }: ExaminationRecordModalProps) => {
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
-    const [medicinesAdded, setMedicinesAdded] = useState<any[]>([]);
-    const [medicine, setMedicine] = useState<any>(null);
+    const [medicinesAdded, setMedicinesAdded] = useState<IMedicine[]>([]);
+    const [selectedMedicine, setSelectedMedicine] = useState<IMedicine | null>(null);
     const [quantity, setQuantity] = useState<number>(0);
     const [optionMedicines, setOptionMedicines] = useState<any[]>([]);
     const [isCreate, setIsCreate] = useState(true);
@@ -32,58 +34,68 @@ const DoctorExaminationRecordModal = ({
             setMedicinesAdded([]);
         }
     };
-    useEffect(() => {
-        if (open) {
-            fetchMedicineList();
-        }
-    }, [open]);
+    // useEffect(() => {
+    //     if (open) {
+    //         fetchMedicineList();
+    //     }
+    // }, [open]);
 
-    const fetchMedicineList = async () => {
-        try {
-            // const { medicines } = await getListMedicine({});
-            const medicines: any[] = []
-            const options = medicines.map((item) => ({
-                label: `${item.name} - SL: ${item.quantity}`,
-                value: item._id,
-                ...item,
-            }));
-            setOptionMedicines(options);
-        } catch (err) {
-            console.error("Fetch medicine failed:", err);
+    const { medicines } = useMedicineList();
+    console.log(medicines)
+    useEffect(() => {
+        if (medicines) {
+            setOptionMedicines(medicines.map((item, index) => ({
+                label: `${item.name} `,
+                value: item.id,
+            })));
         }
-    };
+    }, [medicines]);
+    // const fetchMedicineList = async () => {
+    //     try {
+    //         // const { medicines } = await getListMedicine({});
+    //         const medicines: any[] = []
+    //         const options = medicines.map((item) => ({
+    //             label: `${item.name} - SL: ${item.quantity}`,
+    //             value: item._id,
+    //             ...item,
+    //         }));
+    //         setOptionMedicines(options);
+    //     } catch (err) {
+    //         console.error("Fetch medicine failed:", err);
+    //     }
+    // };
 
     const clearsMedicine = () => {
         setQuantity(0);
-        setMedicine(null);
+        setSelectedMedicine(null);
         setIsCreate(true);
     };
 
     const handleAddMedicine = () => {
-        if (medicine) {
-            const index = medicinesAdded.findIndex((item) => item._id === medicine._id);
+        if (selectedMedicine) {
+            const index = medicinesAdded.findIndex((item) => item.id === selectedMedicine.id);
             const newList = [...medicinesAdded];
             if (index !== -1) newList.splice(index, 1);
             newList.unshift({
-                _id: medicine._id,
-                name: medicine.name,
-                quantity,
-                usage: medicine.usage,
+                id: selectedMedicine.id,
+                name: selectedMedicine.name,
+                stock: selectedMedicine.stock,
+                price: selectedMedicine.price,
             });
             setMedicinesAdded(newList);
             clearsMedicine();
         }
     };
 
-    const handleEdit = (record: any) => {
-        const selected = optionMedicines.find((opt) => opt._id === record._id);
-        setMedicine(selected);
-        setQuantity(record.quantity);
+    const handleEdit = (record: IMedicine) => {
+        const selected = optionMedicines.find((opt) => opt.value === record.id);
+        setSelectedMedicine(selected);
+        setQuantity(record.stock);
         setIsCreate(false);
     };
 
     const handleRemoveMedicine = (record: any) => {
-        const newList = medicinesAdded.filter((item) => item._id !== record._id);
+        const newList = medicinesAdded.filter((item) => item.id !== record.id);
         setMedicinesAdded(newList);
     };
 
@@ -105,7 +117,15 @@ const DoctorExaminationRecordModal = ({
             setLoading(false);
         }
     };
-
+    console.log(selectedMedicine)
+    const handleSetMedicine = (option: any) => {
+        console.log("option", option)
+        const medicine = medicines.find((item) => item.id === option.value);
+        if (medicine) {
+            setSelectedMedicine(medicine);
+            setQuantity(medicine.stock);
+        }
+    }
     return (
         <Modal
             title="Tạo hồ sơ khám tổng quát"
@@ -162,9 +182,9 @@ const DoctorExaminationRecordModal = ({
                                         style={{ flex: 1 }}
                                         placeholder="Chọn thuốc"
                                         options={optionMedicines}
-                                        value={medicine?._id}
+                                        value={selectedMedicine?.id}
                                         onChange={(_, option: any) => {
-                                            setMedicine(option);
+                                            handleSetMedicine(option);
                                         }}
                                         disabled={!isCreate}
                                     />
@@ -172,6 +192,7 @@ const DoctorExaminationRecordModal = ({
                                         min={1}
                                         placeholder="Số lượng"
                                         value={quantity}
+                                        max={selectedMedicine?.stock}
                                         onChange={(val) => {
                                             setQuantity(val || 0);
                                         }}
@@ -179,7 +200,7 @@ const DoctorExaminationRecordModal = ({
                                     <Button
                                         type="primary"
                                         onClick={handleAddMedicine}
-                                        disabled={!medicine || quantity <= 0}
+                                        disabled={!selectedMedicine || quantity <= 0}
                                     >
                                         {isCreate ? "Thêm" : "Cập nhật"}
                                     </Button>
@@ -187,7 +208,7 @@ const DoctorExaminationRecordModal = ({
                             </Form.Item>
 
                             <Table
-                                rowKey="_id"
+                                rowKey="id"
                                 columns={[
                                     {
                                         title: "Tên thuốc",
@@ -195,7 +216,7 @@ const DoctorExaminationRecordModal = ({
                                     },
                                     {
                                         title: "SL",
-                                        dataIndex: "quantity",
+                                        dataIndex: "stock",
                                         width: 100,
                                     },
                                     {
@@ -206,14 +227,14 @@ const DoctorExaminationRecordModal = ({
                                             <Space>
                                                 <Button
                                                     size="small"
-                                                    icon={<Edit />}
+                                                    icon={<Edit className="w-4 h-4" />}
                                                     onClick={() => handleEdit(record)}
                                                 />
                                                 <Popconfirm
                                                     title="Xóa thuốc này?"
                                                     onConfirm={() => handleRemoveMedicine(record)}
                                                 >
-                                                    <Button size="small" icon={<Delete />} danger />
+                                                    <Button size="small" icon={<Delete className="w-4 h-4"  />} danger />
                                                 </Popconfirm>
                                             </Space>
                                         ),
