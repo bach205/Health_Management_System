@@ -36,6 +36,7 @@ export const sortOptions = [
     { value: "oldest", label: "Cũ nhất" },
     { value: "name_asc", label: "Tên A-Z" },
     { value: "name_desc", label: "Tên Z-A" },
+    { value: "update_desc", label: "Sửa gần đây" },
 ]
 export const specialtyOptions = [
     { value: "general", label: "Nội trú" },
@@ -48,7 +49,7 @@ export const specialtyOptions = [
     { value: "oncology", label: "Ung thư" },
     { value: "neurology", label: "Thần kinh học" },
     { value: "other", label: "Đa khoa" },
-    { value: "", label: "Không có" }
+    { value: "none", label: "Không có" }
 ];
 
 export const PASSWORD_DEFAULT = "123456";

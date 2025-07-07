@@ -4,7 +4,7 @@ import { specialtyOptions, TYPE_EMPLOYEE_STR } from "../../constants/user.const"
 import type { IUserBase } from "../../types/index.type";
 import dayjs from "dayjs";
 import Uploader from "../../pages/Profile/Uploader";
-
+import { useSpecialtyList } from "../../hooks/useSpecialtyList";  
 interface IProps {
   isVisible: boolean;
   handleOk: () => void;
@@ -22,6 +22,7 @@ const ModalUpdateDoctor = ({ role, isVisible, handleOk, handleCancel, form, user
     handleCancel();
     setReload(!reload);
   }
+  const { specialties, loading: specialtyLoading, reload: specialtyReload, handleTableChange: specialtyTableChange } = useSpecialtyList(undefined, true);
   return (
     <Modal
       open={isVisible}
@@ -91,11 +92,14 @@ const ModalUpdateDoctor = ({ role, isVisible, handleOk, handleCancel, form, user
                 style={{ width: 120 }}
                 value={specialty}
                 onChange={(value) => setSpecialty(value)}
-                options={specialtyOptions}
+                options={specialties.map((specialty) => ({
+                  label: specialty.name,
+                  value: specialty.id,
+                }))}
               />
             </Form.Item>
             <Form.Item name="bio" label="Tiểu sử">
-              <Input placeholder="Tiểu sử bác sĩ" />
+              <Input.TextArea placeholder="Tiểu sử bác sĩ" />
             </Form.Item>
           </>
         )}

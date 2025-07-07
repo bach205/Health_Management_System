@@ -7,6 +7,12 @@ import {
   Calendar,
   CalendarArrowDown,
   ClipboardType,
+  File,
+  FileText,
+  FileTextIcon,
+  LucideFileText,
+  Pill,
+  Stethoscope,
 } from "lucide-react";
 import type { JSX } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -32,7 +38,7 @@ const Sidebar = ({ isCollapsed, role }: { isCollapsed: boolean, role: string }) 
 
       {SIDEBAR_ITEMS.map((sidebar) => {
         if (sidebar.label === "Quản lý" && role !== "admin") {
-            return null
+          return null
         }
 
         if (sidebar.label === "Phòng khám" && (role !== "admin")) {
@@ -107,7 +113,7 @@ const SIDEBAR_ITEMS = [
         id: "dashboard",
         label: "Dashboard",
         icon: <LayoutDashboard className="w-4 h-4" />,
-        href: "/dashboard",
+        href: "/admin/dashboard",
       },
     ],
   },
@@ -145,6 +151,18 @@ const SIDEBAR_ITEMS = [
         label: "Quản lý y tá",
         icon: <Users className="w-4 h-4" />,
         href: "/admin/nurses",
+      },
+      {
+        id: "medicines",
+        label: "Quản lý thuốc",
+        icon: <Pill className="w-4 h-4" />,
+        href: "/admin/medicines",
+      },
+      {
+        id: "specialties",
+        label: "Quản lý chuyên khoa",
+        icon: <Stethoscope className="w-4 h-4" />,
+        href: "/admin/specialties",
       },
     ],
   },
@@ -200,6 +218,18 @@ const SIDEBAR_ITEMS = [
         label: "Quản lý lịch hẹn",
         icon: <ClipboardType className="w-4 h-4" />,
         href: "/user-book-appointments",
+      },
+    ],
+  },
+  {
+    id: 6,
+    label: "Documents",
+    items: [
+      {
+        id: "documents",
+        label: "Documents",
+        icon: <FileText className="w-4 h-4" />,
+        href: "/admin/documents",
       },
     ],
   },

@@ -34,6 +34,7 @@ class QueueService {
     const queueClinic = await prisma.queue.findMany({
       where: {
         clinic_id: Number(clinicId),
+        
         status: {
           in: ["waiting", "in_progress"],
         },
@@ -43,15 +44,19 @@ class QueueService {
         { appointment: { created_at: "asc" } },
         { created_at: "asc" }
       ],
-      skip: (pageNumber - 1) * pageSize,
-      take: pageSize,
+      skip: (+pageNumber - 1) * +pageSize,
+      take: +pageSize,
       include: {
         patient: {
           include: {
             user: true,
           },
         },
-        appointment: true,
+        appointment: {
+          include: {
+            doctor: true,
+          },
+        },
       },
     });
     console.log(queueClinic);

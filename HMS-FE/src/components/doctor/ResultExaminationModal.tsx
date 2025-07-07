@@ -6,7 +6,7 @@ import mainRequest from "../../api/mainRequest";
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { getClinicService } from "../../services/clinic.service";
-import { getDoctorsInClinic, getDoctorAvailableSlots } from "../../services/doctor.service";
+import { getDoctorsInClinic, getDoctorAvailableSlotsByDoctorId } from "../../services/doctor.service";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import { Button, message } from "antd";
@@ -81,7 +81,7 @@ const ResultExaminationModal = ({
   // Lấy slots trống khi chọn bác sĩ
   useEffect(() => {
     if (to_doctor_id) {
-      getDoctorAvailableSlots(Number(to_doctor_id))
+      getDoctorAvailableSlotsByDoctorId(Number(to_doctor_id))
         .then((res: any) => {
           setAvailableSlots([{
             slot_date: "",

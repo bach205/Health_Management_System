@@ -3,6 +3,7 @@ import { useState } from "react";
 import { specialtyOptions, TYPE_EMPLOYEE_STR } from "../../constants/user.const";
 import type { IUserBase } from "../../types/index.type";
 import dayjs from "dayjs";
+import Uploader from "../../pages/Profile/Uploader";
 
 interface IProps {
   isVisible: boolean;
@@ -10,10 +11,18 @@ interface IProps {
   handleCancel: () => void;
   form: FormInstance;
   role: IUserBase["role"];
+  user?: any;
+  reload: boolean;
+  setReload: (reload: boolean) => void;
 }
 
-const ModalUpdateUser = ({ role, isVisible, handleOk, handleCancel, form }: IProps) => {
+const ModalUpdateUser = ({ role, isVisible, handleOk, handleCancel, form, user, reload, setReload }: IProps) => {
   const [specialty, setSpecialty] = useState<string>("internal");
+  
+  const handleReload = () => {
+    handleCancel();
+    setReload(!reload);
+  }
   return (
     <Modal
       open={isVisible}
@@ -26,6 +35,11 @@ const ModalUpdateUser = ({ role, isVisible, handleOk, handleCancel, form }: IPro
       centered
 
     >
+      <Uploader
+        user={user}
+        reload={reload}
+        setReload={handleReload}
+      ></Uploader>
       <Form
         name="updateUserForm"
         form={form}
