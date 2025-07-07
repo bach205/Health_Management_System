@@ -168,7 +168,7 @@ class AppointmentService {
         clinic_id: appointment.clinic_id,
         slot_date: appointment.appointment_date,
         slot_time: (typeof appointment.appointment_time === 'string') ? appointment.appointment_time : appointment.appointment_time.toTimeString().slice(0,8),
-        registered_online: 1 // 1: online, 0: walk-in
+        registered_online: true // 1: online, 0: walk-in
       });
     } catch (err) {
       console.error('Không thể cấp số thứ tự cho queue:', err.message);

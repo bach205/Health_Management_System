@@ -86,6 +86,9 @@ class QueueService {
     to_clinic_id,
     record_id,
     priority = 2, // Mặc định priority cao nhất cho chuyển phòng
+    slot_date,    // Thêm tham số này
+    slot_time,    // Thêm tham số này
+    registered_online = false // Thêm tham số này
   }) {
     // 1. Tìm queue hiện tại của bệnh nhân (chưa done và đang khám)
     const currentQueue = await prisma.queue.findFirst({
@@ -120,19 +123,26 @@ class QueueService {
       throw new Error("Bệnh nhân đã có trong hàng đợi phòng này.");
     }
 
-    // 4. Tạo mới bản ghi queue ở phòng khám mới
-    const newQueue = await prisma.queue.create({
-      data: {
-        patient_id,
-        clinic_id: to_clinic_id,
-        record_id,
-        status: "waiting",
-        priority,
-      },
-      include: { patient: true },
+    // 4. Tạo mới bản ghi queue ở phòng khám mới bằng assignQueueNumber
+    const newQueue = await QueueService.assignQueueNumber({
+      appointment_id: null,
+      patient_id,
+      clinic_id: to_clinic_id,
+      slot_date,
+      slot_time,
+      registered_online
     });
 
-    // 5. Emit socket event để thông báo cho phòng khám mới
+    // 5. Cập nhật record_id và priority nếu cần
+    await prisma.queue.update({
+      where: { id: newQueue.id },
+      data: {
+        record_id,
+        priority
+      }
+    });
+
+    // 6. Emit socket event để thông báo cho phòng khám mới
     const io = getIO();
     if (io) {
       io.to(`clinic_${to_clinic_id}`).emit("queue:assigned", {
@@ -225,16 +235,14 @@ class QueueService {
     });
     if (existingQueue) throw new Error("Đã check-in vào hàng đợi!");
 
-    // 3. Tạo queue mới với priority từ appointment
-    const newQueue = await prisma.queue.create({
-      data: {
-        patient_id: appointment.patient_id,
-        clinic_id: appointment.clinic_id,
-        appointment_id: appointment.id,
-        status: "waiting",
-        priority: appointment.priority || 0,
-      },
-      include: { patient: true },
+    // 3. Gọi assignQueueNumber để tạo queue mới
+    const newQueue = await QueueService.assignQueueNumber({
+      appointment_id: appointment.id,
+      patient_id: appointment.patient_id,
+      clinic_id: appointment.clinic_id,
+      slot_date: appointment.appointment_date,
+      slot_time: (typeof appointment.appointment_time === 'string') ? appointment.appointment_time : appointment.appointment_time.toTimeString().slice(0,8),
+      registered_online: true
     });
 
     // 4. Emit socket event
@@ -311,7 +319,7 @@ class QueueService {
     clinic_id,
     slot_date,
     slot_time,
-    registered_online = 1 // 1: online, 0: walk-in
+    registered_online = true // 1: online, 0: walk-in
   }) {
     const shift = this.getShiftTypeAndRange(slot_time);
     if (!shift) throw new Error("Giờ khám không thuộc ca nào!");
