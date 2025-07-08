@@ -1,5 +1,5 @@
 -- Create and use the hospital database
-CREATE DATABASE hospital;
+
 USE hospital;
 
 -- Disable safe update mode to allow updates without WHERE clause on key columns
@@ -40,7 +40,7 @@ CREATE TABLE clinics (
     name VARCHAR(255) NOT NULL COMMENT 'Specialty name',
     description TEXT COMMENT 'Clinic description'
 );
-
+select *from users;
 -- Table for doctors
 -- Thông tin mở rộng từ user (bác sĩ)
 CREATE TABLE doctors (
@@ -778,7 +778,58 @@ UPDATE doctors SET price = 380000 WHERE user_id = 25; -- Chẩn đoán hình ả
 -- SET SQL_SAFE_UPDATES = 1;
 ALTER TABLE queues
   ADD COLUMN queue_number INT,
-  ADD COLUMN shift_type VARCHAR(20)
+  ADD COLUMN shift_type VARCHAR(20);
+CREATE TABLE conversations (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(255),
+  type ENUM('direct', 'group') DEFAULT 'direct',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  last_message_at DATETIME
+);
 
+CREATE TABLE conversation_participants (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  conversationId INT NOT NULL,
+  userId INT NOT NULL,
+  
+  CONSTRAINT fk_conversation FOREIGN KEY (conversationId) REFERENCES conversations(id) ON DELETE CASCADE,
+  CONSTRAINT fk_user FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE,
 
+  UNIQUE KEY unique_participant (conversationId, userId)
+);
+CREATE TABLE chats (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  text TEXT,
+  file_url TEXT,
+  file_name VARCHAR(255),
+  file_type VARCHAR(50),
+  message_type ENUM('text', 'image', 'file', 'audio', 'video') DEFAULT 'text',
+  toId INT NOT NULL,
+  sendById INT NOT NULL,
+  conversationId INT NOT NULL,
+  is_read BOOLEAN DEFAULT FALSE,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
+  CONSTRAINT fk_chat_to FOREIGN KEY (toId) REFERENCES users(id) ON DELETE CASCADE,
+  CONSTRAINT fk_chat_send_by FOREIGN KEY (sendById) REFERENCES users(id) ON DELETE CASCADE,
+  CONSTRAINT fk_chat_conversation FOREIGN KEY (conversationId) REFERENCES conversations(id) ON DELETE CASCADE
+);
+select *from users;
+
+INSERT INTO conversations (name, type, last_message_at)
+VALUES ('admin - drminh', 'direct', NOW());
+SELECT LAST_INSERT_ID() AS conversationId;
+
+-- admin (user_id = 1)
+INSERT INTO conversation_participants (conversationId, userId)
+VALUES (2, 1);
+
+-- bác sĩ Minh (user_id = 2)
+INSERT INTO conversation_participants (conversationId, userId)
+VALUES (2, 2);
+
+INSERT INTO chats (text, toId, sendById, conversationId, message_type, is_read)
+VALUES ('Chào bác sĩ Minh!', 2, 1, 2, 'text', FALSE);
+select * from doctors;
