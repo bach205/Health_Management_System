@@ -11,7 +11,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       <Sidebar role={user?.role || ""} isCollapsed={isCollapsed} />
       <div className="flex-1 overflow-y-auto">
         <Topbar isCollapsed={isCollapsed} setCollapsed={setIsCollapsed} />
-        <div className="px-12 pt-10 rounded-t-3xl shadow-md bg-[#F4F7FB] min-h-full">
+        <div className="px-12 rounded-t-3xl shadow-md bg-[#F4F7FB] min-h-full">
           {children}
         </div>
       </div>

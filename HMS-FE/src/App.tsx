@@ -43,6 +43,8 @@ import MedicineDashboard from "./pages/Admin/Medicine/AdminMedicineDashboard";
 import AdminSpecialtyDashboard from "./pages/Admin/Specialty/AdminSpecialtyDashboard";
 import AdminDashboard from "./pages/Admin/Dashboard/AdminDashboard";
 import ForgetPage from "./pages/ForgetPage";
+import ChatPage from "./pages/Chat";
+
 dayjs.extend(plugin);
 dayjs.updateLocale("en", {
   weekStart: 1,
@@ -267,6 +269,13 @@ const PrivateRoutes: PrivateRoute[] = [
     layout: DashboardLayout,
     allowedRoles: ["admin"],
   },
+  {
+    path: "/chat",
+    element: <ChatPage />,
+    layout: DashboardLayout,
+    allowedRoles: ["admin", "doctor", "nurse", "patient"],
+  },
+
 
 
 ];
