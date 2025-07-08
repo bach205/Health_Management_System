@@ -13,6 +13,7 @@ import {
   LucideFileText,
   Pill,
   Stethoscope,
+  MessageCircle,
 } from "lucide-react";
 import type { JSX } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -230,6 +231,18 @@ const SIDEBAR_ITEMS = [
         label: "Documents",
         icon: <FileText className="w-4 h-4" />,
         href: "/admin/documents",
+      },
+    ],
+  },
+  {
+    id: 7,
+    label: "Chat",
+    items: [
+      {
+        id: "chat",
+        label: "Chat",
+        icon: <MessageCircle className="w-4 h-4" />,
+        href: "/chat",
       },
     ],
   },
