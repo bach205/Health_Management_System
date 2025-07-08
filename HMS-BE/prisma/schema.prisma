@@ -418,13 +418,20 @@ model AvailableSlot {
 model Conversation {
   id         Int       @id @default(autoincrement())
   name       String?   @db.VarChar(255)
+  type       ConversationType @default(direct) // direct: 1-1, group: nhiều người
   created_at DateTime? @default(now())
   updated_at DateTime? @default(now()) @updatedAt
+  last_message_at DateTime? // Thời gian tin nhắn cuối cùng
 
   chats        Chat[]
   participants ConversationParticipant[]
 
   @@map("conversations")
+}
+
+enum ConversationType {
+  direct
+  group
 }
 
 model ConversationParticipant {
@@ -442,12 +449,17 @@ model ConversationParticipant {
 
 model Chat {
   id             Int       @id @default(autoincrement())
-  text           String    @db.Text
-  file           String?   @db.Text
+  text           String?   @db.Text
+  file_url       String?   @db.Text
+  file_name      String?   @db.VarChar(255)
+  file_type      String?   @db.VarChar(50)
+  message_type   MessageType @default(text) // text, image, file, audio, video
   toId           Int
   sendById       Int
   conversationId Int
+  is_read        Boolean   @default(false)
   created_at     DateTime? @default(now())
+  updated_at     DateTime? @default(now()) @updatedAt
 
   to           User         @relation("ChatTo", fields: [toId], references: [id], onDelete: Cascade)
   sendBy       User         @relation("ChatSendBy", fields: [sendById], references: [id], onDelete: Cascade)
@@ -456,5 +468,14 @@ model Chat {
   @@index([conversationId], map: "conversation_id")
   @@index([sendById], map: "send_by_id")
   @@index([toId], map: "to_id")
+  @@index([is_read], map: "is_read")
   @@map("chats")
+}
+
+enum MessageType {
+  text
+  image
+  file
+  audio
+  video
 }
