@@ -36,7 +36,7 @@ class NotificationService {
     }
 
     async markAllAsRead(userId) {
-        return prisma.notification.updateMany({
+        return prisma.notificationItems.updateMany({
             where: {
                 userId: userId,
                 isSeen: false,
@@ -49,7 +49,7 @@ class NotificationService {
 
 
     // async deleteNotification(notificationId) {
-    //     return prisma.notification.delete({
+    //     return prisma.notificationItems.delete({
     //         where: { id: notificationId },
     //     });
     // }

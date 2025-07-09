@@ -33,6 +33,7 @@ class NotificationController {
     }
     async markAllAsRead(req, res, next) {
         try {
+            console.log(req.user)
             const notification = await NotificationService.markAllAsRead(req.user.id);
             res.status(200).json(notification);
         } catch (err) {
