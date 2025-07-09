@@ -1,6 +1,7 @@
 const prisma = require("../config/prisma");
 const { getIO } = require("../config/socket.js");
 const ExaminationRecordService = require("./examinationRecord.service");
+const { sendPatientQueueNumberEmail } = require("../utils/staff.email");
 
 class QueueService {
   /**
@@ -349,9 +350,85 @@ class QueueService {
         shift_type: type,
         slot_date,
         created_at: new Date(),
+      },
+      include: {
+        patient: {
+          include: {
+            user: true
+          }
+        },
+        appointment: appointment_id ? {
+          include: {
+            doctor: true,
+            clinic: true
+          }
+        } : false,
+        clinic: true
       }
     });
+
+    // Gửi email thông báo số thứ tự cho bệnh nhân
+    try {
+      if (newQueue.patient?.user?.email) {
+        await sendPatientQueueNumberEmail(
+          newQueue.patient.user.email,
+          newQueue.patient.user.full_name || "Bệnh nhân",
+          newQueue.queue_number,
+          newQueue.shift_type,
+          newQueue.slot_date instanceof Date ? newQueue.slot_date.toISOString().slice(0,10) : newQueue.slot_date,
+          slot_time,
+          newQueue.appointment?.doctor?.full_name || "Bác sĩ chưa xác định",
+          newQueue.clinic?.name || "Phòng khám"
+        );
+      }
+    } catch (err) {
+      console.error('Không thể gửi email thông báo số thứ tự:', err.message);
+    }
+
     return newQueue;
+  }
+
+  /**
+   * Lấy danh sách queue của tất cả bệnh nhân theo ngày
+   * @param {string} dateStr - Ngày cần lấy (YYYY-MM-DD), nếu không có sẽ lấy hôm nay
+   * @returns {Promise<Array>} Danh sách queue theo ngày
+   */
+  static async getQueuesByDate(dateStr) {
+    let date;
+    if (dateStr) {
+      date = new Date(dateStr);
+      date.setHours(0, 0, 0, 0);
+    } else {
+      date = new Date();
+      date.setHours(0, 0, 0, 0);
+    }
+    const nextDay = new Date(date);
+    nextDay.setDate(date.getDate() + 1);
+
+    const queues = await prisma.queue.findMany({
+      where: {
+        slot_date: {
+          gte: date,
+          lt: nextDay
+        },
+        status: {
+          in: ["waiting", "in_progress"]
+        }
+      },
+      orderBy: [
+        { slot_date: "asc" },
+        { queue_number: "asc" }
+      ],
+      include: {
+        patient: {
+          include: {
+            user: true
+          }
+        },
+        clinic: true
+      }
+    });
+    return queues;
   }
 }
 
