@@ -1,7 +1,10 @@
 import React from "react";
 import { assets } from "../../assets/assets.ts";
 
+
+
 const Header: React.FC = () => {
+
   return (
     <div className="containter flex flex-col md:flex-row flex-wrap bg-[#5f6fff]  px-6 md:px-10 lg:px-20">
       {/*------------------------Left Side------------------------------------ */}
@@ -30,6 +33,7 @@ const Header: React.FC = () => {
       </div>
       {/*------------------------Right Side ------------------------------ */}
       <div className="md:w-1/2 relative">
+
         <img
           className="w-full md:absolute bottom-0 h-auto rounded-lg"
           src={assets.header_img}

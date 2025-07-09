@@ -8,7 +8,7 @@ import ExaminationOrderModal from "../../../components/doctor/ExaminationOrderMo
 import ResultExaminationModal from "../../../components/doctor/ResultExaminationModal";
 import ExaminationRecordModal from "../../../components/doctor/ExaminationRecordModal";
 import { useAuthStore } from "../../../store/authStore";
-import { useSocket } from "../../../hooks/useSocket";
+import { useSocket } from "../../../hooks/socket/useSocket";
 import { updateQueueStatus } from "../../../services/queue.service";
 import { Button, Dropdown, Flex, Menu, message, Select, Space, Table, Tag, Tooltip, Typography } from "antd";
 import ModalPatientExaminationOrder from "./ModalPatientExaminationOrder";

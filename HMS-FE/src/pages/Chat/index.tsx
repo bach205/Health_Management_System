@@ -1,7 +1,7 @@
 import React from 'react';
 import ChatWindow from '../../components/chat/ChatWindow';
 import ConversationList from '../../components/chat/ConversationList';
-import { useChat } from '../../hooks/useChat';
+import { useChat } from '../../hooks/socket/useChat';
 
 
 const ChatPage: React.FC = () => {

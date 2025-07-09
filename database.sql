@@ -847,3 +847,25 @@ VALUES (2, 2);
 INSERT INTO chats (text, toId, sendById, conversationId, message_type, is_read)
 VALUES ('Chào bác sĩ Minh!', 2, 1, 2, 'text', FALSE);
 select * from doctors;
+
+
+-- Tạo bảng cho notification feature
+CREATE TABLE `notification_items` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `message` TEXT NOT NULL,
+  `isSeen` BOOLEAN NOT NULL DEFAULT FALSE,
+  `navigate_url` TEXT NOT NULL,
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `userId` INT NOT NULL,
+
+  CONSTRAINT `fk_notification_user` FOREIGN KEY (`userId`) REFERENCES `Users`(`id`)
+);
+
+--Tạo bảng cho documents cho rag 
+CREATE TABLE documents (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    file_name VARCHAR(200) CHARACTER SET utf8mb4,
+    file_location VARCHAR(200) CHARACTER SET utf8mb4 UNIQUE,
+    user_id INT
+);

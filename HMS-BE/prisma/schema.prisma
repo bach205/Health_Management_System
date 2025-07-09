@@ -38,6 +38,7 @@ model User {
   chatsSent                Chat[]                    @relation("ChatSendBy")
   chatsReceived            Chat[]                    @relation("ChatTo")
   conversationParticipants ConversationParticipant[]
+  notifications NotificationItems[]
 
   @@map("users")
 }
@@ -482,3 +483,19 @@ enum MessageType {
   audio
   video
 }
+
+model NotificationItems {
+  id           Int     @id @default(autoincrement())
+  message      String  @db.Text
+  isSeen       Boolean @default(false)
+  navigate_url String  @db.Text
+  created_at    DateTime    @default(now())
+  updated_at    DateTime    @updatedAt
+
+  // Thêm quan hệ tới User
+  userId       Int
+  user         User    @relation(fields: [userId], references: [id])
+
+  @@map("notification_items")
+}
+
