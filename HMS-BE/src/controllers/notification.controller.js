@@ -15,7 +15,7 @@ class NotificationController {
         try {
             const userId = req.user.id;
             const { limit, offset } = req.query
-            const notifications = await NotificationService.getNotificationsByUser(userId, offset, limit);
+            const notifications = await NotificationService.getNotificationsByUser(userId, Number(offset), Number(limit));
             res.status(200).json(notifications);
         } catch (err) {
             next(err);
