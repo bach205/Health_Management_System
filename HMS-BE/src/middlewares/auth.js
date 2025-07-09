@@ -5,6 +5,8 @@ const authenticate = (req, res, next) => {
     try {
 
         const authHeader = req.headers.authorization;
+        console.log(authHeader)
+        //console.log("authHeader: ", authHeader);
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
             return res.status(401).json({
                 message: 'No token provided',
@@ -18,7 +20,7 @@ const authenticate = (req, res, next) => {
         req.user = decoded;
         next();
     } catch (error) {
-        console.log(error)
+       // console.log(error)
 
         // Xử lý lỗi token expired cụ thể
         if (error.name === 'TokenExpiredError') {
@@ -46,10 +48,9 @@ const authenticate = (req, res, next) => {
 
 const authorize = (...roles) => {
     return (req, res, next) => {
-        console.log("roles: ", req.user.role);
         if (!roles.includes(req.user.role)) {       
             return res.status(403).json({
-                message: 'You do not have permission to perform th  is action'
+                message: 'You do not have permission to perform this action'
             });
         }
         next();

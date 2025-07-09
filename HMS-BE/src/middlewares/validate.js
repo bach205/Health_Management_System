@@ -1,10 +1,9 @@
 module.exports = function validate(schemas) {
     return (req, res, next) => {
-    
         const validationErrors = [];
         if (schemas.body) {
             const { error } = schemas.body.validate(req.body, { abortEarly: false });
-            
+            console.log("error: ", error);
             if (error) {
                 validationErrors.push(...error.details.map((d) => d.message));
             }

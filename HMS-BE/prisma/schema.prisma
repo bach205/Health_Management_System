@@ -253,6 +253,9 @@ model Queue {
   qr_code           String?
   called_at         DateTime?
   created_at        DateTime    @default(now())
+  shift_type        String?
+  queue_number      Int?
+  slot_date         DateTime?
 
   patient     Patient            @relation(fields: [patient_id], references: [id])
   clinic      Clinic             @relation(fields: [clinic_id], references: [id])

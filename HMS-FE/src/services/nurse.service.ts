@@ -14,7 +14,7 @@ export const getAllNurse = async (params?: { keyword?: string; sort?: string }) 
 }
 
 export const updateNurse = async (id: number, nurse: IUserBase) => {
-  console.log(nurse)
+  //console.log(nurse)
   return await instance.put(`${BASE_URL}/update/${id}`, nurse);
 };
 

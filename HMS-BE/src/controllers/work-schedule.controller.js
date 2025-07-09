@@ -70,6 +70,7 @@ class WorkScheduleController {
         data: workSchedule,
       });
     } catch (error) {
+      console.log("error: ", error);
       res.status(error.statusCode || 500).json({
         success: false,
         message: error.message || "Đã xảy ra lỗi khi cập nhật lịch làm việc",
