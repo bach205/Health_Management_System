@@ -1,9 +1,9 @@
-import { Bell, Menu, User } from "lucide-react";
-import { IMAGE_CONST } from "../../constants/image.const";
 import { Button, Flex, Tooltip } from "antd";
+import { Menu, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useAuthStore } from "../../store/authStore";
 import useAuth from "../../hooks/useAuth";
+import { useAuthStore } from "../../store/authStore";
+import Notification from "../MainLayout/Notification";
 const Topbar = ({ isCollapsed, setCollapsed }: { isCollapsed: boolean; setCollapsed: (isCollapsed: boolean) => void }) => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
@@ -18,6 +18,10 @@ const Topbar = ({ isCollapsed, setCollapsed }: { isCollapsed: boolean; setCollap
       </div>
       <div className="flex items-center gap-2">
         <Flex>
+          <Tooltip title="Thông Báo" placement="bottom">
+            <Notification />
+          </Tooltip>
+
           <Tooltip title="Sửa thông tin" placement="bottom">
             <Button type="text"
               onClick={() => user?.role === "doctor" ? navigate("/doctor-profile") : navigate("/staff-profile")}
@@ -29,6 +33,7 @@ const Topbar = ({ isCollapsed, setCollapsed }: { isCollapsed: boolean; setCollap
 
             </Button>
           </Tooltip>
+
           <Tooltip title="Đăng xuất" placement="bottom">
             <Button type="text" onClick={() => auth.handleLogout()} >
               Đăng xuất

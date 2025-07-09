@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 import useQueue from "../../../hooks/useQueue";
 import { getQueueStatus } from "../../../types/queue.type";
 import { useAuthStore } from "../../../store/authStore";
-import { useSocket } from "../../../hooks/useSocket";
+import { useSocket } from "../../../hooks/socket/useSocket";
 import { Button, Flex, Select, Space, Table, Tag, Tooltip, Typography } from "antd";
 import { RefreshCcw } from "lucide-react";
 import dayjs from "dayjs";
@@ -250,7 +250,7 @@ const PatientQueueTable = () => {
                 size="middle"
                 scroll={{ y: 400 }}
             />
- 
+
         </div>
     );
 };
