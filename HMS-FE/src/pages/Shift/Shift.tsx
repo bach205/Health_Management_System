@@ -35,7 +35,7 @@ const convertHHmmToISOString = (time: string) => {
 
 function ShiftManager() {
   const [shifts, setShifts] = useState<Shift[]>([]);
-  const [change,setChange] = useState(true);
+  const [change, setChange] = useState(true);
   const [form] = Form.useForm();
   const [modalVisible, setModalVisible] = React.useState(false);
   const [editingShift, setEditingShift] = React.useState<Shift | null>(null);
@@ -46,20 +46,21 @@ function ShiftManager() {
 
   useEffect(() => {
     const fetchShifts = async () => {
-        const res = await getShiftService();
-        const rawShifts = res.data.data;
-        const formattedShifts = rawShifts.map((shift: any) => ({
-          id: shift.id,
-          name: shift.name,
-          start_time: formatDateToHHmm(shift.start_time),
-          end_time: formatDateToHHmm(shift.end_time),
-        }));
-        
-        setShifts(formattedShifts);      
+      const res = await getShiftService();
+      console.log(res.data.data);
+      const rawShifts = res.data.data;
+      const formattedShifts = rawShifts.map((shift: any) => ({
+        id: shift.id,
+        name: shift.name,
+        start_time: formatDateToHHmm(shift.start_time),
+        end_time: formatDateToHHmm(shift.end_time),
+      }));
+
+      setShifts(formattedShifts);
     };
     fetchShifts();
   }, [change]);
- 
+
   const openModal = (shift?: Shift) => {
     if (shift) {
       setEditingShift(shift);
@@ -98,8 +99,8 @@ function ShiftManager() {
       try {
         await updateShiftService(payload, editingShift.id.toString());
         setShifts(prev =>
-          prev.map(s => (s.id === editingShift.id ? { 
-            ...s, 
+          prev.map(s => (s.id === editingShift.id ? {
+            ...s,
             name: values.name,
             start_time: values.start_time.format('HH:mm'),
             end_time: values.end_time.format('HH:mm')
@@ -189,10 +190,10 @@ function ShiftManager() {
       key: 'action',
       render: (_: any, record: Shift) => (
         <>
-          <Button onClick={() => openViewModal(record)} size="small" style={{ marginRight: 8 }}><Eye size={15}/></Button>
-          <Button onClick={() => openModal(record)} size="small"><PenLine size={15}/></Button>
+          <Button onClick={() => openViewModal(record)} size="small" style={{ marginRight: 8 }}><Eye size={15} /></Button>
+          <Button onClick={() => openModal(record)} size="small"><PenLine size={15} /></Button>
           <Popconfirm title="Xoá?" onConfirm={() => handleDelete(record.id)}>
-            <Button danger size="small" className="ml-2"><Delete size={15}/></Button>
+            <Button danger size="small" className="ml-2"><Delete size={15} /></Button>
           </Popconfirm>
         </>
       ),
@@ -212,7 +213,7 @@ function ShiftManager() {
         onOk={() => form.submit()}
       >
         <Form form={form} layout="vertical" onFinish={handleSubmit}>
-          <Form.Item name="name" label="Tên ca" rules={[{ required: true, message: 'Vui lòng nhập tên ca' }]}> 
+          <Form.Item name="name" label="Tên ca" rules={[{ required: true, message: 'Vui lòng nhập tên ca' }]}>
             <Input placeholder="Nhập tên ca (ví dụ: Sáng)" disabled />
           </Form.Item>
           <Form.Item
@@ -254,9 +255,9 @@ function ShiftManager() {
         footer={null}
         onCancel={() => setViewModalVisible(false)}
       >
-        
+
         {viewShift && (
-         
+
           <div>
             <p><strong>Tên ca:</strong> {viewShift.name}</p>
             <p><strong>Giờ bắt đầu:</strong> {viewShift.start_time}</p>

@@ -14,7 +14,7 @@ const shiftRouter = express.Router();
 shiftRouter.get(
   "/",
   authenticate,
-  // authorize(["admin", "doctor", "nurse"]),
+  authorize("admin", "doctor", "nurse"),
   asyncHandler(shiftController.getShifts)
 );
 
@@ -22,7 +22,7 @@ shiftRouter.get(
 shiftRouter.get(
   "/:id",
   authenticate,
-  // authorize(["admin", "doctor", "nurse"]),
+  authorize("admin", "doctor", "nurse"),
   asyncHandler(shiftController.getShiftById)
 );
 
@@ -30,7 +30,7 @@ shiftRouter.get(
 shiftRouter.post(
   "/",
   authenticate,
-  // authorize(["admin"]),
+  authorize("admin"),
   validate({ body: createShiftSchema }),
   asyncHandler(shiftController.createShift)
 );
@@ -39,7 +39,7 @@ shiftRouter.post(
 shiftRouter.put(
   "/:id",
   authenticate,
-  // authorize(["admin"]),
+  authorize("admin"),
   validate({ body: updateShiftSchema }),
   asyncHandler(shiftController.updateShift)
 );
@@ -48,7 +48,7 @@ shiftRouter.put(
 shiftRouter.delete(
   "/:id",
   authenticate,
-  // authorize(["admin"]),
+  authorize("admin"),
   asyncHandler(shiftController.deleteShift)
 );
 

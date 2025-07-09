@@ -159,7 +159,8 @@ class WorkScheduleService {
       if (error) {
         throw new BadRequestError(error.details[0].message);
       }
-
+      console.log("updateData: ", updateData);
+      updateData.work_date = new Date(updateData.work_date);
       // Check if work schedule exists
       const existingSchedule = await prisma.workSchedule.findUnique({
         where: { id: parseInt(id) },

@@ -36,7 +36,7 @@ doctorRouter.get(
   "/",
   authenticate,
   checkUserStatus(),
-  //authorize("admin"),
+  authorize("admin"),
   asyncHandler(doctorController.getAllDoctors),
   doctorController.getAllDoctors
 );
@@ -45,7 +45,7 @@ doctorRouter.post(
   "/update",
   authenticate,
   checkUserStatus(),
-  // authorize("admin"),
+  authorize("admin"),
   asyncHandler(doctorController.updateDoctor),
   doctorController.updateDoctor
 );
@@ -70,8 +70,8 @@ doctorRouter.post(
 
 doctorRouter.get(
   "/:id",
-  // authenticate,
-  // authorize("admin"),
+  authenticate,
+  authorize("admin"),
   asyncHandler(doctorController.getDoctorById),
   doctorController.getDoctorById
 );

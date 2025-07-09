@@ -18,7 +18,7 @@ clinicRouter.get("/:id", asyncHandler(ClinicController.getClinicById));
 clinicRouter.post(
   "/create",
   authenticate,
-  // authorize("admin"),
+  authorize("admin"),
   validate({ body: createClinicSchema }),
   asyncHandler(ClinicController.createClinic)
 );
@@ -26,7 +26,7 @@ clinicRouter.post(
 clinicRouter.put(
   "/update/:id",
   authenticate,
-  // authorize("admin"),
+  authorize("admin"),
   validate({ body: updateClinicSchema }),
   asyncHandler(ClinicController.updateClinic)
 );
@@ -34,13 +34,14 @@ clinicRouter.put(
 clinicRouter.delete(
   "/delete/:id",
   authenticate,
-  // authorize("admin"),
+  authorize("admin"),
   asyncHandler(ClinicController.deleteClinic)
 );
 
 clinicRouter.get(
   "/clinics-for-doctor",
   authenticate,
+  authorize("admin"),
   asyncHandler(ClinicController.getAllClinicsForDoctor)
 );
 

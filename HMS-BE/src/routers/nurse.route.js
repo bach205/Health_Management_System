@@ -11,24 +11,28 @@ nurseRouter.use(checkUserStatus());
 
 // Routes that require admin authorization
 nurseRouter.post("/create",
+    authenticate,
     authorize("admin"),
     async (req, res) => {
         return await NurseController.createNurse(req, res);
     });
 
 nurseRouter.put("/update/:id",
+    authenticate,
     authorize("admin"),
     async (req, res) => {
         return await NurseController.updateNurse(req, res);
     });
 
 nurseRouter.put("/ban/:id",
+    authenticate,
     authorize("admin"),
     async (req, res) => {
         return await NurseController.banNurse(req, res);
     });
 
 nurseRouter.put("/reset-password/:id",
+    authenticate,
     authorize("admin"),
     async (req, res) => {
         return await NurseController.resetPassword(req, res);
@@ -36,12 +40,14 @@ nurseRouter.put("/reset-password/:id",
 
 // Routes that allow both admin and staff to access
 nurseRouter.get("/get-all-nurse",
+    authenticate,
     authorize("admin", "doctor", "nurse"),
     async (req, res) => {
         return await NurseController.getAllNurse(req, res);
     });
 
 nurseRouter.delete("/delete/:id",
+    authenticate,
     authorize("admin"),
     async (req, res) => {
         return await NurseController.deleteNurse(req, res);
