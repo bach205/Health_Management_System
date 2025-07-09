@@ -7,7 +7,19 @@ const ListNotification = ({
     modalRef,
     setOpen,
     notifications,
-}: ListNotificationProps) => {
+    loadMoreNotifications,
+    hasMore
+}: ListNotificationProps & { loadMoreNotifications: () => void, hasMore: boolean }) => {
+    const listRef = useRef<HTMLUListElement>(null);
+
+    // Gọi loadMore khi scroll tới cuối
+    const handleScroll = (e: React.UIEvent<HTMLUListElement>) => {
+        const el = e.currentTarget;
+        if (el.scrollTop + el.clientHeight >= el.scrollHeight - 10 && hasMore) {
+            loadMoreNotifications();
+        }
+    };
+
     return (
         <div
             ref={modalRef}
@@ -23,7 +35,11 @@ const ListNotification = ({
                     Đóng
                 </button>
             </div>
-            <ul className="max-h-60 overflow-y-auto space-y-2">
+            <ul
+                ref={listRef}
+                className="max-h-60 overflow-y-auto space-y-2"
+                onScroll={handleScroll}
+            >
                 {notifications.length === 0 ? (
                     <li className="text-center text-gray-400 py-4">
                         Không có thông báo nào
@@ -41,17 +57,19 @@ const ListNotification = ({
                         </li>
                     ))
                 )}
+                {hasMore && (
+                    <li className="text-center text-gray-400 py-2">Đang tải thêm...</li>
+                )}
             </ul>
         </div>
     );
 };
 
 export default function Notification() {
-    const { notifications, setNotifications, unseenCount, setUnseenCount, open, setOpen } = useNotificationSocket()
+    const { notifications, setNotifications, unseenCount, setUnseenCount, open, setOpen, loadMoreNotifications, hasMore } = useNotificationSocket()
 
     const modalRef = useRef<HTMLDivElement>(null);
     const bellRef = useRef<HTMLButtonElement>(null);
-
 
     // Đóng modal khi click ra ngoài
     useEffect(() => {
@@ -92,9 +110,11 @@ export default function Notification() {
             </button>
             {open && (
                 <ListNotification
-                    modalRef={modalRef}
+                    modalRef={modalRef as React.RefObject<HTMLDivElement>}
                     setOpen={setOpen}
                     notifications={notifications}
+                    loadMoreNotifications={loadMoreNotifications}
+                    hasMore={hasMore}
                 />
             )}
         </div>

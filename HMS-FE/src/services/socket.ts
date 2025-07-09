@@ -1,8 +1,9 @@
 import { io, Socket } from "socket.io-client";
-// import { useAuthStore } from '../store/authStore';
+
 const SOCKET_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
 let socket: Socket | null = null;
+let hasJoinedRoom = false;
 
 export const getSocket = (userId: string) => {
     if (!socket) {
@@ -10,10 +11,17 @@ export const getSocket = (userId: string) => {
             withCredentials: true,
             transports: ["websocket"],
             auth: {
-                token: localStorage.getItem("token")
+                token: localStorage.getItem("token"),
+            },
+        });
+
+        socket.on("connect", () => {
+            if (!hasJoinedRoom) {
+                socket?.emit("join", { userId });
+                hasJoinedRoom = true;
             }
         });
     }
-    socket.emit('join', { userId });
+
     return socket;
-}; 
+};
