@@ -47,7 +47,6 @@ CREATE TABLE doctors (
     user_id INT PRIMARY KEY COMMENT 'Tham chiếu đến users(id)',
     specialty VARCHAR(255) COMMENT 'Chuyên môn', -- này tạm thời t để đây
     bio TEXT COMMENT 'Giới thiệu',
-	rating DECIMAL(2,1) DEFAULT 0.0 COMMENT '(tối đa 9.9) Đánh giá trung bình, sửa rating trên backend', 
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
@@ -526,15 +525,8 @@ INSERT INTO doctors (user_id, specialty, bio) VALUES
 (25, 'Chẩn đoán hình ảnh', 'Chuyên gia về đọc và phân tích hình ảnh y khoa.');
 
 -- Update doctor average ratings based on the ratings data
-UPDATE doctors d 
-SET rating = (
-    SELECT ROUND(AVG(rating), 1)
-    FROM doctor_ratings dr 
-    WHERE dr.doctor_id = d.user_id
-)
-WHERE d.user_id IN (SELECT DISTINCT doctor_id FROM doctor_ratings);
 
--- Add new tables according to Prisma schema
+
 
 -- Table for specialties
 CREATE TABLE specialties (
@@ -649,8 +641,69 @@ UPDATE doctors SET price = 380000 WHERE user_id = 25; -- Chẩn đoán hình ả
 -- SET SQL_SAFE_UPDATES = 1;
 ALTER TABLE queues
   ADD COLUMN queue_number INT,
-  ADD COLUMN shift_type VARCHAR(20)
+  ADD COLUMN shift_type VARCHAR(20);
+
+SET SQL_SAFE_UPDATES = 0;
 
 
+  
+  ALTER TABLE queues
+ADD COLUMN slot_date DATE NULL;
+
+UPDATE queues q
+JOIN appointments a ON q.appointment_id = a.id
+SET q.slot_date = a.appointment_date
+WHERE q.queue_number IS NULL
+  AND q.appointment_id IS NOT NULL
+  AND q.id IS NOT NULL;
+  
+  UPDATE queues
+SET slot_date = DATE(created_at)
+WHERE queue_number IS NULL AND appointment_id IS NULL;
+
+UPDATE queues q
+JOIN appointments a ON q.appointment_id = a.id
+SET q.shift_type = 
+  CASE
+    WHEN a.appointment_time >= '08:00:00' AND a.appointment_time < '12:00:00' THEN 'morning'
+    WHEN a.appointment_time >= '13:00:00' AND a.appointment_time < '17:00:00' THEN 'afternoon'
+    WHEN a.appointment_time >= '18:00:00' AND a.appointment_time < '22:00:00' THEN 'night'
+    ELSE NULL
+  END
+WHERE q.queue_number IS NULL AND q.appointment_id IS NOT NULL;
+
+UPDATE queues
+SET shift_type = 
+  CASE
+    WHEN TIME(created_at) >= '08:00:00' AND TIME(created_at) < '12:00:00' THEN 'morning'
+    WHEN TIME(created_at) >= '13:00:00' AND TIME(created_at) < '17:00:00' THEN 'afternoon'
+    WHEN TIME(created_at) >= '18:00:00' AND TIME(created_at) < '22:00:00' THEN 'night'
+    ELSE NULL
+  END
+WHERE queue_number IS NULL AND appointment_id IS NULL;
+
+SET @clinic := 0;
+SET @date := '';
+SET @shift := '';
+SET @num := 0;
+
+UPDATE queues q
+JOIN (
+  SELECT 
+    id,
+    clinic_id,
+    slot_date,
+    shift_type,
+    @num := IF(@clinic = clinic_id AND @date = slot_date AND @shift = shift_type, @num + 1,
+               IF(shift_type = 'morning', 1, IF(shift_type = 'afternoon', 101, IF(shift_type = 'night', 201, 1)))
+    ) AS queue_number,
+    @clinic := clinic_id,
+    @date := slot_date,
+    @shift := shift_type
+  FROM queues
+  WHERE queue_number IS NULL
+  ORDER BY clinic_id, slot_date, shift_type, created_at
+) t ON q.id = t.id
+SET q.queue_number = t.queue_number;
 
 
