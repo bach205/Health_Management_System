@@ -3,7 +3,7 @@ const { BadRequestError } = require("../core/error.response");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 const QueueService = require("./queue.service");
-const { sendStaffNewPasswordEmail, sendPatientNewPasswordEmail } = require("../utils/staff.email");
+const { sendStaffNewPasswordEmail, sendPatientNewPasswordEmail, sendPatientAppointmentConfirmationEmail } = require("../utils/staff.email");
 
 class AppointmentService {
   /**
@@ -156,8 +156,39 @@ class AppointmentService {
       data: { status: "confirmed" },
       include: {
         patient: true,
+        doctor: true,
+        clinic: true,
       }
     });
+    // ====== GỌI CẤP SỐ THỨ TỰ CHO QUEUE ======
+    try {
+      await QueueService.assignQueueNumber({
+        appointment_id: appointment.id,
+        patient_id: appointment.patient_id,
+        clinic_id: appointment.clinic_id,
+        slot_date: appointment.appointment_date,
+        slot_time: (typeof appointment.appointment_time === 'string') ? appointment.appointment_time : appointment.appointment_time.toTimeString().slice(0,8),
+        registered_online: true // 1: online, 0: walk-in
+      });
+    } catch (err) {
+      console.error('Không thể cấp số thứ tự cho queue:', err.message);
+    }
+    // ====== GỬI MAIL XÁC NHẬN LỊCH HẸN ======
+    try {
+      if (appointment.patient && appointment.patient.email) {
+        await sendPatientAppointmentConfirmationEmail(
+          appointment.patient.email,
+          appointment.patient.full_name || "Bệnh nhân",
+          appointment.appointment_date instanceof Date ? appointment.appointment_date.toISOString().slice(0,10) : appointment.appointment_date,
+          (typeof appointment.appointment_time === 'string') ? appointment.appointment_time : appointment.appointment_time.toTimeString().slice(0,8),
+          appointment.doctor && appointment.doctor.full_name ? appointment.doctor.full_name : "",
+          appointment.clinic && appointment.clinic.name ? appointment.clinic.name : ""
+        );
+      }
+    } catch (err) {
+      console.error('Không thể gửi mail xác nhận lịch hẹn:', err.message);
+    }
+    // ====== END ======
     return appointment;
   }
 
