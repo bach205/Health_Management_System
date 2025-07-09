@@ -38,7 +38,7 @@ model User {
   chatsSent                Chat[]                    @relation("ChatSendBy")
   chatsReceived            Chat[]                    @relation("ChatTo")
   conversationParticipants ConversationParticipant[]
-  notifications            Notification[]
+  notifications NotificationItems[]
 
   @@map("users")
 }
@@ -481,16 +481,18 @@ enum MessageType {
   video
 }
 
-model Notification {
-  id        Int      @id @default(autoincrement())
-  userId    Int
-  content   String   @db.Text
-  type      String?  // Có thể là: info, warning, chat, appointment, ...
-  isRead    Boolean  @default(false)
-  createdAt DateTime @default(now())
+model NotificationItems {
+  id           Int     @id @default(autoincrement())
+  message      String  @db.Text
+  isSeen       Boolean @default(false)
+  navigate_url String  @db.Text
+  created_at    DateTime    @default(now())
+  updated_at    DateTime    @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Thêm quan hệ tới User
+  userId       Int
+  user         User    @relation(fields: [userId], references: [id])
 
-  @@index([userId])
-  @@map("notifications")
+  @@map("notification_items")
 }
+

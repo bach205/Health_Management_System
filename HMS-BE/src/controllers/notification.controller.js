@@ -14,8 +14,9 @@ class NotificationController {
     async getNotifications(req, res, next) {
         try {
             const userId = req.user.id;
-            const notifications = await NotificationService.getNotificationsByUser(userId);
-            res.json(notifications);
+            const { limit, offset } = req.query
+            const notifications = await NotificationService.getNotificationsByUser(userId, offset, limit);
+            res.status(200).json(notifications);
         } catch (err) {
             next(err);
         }
@@ -25,7 +26,15 @@ class NotificationController {
         try {
             const { id } = req.params;
             const notification = await NotificationService.markAsRead(id);
-            res.json(notification);
+            res.status(200).json(notification);
+        } catch (err) {
+            next(err);
+        }
+    }
+    async markAllAsRead(req, res, next) {
+        try {
+            const notification = await NotificationService.markAllAsRead(req.user.id);
+            res.status(200).json(notification);
         } catch (err) {
             next(err);
         }
