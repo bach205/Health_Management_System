@@ -4,14 +4,14 @@ const prisma = require("../config/prisma");
 class FeedbackService {
     // Create feedback for doctor
     async createFeedback(user, data) {
-        const { appointmentId, rating, comment, isAnonymous } = data;
+        const { appointment_id, rating, comment, is_anonymous } = data;
         // Validate input
-        if (!appointmentId || typeof rating !== 'number') {
+        if (!appointment_id || typeof rating !== 'number') {
             throw new BadRequestError("Thiếu thông tin bắt buộc");
         }
         // Get appointment
         const appointment = await prisma.appointment.findUnique({
-            where: { id: appointmentId },
+            where: { id: appointment_id },
             include: { patient: true }
         });
         if (!appointment) {
@@ -24,7 +24,7 @@ class FeedbackService {
         // Check if feedback already exists
         const existing = await prisma.doctorRating.findFirst({
             where: {
-                appointment_id: appointmentId,
+                appointment_id: appointment_id,
                 patient_id: appointment.patient_id,
                 doctor_id: appointment.doctor_id
             }
@@ -40,7 +40,7 @@ class FeedbackService {
                 appointment_id: appointment.id,
                 rating,
                 comment,
-                is_anonymous: isAnonymous
+                is_anonymous: is_anonymous
             }
         });
         return feedback;
@@ -65,7 +65,7 @@ class FeedbackService {
             data: {
                 rating: data.rating,
                 comment: data.comment,
-                is_anonymous: data.isAnonymous
+                is_anonymous: data.is_anonymous
             }
         });
         return updated;
