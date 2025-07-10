@@ -39,6 +39,7 @@ model User {
   chatsReceived            Chat[]                    @relation("ChatTo")
   conversationParticipants ConversationParticipant[]
   notifications NotificationItems[]
+  paymentTransactions     TbTransaction[]
 
   @@map("users")
 }
@@ -497,5 +498,23 @@ model NotificationItems {
   user         User    @relation(fields: [userId], references: [id])
 
   @@map("notification_items")
+}
+
+model TbTransaction {
+  id                  Int      @id @default(autoincrement())
+  gateway             String   @db.VarChar(100)
+  transaction_date    DateTime @db.Timestamp(0) @default(dbgenerated("'0000-00-00 00:00:00'"))
+  account_number      String?  @db.VarChar(100)
+  sub_account         String?  @db.VarChar(250)
+  amount_in           Decimal  @db.Decimal(20,2) @default(0.00)
+  amount_out          Decimal  @db.Decimal(20,2) @default(0.00)
+  accumulated         Decimal  @db.Decimal(20,2) @default(0.00)
+  code                String?  @db.VarChar(250)
+  transaction_content String?  @db.Text
+  reference_number    String?  @db.VarChar(255)
+  body                String?  @db.Text
+  created_at          DateTime @db.Timestamp(0) @default(now())
+
+  @@map("tb_transactions")
 }
 
