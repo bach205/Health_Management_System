@@ -11,23 +11,23 @@ Hệ thống quản lý bệnh viện gồm 3 thành phần chính:
 
 ### Cài đặt
 ```bash
-yarn install
+npm install
 ```
 
 ### Chạy server phát triển
 ```bash
-yarn dev
+npm run dev
 ```
 
 ### Chạy server production
 ```bash
-yarn start
+npm start
 ```
 
 - Cấu hình kết nối DB trong `.env` (tham khảo `.env.example`).
 - Sử dụng Prisma để migrate database:
 ```bash
-yarn prisma migrate dev
+npx prisma migrate dev
 ```
 
 ---
@@ -36,12 +36,12 @@ yarn prisma migrate dev
 
 ### Cài đặt
 ```bash
-yarn install
+npm install
 ```
 
 ### Chạy server phát triển
 ```bash
-yarn dev
+npm run dev
 ```
 
 - Mặc định FE chạy ở `http://localhost:5173`.
@@ -58,7 +58,7 @@ yarn dev
 
 ## Thông tin khác
 - Để biết chi tiết về các API (ví dụ: feedback, appointment, ...), xem tài liệu API hoặc liên hệ team backend.
-- Đảm bảo đã cài đặt Node.js >= 18, Yarn >= 1.22, MySQL >= 8.0.
+- Đảm bảo đã cài đặt Node.js >= 18, npm >= 9, MySQL >= 8.0.
 
 ---
 
