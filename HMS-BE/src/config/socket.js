@@ -42,11 +42,12 @@ const authToken = async (socket, next) => {
 
 const handleSocketConnected = (socket, io) => {
   console.log(`🔌 Client connected: ${socket.id}`);
+  socket.join(`user_${socket.user.id}`);
   // Khi user join
-  socket.on('join', ({ userId }) => {
-    console.log(`join user_${userId}`)
-    socket.join(`user_${userId}`);
-  });
+  // socket.on('join', ({ userId }) => {
+  //   console.log(`join user_${userId}`)
+  //   socket.join(`user_${userId}`);
+  // });
 
   // Gửi tin nhắn mới
   socket.on('send_message', async (data) => {
