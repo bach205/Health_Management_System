@@ -47,7 +47,6 @@ CREATE TABLE doctors (
     user_id INT PRIMARY KEY COMMENT 'Tham chiếu đến users(id)',
     specialty VARCHAR(255) COMMENT 'Chuyên môn', -- này tạm thời t để đây
     bio TEXT COMMENT 'Giới thiệu',
-	rating DECIMAL(2,1) DEFAULT 0.0 COMMENT '(tối đa 9.9) Đánh giá trung bình, sửa rating trên backend', 
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
@@ -830,23 +829,6 @@ CREATE TABLE chats (
   CONSTRAINT fk_chat_send_by FOREIGN KEY (sendById) REFERENCES users(id) ON DELETE CASCADE,
   CONSTRAINT fk_chat_conversation FOREIGN KEY (conversationId) REFERENCES conversations(id) ON DELETE CASCADE
 );
-select *from users;
-
-INSERT INTO conversations (name, type, last_message_at)
-VALUES ('admin - drminh', 'direct', NOW());
-SELECT LAST_INSERT_ID() AS conversationId;
-
--- admin (user_id = 1)
-INSERT INTO conversation_participants (conversationId, userId)
-VALUES (2, 1);
-
--- bác sĩ Minh (user_id = 2)
-INSERT INTO conversation_participants (conversationId, userId)
-VALUES (2, 2);
-
-INSERT INTO chats (text, toId, sendById, conversationId, message_type, is_read)
-VALUES ('Chào bác sĩ Minh!', 2, 1, 2, 'text', FALSE);
-select * from doctors;
 
 
 -- Tạo bảng cho notification feature
@@ -862,7 +844,7 @@ CREATE TABLE `notification_items` (
   CONSTRAINT `fk_notification_user` FOREIGN KEY (`userId`) REFERENCES `Users`(`id`)
 );
 
---Tạo bảng cho documents cho rag 
+-- Tạo bảng cho documents cho rag 
 CREATE TABLE documents (
     id INT PRIMARY KEY AUTO_INCREMENT,
     file_name VARCHAR(200) CHARACTER SET utf8mb4,

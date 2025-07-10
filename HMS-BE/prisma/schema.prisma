@@ -124,22 +124,22 @@ model Specialty {
 
 model DoctorRating {
   id            Int      @id @default(autoincrement())
-  doctorId      Int
-  patientId     Int
-  appointmentId Int?
+  doctor_id     Int
+  patient_id    Int
+  appointment_id Int?
   rating        Decimal  @db.Decimal(2, 1)
   comment       String?
-  isAnonymous   Boolean  @default(false)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @default(now()) @updatedAt
+  is_anonymous  Boolean  @default(false)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @default(now()) @updatedAt
 
-  doctor      Doctor       @relation("DoctorToRating", fields: [doctorId], references: [user_id], onDelete: Cascade)
-  patient     Patient      @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  appointment Appointment? @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
+  doctor      Doctor       @relation("DoctorToRating", fields: [doctor_id], references: [user_id], onDelete: Cascade)
+  patient     Patient      @relation(fields: [patient_id], references: [id], onDelete: Cascade)
+  appointment Appointment? @relation(fields: [appointment_id], references: [id], onDelete: SetNull)
 
-  @@index([doctorId])
-  @@index([patientId])
-  @@index([appointmentId])
+  @@index([doctor_id])
+  @@index([patient_id])
+  @@index([appointment_id])
   @@map("doctor_ratings")
 }
 
@@ -498,4 +498,3 @@ model NotificationItems {
 
   @@map("notification_items")
 }
-
