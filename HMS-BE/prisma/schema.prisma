@@ -39,7 +39,6 @@ model User {
   chatsReceived            Chat[]                    @relation("ChatTo")
   conversationParticipants ConversationParticipant[]
   notifications NotificationItems[]
-  paymentTransactions     TbTransaction[]
 
   @@map("users")
 }
@@ -125,12 +124,12 @@ model Specialty {
 
 model DoctorRating {
   id            Int      @id @default(autoincrement())
-  doctorId      Int
-  patientId     Int
-  appointmentId Int?
+  doctorId      Int       @map("doctor_id")
+  patientId     Int       @map("patient_id")
+  appointmentId Int?       @map("appointment_id")
   rating        Decimal  @db.Decimal(2, 1)
   comment       String?
-  isAnonymous   Boolean  @default(false)
+  isAnonymous   Boolean  @default(false)  @map("is_anonymous")
   createdAt     DateTime @default(now())
   updatedAt     DateTime @default(now()) @updatedAt
 
@@ -499,22 +498,3 @@ model NotificationItems {
 
   @@map("notification_items")
 }
-
-model TbTransaction {
-  id                  Int      @id @default(autoincrement())
-  gateway             String   @db.VarChar(100)
-  transaction_date    DateTime @db.Timestamp(0) @default(dbgenerated("'0000-00-00 00:00:00'"))
-  account_number      String?  @db.VarChar(100)
-  sub_account         String?  @db.VarChar(250)
-  amount_in           Decimal  @db.Decimal(20,2) @default(0.00)
-  amount_out          Decimal  @db.Decimal(20,2) @default(0.00)
-  accumulated         Decimal  @db.Decimal(20,2) @default(0.00)
-  code                String?  @db.VarChar(250)
-  transaction_content String?  @db.Text
-  reference_number    String?  @db.VarChar(255)
-  body                String?  @db.Text
-  created_at          DateTime @db.Timestamp(0) @default(now())
-
-  @@map("tb_transactions")
-}
-
