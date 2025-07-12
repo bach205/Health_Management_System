@@ -4,8 +4,11 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../store/authStore.ts";
 import useAuth from "../../hooks/useAuth.ts"
 import { User } from "lucide-react";
+import { Tooltip } from "antd";
+import Notification from "./Notification.tsx";
 import logo from '../../assets/prjLogo.png'
 // import { getProfile } from "../../services/patient.service.ts";
+
 import { Avatar } from "antd";
 import ProfileContext from "../../context/ProfileContext.tsx";
 const Navbar: React.FC = () => {
@@ -48,6 +51,10 @@ const Navbar: React.FC = () => {
         </NavLink>
       </ul>
       <div className="flex items-center gap-4 flex-1 justify-end">
+        {user &&
+          <Tooltip title="Thông Báo" placement="bottom">
+            <Notification />
+          </Tooltip>}
         {isAuthenticated ? (
           <div className="flex items-center gap-2 cursor-pointer group relative">
             {user?.role === "patient" ? (
@@ -90,7 +97,7 @@ const Navbar: React.FC = () => {
                 </div>
               </>
             ) : (
-              <Link to="/admin/dashboard">Quay lại trang làm việc</Link>
+              <Link to="/admin/dashboard">Trang làm việc</Link>
             )}
           </div>
         ) : (

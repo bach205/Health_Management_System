@@ -1,5 +1,5 @@
 -- Create and use the hospital database
-CREATE DATABASE hospital;
+
 USE hospital;
 
 -- Disable safe update mode to allow updates without WHERE clause on key columns
@@ -40,7 +40,7 @@ CREATE TABLE clinics (
     name VARCHAR(255) NOT NULL COMMENT 'Specialty name',
     description TEXT COMMENT 'Clinic description'
 );
-
+select *from users;
 -- Table for doctors
 -- Thông tin mở rộng từ user (bác sĩ)
 CREATE TABLE doctors (
@@ -706,4 +706,62 @@ JOIN (
 ) t ON q.id = t.id
 SET q.queue_number = t.queue_number;
 
+CREATE TABLE conversations (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(255),
+  type ENUM('direct', 'group') DEFAULT 'direct',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  last_message_at DATETIME
+);
 
+CREATE TABLE conversation_participants (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  conversationId INT NOT NULL,
+  userId INT NOT NULL,
+  
+  CONSTRAINT fk_conversation FOREIGN KEY (conversationId) REFERENCES conversations(id) ON DELETE CASCADE,
+  CONSTRAINT fk_user FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE,
+
+  UNIQUE KEY unique_participant (conversationId, userId)
+);
+CREATE TABLE chats (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  text TEXT,
+  file_url TEXT,
+  file_name VARCHAR(255),
+  file_type VARCHAR(50),
+  message_type ENUM('text', 'image', 'file', 'audio', 'video') DEFAULT 'text',
+  toId INT NOT NULL,
+  sendById INT NOT NULL,
+  conversationId INT NOT NULL,
+  is_read BOOLEAN DEFAULT FALSE,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+  CONSTRAINT fk_chat_to FOREIGN KEY (toId) REFERENCES users(id) ON DELETE CASCADE,
+  CONSTRAINT fk_chat_send_by FOREIGN KEY (sendById) REFERENCES users(id) ON DELETE CASCADE,
+  CONSTRAINT fk_chat_conversation FOREIGN KEY (conversationId) REFERENCES conversations(id) ON DELETE CASCADE
+);
+
+
+-- Tạo bảng cho notification feature
+CREATE TABLE `notification_items` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `message` TEXT NOT NULL,
+  `isSeen` BOOLEAN NOT NULL DEFAULT FALSE,
+  `navigate_url` TEXT NOT NULL,
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `userId` INT NOT NULL,
+
+  CONSTRAINT `fk_notification_user` FOREIGN KEY (`userId`) REFERENCES `Users`(`id`)
+);
+
+-- Tạo bảng cho documents cho rag 
+CREATE TABLE documents (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    file_name VARCHAR(200) CHARACTER SET utf8mb4,
+    file_location VARCHAR(200) CHARACTER SET utf8mb4 UNIQUE,
+    user_id INT
+);

@@ -1,19 +1,17 @@
 // hooks/useSocket.ts
 import { useEffect } from "react";
-import { io } from "socket.io-client";
+import { getSocket } from "../../services/socket";
+import { useAuthStore } from "../../store/authStore";
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8080";
-
-const socket = io(BACKEND_URL, {
-  withCredentials: true,
-});
-
-export const useSocket = (  
+export const useSocket = (
   roomId: string,
   eventName: string,
   handler: (data: any) => void
 ) => {
+  const { user } = useAuthStore()
+
   useEffect(() => {
+    const socket = getSocket(user.id);
     if (!roomId) return;
 
     socket.emit("joinRoom", roomId);

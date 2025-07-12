@@ -1,6 +1,7 @@
 const prisma = require("../config/prisma");
 const { getIO } = require("../config/socket.js");
 const ExaminationRecordService = require("./examinationRecord.service");
+const { sendPatientQueueNumberEmail } = require("../utils/staff.email");
 
 class QueueService {
   /**
@@ -86,6 +87,9 @@ class QueueService {
     to_clinic_id,
     record_id,
     priority = 2, // Mặc định priority cao nhất cho chuyển phòng
+    slot_date,    // Thêm tham số này
+    slot_time,    // Thêm tham số này
+    registered_online = false // Thêm tham số này
   }) {
     // 1. Tìm queue hiện tại của bệnh nhân (chưa done và đang khám)
     const currentQueue = await prisma.queue.findFirst({
@@ -120,19 +124,26 @@ class QueueService {
       throw new Error("Bệnh nhân đã có trong hàng đợi phòng này.");
     }
 
-    // 4. Tạo mới bản ghi queue ở phòng khám mới
-    const newQueue = await prisma.queue.create({
-      data: {
-        patient_id,
-        clinic_id: to_clinic_id,
-        record_id,
-        status: "waiting",
-        priority,
-      },
-      include: { patient: true },
+    // 4. Tạo mới bản ghi queue ở phòng khám mới bằng assignQueueNumber
+    const newQueue = await QueueService.assignQueueNumber({
+      appointment_id: null,
+      patient_id,
+      clinic_id: to_clinic_id,
+      slot_date,
+      slot_time,
+      registered_online
     });
 
-    // 5. Emit socket event để thông báo cho phòng khám mới
+    // 5. Cập nhật record_id và priority nếu cần
+    await prisma.queue.update({
+      where: { id: newQueue.id },
+      data: {
+        record_id,
+        priority
+      }
+    });
+
+    // 6. Emit socket event để thông báo cho phòng khám mới
     const io = getIO();
     if (io) {
       io.to(`clinic_${to_clinic_id}`).emit("queue:assigned", {
@@ -225,16 +236,14 @@ class QueueService {
     });
     if (existingQueue) throw new Error("Đã check-in vào hàng đợi!");
 
-    // 3. Tạo queue mới với priority từ appointment
-    const newQueue = await prisma.queue.create({
-      data: {
-        patient_id: appointment.patient_id,
-        clinic_id: appointment.clinic_id,
-        appointment_id: appointment.id,
-        status: "waiting",
-        priority: appointment.priority || 0,
-      },
-      include: { patient: true },
+    // 3. Gọi assignQueueNumber để tạo queue mới
+    const newQueue = await QueueService.assignQueueNumber({
+      appointment_id: appointment.id,
+      patient_id: appointment.patient_id,
+      clinic_id: appointment.clinic_id,
+      slot_date: appointment.appointment_date,
+      slot_time: (typeof appointment.appointment_time === 'string') ? appointment.appointment_time : appointment.appointment_time.toTimeString().slice(0,8),
+      registered_online: true
     });
 
     // 4. Emit socket event
@@ -280,6 +289,146 @@ class QueueService {
     }
 
     return updated;
+  }
+
+  /**
+   * Xác định ca và range STT dựa vào giờ khám (3 ca: sáng, chiều, đêm)
+   * @param {string} time - Chuỗi giờ dạng 'HH:mm:ss'
+   * @returns {{type: string, min: number, max: number} | null}
+   */
+  static getShiftTypeAndRange(time) {
+    if (time >= "08:00:00" && time < "12:00:00") {
+      return { type: "morning", min: 1, max: 100 };
+    }
+    if (time >= "13:00:00" && time < "17:00:00") {
+      return { type: "afternoon", min: 101, max: 200 };
+    }
+    if (time >= "18:00:00" && time < "22:00:00") {
+      return { type: "night", min: 201, max: 300 };
+    }
+    return null;
+  }
+
+  /**
+   * Cấp số thứ tự động cho queue khi xác nhận lịch hẹn hoặc walk-in
+   * @param {Object} params - { appointment_id, patient_id, clinic_id, slot_date, slot_time, registered_online }
+   * @returns {Promise<Object>} Queue mới
+   */
+  static async assignQueueNumber({
+    appointment_id,
+    patient_id,
+    clinic_id,
+    slot_date,
+    slot_time,
+    registered_online = true // 1: online, 0: walk-in
+  }) {
+    const shift = this.getShiftTypeAndRange(slot_time);
+    if (!shift) throw new Error("Giờ khám không thuộc ca nào!");
+    const { type, min, max } = shift;
+
+    // Lấy số lớn nhất đã cấp trong ca này, ngày này, phòng khám này
+    const lastQueue = await prisma.queue.findFirst({
+      where: {
+        clinic_id,
+        shift_type: type,
+        slot_date,
+      },
+      orderBy: { queue_number: "desc" }
+    });
+    const nextStt = lastQueue ? lastQueue.queue_number + 1 : min;
+    if (nextStt > max) throw new Error("Đã hết chỗ trong ca này!");
+
+    // Tạo queue mới
+    const newQueue = await prisma.queue.create({
+      data: {
+        appointment_id,
+        patient_id,
+        clinic_id,
+        status: "waiting",
+        registered_online,
+        queue_number: nextStt,
+        shift_type: type,
+        slot_date,
+        created_at: new Date(),
+      },
+      include: {
+        patient: {
+          include: {
+            user: true
+          }
+        },
+        appointment: appointment_id ? {
+          include: {
+            doctor: true,
+            clinic: true
+          }
+        } : false,
+        clinic: true
+      }
+    });
+
+    // Gửi email thông báo số thứ tự cho bệnh nhân
+    try {
+      if (newQueue.patient?.user?.email) {
+        await sendPatientQueueNumberEmail(
+          newQueue.patient.user.email,
+          newQueue.patient.user.full_name || "Bệnh nhân",
+          newQueue.queue_number,
+          newQueue.shift_type,
+          newQueue.slot_date instanceof Date ? newQueue.slot_date.toISOString().slice(0,10) : newQueue.slot_date,
+          slot_time,
+          newQueue.appointment?.doctor?.full_name || "Bác sĩ chưa xác định",
+          newQueue.clinic?.name || "Phòng khám"
+        );
+      }
+    } catch (err) {
+      console.error('Không thể gửi email thông báo số thứ tự:', err.message);
+    }
+
+    return newQueue;
+  }
+
+  /**
+   * Lấy danh sách queue của tất cả bệnh nhân theo ngày
+   * @param {string} dateStr - Ngày cần lấy (YYYY-MM-DD), nếu không có sẽ lấy hôm nay
+   * @returns {Promise<Array>} Danh sách queue theo ngày
+   */
+  static async getQueuesByDate(dateStr) {
+    let date;
+    if (dateStr) {
+      date = new Date(dateStr);
+      date.setHours(0, 0, 0, 0);
+    } else {
+      date = new Date();
+      date.setHours(0, 0, 0, 0);
+    }
+    const nextDay = new Date(date);
+    nextDay.setDate(date.getDate() + 1);
+
+    const queues = await prisma.queue.findMany({
+      where: {
+        slot_date: {
+          gte: date,
+          lt: nextDay
+        },
+        status: {
+          in: ["waiting", "in_progress"]
+        }
+      },
+      orderBy: [
+        { slot_date: "asc" },
+        { queue_number: "asc" }
+      ],
+      include: {
+        patient: {
+          include: {
+            user: true
+          }
+        },
+        clinic: true
+      }
+    });
+    return queues;
   }
 }
 
