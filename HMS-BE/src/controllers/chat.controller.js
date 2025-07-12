@@ -206,6 +206,47 @@ class ChatController {
             res.status(500).json({ message: error.message || "Lỗi tìm kiếm tin nhắn" });
         }
     }
+
+    // Upload multiple files for chat (multipart)
+    async uploadFilesForChat(req, res) {
+        try {
+            if (!req.files || !Array.isArray(req.files) || req.files.length === 0) {
+                return res.status(400).json({ message: 'Không có file upload' });
+            }
+            const filesMeta = req.files.map(file => ({
+                file_url: file.path.replace(/\\/g, '/'),
+                file_name: file.originalname,
+                file_type: file.mimetype
+            }));
+            res.json(filesMeta);
+        } catch (error) {
+            console.error('Error uploading files for chat:', error);
+            res.status(500).json({ message: error.message || 'Lỗi upload file chat' });
+        }
+    }
+
+    // Xóa file đã upload (hỗ trợ xóa 1 hoặc nhiều file)
+    async deleteUploadedFile(req, res) {
+        try {
+            let fileUrls = req.body.file_url;
+            if (!fileUrls) return res.status(400).json({ message: 'Thiếu file_url' });
+            if (!Array.isArray(fileUrls)) fileUrls = [fileUrls];
+            const path = require('path');
+            const fs = require('fs');
+            let deleted = 0;
+            for (const url of fileUrls) {
+                const filePath = path.isAbsolute(url) ? url : path.join(process.cwd(), url);
+                if (fs.existsSync(filePath)) {
+                    fs.unlinkSync(filePath);
+                    deleted++;
+                }
+            }
+            res.json({ message: `Đã xóa ${deleted} file` });
+        } catch (error) {
+            console.log(error.message)
+            res.status(500).json({ message: error.message || 'Lỗi xóa file' });
+        }
+    }
 }
 
 module.exports = new ChatController(); 

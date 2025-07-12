@@ -137,6 +137,21 @@ class ChatService {
             throw error;
         }
     }
+
+    // Upload multiple files (multipart) lên server
+    async uploadFiles(files: File[]): Promise<Array<{ file_url: string; file_name: string; file_type: string }>> {
+        const formData = new FormData();
+        files.forEach(file => formData.append('files', file));
+        const response = await mainRequest.post(`${BASE_URL}/chat/upload`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        return response.data;
+    }
+
+    // Xóa file đã upload trên server (1 hoặc nhiều file)
+    async deleteFile(file_url: string | string[]): Promise<void> {
+        await mainRequest.delete(`${BASE_URL}/chat/upload`, { data: { file_url } });
+    }
 }
 
 export default new ChatService(); 
