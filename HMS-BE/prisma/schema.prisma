@@ -34,6 +34,7 @@ model User {
   passwordResetTokens PasswordResetToken[]
   appointments        Appointment[]        @relation("DoctorAppointment")
   availableSlots      AvailableSlot[]
+  documents           Documents[]
 
   chatsSent                Chat[]                    @relation("ChatSendBy")
   chatsReceived            Chat[]                    @relation("ChatTo")
@@ -101,13 +102,12 @@ model Clinic {
 
 model Doctor {
   user_id      Int      @id
+  specialty    String?  @db.VarChar(255) // Thêm trường specialty cho phù hợp với database
   specialty_id Int?
   bio          String?  @db.Text
   price        Int?     @default(0)
-  rating       Decimal? @default(0.0) @db.Decimal(2, 1)
-
   user      User           @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "doctors_ibfk_1")
-  specialty Specialty?     @relation(fields: [specialty_id], references: [id], onUpdate: Restrict, map: "doctors_ibfk_2")
+  specialtyRel Specialty?     @relation(fields: [specialty_id], references: [id], onUpdate: Restrict, map: "doctors_ibfk_2")
   ratings   DoctorRating[] @relation("DoctorToRating")
 
   @@index([specialty_id], map: "specialty_id")
@@ -497,4 +497,12 @@ model NotificationItems {
   user         User    @relation(fields: [userId], references: [id])
 
   @@map("notification_items")
+}
+
+model Documents {
+  id            Int     @id @default(autoincrement())
+  file_name     String? @db.VarChar(200)
+  file_location String? @unique @db.VarChar(200)
+  user_id       Int?
+  user          User?   @relation(fields: [user_id], references: [id])
 }
