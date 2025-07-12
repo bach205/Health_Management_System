@@ -206,6 +206,121 @@ class ChatController {
             res.status(500).json({ message: error.message || "Lỗi tìm kiếm tin nhắn" });
         }
     }
+
+    // Stream file or image from file_url in message
+    async streamFileFromMessage(req, res) {
+        try {
+            const { messageId } = req.params;
+            const userId = req.user.id;
+            // Lấy message và kiểm tra quyền truy cập
+            const message = await ChatService.getMessageById(Number(messageId));
+            if (!message) {
+                return res.status(404).json({ message: 'Không tìm thấy tin nhắn' });
+            }
+            // Kiểm tra quyền truy cập conversation
+            const conversation = await ConversationService.getConversationById(message.conversationId, userId);
+            if (!conversation) {
+                return res.status(403).json({ message: 'Không có quyền truy cập conversation này' });
+            }
+            if (!message.file_url) {
+                return res.status(400).json({ message: 'Tin nhắn không chứa file' });
+            }
+            const url = message.file_url;
+            const isExternal = url.startsWith('http://') || url.startsWith('https://');
+            if (isExternal) {
+                // Nếu là URL ngoài, dùng axios stream
+                const axios = require('axios');
+                const response = await axios.get(url, { responseType: 'stream' });
+                // Truyền header content-type, content-disposition nếu có
+                if (response.headers['content-type']) {
+                    res.setHeader('Content-Type', response.headers['content-type']);
+                }
+                if (response.headers['content-disposition']) {
+                    res.setHeader('Content-Disposition', response.headers['content-disposition']);
+                } else if (message.file_name) {
+                    res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(message.file_name)}"`);
+                }
+                response.data.pipe(res);
+            } else {
+                // Nếu là file nội bộ (đường dẫn vật lý), dùng fs stream
+                const path = require('path');
+                const fs = require('fs');
+                const filePath = path.isAbsolute(url) ? url : path.join(process.cwd(), url);
+                if (!fs.existsSync(filePath)) {
+                    return res.status(404).json({ message: 'Không tìm thấy file vật lý' });
+                }
+                const mime = require('mime-types');
+                res.setHeader('Content-Type', mime.lookup(filePath) || 'application/octet-stream');
+                res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(message.file_name || path.basename(filePath))}"`);
+                const fileStream = fs.createReadStream(filePath);
+                fileStream.pipe(res);
+            }
+        } catch (error) {
+            console.error('Error streaming file from message:', error);
+            res.status(500).json({ message: error.message || 'Lỗi lấy file từ tin nhắn' });
+        }
+    }
+
+    // Upload file/image for chat (multipart)
+    async uploadFileForChat(req, res) {
+        try {
+            if (!req.file) {
+                return res.status(400).json({ message: 'Không có file upload' });
+            }
+            // Lưu thông tin file trả về cho FE
+            const fileUrl = req.file.path.replace(/\\/g, '/'); // Đường dẫn lưu file trên server
+            const fileName = req.file.originalname;
+            const fileType = req.file.mimetype;
+            res.json({
+                file_url: fileUrl,
+                file_name: fileName,
+                file_type: fileType
+            });
+        } catch (error) {
+            console.error('Error uploading file for chat:', error);
+            res.status(500).json({ message: error.message || 'Lỗi upload file chat' });
+        }
+    }
+
+    // Upload multiple files for chat (multipart)
+    async uploadFilesForChat(req, res) {
+        try {
+            if (!req.files || !Array.isArray(req.files) || req.files.length === 0) {
+                return res.status(400).json({ message: 'Không có file upload' });
+            }
+            const filesMeta = req.files.map(file => ({
+                file_url: file.path.replace(/\\/g, '/'),
+                file_name: file.originalname,
+                file_type: file.mimetype
+            }));
+            res.json(filesMeta);
+        } catch (error) {
+            console.error('Error uploading files for chat:', error);
+            res.status(500).json({ message: error.message || 'Lỗi upload file chat' });
+        }
+    }
+
+    // Xóa file đã upload (hỗ trợ xóa 1 hoặc nhiều file)
+    async deleteUploadedFile(req, res) {
+        try {
+            let fileUrls = req.body.file_url;
+            if (!fileUrls) return res.status(400).json({ message: 'Thiếu file_url' });
+            if (!Array.isArray(fileUrls)) fileUrls = [fileUrls];
+            const path = require('path');
+            const fs = require('fs');
+            let deleted = 0;
+            for (const url of fileUrls) {
+                const filePath = path.isAbsolute(url) ? url : path.join(process.cwd(), url);
+                if (fs.existsSync(filePath)) {
+                    fs.unlinkSync(filePath);
+                    deleted++;
+                }
+            }
+            res.json({ message: `Đã xóa ${deleted} file` });
+        } catch (error) {
+            res.status(500).json({ message: error.message || 'Lỗi xóa file' });
+        }
+    }
 }
 
 module.exports = new ChatController(); 
