@@ -62,8 +62,8 @@ export interface ISpecialty {
 export interface IMedicine {
   id: number;
   name: string;
-  stock: number;
-  price: number;
+  // price: number;
+  note:string
 }
 
 export type EmployeeType = keyof typeof TYPE_EMPLOYEE;

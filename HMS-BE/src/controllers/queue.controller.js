@@ -8,10 +8,11 @@ class QueueController {
   static async getQueueClinic(req, res, next) {
     try {
       const { clinicId } = req.params;
-      const { pageNumber, pageSize } = req.query;
+      const { pageNumber, pageSize, type } = req.query;
       const result = await QueueService.getQueueClinic(clinicId, {
         pageNumber,
         pageSize,
+        type,
       });
       return new OK({
         message: "Lấy danh sách queue thành công",

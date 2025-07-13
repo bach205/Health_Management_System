@@ -35,7 +35,7 @@ const Footer: React.FC = () => {
       <div>
         <hr />
         <p className="py-5 text-sm text-center">
-          Bản quyền 2024@ Prescripto - Đã đăng ký bản quyền.
+          Bản quyền 2025@ Prescripto - Đã đăng ký bản quyền.
         </p>
       </div>
     </div>

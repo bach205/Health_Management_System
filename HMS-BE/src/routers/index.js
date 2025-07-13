@@ -22,6 +22,8 @@ const userRouter = require("./user.route");
 const notificationRouter = require('./notification.route');
 const sepayRouter = require('./sepay.route');
 const feedbackRouter = require("./feedback.route");
+const statisticsRouter = require("./statistics.route");
+
 router.use("/nurse", nurseRouter);
 router.use("/doctor", doctorRouter);
 router.use("/patient", patientRouter);
@@ -44,4 +46,5 @@ router.use("/user", userRouter);
 router.use('/notification', notificationRouter);
 router.use('/sepay', sepayRouter);
 router.use('/feedback', feedbackRouter);
+router.use("/statistics", statisticsRouter);
 module.exports = router;
