@@ -182,7 +182,7 @@ model ExaminationOrder {
   id             Int      @id @default(autoincrement())
   doctor_id      Int
   patient_id     Int
-  record_id      Int?      // ExaminationRecord
+  record_id      Int      // ExaminationRecord
   from_clinic_id Int
   to_clinic_id   Int
   reason         String?  @db.Text
@@ -261,6 +261,9 @@ model PrescriptionItem {
   record_id   Int
   medicine_id Int?
   note        String? @db.Text
+  dosage      String?
+  frequency   String?
+  duration    String?
 
   record    ExaminationRecord @relation(fields: [record_id], references: [id])
   medicine  Medicine?         @relation(fields: [medicine_id], references: [id], onUpdate: Restrict)

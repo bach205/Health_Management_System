@@ -13,9 +13,9 @@ const { Option } = Select;
 interface ResultExaminationModalProps {
   open: boolean;
   onClose: () => void;
-  patientId: number;
-  clinicId: number;
-  doctorId?: number;
+  patient_id: number;
+  clinic_id: number;
+  doctor_id?: number;
   currentUserId?: number;
   onSuccess?: () => void;
 }
@@ -23,9 +23,9 @@ interface ResultExaminationModalProps {
 const ResultExaminationModal = ({
   open,
   onClose,
-  patientId,
-  clinicId,
-  doctorId,
+  patient_id,
+  clinic_id,
+  doctor_id,
   currentUserId,
   onSuccess,
 }: ResultExaminationModalProps) => {
@@ -96,10 +96,10 @@ const ResultExaminationModal = ({
       }
       await mainRequest.post("/api/v1/examination-detail", {
         ...values,
-        patient_id: patientId,
-        clinic_id: clinicId,
-        doctor_id: doctorId,
-        from_clinic_id: clinicId,
+        patient_id: patient_id,
+        clinic_id: clinic_id,
+        doctor_id: doctor_id,
+        from_clinic_id: clinic_id,
         created_by_user_id: currentUserId,
         examined_at: new Date().toISOString(),
         ...(values.to_clinic_id
@@ -163,7 +163,7 @@ const ResultExaminationModal = ({
           <Select allowClear placeholder="Không chỉ định phòng tiếp theo" onChange={handleChangeClinic}>
             <Option value={""}>Không chỉ định phòng tiếp theo</Option>
             {clinics
-              .filter((c) => c.id !== clinicId)
+              .filter((c) => c.id !== clinic_id)
               .map((c) => (
                 <Option key={c.id} value={c.id}>
                   {c.name}

@@ -205,7 +205,8 @@ const QueueTable = () => {
             width: 200,
             render: (_: any, record: any) => {
                 return (
-
+                    //  kiem tra tai khoan bac si co trung voi appointment ko
+                    record?.appointment?.doctor?.id === currentDoctorId &&
                     <Space wrap size={'small'}>
                         {record.status === "waiting" && (
                             <>
@@ -292,7 +293,7 @@ const QueueTable = () => {
                                 </label>
                                 <Select style={{ minWidth: 200 }} value={statusFilter} onChange={handleFilter} placeholder="Chọn trạng thái">
                                     <Option key={"clinic.id"} value={""}>
-                                        Tất cả
+                                        Khám bệnh
                                     </Option>
 
                                     <Option value={"waiting"}>Chờ khám</Option>
@@ -336,9 +337,9 @@ const QueueTable = () => {
             <DoctorExaminationOrderModal
                 open={showDoctorExaminationOrderModal}
                 onClose={() => setShowDoctorExaminationOrderModal(false)}
-                patientId={selectedPatient?.id}
-                clinicId={Number(selectedClinic)}
-                doctorId={(Number)(currentDoctorId)}
+                patient_id={selectedPatient?.id}
+                clinic_id={Number(selectedClinic)}
+                doctor_id={(Number)(currentDoctorId)}
                 currentUserId={(Number)(user?.id)}
                 onSuccess={() => {
                     setShowDoctorExaminationOrderModal(false);
@@ -350,8 +351,9 @@ const QueueTable = () => {
             <DoctorExaminationRecordModal
                 open={showRecordModal}
                 onClose={() => setShowRecordModal(false)}
-                patientId={selectedPatient?.id}
-                doctorId={Number(currentDoctorId)}
+                patient_id={selectedPatient?.id}
+                clinic_id={Number(selectedClinic)}
+                doctor_id={Number(currentDoctorId)}
                 onSuccess={() => {
                     setShowRecordModal(false);
                     setSelectedPatient(null);
