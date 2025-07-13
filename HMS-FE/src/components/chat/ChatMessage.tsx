@@ -15,7 +15,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, onEdit, onDelete }) 
     const [isEditing, setIsEditing] = React.useState(false);
     const [editText, setEditText] = React.useState(message.text);
     const [showConfirm, setShowConfirm] = React.useState(false);
-    const [showMenu, setShowMenu] = React.useState(false);
+
     const handleEdit = () => {
         if (editText.trim() && editText !== message.text) {
             onEdit(message.id, editText);
@@ -109,47 +109,53 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, onEdit, onDelete }) 
     };
 
     return (
-        <div className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'} mb-2`}>
-  <div className={`relative max-w-[80%] px-4 py-2 rounded-lg ${
-    isOwnMessage ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-900'
-  }`}>
-    {renderMessageContent()}
-                {/* Menu ba chấm (chỉ cho tin nhắn của mình) */}
-                {isOwnMessage && !isEditing && (
-                    <div className="absolute -left-6 top-1">
-                        <button
-                            onClick={() => setShowMenu(!showMenu)}
-                            className="text-gray-400 hover:text-gray-600"
-                        >
-                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M10 3a1.5 1.5 0 110 3 1.5 1.5 0 010-3zm0 5a1.5 1.5 0 110 3 1.5 1.5 0 010-3zm0 5a1.5 1.5 0 110 3 1.5 1.5 0 010-3z" />
-                            </svg>
-                        </button>
+        <div className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'} mb-4`}>
+            <div className={`flex ${isOwnMessage ? 'flex-row-reverse' : 'flex-row'} items-end space-x-2 max-w-xs lg:max-w-md`}>
+                {/* Avatar */}
+                <div className="flex-shrink-0">
+                    <img
+                        src={message.sendBy.avatar || '/images/avatar-default.png'}
+                        alt={message.sendBy.full_name}
+                        className="w-8 h-8 rounded-full"
+                    />
+                </div>
 
-                        {showMenu && (
-                            <div className="absolute -left-28 top-6 w-28 bg-white border rounded shadow-md z-50">
-                                <button
-                                    onClick={() => {
-                                        setIsEditing(true);
-                                        setShowMenu(false);
-                                    }}
-                                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                >
-                                    Chỉnh sửa
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        setShowMenu(false);
-                                        handleDelete();
-                                    }}
-                                    className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-                                >
-                                    Xóa
-                                </button>
-                            </div>
+                {/* Message Content */}
+                <div className={`flex flex-col ${isOwnMessage ? 'items-end' : 'items-start'}`}>
+                    <div className={`px-4 py-2 rounded-lg ${isOwnMessage
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-gray-100 text-gray-900'
+                        }`}>
+                        {renderMessageContent()}
+                    </div>
+
+                    {/* Message Info */}
+                    <div className={`flex items-center space-x-2 mt-1 text-xs text-gray-500 ${isOwnMessage ? 'flex-row-reverse' : 'flex-row'
+                        }`}>
+                        <span>{dayjs(message.created_at).format('HH:mm')}</span>
+                        {message.is_read && isOwnMessage && (
+                            <span className="text-blue-500">✓✓</span>
                         )}
                     </div>
-                )}
+
+                    {/* Action Buttons */}
+                    {isOwnMessage && !isEditing && (
+                        <div className="flex items-center space-x-1 mt-1">
+                            <button
+                                onClick={() => setIsEditing(true)}
+                                className="text-xs text-gray-500 hover:text-gray-700"
+                            >
+                                Sửa
+                            </button>
+                            <button
+                                onClick={handleDelete}
+                                className="text-xs text-red-500 hover:text-red-700"
+                            >
+                                Xóa
+                            </button>
+                        </div>
+                    )}
+                </div>
             </div>
             {/* Modal xác nhận xóa */}
             {showConfirm && (
