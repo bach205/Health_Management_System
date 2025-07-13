@@ -87,16 +87,28 @@ class ExaminationDetailService {
           });
         }
 
-        // 3.4 Tạo queue mới từ appointment (kết hợp logic từ checkInFromAppointment)
-        const newQueue = await prisma.queue.create({
+        // 3.4 Tạo queue mới từ appointment sử dụng assignQueueNumber
+        const newQueue = await QueueService.assignQueueNumber({
+          appointment_id: appointment.id,
+          patient_id,
+          clinic_id: to_clinic_id,
+          slot_date,
+          slot_time: (typeof start_time === 'string') ? start_time : start_time.toTimeString().slice(0,8),
+          registered_online: true
+        });
+
+        // Cập nhật record_id và priority cho queue mới
+        await prisma.queue.update({
+          where: { id: newQueue.id },
           data: {
-            patient_id,
-            clinic_id: to_clinic_id,
-            appointment_id: appointment.id,
             record_id: record.id,
-            status: "waiting",
             priority: 2,  // Giữ priority cao cho chuyển phòng
           },
+        });
+
+        // Lấy lại queue với thông tin đầy đủ
+        const updatedQueue = await prisma.queue.findUnique({
+          where: { id: newQueue.id },
           include: { patient: true },
         });
 
@@ -105,8 +117,8 @@ class ExaminationDetailService {
         if (io) {
           // Emit event cho phòng mới
           io.to(`clinic_${to_clinic_id}`).emit("queue:assigned", {
-            patient: newQueue.patient,
-            queue: newQueue,
+            patient: updatedQueue.patient,
+            queue: updatedQueue,
             clinicId: to_clinic_id,
           });
         

@@ -58,4 +58,13 @@ queueRouter.post(
   asyncHandler(QueueController.callNextPatient)
 );
 
+// Lấy danh sách queue của tất cả bệnh nhân trong ngày hôm nay
+queueRouter.get(
+  "/today",
+  authenticate,
+  checkUserStatus(),
+  authorize("admin", "doctor", "nurse"),
+  asyncHandler(QueueController.getTodayQueues)
+);
+
 module.exports = queueRouter;
