@@ -247,6 +247,56 @@ class ChatController {
             res.status(500).json({ message: error.message || 'Lỗi xóa file' });
         }
     }
+
+    // Stream file từ file_url
+    async streamFile(req, res) {
+        try {
+            const { filename } = req.params;
+            const path = require('path');
+            const fs = require('fs');
+
+            // Tạo đường dẫn file từ filename
+            const filePath = path.join(process.cwd(), 'uploads', 'chat', filename);
+
+            // Kiểm tra file có tồn tại không
+            if (!fs.existsSync(filePath)) {
+                return res.status(404).json({ message: 'File không tồn tại' });
+            }
+
+            // Lấy thông tin file
+            const stat = fs.statSync(filePath);
+            const fileSize = stat.size;
+            const range = req.headers.range;
+
+            if (range) {
+                // Hỗ trợ range request cho video/audio streaming
+                const parts = range.replace(/bytes=/, "").split("-");
+                const start = parseInt(parts[0], 10);
+                const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+                const chunksize = (end - start) + 1;
+                const file = fs.createReadStream(filePath, { start, end });
+
+                res.writeHead(206, {
+                    'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+                    'Accept-Ranges': 'bytes',
+                    'Content-Length': chunksize,
+                    'Content-Type': 'application/octet-stream',
+                });
+                file.pipe(res);
+            } else {
+                // Stream toàn bộ file
+                res.writeHead(200, {
+                    'Content-Length': fileSize,
+                    'Content-Type': 'application/octet-stream',
+                    'Cache-Control': 'public, max-age=31536000', // Cache 1 năm
+                });
+                fs.createReadStream(filePath).pipe(res);
+            }
+        } catch (error) {
+            console.error('Error streaming file:', error);
+            res.status(500).json({ message: error.message || 'Lỗi stream file' });
+        }
+    }
 }
 
 module.exports = new ChatController(); 

@@ -456,7 +456,7 @@ model Chat {
   text           String?   @db.Text
   file_url       String?   @db.Text
   file_name      String?   @db.VarChar(255)
-  file_type      String?   @db.VarChar(50)
+  file_type      String?   @db.VarChar(255)
   message_type   MessageType @default(text) // text, image, file, audio, video
   toId           Int
   sendById       Int

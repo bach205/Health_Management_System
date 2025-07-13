@@ -16,6 +16,9 @@ const upload = multer({ storage });
 
 const router = express.Router();
 
+// Stream file route - không cần authenticate vì cần truy cập từ frontend
+router.get('/stream/:filename', ChatController.streamFile);
+
 // Tất cả routes đều cần authenticate
 router.use(authenticate);
 

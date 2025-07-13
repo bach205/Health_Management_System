@@ -816,7 +816,7 @@ CREATE TABLE chats (
   text TEXT,
   file_url TEXT,
   file_name VARCHAR(255),
-  file_type VARCHAR(50),
+  file_type VARCHAR(255),
   message_type ENUM('text', 'image', 'file', 'audio', 'video') DEFAULT 'text',
   toId INT NOT NULL,
   sendById INT NOT NULL,

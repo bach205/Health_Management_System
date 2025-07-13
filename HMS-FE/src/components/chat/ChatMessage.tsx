@@ -2,6 +2,7 @@ import React from 'react';
 import type { IMessage } from '../../types/chat.type';
 import { useAuthStore } from '../../store/authStore';
 import dayjs from 'dayjs';
+import fileStreamService from '../../services/fileStream.service';
 
 interface ChatMessageProps {
     message: IMessage;
@@ -16,6 +17,33 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, onEdit, onDelete }) 
     const [editText, setEditText] = React.useState(message.text);
     const [showConfirm, setShowConfirm] = React.useState(false);
     const [showMenu, setShowMenu] = React.useState(false);
+    const [blobUrl, setBlobUrl] = React.useState<string | null>(null);
+    const [isLoadingBlob, setIsLoadingBlob] = React.useState(false);
+
+    // Load blob URL khi message là file/image
+    React.useEffect(() => {
+        if (fileStreamService.isFileMessage(message) && message.file_url) {
+            setIsLoadingBlob(true);
+            fileStreamService.getBlobUrl(message.file_url)
+                .then(url => {
+                    setBlobUrl(url);
+                })
+                .catch(error => {
+                    console.error('Error loading blob URL:', error);
+                })
+                .finally(() => {
+                    setIsLoadingBlob(false);
+                });
+        }
+
+        // Cleanup khi component unmount
+        return () => {
+            if (blobUrl) {
+                fileStreamService.revokeBlobUrl(message.file_url!);
+            }
+        };
+    }, [message.file_url, message.message_type]);
+
     const handleEdit = () => {
         if (editText.trim() && editText !== message.text) {
             onEdit(message.id, editText);
@@ -37,11 +65,25 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, onEdit, onDelete }) 
             case 'image':
                 return (
                     <div className="max-w-xs">
-                        <img
-                            src={message.file_url}
-                            alt="Image"
-                            className="rounded-lg max-w-full h-auto"
-                        />
+                        {isLoadingBlob ? (
+                            <div className="w-32 h-32 bg-gray-200 rounded-lg flex items-center justify-center">
+                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                            </div>
+                        ) : blobUrl ? (
+                            <img
+                                src={blobUrl}
+                                alt="Image"
+                                className="rounded-lg max-w-full h-auto"
+                                onError={() => {
+                                    console.error('Error loading image');
+                                    setBlobUrl(null);
+                                }}
+                            />
+                        ) : (
+                            <div className="w-32 h-32 bg-gray-200 rounded-lg flex items-center justify-center">
+                                <span className="text-gray-500 text-sm">Lỗi tải ảnh</span>
+                            </div>
+                        )}
                         {message.text && (
                             <p className="mt-2 text-sm text-gray-700">{message.text}</p>
                         )}
@@ -63,15 +105,27 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, onEdit, onDelete }) 
                                 {message.file_type}
                             </p>
                         </div>
-                        <a
-                            href={message.file_url}
-                            download={message.file_name}
-                            className="flex-shrink-0 text-blue-600 hover:text-blue-800"
-                        >
-                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
-                            </svg>
-                        </a>
+                        {isLoadingBlob ? (
+                            <div className="flex-shrink-0">
+                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
+                            </div>
+                        ) : blobUrl ? (
+                            <a
+                                href={blobUrl}
+                                download={message.file_name}
+                                className="flex-shrink-0 text-blue-600 hover:text-blue-800"
+                            >
+                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                                </svg>
+                            </a>
+                        ) : (
+                            <div className="flex-shrink-0 text-red-500">
+                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                </svg>
+                            </div>
+                        )}
                     </div>
                 );
             default:
@@ -110,10 +164,9 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, onEdit, onDelete }) 
 
     return (
         <div className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'} mb-2`}>
-  <div className={`relative max-w-[80%] px-4 py-2 rounded-lg ${
-    isOwnMessage ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-900'
-  }`}>
-    {renderMessageContent()}
+            <div className={`relative max-w-[80%] px-4 py-2 rounded-lg ${isOwnMessage ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-900'
+                }`}>
+                {renderMessageContent()}
                 {/* Menu ba chấm (chỉ cho tin nhắn của mình) */}
                 {isOwnMessage && !isEditing && (
                     <div className="absolute -left-6 top-1">

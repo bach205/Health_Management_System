@@ -19,6 +19,26 @@ const MessageInput: React.FC<MessageInputProps> = ({
     const [pendingFiles, setPendingFiles] = React.useState<Array<{ file: File, preview: string, meta?: { file_url: string, file_name: string, file_type: string } }>>([]);
     const fileInputRef = React.useRef<HTMLInputElement>(null);
 
+    // // Cleanup: xóa file khi component unmount
+    // React.useEffect(() => {
+    //     return () => {
+    //         console.log(1)
+    //         // Xóa tất cả file đã upload nhưng chưa gửi khi component unmount
+    //         pendingFiles.forEach(async (pf) => {
+    //             if (pf.meta) {
+    //                 try {
+    //                     const chatService = (await import('../../services/chat.service')).default;
+    //                     await chatService.deleteFile(pf.meta.file_url);
+    //                 } catch (err) {
+    //                     // ignore
+    //                 }
+    //             }
+    //             if (pf.preview) URL.revokeObjectURL(pf.preview);
+    //         });
+
+    //     };
+    // }, [pendingFiles]);
+
     const handleSendMessage = async () => {
         if (disabled) return;
         // Gửi text nếu có
@@ -43,6 +63,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
                     conversationId,
                     message_type: pf.meta.file_type.startsWith('image/') ? 'image' : 'file'
                 };
+                console.log(messageData)
                 onSendMessage(messageData);
             }
         }
@@ -118,7 +139,9 @@ const MessageInput: React.FC<MessageInputProps> = ({
                                 <img src={pf.preview} alt={pf.meta.file_name} className="w-16 h-16 object-cover rounded" />
                             ) : (
                                 <div className="w-16 h-16 flex items-center justify-center bg-gray-100 rounded">
-                                    <span className="text-xs text-gray-600 text-center break-all">{pf.meta?.file_name || pf.file.name}</span>
+                                    <svg className="w-8 h-8 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
+                                    </svg>
                                 </div>
                             )}
                             <span
