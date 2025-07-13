@@ -35,6 +35,13 @@ class QueueService {
     if (["waiting", "in_progress", "done", "skipped"].includes(type)) {
       status = { in: [type] };
     }
+    const queueClinicdata = await prisma.queue.findMany({
+      where: {
+        clinic_id: Number(clinicId),
+        status: status,
+      },
+    });
+    console.log(queueClinicdata)
 
     // 2. Lấy danh sách queue theo thứ tự ưu tiên:
     // - Ưu tiên theo priority của appointment (cao xuống thấp)
@@ -382,7 +389,7 @@ class QueueService {
           newQueue.patient.user.full_name || "Bệnh nhân",
           newQueue.queue_number,
           newQueue.shift_type,
-          newQueue.slot_date instanceof Date ? newQueue.slot_date.toISOString().slice(0,10) : newQueue.slot_date,
+          newQueue.slot_date instanceof Date ? newQueue.slot_date.toISOString().slice(0, 10) : newQueue.slot_date,
           slot_time,
           newQueue.appointment?.doctor?.full_name || "Bác sĩ chưa xác định",
           newQueue.clinic?.name || "Phòng khám"

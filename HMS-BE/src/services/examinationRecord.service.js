@@ -5,7 +5,7 @@ const prescriptionItemService = require("./prescriptionItem.service");
 class ExaminationRecordService {
     static async createIfNotExists(patient_id, clinic_id, doctor_id) {
         let record = await prisma.examinationRecord.findFirst({
-            where: { patient_id, final_diagnosis: null },
+            where: { patient_id, result: null },
         });
         if (!record) {
             record = await prisma.examinationRecord.create({
@@ -23,7 +23,7 @@ class ExaminationRecordService {
     // edited after removed examinationDetail service
     static async create(data) {
         const { patient_id, clinic_id, doctor_id, result, note, prescription_items = [] } = data;
-
+        console.log(data)
         if (!result.trim()) throw new Error("Không được để trống kết quả khám");
 
 
@@ -45,15 +45,22 @@ class ExaminationRecordService {
 
         const record = await prisma.examinationRecord.create({
             data: {
-                patient_id,
-                clinic_id,
-                doctor_id,
+                patient: {
+                    connect: { id: patient_id }
+                },
+                clinic: {
+                    connect: { id: clinic_id }
+                },
+                doctor: {
+                    connect: { user_id: doctor_id }
+                },
                 result,
                 note,
-                examined_at: new Date(), // hoặc từ client
-                final_diagnosis,
+                examined_at: new Date(),
             },
         });
+
+
 
         // Gọi tạo nhiều thuốc nếu có
         if (prescription_items.length > 0) {

@@ -8,16 +8,18 @@ import type { IMedicine } from "../../../types/index.type";
 interface ExaminationRecordModalProps {
     open: boolean;
     onClose: () => void;
-    patientId: number;
-    doctorId?: number;
+    patient_id: number;
+    clinic_id: number;
+    doctor_id?: number;
     onSuccess?: () => void;
 }
 
 const DoctorExaminationRecordModal = ({
     open,
     onClose,
-    patientId,
-    doctorId,
+    patient_id,
+    clinic_id,
+    doctor_id,
     onSuccess,
 }: ExaminationRecordModalProps) => {
     const [form] = Form.useForm();
@@ -78,14 +80,15 @@ const DoctorExaminationRecordModal = ({
         try {
             await mainRequest.post("/api/v1/examination-record", {
                 ...values,
-                patient_id: patientId,
-                doctor_id: doctorId,
+                patient_id: patient_id,
+                doctor_id: doctor_id,
+                clinic_id: clinic_id,
                 prescription_items: medicinesAdded.map((med) => ({
                     medicine_id: med.id,
                     note: med.note ?? null,
                 })),
             });
-            toast.success("Tạo hồ sơ khám tổng quát thành công!");
+            toast.success("Tạo hồ sơ khám thành công!");
             form.resetFields();
             setMedicinesAdded([]);
             onClose();
@@ -107,6 +110,7 @@ const DoctorExaminationRecordModal = ({
     }
     const handleCloseModal = () => {
         form.resetFields();
+        handleSetMedicineVisible(false)
         setMedicinesAdded([]);
         clearsMedicine();
         onClose();
@@ -114,7 +118,7 @@ const DoctorExaminationRecordModal = ({
 
     return (
         <Modal
-            title="Tạo hồ sơ khám tổng quát"
+            title="Tạo hồ sơ khám"
             open={open}
             onCancel={handleCloseModal}
             onOk={() => form.submit()}
@@ -150,12 +154,11 @@ const DoctorExaminationRecordModal = ({
                 <Space size={16}>
                     <Form.Item
                         layout="horizontal"
-                        valuePropName="checked"
                         label="Thêm đơn thuốc"
                         tooltip="Nếu chọn, hồ sơ khám tổng quát có thêm đơn thuốc"
+                        initialValue={medicineVisible}
                     >
-                        <Checkbox onChange={(e) => handleSetMedicineVisible(e.target.checked)}>
-                        </Checkbox>
+                        <Checkbox checked={medicineVisible} onChange={(e) => handleSetMedicineVisible(e.target.checked)} />
                     </Form.Item>
                 </Space>
 
@@ -165,7 +168,7 @@ const DoctorExaminationRecordModal = ({
                             <Form.Item label="Đơn thuốc">
                                 <Flex justify="space-between" gap={8}>
                                     <Select showSearch
-                                    
+
                                         style={{ minWidth: 200 }}
                                         placeholder="Chọn thuốc"
                                         options={optionMedicines}
