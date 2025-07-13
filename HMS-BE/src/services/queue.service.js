@@ -1,6 +1,7 @@
 const prisma = require("../config/prisma");
 const { getIO } = require("../config/socket.js");
 const ExaminationRecordService = require("./examinationRecord.service");
+const { sendPatientQueueNumberEmail } = require("../utils/staff.email");
 
 class QueueService {
   /**
@@ -10,8 +11,8 @@ class QueueService {
    * @returns {Promise<Object>} Danh sách queue và thông tin phân trang
    */
   static async getQueueClinic(clinicId, query) {
-    const { pageNumber = 1, pageSize = 10 } = query;
-
+    const { pageNumber = 1, pageSize = 10, type } = query;
+    console.log(query)
     if (!clinicId) {
       throw new Error("Clinic ID is required");
     }
@@ -27,6 +28,21 @@ class QueueService {
       throw new Error("Clinic not found");
     }
 
+    let status = {
+      in: ["waiting", "in_progress"],
+    }
+    // Nếu có type thì lọc theo type
+    if (["waiting", "in_progress", "done", "skipped"].includes(type)) {
+      status = { in: [type] };
+    }
+    const queueClinicdata = await prisma.queue.findMany({
+      where: {
+        clinic_id: Number(clinicId),
+        status: status,
+      },
+    });
+    console.log(queueClinicdata)
+
     // 2. Lấy danh sách queue theo thứ tự ưu tiên:
     // - Ưu tiên theo priority của appointment (cao xuống thấp)
     // - Nếu cùng priority thì ưu tiên theo thời gian đặt lịch (sớm lên trước)
@@ -34,10 +50,7 @@ class QueueService {
     const queueClinic = await prisma.queue.findMany({
       where: {
         clinic_id: Number(clinicId),
-        
-        status: {
-          in: ["waiting", "in_progress"],
-        },
+        status: status,
       },
       orderBy: [
         { priority: "desc" },
@@ -59,7 +72,7 @@ class QueueService {
         },
       },
     });
-    console.log(queueClinic);
+    // console.log(queueClinic);
 
     // 3. Tính toán thông tin phân trang
     const total = await prisma.queue.count({
@@ -170,10 +183,12 @@ class QueueService {
       include: { patient: true, clinic: true, appointment: true },
     });
 
+    // >>>>>> Tại queue Không cần tạo ExaminationRecord vì bác sĩ sẽ tạo examination record sau khi khám (queue status in_progress)
+
     // Nếu bắt đầu khám (in_progress), tạo ExaminationRecord nếu chưa có
-    if (status === "in_progress") {
-      await ExaminationRecordService.createIfNotExists(updated.patient_id);
-    }
+    // if (status === "in_progress") {
+    //   await ExaminationRecordService.createIfNotExists(updated.patient_id, updated.clinic_id, updated.appointment.doctor_id);
+    // }
 
     // Nếu bệnh nhân vắng mặt (status = skipped), thêm vào danh sách đợi lại
     // if (status === "skipped") {
@@ -241,7 +256,7 @@ class QueueService {
       patient_id: appointment.patient_id,
       clinic_id: appointment.clinic_id,
       slot_date: appointment.appointment_date,
-      slot_time: (typeof appointment.appointment_time === 'string') ? appointment.appointment_time : appointment.appointment_time.toTimeString().slice(0,8),
+      slot_time: (typeof appointment.appointment_time === 'string') ? appointment.appointment_time : appointment.appointment_time.toTimeString().slice(0, 8),
       registered_online: true
     });
 
@@ -349,9 +364,85 @@ class QueueService {
         shift_type: type,
         slot_date,
         created_at: new Date(),
+      },
+      include: {
+        patient: {
+          include: {
+            user: true
+          }
+        },
+        appointment: appointment_id ? {
+          include: {
+            doctor: true,
+            clinic: true
+          }
+        } : false,
+        clinic: true
       }
     });
+
+    // Gửi email thông báo số thứ tự cho bệnh nhân
+    try {
+      if (newQueue.patient?.user?.email) {
+        await sendPatientQueueNumberEmail(
+          newQueue.patient.user.email,
+          newQueue.patient.user.full_name || "Bệnh nhân",
+          newQueue.queue_number,
+          newQueue.shift_type,
+          newQueue.slot_date instanceof Date ? newQueue.slot_date.toISOString().slice(0, 10) : newQueue.slot_date,
+          slot_time,
+          newQueue.appointment?.doctor?.full_name || "Bác sĩ chưa xác định",
+          newQueue.clinic?.name || "Phòng khám"
+        );
+      }
+    } catch (err) {
+      console.error('Không thể gửi email thông báo số thứ tự:', err.message);
+    }
+
     return newQueue;
+  }
+
+  /**
+   * Lấy danh sách queue của tất cả bệnh nhân theo ngày
+   * @param {string} dateStr - Ngày cần lấy (YYYY-MM-DD), nếu không có sẽ lấy hôm nay
+   * @returns {Promise<Array>} Danh sách queue theo ngày
+   */
+  static async getQueuesByDate(dateStr) {
+    let date;
+    if (dateStr) {
+      date = new Date(dateStr);
+      date.setHours(0, 0, 0, 0);
+    } else {
+      date = new Date();
+      date.setHours(0, 0, 0, 0);
+    }
+    const nextDay = new Date(date);
+    nextDay.setDate(date.getDate() + 1);
+
+    const queues = await prisma.queue.findMany({
+      where: {
+        slot_date: {
+          gte: date,
+          lt: nextDay
+        },
+        status: {
+          in: ["waiting", "in_progress"]
+        }
+      },
+      orderBy: [
+        { slot_date: "asc" },
+        { queue_number: "asc" }
+      ],
+      include: {
+        patient: {
+          include: {
+            user: true
+          }
+        },
+        clinic: true
+      }
+    });
+    return queues;
   }
 }
 

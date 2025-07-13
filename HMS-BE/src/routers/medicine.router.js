@@ -7,29 +7,29 @@ const medicineController = require("../controllers/medicine.controller");
 const medicineRouter = express.Router();
 
 medicineRouter.use(authenticate);
-// medicineRouter.use(checkUserStatus());
+medicineRouter.use(checkUserStatus());
 
 medicineRouter.get(
     "/",
-    authorize("admin"),
+    authorize("admin", "doctor", "nurse"),
     asyncHandler(medicineController.getAllMedicines)
 );
 
 medicineRouter.get(
     "/:id",
-    authorize("admin"),
+    authorize("admin", "doctor", "nurse"),
     asyncHandler(medicineController.getMedicineById)
 );
 medicineRouter.post(
     "/",
-    authorize("admin"),
+    authorize("admin", "doctor", "nurse"),
     asyncHandler(medicineController.getMedicines)
 );
 
 
 medicineRouter.post(
     "/create",
-    authorize("admin"),
+    authorize("admin", "doctor", "nurse"),
     asyncHandler(medicineController.createMedicine)
 );
 

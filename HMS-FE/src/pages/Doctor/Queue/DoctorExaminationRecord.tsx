@@ -8,23 +8,24 @@ import type { IMedicine } from "../../../types/index.type";
 interface ExaminationRecordModalProps {
     open: boolean;
     onClose: () => void;
-    patientId: number;
-    doctorId?: number;
+    patient_id: number;
+    clinic_id: number;
+    doctor_id?: number;
     onSuccess?: () => void;
 }
 
 const DoctorExaminationRecordModal = ({
     open,
     onClose,
-    patientId,
-    doctorId,
+    patient_id,
+    clinic_id,
+    doctor_id,
     onSuccess,
 }: ExaminationRecordModalProps) => {
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
     const [medicinesAdded, setMedicinesAdded] = useState<IMedicine[]>([]);
     const [selectedMedicine, setSelectedMedicine] = useState<IMedicine | null>(null);
-    const [quantity, setQuantity] = useState<number>(0);
     const [optionMedicines, setOptionMedicines] = useState<any[]>([]);
     const [isCreate, setIsCreate] = useState(true);
     const [medicineVisible, setMedicineVisible] = useState(false);
@@ -34,11 +35,6 @@ const DoctorExaminationRecordModal = ({
             setMedicinesAdded([]);
         }
     };
-    // useEffect(() => {
-    //     if (open) {
-    //         fetchMedicineList();
-    //     }
-    // }, [open]);
 
     const { medicines } = useMedicineList();
     console.log(medicines)
@@ -50,23 +46,8 @@ const DoctorExaminationRecordModal = ({
             })));
         }
     }, [medicines]);
-    // const fetchMedicineList = async () => {
-    //     try {
-    //         // const { medicines } = await getListMedicine({});
-    //         const medicines: any[] = []
-    //         const options = medicines.map((item) => ({
-    //             label: `${item.name} - SL: ${item.quantity}`,
-    //             value: item._id,
-    //             ...item,
-    //         }));
-    //         setOptionMedicines(options);
-    //     } catch (err) {
-    //         console.error("Fetch medicine failed:", err);
-    //     }
-    // };
 
     const clearsMedicine = () => {
-        setQuantity(0);
         setSelectedMedicine(null);
         setIsCreate(true);
     };
@@ -75,23 +56,18 @@ const DoctorExaminationRecordModal = ({
         if (selectedMedicine) {
             const index = medicinesAdded.findIndex((item) => item.id === selectedMedicine.id);
             const newList = [...medicinesAdded];
-            if (index !== -1) newList.splice(index, 1);
+
+            if (index !== -1) newList.splice(index, 1); // Xóa nếu đã có để cập nhật lại
+
             newList.unshift({
                 id: selectedMedicine.id,
                 name: selectedMedicine.name,
-                stock: selectedMedicine.stock,
-                price: selectedMedicine.price,
+                note: selectedMedicine.note, // thêm ghi chú
             });
+
             setMedicinesAdded(newList);
             clearsMedicine();
         }
-    };
-
-    const handleEdit = (record: IMedicine) => {
-        const selected = optionMedicines.find((opt) => opt.value === record.id);
-        setSelectedMedicine(selected);
-        setQuantity(record.stock);
-        setIsCreate(false);
     };
 
     const handleRemoveMedicine = (record: any) => {
@@ -104,11 +80,17 @@ const DoctorExaminationRecordModal = ({
         try {
             await mainRequest.post("/api/v1/examination-record", {
                 ...values,
-                patient_id: patientId,
-                primary_doctor_id: doctorId,
+                patient_id: patient_id,
+                doctor_id: doctor_id,
+                clinic_id: clinic_id,
+                prescription_items: medicinesAdded.map((med) => ({
+                    medicine_id: med.id,
+                    note: med.note ?? null,
+                })),
             });
-            toast.success("Tạo hồ sơ khám tổng quát thành công!");
+            toast.success("Tạo hồ sơ khám thành công!");
             form.resetFields();
+            setMedicinesAdded([]);
             onClose();
             onSuccess?.();
         } catch (err: any) {
@@ -117,20 +99,28 @@ const DoctorExaminationRecordModal = ({
             setLoading(false);
         }
     };
-    console.log(selectedMedicine)
+
+    // console.log(selectedMedicine)
     const handleSetMedicine = (option: any) => {
         console.log("option", option)
         const medicine = medicines.find((item) => item.id === option.value);
         if (medicine) {
             setSelectedMedicine(medicine);
-            setQuantity(medicine.stock);
         }
     }
+    const handleCloseModal = () => {
+        form.resetFields();
+        handleSetMedicineVisible(false)
+        setMedicinesAdded([]);
+        clearsMedicine();
+        onClose();
+    }
+
     return (
         <Modal
-            title="Tạo hồ sơ khám tổng quát"
+            title="Tạo hồ sơ khám"
             open={open}
-            onCancel={onClose}
+            onCancel={handleCloseModal}
             onOk={() => form.submit()}
             confirmLoading={loading}
             okText="Lưu hồ sơ"
@@ -145,30 +135,30 @@ const DoctorExaminationRecordModal = ({
                 className="pt-2"
             >
                 <Form.Item
-                    label="Triệu chứng"
-                    name="symptoms"
-                    rules={[{ required: true, message: "Vui lòng nhập triệu chứng" }]}
+                    label="Kết quả khám chuyên khoa"
+                    name="result"
+                    rules={[{ required: true, message: "Vui lòng nhập kết quả khám" }]}
                 >
-                    <Input.TextArea rows={3} placeholder="Nhập triệu chứng..." />
+                    <Input.TextArea rows={3} placeholder="Nhập kết quả khám..." />
                 </Form.Item>
 
+                {/* note */}
                 <Form.Item
-                    label="Chẩn đoán cuối cùng"
-                    name="final_diagnosis"
-                    rules={[{ required: true, message: "Vui lòng nhập chẩn đoán cuối cùng" }]}
+                    label="Ghi chú"
+                    name="note"
+                    rules={[{ message: "Ghi chú" }]}
                 >
-                    <Input.TextArea rows={3} placeholder="Nhập chẩn đoán cuối cùng..." />
+                    <Input.TextArea rows={3} placeholder="Nhập ghi chú..." />
                 </Form.Item>
 
                 <Space size={16}>
                     <Form.Item
                         layout="horizontal"
-                        valuePropName="checked"
                         label="Thêm đơn thuốc"
                         tooltip="Nếu chọn, hồ sơ khám tổng quát có thêm đơn thuốc"
+                        initialValue={medicineVisible}
                     >
-                        <Checkbox onChange={(e) => handleSetMedicineVisible(e.target.checked)}>
-                        </Checkbox>
+                        <Checkbox checked={medicineVisible} onChange={(e) => handleSetMedicineVisible(e.target.checked)} />
                     </Form.Item>
                 </Space>
 
@@ -177,9 +167,9 @@ const DoctorExaminationRecordModal = ({
                         <>
                             <Form.Item label="Đơn thuốc">
                                 <Flex justify="space-between" gap={8}>
-                                    <Select
-                                        showSearch
-                                        style={{ flex: 1 }}
+                                    <Select showSearch
+
+                                        style={{ minWidth: 200 }}
                                         placeholder="Chọn thuốc"
                                         options={optionMedicines}
                                         value={selectedMedicine?.id}
@@ -188,36 +178,40 @@ const DoctorExaminationRecordModal = ({
                                         }}
                                         disabled={!isCreate}
                                     />
-                                    <InputNumber
-                                        min={1}
-                                        placeholder="Số lượng"
-                                        value={quantity}
-                                        max={selectedMedicine?.stock}
-                                        onChange={(val) => {
-                                            setQuantity(val || 0);
+                                    <Input
+                                        placeholder="Ghi chú thuốc"
+
+                                        value={selectedMedicine?.note}
+                                        onChange={(e) => {
+                                            if (selectedMedicine) {
+                                                setSelectedMedicine({
+                                                    ...selectedMedicine,
+                                                    note: e.target.value,
+                                                });
+                                            }
                                         }}
+                                        disabled={!isCreate}
                                     />
+
                                     <Button
                                         type="primary"
                                         onClick={handleAddMedicine}
-                                        disabled={!selectedMedicine || quantity <= 0}
+                                        disabled={!selectedMedicine}
                                     >
                                         {isCreate ? "Thêm" : "Cập nhật"}
                                     </Button>
                                 </Flex>
                             </Form.Item>
 
-                            <Table
-                                rowKey="id"
+                            <Table rowKey="id"
                                 columns={[
                                     {
                                         title: "Tên thuốc",
                                         dataIndex: "name",
                                     },
                                     {
-                                        title: "SL",
-                                        dataIndex: "stock",
-                                        width: 100,
+                                        title: "Ghi chú",
+                                        dataIndex: "note",
                                     },
                                     {
                                         title: "Thao tác",
@@ -225,16 +219,11 @@ const DoctorExaminationRecordModal = ({
                                         width: 150,
                                         render: (_, record) => (
                                             <Space>
-                                                <Button
-                                                    size="small"
-                                                    icon={<Edit className="w-4 h-4" />}
-                                                    onClick={() => handleEdit(record)}
-                                                />
                                                 <Popconfirm
                                                     title="Xóa thuốc này?"
                                                     onConfirm={() => handleRemoveMedicine(record)}
                                                 >
-                                                    <Button size="small" icon={<Delete className="w-4 h-4"  />} danger />
+                                                    <Button size="small" icon={<Delete className="w-4 h-4" />} danger />
                                                 </Popconfirm>
                                             </Space>
                                         ),
