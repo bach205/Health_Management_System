@@ -236,13 +236,27 @@ class QueueService {
     });
     if (existingQueue) throw new Error("Đã check-in vào hàng đợi!");
 
-    // 3. Gọi assignQueueNumber để tạo queue mới
+    // 3. Xử lý thời gian appointment để tránh vấn đề múi giờ
+    let appointmentTimeStr;
+    if (typeof appointment.appointment_time === 'string') {
+      appointmentTimeStr = appointment.appointment_time;
+    } else if (appointment.appointment_time instanceof Date) {
+      // Lấy giờ local thay vì UTC để tránh chuyển đổi múi giờ
+      const hours = appointment.appointment_time.getHours().toString().padStart(2, '0');
+      const minutes = appointment.appointment_time.getMinutes().toString().padStart(2, '0');
+      const seconds = appointment.appointment_time.getSeconds().toString().padStart(2, '0');
+      appointmentTimeStr = `${hours}:${minutes}:${seconds}`;
+    } else {
+      appointmentTimeStr = '08:00:00'; // Default time
+    }
+
+    // 4. Gọi assignQueueNumber để tạo queue mới
     const newQueue = await QueueService.assignQueueNumber({
       appointment_id: appointment.id,
       patient_id: appointment.patient_id,
       clinic_id: appointment.clinic_id,
       slot_date: appointment.appointment_date,
-      slot_time: (typeof appointment.appointment_time === 'string') ? appointment.appointment_time : appointment.appointment_time.toTimeString().slice(0,8),
+      slot_time: appointmentTimeStr,
       registered_online: true
     });
 
@@ -370,13 +384,19 @@ class QueueService {
     // Gửi email thông báo số thứ tự cho bệnh nhân
     try {
       if (newQueue.patient?.user?.email) {
+        // Đảm bảo slot_time được format đúng cho email
+        const emailTime = typeof slot_time === 'string' ? slot_time : 
+                         (slot_time instanceof Date ? 
+                           `${slot_time.getHours().toString().padStart(2, '0')}:${slot_time.getMinutes().toString().padStart(2, '0')}:${slot_time.getSeconds().toString().padStart(2, '0')}` : 
+                           '08:00:00');
+        
         await sendPatientQueueNumberEmail(
           newQueue.patient.user.email,
           newQueue.patient.user.full_name || "Bệnh nhân",
           newQueue.queue_number,
           newQueue.shift_type,
           newQueue.slot_date instanceof Date ? newQueue.slot_date.toISOString().slice(0,10) : newQueue.slot_date,
-          slot_time,
+          emailTime,
           newQueue.appointment?.doctor?.full_name || "Bác sĩ chưa xác định",
           newQueue.clinic?.name || "Phòng khám"
         );
