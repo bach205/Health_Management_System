@@ -8,8 +8,14 @@ const storage = multer.diskStorage({
         cb(null, 'uploads/chat/');
     },
     filename: function (req, file, cb) {
+        // Ép lại encoding đúng nếu bị lỗi Unicode
+        const originalName = Buffer.from(file.originalname, 'latin1').toString('utf8');
+
+        // Làm sạch tên file (nếu muốn)
+        const safeName = originalName.replace(/\s+/g, '_');
+        file.originalname = safeName;
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, uniqueSuffix + '-' + file.originalname.replace(/\s+/g, '_'));
+        cb(null, uniqueSuffix + '-' + safeName);
     }
 });
 const upload = multer({ storage });

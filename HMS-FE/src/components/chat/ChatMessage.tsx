@@ -60,10 +60,22 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, onEdit, onDelete }) 
         setShowConfirm(false);
     };
 
-    // Mở file/ảnh trong window mới
+    // Mở file/ảnh trong window mới hoặc tải file
     const openFileInNewWindow = () => {
         if (blobUrl) {
             window.open(blobUrl, '_blank');
+        }
+    };
+
+    // Thay thế: Tải file về máy khi click vào file (chỉ cho message_type === 'file')
+    const openFileDownload = () => {
+        if (blobUrl) {
+            const a = document.createElement('a');
+            a.href = blobUrl;
+            a.download = message.file_name || 'download';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
         }
     };
 
@@ -107,8 +119,8 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, onEdit, onDelete }) 
                 return (
                     <div className="flex items-center space-x-2 p-3 bg-blue-50 rounded-lg">
                         <div className="flex-1 flex items-center space-x-2 cursor-pointer hover:bg-blue-100 transition-colors rounded p-1"
-                            onClick={openFileInNewWindow}
-                            title="Click để mở file trong cửa sổ mới">
+                            onClick={openFileDownload} // Đổi từ openFileInNewWindow sang openFileDownload
+                            title="Click để tải xuống file">
                             <div className="flex-shrink-0">
                                 <svg className="w-8 h-8 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
                                     <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
@@ -118,35 +130,13 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, onEdit, onDelete }) 
                                 <p className="text-sm font-medium text-gray-900 truncate">
                                     {message.file_name}
                                 </p>
-                                <p className="text-xs text-gray-500">
-                                    {message.file_type}
-                                </p>
-                            </div>
-                            <div className="flex-shrink-0 text-blue-600">
-                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                                </svg>
                             </div>
                         </div>
-                        {/* Nút download */}
-                        {blobUrl && (
-                            <a
-                                href={blobUrl}
-                                download={message.file_name}
-                                className="flex-shrink-0 p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded transition-colors"
-                                title="Tải xuống file"
-                                onClick={(e) => e.stopPropagation()} // Ngăn không cho trigger openFileInNewWindow
-                            >
-                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
-                                </svg>
-                            </a>
-                        )}
                     </div>
                 );
             default:
                 return (
-                    <div className="text-sm">
+                    <div className="text-sm px-4 py-2">
                         {isEditing ? (
                             <div className="flex items-center space-x-2">
                                 <input
@@ -180,12 +170,12 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, onEdit, onDelete }) 
 
     return (
         <div className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'} mb-2`}>
-            <div className={`relative max-w-[80%] px-4 py-2 rounded-lg ${isOwnMessage ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-900'
+            <div className={`relative max-w-[80%] rounded-lg ${isOwnMessage ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-900'
                 }`}>
                 {renderMessageContent()}
                 {/* Menu ba chấm (chỉ cho tin nhắn của mình) */}
                 {isOwnMessage && !isEditing && (
-                    <div className="absolute -left-6 top-1">
+                    <div className="absolute -left-6 top-1 ">
                         <button
                             onClick={() => setShowMenu(!showMenu)}
                             className="text-gray-400 hover:text-gray-600"

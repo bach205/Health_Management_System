@@ -63,7 +63,6 @@ const MessageInput: React.FC<MessageInputProps> = ({
                     conversationId,
                     message_type: pf.meta.file_type.startsWith('image/') ? 'image' : 'file'
                 };
-                console.log(messageData)
                 onSendMessage(messageData);
             }
         }
@@ -85,6 +84,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
         const fileArr = Array.from(files);
         try {
             const metas = await chatService.uploadFiles(fileArr);
+            console.log(metas)
             const newPendingFiles = fileArr.map((file, i) => ({ file, preview: URL.createObjectURL(file), meta: metas[i] }));
             setPendingFiles(prev => [...prev, ...newPendingFiles]);
         } catch (err) {
