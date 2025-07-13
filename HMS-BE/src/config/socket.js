@@ -61,6 +61,7 @@ const handleSocketConnected = (socket, io) => {
         });
       }
     } catch (err) {
+      console.log(err)
       socket.emit('error', { message: 'Gửi tin nhắn thất bại' });
     }
   });
