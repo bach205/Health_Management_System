@@ -2,6 +2,7 @@
 import { useEffect } from "react";
 import { getSocket } from "../../services/socket";
 import { useAuthStore } from "../../store/authStore";
+import { socket } from "../../utils/socket";
 
 export const useSocket = (
   roomId: string,
@@ -11,7 +12,7 @@ export const useSocket = (
   const { user } = useAuthStore()
 
   useEffect(() => {
-    const socket = getSocket(user.id);
+    const socket = getSocket(user?.id || 'defaultUserId');
     if (!roomId) return;
 
     socket.emit("joinRoom", roomId);

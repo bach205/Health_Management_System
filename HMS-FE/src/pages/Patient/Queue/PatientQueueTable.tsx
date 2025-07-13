@@ -24,12 +24,6 @@ const PatientQueueTable = () => {
         setQueues,  // Thêm setQueues vào đây
     } = useQueueStore();
     console.log(queues);
-    const [showModalPatientExaminationOrder, setShowModalPatientExaminationOrder] = useState(false);
-    const [showDoctorExaminationOrderModal, setShowDoctorExaminationOrderModal] = useState(false);
-    const [showResultModal, setShowResultModal] = useState(false);
-    const [showAssignModal, setShowAssignModal] = useState(false);
-    const [showRecordModal, setShowRecordModal] = useState(false);
-    const [selectedPatient, setSelectedPatient] = useState<any>(null);
     const [clinics, setClinics] = useState<any[]>([]);
     const [selectedClinic, setSelectedClinic] = useState("");
     const { fetchQueue } = useQueue();
@@ -69,28 +63,6 @@ const PatientQueueTable = () => {
         }
     );
 
-    // const menu = (record: any) => (
-    //     <Menu>
-    //         {record.status === "waiting" && (
-    //             <>
-    //                 <Menu.Item
-    //                     key="start"
-    //                     onClick={() => handleStatusUpdate(record.id, "in_progress")}
-    //                 >
-    //                     Bắt đầu khám
-    //                 </Menu.Item>
-    //                 <Menu.Item
-    //                     key="skip"
-    //                     onClick={() => handleStatusUpdate(record.id, "skipped")}
-    //                     danger
-    //                 >
-    //                     Bỏ qua
-    //                 </Menu.Item>
-    //             </>
-    //         )}
-    //         {/* Rest of the menu items... */}
-    //     </Menu>
-    // );
     useEffect(() => {
         const fetchClinics = async () => {
             try {

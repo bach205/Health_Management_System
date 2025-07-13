@@ -28,9 +28,6 @@ model User {
   nurse               Nurse?
   workSchedules       WorkSchedule[]
   examinationOrders   ExaminationOrder[]   @relation("DoctorExaminationOrder")
-  primaryRecords      ExaminationRecord[]  @relation("PrimaryDoctor")
-  createdRecords      ExaminationRecord[]  @relation("CreatedByUser")
-  examinationDetails  ExaminationDetail[]
   passwordResetTokens PasswordResetToken[]
   appointments        Appointment[]        @relation("DoctorAppointment")
   availableSlots      AvailableSlot[]
@@ -91,10 +88,11 @@ model Clinic {
   workSchedules      WorkSchedule[]
   fromOrders         ExaminationOrder[]  @relation("FromClinic")
   toOrders           ExaminationOrder[]  @relation("ToClinic")
-  examinationDetails ExaminationDetail[]
   queues             Queue[]
   appointments       Appointment[]
   availableSlots     AvailableSlot[]
+  examinationRecords ExaminationRecord[]
+
 
   @@map("clinics")
 }
@@ -104,11 +102,12 @@ model Doctor {
   specialty_id Int?
   bio          String?  @db.Text
   price        Int?     @default(0)
-  rating       Decimal? @default(0.0) @db.Decimal(2, 1)
 
   user      User           @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "doctors_ibfk_1")
   specialty Specialty?     @relation(fields: [specialty_id], references: [id], onUpdate: Restrict, map: "doctors_ibfk_2")
   ratings   DoctorRating[] @relation("DoctorToRating")
+  examinationRecords ExaminationRecord[]
+
 
   @@index([specialty_id], map: "specialty_id")
   @@map("doctors")
@@ -182,8 +181,10 @@ model ExaminationOrder {
   id             Int      @id @default(autoincrement())
   doctor_id      Int
   patient_id     Int
+  record_id      Int?      // ExaminationRecord
   from_clinic_id Int
   to_clinic_id   Int
+  reason         String?  @db.Text
   total_cost     Decimal  @default(0.00)
   created_at     DateTime @default(now())
 
@@ -192,54 +193,37 @@ model ExaminationOrder {
   fromClinic Clinic  @relation("FromClinic", fields: [from_clinic_id], references: [id])
   toClinic   Clinic  @relation("ToClinic", fields: [to_clinic_id], references: [id])
 
+  record     ExaminationRecord? @relation(fields: [record_id], references: [id])
+
   @@map("examination_orders")
 }
 
+// doctor viet ket qua kham
 model ExaminationRecord {
   id                 Int      @id @default(autoincrement())
   patient_id         Int
-  symptoms           String?  @db.Text
-  primary_doctor_id  Int?
-  final_diagnosis    String?  @db.Text
-  created_by_user_id Int?
+  clinic_id          Int
+  doctor_id          Int      // id cua doctor dam nhiem kham 
+  result             String?  @db.Text      // add from removed ExaminationDetail 
+  note               String?  @db.Text      // add from ExaminationDetail
+  examined_at        DateTime?              // add from ExaminationDetail
   created_at         DateTime @default(now())
   updated_at         DateTime @updatedAt
 
-  patient            Patient             @relation(fields: [patient_id], references: [id])
-  primaryDoctor      User?               @relation("PrimaryDoctor", fields: [primary_doctor_id], references: [id])
-  createdByUser      User?               @relation("CreatedByUser", fields: [created_by_user_id], references: [id])
-  examinationDetails ExaminationDetail[]
-  prescriptions      Prescription[]
-  invoiceItems       InvoiceItem[]
-  queues             Queue[]
-  payments           Payment[]
+  patient       Patient @relation(fields: [patient_id], references: [id])
+  clinic        Clinic  @relation(fields: [clinic_id], references: [id])
+  doctor        Doctor    @relation(fields: [doctor_id], references: [user_id])
+
+  examinationOrder ExaminationOrder[]
+  prescriptionItems PrescriptionItem[]
+
+  invoiceItems  InvoiceItem[]
+  queues        Queue[]
+  payments      Payment[]
 
   @@map("examination_records")
 }
 
-model ExaminationDetail {
-  id          Int               @id @default(autoincrement())
-  record_id   Int
-  clinic_id   Int
-  doctor_id   Int
-  result      String?           @db.Text
-  note        String?           @db.Text
-  examined_at DateTime?
-  status      ExaminationStatus @default(pending)
-
-  record ExaminationRecord @relation(fields: [record_id], references: [id])
-  clinic Clinic            @relation(fields: [clinic_id], references: [id])
-  doctor User              @relation(fields: [doctor_id], references: [id])
-
-  @@map("examination_details")
-}
-
-enum ExaminationStatus {
-  pending
-  in_progress
-  done
-  cancelled
-}
 
 model Queue {
   id                Int         @id @default(autoincrement())
@@ -255,7 +239,6 @@ model Queue {
   created_at        DateTime    @default(now())
   shift_type        String?
   queue_number      Int?
-  slot_date         DateTime?
 
   patient     Patient            @relation(fields: [patient_id], references: [id])
   clinic      Clinic             @relation(fields: [clinic_id], references: [id])
@@ -272,35 +255,20 @@ enum QueueStatus {
   skipped
 }
 
-model Prescription {
-  id         Int      @id @default(autoincrement())
-  record_id  Int
-  created_at DateTime @default(now())
-
-  record ExaminationRecord  @relation(fields: [record_id], references: [id])
-  items  PrescriptionItem[]
-
-  @@map("prescriptions")
-}
-
 model PrescriptionItem {
-  id              Int     @id @default(autoincrement())
-  prescription_id Int
-  medicine_id     Int?
-  quantity        Int?    @default(1)
-  medicine_name   String  @db.VarChar(255)
-  dosage          String? @db.VarChar(100)
-  frequency       String? @db.VarChar(100)
-  duration        String? @db.VarChar(100)
-  note            String? @db.Text
+  id          Int     @id @default(autoincrement())
+  record_id   Int
+  medicine_id Int?
+  note        String? @db.Text
 
-  prescription Prescription @relation(fields: [prescription_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "prescription_items_ibfk_1")
-  medicine     Medicine?    @relation(fields: [medicine_id], references: [id], onUpdate: Restrict, map: "prescription_items_ibfk_2")
+  record    ExaminationRecord @relation(fields: [record_id], references: [id])
+  medicine  Medicine?         @relation(fields: [medicine_id], references: [id], onUpdate: Restrict)
 
-  @@index([medicine_id], map: "medicine_id")
-  @@index([prescription_id], map: "prescription_id")
+  @@index([medicine_id])
+  @@index([record_id])
   @@map("prescription_items")
 }
+
 
 model Medicine {
   id    Int     @id @default(autoincrement())

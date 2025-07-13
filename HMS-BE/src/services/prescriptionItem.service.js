@@ -2,13 +2,33 @@ const prisma = require("../config/prisma");
 const { BadRequestError } = require("../core/error.response");
 
 class PrescriptionItemService {
+
+  // Tạo nhiều prescription items
+  // record_id: ID của bản ghi kê đơn
+  static async createMany(record_id, items = []) {
+    if (!record_id) throw new BadRequestError("Thiếu record_id");
+    if (!Array.isArray(items)) throw new BadRequestError("Danh sách thuốc không hợp lệ");
+
+    if (items.length === 0) return;
+
+    const data = items.map(item => {
+      if (!item.medicine_id) throw new BadRequestError("Thiếu medicine_id cho một thuốc");
+      return {
+        record_id,
+        medicine_id: item.medicine_id,
+        note: item.note ?? null,
+      };
+    });
+
+    return await prisma.prescriptionItem.createMany({ data });
+  }
+
   // Lấy danh sách tất cả prescription items
   async getAll() {
     try {
       const items = await prisma.prescriptionItem.findMany({
         include: {
           medicine: true,
-          prescription: true,
         },
       });
       return items;
@@ -17,48 +37,21 @@ class PrescriptionItemService {
     }
   }
 
-  // Lấy theo ID
-  async getById(id) {
+  // Lấy danh sách prescription items theo record_id
+  async getByRecordId(record_id) {
     try {
-      const item = await prisma.prescriptionItem.findUnique({
-        where: { id: Number(id) },
-        include: {
-          medicine: true,
-          prescription: true,
-        },
-      });
-      if (!item) throw new BadRequestError("Không tìm thấy mục kê đơn");
-      return item;
-    } catch (error) {
-      throw new BadRequestError(error.message);
-    }
-  }
-
-  // Tạo mới prescription item
-  async create(data) {
-    const { prescription_id, medicine_id, quantity, note } = data;
-
-    if (!prescription_id || !medicine_id || !quantity) {
-      throw new BadRequestError("Thiếu thông tin bắt buộc");
-    }
-
-    try {
-      const item = await prisma.prescriptionItem.create({
-        data: {
-          prescription_id: Number(prescription_id),
-          medicine_id: Number(medicine_id),
-          quantity: Number(quantity),
-          note: note?.trim() || null,
-        },
+      const items = await prisma.prescriptionItem.findMany({
+        where: { record_id: Number(record_id) },
         include: {
           medicine: true,
         },
       });
-      return item;
+      return items;
     } catch (error) {
       throw new BadRequestError(error.message);
     }
-  }
+  } 
+
 
   // Cập nhật prescription item
   async update(id, data) {
@@ -111,4 +104,5 @@ class PrescriptionItemService {
   }
 }
 
-module.exports = new PrescriptionItemService();
+
+module.exports = PrescriptionItemService;

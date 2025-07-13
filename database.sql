@@ -1,4 +1,5 @@
 -- Create and use the hospital database
+-- create database hospital;
 
 USE hospital;
 
@@ -87,7 +88,6 @@ CREATE TABLE examination_orders (
     FOREIGN KEY (to_clinic_id) REFERENCES clinics(id) ON DELETE CASCADE
 );
 
--- Table for examination records
 CREATE TABLE examination_records (
     id INT AUTO_INCREMENT PRIMARY KEY,
     patient_id INT NOT NULL COMMENT 'Patient',
@@ -97,25 +97,37 @@ CREATE TABLE examination_records (
     primary_doctor_id INT COMMENT 'Primary doctor',
     final_diagnosis TEXT COMMENT 'Final diagnosis',
     created_by_user_id INT COMMENT 'User who created the record',
-    FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
-    FOREIGN KEY (primary_doctor_id) REFERENCES users(id) ON DELETE SET NULL,
-    FOREIGN KEY (created_by_user_id) REFERENCES users(id) ON DELETE SET NULL
-);
 
--- Table for examination details
-CREATE TABLE examination_details (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    record_id INT NOT NULL COMMENT 'General examination record',
-    clinic_id INT NOT NULL COMMENT 'Specific clinic',
-    doctor_id INT NOT NULL COMMENT 'Doctor at clinic',
+    -- Gộp từ examination_details:
+    clinic_id INT NOT NULL COMMENT 'Clinic where the examination was performed',
+    doctor_id INT NOT NULL COMMENT 'Doctor performing the examination',
     result TEXT COMMENT 'Examination result',
     note TEXT COMMENT 'Additional notes',
-    examined_at DATETIME COMMENT 'Examination completion time',
+    examined_at DATETIME COMMENT 'Time examination was completed',
     status ENUM('pending', 'in_progress', 'done', 'cancelled') DEFAULT 'pending' COMMENT 'Examination status',
-    FOREIGN KEY (record_id) REFERENCES examination_records(id) ON DELETE CASCADE,
+
+    FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
+    FOREIGN KEY (primary_doctor_id) REFERENCES users(id) ON DELETE SET NULL,
+    FOREIGN KEY (created_by_user_id) REFERENCES users(id) ON DELETE SET NULL,
     FOREIGN KEY (clinic_id) REFERENCES clinics(id) ON DELETE CASCADE,
     FOREIGN KEY (doctor_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+
+-- Table for examination details
+-- CREATE TABLE examination_details (
+--     id INT AUTO_INCREMENT PRIMARY KEY,
+--     record_id INT NOT NULL COMMENT 'General examination record',
+--     clinic_id INT NOT NULL COMMENT 'Specific clinic',
+--     doctor_id INT NOT NULL COMMENT 'Doctor at clinic',
+--     result TEXT COMMENT 'Examination result',
+--     note TEXT COMMENT 'Additional notes',
+--     examined_at DATETIME COMMENT 'Examination completion time',
+--     status ENUM('pending', 'in_progress', 'done', 'cancelled') DEFAULT 'pending' COMMENT 'Examination status',
+--     FOREIGN KEY (record_id) REFERENCES examination_records(id) ON DELETE CASCADE,
+--     FOREIGN KEY (clinic_id) REFERENCES clinics(id) ON DELETE CASCADE,
+--     FOREIGN KEY (doctor_id) REFERENCES users(id) ON DELETE CASCADE
+-- );
 
 -- Table for patient queues
 CREATE TABLE queues (
@@ -388,23 +400,41 @@ INSERT INTO work_schedules (user_id, clinic_id, work_date, shift_id) VALUES
 (6, 8, '2025-06-22', 2);
 
 -- Insert sample data into examination_records
-INSERT INTO examination_records (patient_id, symptoms, primary_doctor_id, final_diagnosis, created_by_user_id) VALUES
-(8, 'Đau đầu, sốt cao 39 độ, ho nhiều', 2, 'Viêm phổi cấp', 2),
-(9, 'Đau bụng dữ dội, buồn nôn', 3, 'Viêm ruột thừa cấp', 3),
-(10, 'Đau khớp gối, khó đi lại', 14, 'Thoái hóa khớp gối', 14),
-(11, 'Sốt phát ban, đau họng', 2, 'Sốt xuất huyết', 2),
-(12, 'Nổi mẩn đỏ toàn thân, ngứa', 3, 'Dị ứng thuốc', 3),
-(13, 'Mờ mắt, nhức mắt', 14, 'Cận thị tiến triển', 14);
+INSERT INTO examination_records 
+(patient_id, symptoms, primary_doctor_id, final_diagnosis, created_by_user_id,
+ clinic_id, doctor_id, result, note, examined_at, status) 
+VALUES
+(8, 'Đau đầu, sốt cao 39 độ, ho nhiều', 2, 'Viêm phổi cấp', 2,
+ 1, 2, 'Phổi có dấu hiệu viêm, cần chụp X-quang', 'Bệnh nhân cần nhập viện điều trị', '2025-06-01 09:30:00', 'done'),
+
+(8, null, null, null, null,
+ 9, 2, 'X-quang phổi cho thấy viêm phổi thùy dưới', 'Cần điều trị kháng sinh', '2025-06-01 10:15:00', 'done'),
+
+(9, 'Đau bụng dữ dội, buồn nôn', 3, 'Viêm ruột thừa cấp', 3,
+ 2, 3, 'Đau vùng hố chậu phải, dấu hiệu McBurney dương tính', 'Cần phẫu thuật cấp cứu', '2025-06-02 14:00:00', 'done'),
+
+(10, 'Đau khớp gối, khó đi lại', 14, 'Thoái hóa khớp gối', 14,
+ 3, 14, 'X-quang khớp gối cho thấy thoái hóa độ 2', 'Cần tập vật lý trị liệu', '2025-06-03 08:45:00', 'done'),
+
+(11, 'Sốt phát ban, đau họng', 2, 'Sốt xuất huyết', 2,
+ 4, 2, 'Xét nghiệm máu dương tính với sốt xuất huyết', 'Theo dõi tiểu cầu', '2025-06-04 11:20:00', 'done'),
+
+(12, 'Nổi mẩn đỏ toàn thân, ngứa', 3, 'Dị ứng thuốc', 3,
+ 5, 3, 'Test dị ứng dương tính với penicillin', 'Tránh sử dụng nhóm thuốc beta-lactam', '2025-06-05 15:30:00', 'done'),
+
+(13, 'Mờ mắt, nhức mắt', 14, 'Cận thị tiến triển', 14,
+ 6, 14, 'Đo thị lực: 3/10, cần đeo kính -2.5', 'Tái khám sau 3 tháng', '2025-06-06 09:00:00', 'done');
+
 
 -- Insert sample data into examination_details
-INSERT INTO examination_details (record_id, clinic_id, doctor_id, result, note, examined_at, status) VALUES
-(1, 1, 2, 'Phổi có dấu hiệu viêm, cần chụp X-quang', 'Bệnh nhân cần nhập viện điều trị', '2025-06-01 09:30:00', 'done'),
-(1, 9, 2, 'X-quang phổi cho thấy viêm phổi thùy dưới', 'Cần điều trị kháng sinh', '2025-06-01 10:15:00', 'done'),
-(2, 2, 3, 'Đau vùng hố chậu phải, dấu hiệu McBurney dương tính', 'Cần phẫu thuật cấp cứu', '2025-06-02 14:00:00', 'done'),
-(3, 3, 14, 'X-quang khớp gối cho thấy thoái hóa độ 2', 'Cần tập vật lý trị liệu', '2025-06-03 08:45:00', 'done'),
-(4, 4, 2, 'Xét nghiệm máu dương tính với sốt xuất huyết', 'Theo dõi tiểu cầu', '2025-06-04 11:20:00', 'done'),
-(5, 5, 3, 'Test dị ứng dương tính với penicillin', 'Tránh sử dụng nhóm thuốc beta-lactam', '2025-06-05 15:30:00', 'done'),
-(6, 6, 14, 'Đo thị lực: 3/10, cần đeo kính -2.5', 'Tái khám sau 3 tháng', '2025-06-06 09:00:00', 'done');
+-- INSERT INTO examination_details (record_id, clinic_id, doctor_id, result, note, examined_at, status) VALUES
+-- (1, 1, 2, 'Phổi có dấu hiệu viêm, cần chụp X-quang', 'Bệnh nhân cần nhập viện điều trị', '2025-06-01 09:30:00', 'done'),
+-- (1, 9, 2, 'X-quang phổi cho thấy viêm phổi thùy dưới', 'Cần điều trị kháng sinh', '2025-06-01 10:15:00', 'done'),
+-- (2, 2, 3, 'Đau vùng hố chậu phải, dấu hiệu McBurney dương tính', 'Cần phẫu thuật cấp cứu', '2025-06-02 14:00:00', 'done'),
+-- (3, 3, 14, 'X-quang khớp gối cho thấy thoái hóa độ 2', 'Cần tập vật lý trị liệu', '2025-06-03 08:45:00', 'done'),
+-- (4, 4, 2, 'Xét nghiệm máu dương tính với sốt xuất huyết', 'Theo dõi tiểu cầu', '2025-06-04 11:20:00', 'done'),
+-- (5, 5, 3, 'Test dị ứng dương tính với penicillin', 'Tránh sử dụng nhóm thuốc beta-lactam', '2025-06-05 15:30:00', 'done'),
+-- (6, 6, 14, 'Đo thị lực: 3/10, cần đeo kính -2.5', 'Tái khám sau 3 tháng', '2025-06-06 09:00:00', 'done');
 
 -- Insert sample data into prescriptions
 INSERT INTO prescriptions (record_id) VALUES
@@ -668,13 +698,13 @@ INSERT INTO doctor_ratings (doctor_id, patient_id, appointment_id, rating, comme
 (25, 11, 36, 4.2, 'Bác sĩ chẩn đoán hình ảnh chuyên nghiệp.', FALSE);
 
 -- Update doctor average ratings based on the ratings data
-UPDATE doctors d 
-SET rating = (
-    SELECT ROUND(AVG(rating), 1)
-    FROM doctor_ratings dr 
-    WHERE dr.doctor_id = d.user_id
-)
-WHERE d.user_id IN (SELECT DISTINCT doctor_id FROM doctor_ratings);
+-- UPDATE doctors d 
+-- SET rating = (
+--     SELECT ROUND(AVG(rating), 1)
+--     FROM doctor_ratings dr 
+--     WHERE dr.doctor_id = d.user_id
+-- )
+-- WHERE d.user_id IN (SELECT DISTINCT doctor_id FROM doctor_ratings);
 
 -- Add new tables according to Prisma schema
 
@@ -841,7 +871,7 @@ CREATE TABLE `notification_items` (
   `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `userId` INT NOT NULL,
 
-  CONSTRAINT `fk_notification_user` FOREIGN KEY (`userId`) REFERENCES `Users`(`id`)
+  CONSTRAINT `fk_notification_user` FOREIGN KEY (`userId`) REFERENCES `users`(`id`)
 );
 
 -- Tạo bảng cho documents cho rag 

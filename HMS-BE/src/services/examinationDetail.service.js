@@ -1,3 +1,6 @@
+
+// SERVICE REMOVED !!!!!!!
+
 const prisma = require("../config/prisma");
 const { getIO } = require("../config/socket.js");
 const ExaminationRecordService = require("./examinationRecord.service");

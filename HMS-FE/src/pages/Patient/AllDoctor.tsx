@@ -56,7 +56,7 @@ const AllDoctor: React.FC = () => {
     const { specialties } = useSpecialtyList({ pageSize: 8, current: 1 }, true);
 
     return (
-        <div className="flex flex-col gap-4 w-full">
+        <div className="flex flex-col gap-4 w-full min-h-[200px] overflow-hidden">
             <div className="text-center text-2xl pt-10 pb-5 text-gray-500 uppercase"><p>Danh sách bác sĩ theo chuyên khoa</p></div>
             <Flex justify="space-between" align="center" className="w-full">
                 <Flex gap={10} className="w-full">
