@@ -91,7 +91,7 @@ class PatientService {
     }
 
     async createPatient(data) {
-        const { email,  full_name, date_of_birth, gender, phone, address, identity_number, avatar } = data;
+        const { email, full_name, date_of_birth, gender, phone, address, identity_number, avatar } = data;
 
         // Check if email exists
         const existingUser = await prisma.user.findUnique({
@@ -142,8 +142,8 @@ class PatientService {
         if (sendEmail) {
             sendStaffNewPasswordEmail(newPatient.email, newPatient.password);
         }
-        
-        if (!newPatient) {  
+
+        if (!newPatient) {
             throw new BadRequestError("Có lỗi xảy ra, vui lòng thử lại!");
         }
 
@@ -295,13 +295,12 @@ class PatientService {
                 }
             }
         });
-
         if (!patient) {
             throw new BadRequestError("Bệnh nhân không tồn tại");
         }
-
         return patient;
     }
+
     #createRandomPassword() {
         const upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         const lower = "abcdefghijklmnopqrstuvwxyz";

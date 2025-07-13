@@ -42,10 +42,12 @@ const authToken = async (socket, next) => {
 
 const handleSocketConnected = (socket, io) => {
   console.log(`🔌 Client connected: ${socket.id}`);
+  socket.join(`user_${socket.user.id}`);
   // Khi user join
-  socket.on('join', ({ userId }) => {
-    socket.join(`user_${userId}`);
-  });
+  // socket.on('join', ({ userId }) => {
+  //   console.log(`join user_${userId}`)
+  //   socket.join(`user_${userId}`);
+  // });
 
   // Gửi tin nhắn mới
   socket.on('send_message', async (data) => {
@@ -55,7 +57,6 @@ const handleSocketConnected = (socket, io) => {
       const conversation = await ConversationService.getConversationById(data.conversationId, data.sendById);
       if (conversation) {
         conversation.participants.forEach((p) => {
-          console.log(`user_${p.userId}`)
           io.to(`user_${p.userId}`).emit('new_message', message);
         });
       }
@@ -161,12 +162,11 @@ function initSocket(server) {
       credentials: true,
     },
   });
-  ioInstance = io;
 
   io.use(authToken);
 
   io.on("connection", (socket) => handleSocketConnected(socket, io));
-
+  ioInstance = io;
   return io;
 }
 

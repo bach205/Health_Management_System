@@ -11,8 +11,8 @@ class QueueService {
    * @returns {Promise<Object>} Danh sách queue và thông tin phân trang
    */
   static async getQueueClinic(clinicId, query) {
-    const { pageNumber = 1, pageSize = 10 } = query;
-
+    const { pageNumber = 1, pageSize = 10, type } = query;
+    console.log(query)
     if (!clinicId) {
       throw new Error("Clinic ID is required");
     }
@@ -28,6 +28,14 @@ class QueueService {
       throw new Error("Clinic not found");
     }
 
+    let status = {
+      in: ["waiting", "in_progress"],
+    }
+    // Nếu có type thì lọc theo type
+    if (["waiting", "in_progress", "done", "skipped"].includes(type)) {
+      status = { in: [type] };
+    }
+
     // 2. Lấy danh sách queue theo thứ tự ưu tiên:
     // - Ưu tiên theo priority của appointment (cao xuống thấp)
     // - Nếu cùng priority thì ưu tiên theo thời gian đặt lịch (sớm lên trước)
@@ -35,10 +43,7 @@ class QueueService {
     const queueClinic = await prisma.queue.findMany({
       where: {
         clinic_id: Number(clinicId),
-        
-        status: {
-          in: ["waiting", "in_progress"],
-        },
+        status: status,
       },
       orderBy: [
         { priority: "desc" },
@@ -60,7 +65,7 @@ class QueueService {
         },
       },
     });
-    console.log(queueClinic);
+    // console.log(queueClinic);
 
     // 3. Tính toán thông tin phân trang
     const total = await prisma.queue.count({
@@ -171,10 +176,12 @@ class QueueService {
       include: { patient: true, clinic: true, appointment: true },
     });
 
+    // >>>>>> Tại queue Không cần tạo ExaminationRecord vì bác sĩ sẽ tạo examination record sau khi khám (queue status in_progress)
+
     // Nếu bắt đầu khám (in_progress), tạo ExaminationRecord nếu chưa có
-    if (status === "in_progress") {
-      await ExaminationRecordService.createIfNotExists(updated.patient_id);
-    }
+    // if (status === "in_progress") {
+    //   await ExaminationRecordService.createIfNotExists(updated.patient_id, updated.clinic_id, updated.appointment.doctor_id);
+    // }
 
     // Nếu bệnh nhân vắng mặt (status = skipped), thêm vào danh sách đợi lại
     // if (status === "skipped") {

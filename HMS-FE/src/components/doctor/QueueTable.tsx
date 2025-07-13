@@ -1,6 +1,6 @@
 import { useQueueStore } from "../../store/queueStore";
 import { useEffect, useState, useRef, useCallback } from "react";
-import { getClinicService} from "../../services/clinic.service";
+import { getClinicService } from "../../services/clinic.service";
 import { toast } from "react-toastify";
 import useQueue from "../../hooks/useQueue";
 import { getQueueStatus, type IQueue } from "../../types/queue.type";
@@ -11,7 +11,7 @@ import { Ellipsis } from "lucide-react";
 import ResultExaminationModal from "./ResultExaminationModal";
 import ExaminationRecordModal from "../../components/doctor/ExaminationRecordModal";
 import { useAuthStore } from "../../store/authStore";
-import { useSocket } from "../../hooks/useSocket";
+import { useSocket } from "../../hooks/socket/useSocket";
 
 const QueueTable = () => {
   const {
@@ -50,7 +50,7 @@ const QueueTable = () => {
     const fetchClinics = async () => {
       try {
         const res = await getClinicService();
-        
+
         setClinics(res.data?.metadata.clinics || []);
         if (res.data?.metadata && res.data?.metadata.length > 0) {
           setSelectedClinic(res.data?.metadata[0].id.toString());
@@ -65,7 +65,7 @@ const QueueTable = () => {
     fetchClinics();
   }, []);
 
-  useEffect(() => {  
+  useEffect(() => {
     if (selectedClinic) {
       fetchQueue(selectedClinic);
     } else {
@@ -91,9 +91,8 @@ const QueueTable = () => {
       ?.getBoundingClientRect().height;
     const tableTop = tableEl?.getBoundingClientRect().top;
     if (tableEl && paginationHeight && tableTop) {
-      tableEl.style.height = `${
-        heightWindow - tableTop - paginationHeight - 2
-      }px`;
+      tableEl.style.height = `${heightWindow - tableTop - paginationHeight - 2
+        }px`;
     }
   }, []);
 

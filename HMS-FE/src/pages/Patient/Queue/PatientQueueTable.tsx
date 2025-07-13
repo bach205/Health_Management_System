@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 import useQueue from "../../../hooks/useQueue";
 import { getQueueStatus } from "../../../types/queue.type";
 import { useAuthStore } from "../../../store/authStore";
-import { useSocket } from "../../../hooks/useSocket";
+import { useSocket } from "../../../hooks/socket/useSocket";
 import { Button, Flex, Select, Space, Table, Tag, Tooltip, Typography } from "antd";
 import { RefreshCcw } from "lucide-react";
 import dayjs from "dayjs";
@@ -24,12 +24,6 @@ const PatientQueueTable = () => {
         setQueues,  // Thêm setQueues vào đây
     } = useQueueStore();
     console.log(queues);
-    const [showModalPatientExaminationOrder, setShowModalPatientExaminationOrder] = useState(false);
-    const [showDoctorExaminationOrderModal, setShowDoctorExaminationOrderModal] = useState(false);
-    const [showResultModal, setShowResultModal] = useState(false);
-    const [showAssignModal, setShowAssignModal] = useState(false);
-    const [showRecordModal, setShowRecordModal] = useState(false);
-    const [selectedPatient, setSelectedPatient] = useState<any>(null);
     const [clinics, setClinics] = useState<any[]>([]);
     const [selectedClinic, setSelectedClinic] = useState("");
     const { fetchQueue } = useQueue();
@@ -69,28 +63,6 @@ const PatientQueueTable = () => {
         }
     );
 
-    // const menu = (record: any) => (
-    //     <Menu>
-    //         {record.status === "waiting" && (
-    //             <>
-    //                 <Menu.Item
-    //                     key="start"
-    //                     onClick={() => handleStatusUpdate(record.id, "in_progress")}
-    //                 >
-    //                     Bắt đầu khám
-    //                 </Menu.Item>
-    //                 <Menu.Item
-    //                     key="skip"
-    //                     onClick={() => handleStatusUpdate(record.id, "skipped")}
-    //                     danger
-    //                 >
-    //                     Bỏ qua
-    //                 </Menu.Item>
-    //             </>
-    //         )}
-    //         {/* Rest of the menu items... */}
-    //     </Menu>
-    // );
     useEffect(() => {
         const fetchClinics = async () => {
             try {
@@ -250,7 +222,7 @@ const PatientQueueTable = () => {
                 size="middle"
                 scroll={{ y: 400 }}
             />
- 
+
         </div>
     );
 };

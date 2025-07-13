@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
-import type { IMessage, IConversation, ISendMessageData } from '../types/chat.type';
-import chatService from '../services/chat.service';
-import { useAuthStore } from '../store/authStore';
+import type { IMessage, IConversation, ISendMessageData } from '../../types/chat.type';
+import chatService from '../../services/chat.service';
+import { useAuthStore } from '../../store/authStore';
 import { toast } from 'react-toastify';
-import { getSocket } from '../services/socket';
+import { getSocket } from '../../services/socket';
 
 export const useChat = () => {
     const { user } = useAuthStore();
@@ -16,9 +16,7 @@ export const useChat = () => {
     // Kết nối socket và lắng nghe sự kiện
     useEffect(() => {
         if (!user) return;
-        const socket = getSocket();
-        socket.emit('join', { userId: user.id });
-
+        const socket = getSocket(user.id);
         // Lắng nghe tin nhắn mới
         socket.on('new_message', async (message: IMessage) => {
             setMessages((prev) => {
@@ -90,19 +88,19 @@ export const useChat = () => {
 
     // Gửi tin nhắn qua socket
     const sendMessage = useCallback((data: ISendMessageData) => {
-        const socket = getSocket();
+        const socket = getSocket(user.id);
         socket.emit('send_message', data);
     }, []);
 
     // Sửa tin nhắn qua socket
     const editMessage = useCallback((messageId: number, newText: string) => {
-        const socket = getSocket();
+        const socket = getSocket(user.id);
         socket.emit('edit_message', { messageId, text: newText });
     }, []);
 
     // Xóa tin nhắn qua socket
     const deleteMessage = useCallback((messageId: number) => {
-        const socket = getSocket();
+        const socket = getSocket(user.id);
         socket.emit('delete_message', { messageId });
     }, []);
 

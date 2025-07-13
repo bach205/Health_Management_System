@@ -1,4 +1,5 @@
 -- Create and use the hospital database
+-- create database hospital;
 
 USE hospital;
 
@@ -47,7 +48,6 @@ CREATE TABLE doctors (
     user_id INT PRIMARY KEY COMMENT 'Tham chiếu đến users(id)',
     specialty VARCHAR(255) COMMENT 'Chuyên môn', -- này tạm thời t để đây
     bio TEXT COMMENT 'Giới thiệu',
-	rating DECIMAL(2,1) DEFAULT 0.0 COMMENT '(tối đa 9.9) Đánh giá trung bình, sửa rating trên backend', 
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
@@ -88,7 +88,6 @@ CREATE TABLE examination_orders (
     FOREIGN KEY (to_clinic_id) REFERENCES clinics(id) ON DELETE CASCADE
 );
 
--- Table for examination records
 CREATE TABLE examination_records (
     id INT AUTO_INCREMENT PRIMARY KEY,
     patient_id INT NOT NULL COMMENT 'Patient',
@@ -98,25 +97,37 @@ CREATE TABLE examination_records (
     primary_doctor_id INT COMMENT 'Primary doctor',
     final_diagnosis TEXT COMMENT 'Final diagnosis',
     created_by_user_id INT COMMENT 'User who created the record',
-    FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
-    FOREIGN KEY (primary_doctor_id) REFERENCES users(id) ON DELETE SET NULL,
-    FOREIGN KEY (created_by_user_id) REFERENCES users(id) ON DELETE SET NULL
-);
 
--- Table for examination details
-CREATE TABLE examination_details (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    record_id INT NOT NULL COMMENT 'General examination record',
-    clinic_id INT NOT NULL COMMENT 'Specific clinic',
-    doctor_id INT NOT NULL COMMENT 'Doctor at clinic',
+    -- Gộp từ examination_details:
+    clinic_id INT NOT NULL COMMENT 'Clinic where the examination was performed',
+    doctor_id INT NOT NULL COMMENT 'Doctor performing the examination',
     result TEXT COMMENT 'Examination result',
     note TEXT COMMENT 'Additional notes',
-    examined_at DATETIME COMMENT 'Examination completion time',
+    examined_at DATETIME COMMENT 'Time examination was completed',
     status ENUM('pending', 'in_progress', 'done', 'cancelled') DEFAULT 'pending' COMMENT 'Examination status',
-    FOREIGN KEY (record_id) REFERENCES examination_records(id) ON DELETE CASCADE,
+
+    FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
+    FOREIGN KEY (primary_doctor_id) REFERENCES users(id) ON DELETE SET NULL,
+    FOREIGN KEY (created_by_user_id) REFERENCES users(id) ON DELETE SET NULL,
     FOREIGN KEY (clinic_id) REFERENCES clinics(id) ON DELETE CASCADE,
     FOREIGN KEY (doctor_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+
+-- Table for examination details
+-- CREATE TABLE examination_details (
+--     id INT AUTO_INCREMENT PRIMARY KEY,
+--     record_id INT NOT NULL COMMENT 'General examination record',
+--     clinic_id INT NOT NULL COMMENT 'Specific clinic',
+--     doctor_id INT NOT NULL COMMENT 'Doctor at clinic',
+--     result TEXT COMMENT 'Examination result',
+--     note TEXT COMMENT 'Additional notes',
+--     examined_at DATETIME COMMENT 'Examination completion time',
+--     status ENUM('pending', 'in_progress', 'done', 'cancelled') DEFAULT 'pending' COMMENT 'Examination status',
+--     FOREIGN KEY (record_id) REFERENCES examination_records(id) ON DELETE CASCADE,
+--     FOREIGN KEY (clinic_id) REFERENCES clinics(id) ON DELETE CASCADE,
+--     FOREIGN KEY (doctor_id) REFERENCES users(id) ON DELETE CASCADE
+-- );
 
 -- Table for patient queues
 CREATE TABLE queues (
@@ -334,78 +345,96 @@ INSERT INTO shifts (name, start_time, end_time) VALUES
 
 -- Insert sample data into work_schedules
 INSERT INTO work_schedules (user_id, clinic_id, work_date, shift_id) VALUES
-(2, 2, '2025-06-16', 2),
-(2, 2, '2025-06-17', 1),
-(2, 2, '2025-06-18', 2),
-(2, 2, '2025-06-19', 2),
-(2, 2, '2025-06-20', 1),
-(2, 2, '2025-06-21', 2),
-(2, 2, '2025-06-23', 2),
-(2, 2, '2025-06-24', 1),
-(2, 2, '2025-06-25', 2),
-(2, 2, '2025-06-26', 1),
-(2, 2, '2025-06-27', 2),
-(2, 2, '2025-06-28', 1),
-(14, 3, '2025-06-16', 1),
-(14, 3, '2025-06-17', 2),
-(14, 3, '2025-06-18', 1),
-(14, 3, '2025-06-19', 1),
-(14, 3, '2025-06-20', 2),
-(14, 3, '2025-06-21', 1),
-(14, 3, '2025-06-23', 1),
-(14, 3, '2025-06-24', 1),
-(14, 3, '2025-06-25', 2),
-(14, 3, '2025-06-26', 1),
-(14, 3, '2025-06-27', 1),
-(14, 3, '2025-06-28', 2),
-(3, 1, '2025-06-16', 1),
-(3, 2, '2025-06-16', 2),
-(3, 3, '2025-06-17', 1),
-(3, 4, '2025-06-17', 2),
-(3, 1, '2025-06-18', 1),
-(3, 2, '2025-06-19', 2),
-(3, 3, '2025-06-20', 1),
-(4, 5, '2025-06-16', 1),
-(4, 6, '2025-06-16', 2),
-(4, 7, '2025-06-17', 1),
-(4, 8, '2025-06-17', 2),
-(4, 9, '2025-06-18', 1),
-(4, 10, '2025-06-19', 2),
-(4, 11, '2025-06-20', 1),
-(15, 1, '2025-06-16', 3),
-(15, 2, '2025-06-17', 3),
-(15, 8, '2025-06-21', 5),
-(15, 8, '2025-06-22', 5),
-(5, 1, '2025-06-16', 5),
-(5, 2, '2025-06-17', 5),
-(5, 3, '2025-06-18', 5),
-(5, 8, '2025-06-19', 5),
-(5, 1, '2025-06-20', 5),
-(6, 4, '2025-06-16', 2),
-(6, 5, '2025-06-17', 2),
-(6, 6, '2025-06-18', 2),
-(6, 7, '2025-06-19', 2),
-(6, 8, '2025-06-21', 2),
-(6, 8, '2025-06-22', 2);
+(2, 2, '2025-07-16', 2),
+(2, 2, '2025-07-17', 1),
+(2, 2, '2025-07-18', 2),
+(2, 2, '2025-07-19', 2),
+(2, 2, '2025-07-20', 1),
+(2, 2, '2025-07-21', 2),
+(2, 2, '2025-07-23', 2),
+(2, 2, '2025-07-24', 1),
+(2, 2, '2025-07-25', 2),
+(2, 2, '2025-07-26', 1),
+(2, 2, '2025-07-27', 2),
+(2, 2, '2025-07-28', 1),
+(14, 3, '2025-07-16', 1),
+(14, 3, '2025-07-17', 2),
+(14, 3, '2025-07-18', 1),
+(14, 3, '2025-07-19', 1),
+(14, 3, '2025-07-20', 2),
+(14, 3, '2025-07-21', 1),
+(14, 3, '2025-07-23', 1),
+(14, 3, '2025-07-24', 1),
+(14, 3, '2025-07-25', 2),
+(14, 3, '2025-07-26', 1),
+(14, 3, '2025-07-27', 1),
+(14, 3, '2025-07-28', 2),
+(3, 1, '2025-07-16', 1),
+(3, 2, '2025-07-16', 2),
+(3, 3, '2025-07-17', 1),
+(3, 4, '2025-07-17', 2),
+(3, 1, '2025-07-18', 1),
+(3, 2, '2025-07-19', 2),
+(3, 3, '2025-07-20', 1),
+(4, 5, '2025-07-16', 1),
+(4, 6, '2025-07-16', 2),
+(4, 7, '2025-07-17', 1),
+(4, 8, '2025-07-17', 2),
+(4, 9, '2025-07-18', 1),
+(4, 10, '2025-07-19', 2),
+(4, 11, '2025-07-20', 1),
+(15, 1, '2025-07-16', 3),
+(15, 2, '2025-07-17', 3),
+(15, 8, '2025-07-21', 5),
+(15, 8, '2025-07-22', 5),
+(5, 1, '2025-07-16', 5),
+(5, 2, '2025-07-17', 5),
+(5, 3, '2025-07-18', 5),
+(5, 8, '2025-07-19', 5),
+(5, 1, '2025-07-20', 5),
+(6, 4, '2025-07-16', 2),
+(6, 5, '2025-07-17', 2),
+(6, 6, '2025-07-18', 2),
+(6, 7, '2025-07-19', 2),
+(6, 8, '2025-07-21', 2),
+(6, 8, '2025-07-22', 2);
 
 -- Insert sample data into examination_records
-INSERT INTO examination_records (patient_id, symptoms, primary_doctor_id, final_diagnosis, created_by_user_id) VALUES
-(8, 'Đau đầu, sốt cao 39 độ, ho nhiều', 2, 'Viêm phổi cấp', 2),
-(9, 'Đau bụng dữ dội, buồn nôn', 3, 'Viêm ruột thừa cấp', 3),
-(10, 'Đau khớp gối, khó đi lại', 14, 'Thoái hóa khớp gối', 14),
-(11, 'Sốt phát ban, đau họng', 2, 'Sốt xuất huyết', 2),
-(12, 'Nổi mẩn đỏ toàn thân, ngứa', 3, 'Dị ứng thuốc', 3),
-(13, 'Mờ mắt, nhức mắt', 14, 'Cận thị tiến triển', 14);
+INSERT INTO examination_records 
+(patient_id, symptoms, primary_doctor_id, final_diagnosis, created_by_user_id,
+ clinic_id, doctor_id, result, note, examined_at, status) 
+VALUES
+(8, 'Đau đầu, sốt cao 39 độ, ho nhiều', 2, 'Viêm phổi cấp', 2,
+ 1, 2, 'Phổi có dấu hiệu viêm, cần chụp X-quang', 'Bệnh nhân cần nhập viện điều trị', '2025-06-01 09:30:00', 'done'),
+
+(8, null, null, null, null,
+ 9, 2, 'X-quang phổi cho thấy viêm phổi thùy dưới', 'Cần điều trị kháng sinh', '2025-06-01 10:15:00', 'done'),
+
+(9, 'Đau bụng dữ dội, buồn nôn', 3, 'Viêm ruột thừa cấp', 3,
+ 2, 3, 'Đau vùng hố chậu phải, dấu hiệu McBurney dương tính', 'Cần phẫu thuật cấp cứu', '2025-06-02 14:00:00', 'done'),
+
+(10, 'Đau khớp gối, khó đi lại', 14, 'Thoái hóa khớp gối', 14,
+ 3, 14, 'X-quang khớp gối cho thấy thoái hóa độ 2', 'Cần tập vật lý trị liệu', '2025-06-03 08:45:00', 'done'),
+
+(11, 'Sốt phát ban, đau họng', 2, 'Sốt xuất huyết', 2,
+ 4, 2, 'Xét nghiệm máu dương tính với sốt xuất huyết', 'Theo dõi tiểu cầu', '2025-06-04 11:20:00', 'done'),
+
+(12, 'Nổi mẩn đỏ toàn thân, ngứa', 3, 'Dị ứng thuốc', 3,
+ 5, 3, 'Test dị ứng dương tính với penicillin', 'Tránh sử dụng nhóm thuốc beta-lactam', '2025-06-05 15:30:00', 'done'),
+
+(13, 'Mờ mắt, nhức mắt', 14, 'Cận thị tiến triển', 14,
+ 6, 14, 'Đo thị lực: 3/10, cần đeo kính -2.5', 'Tái khám sau 3 tháng', '2025-06-06 09:00:00', 'done');
+
 
 -- Insert sample data into examination_details
-INSERT INTO examination_details (record_id, clinic_id, doctor_id, result, note, examined_at, status) VALUES
-(1, 1, 2, 'Phổi có dấu hiệu viêm, cần chụp X-quang', 'Bệnh nhân cần nhập viện điều trị', '2025-06-01 09:30:00', 'done'),
-(1, 9, 2, 'X-quang phổi cho thấy viêm phổi thùy dưới', 'Cần điều trị kháng sinh', '2025-06-01 10:15:00', 'done'),
-(2, 2, 3, 'Đau vùng hố chậu phải, dấu hiệu McBurney dương tính', 'Cần phẫu thuật cấp cứu', '2025-06-02 14:00:00', 'done'),
-(3, 3, 14, 'X-quang khớp gối cho thấy thoái hóa độ 2', 'Cần tập vật lý trị liệu', '2025-06-03 08:45:00', 'done'),
-(4, 4, 2, 'Xét nghiệm máu dương tính với sốt xuất huyết', 'Theo dõi tiểu cầu', '2025-06-04 11:20:00', 'done'),
-(5, 5, 3, 'Test dị ứng dương tính với penicillin', 'Tránh sử dụng nhóm thuốc beta-lactam', '2025-06-05 15:30:00', 'done'),
-(6, 6, 14, 'Đo thị lực: 3/10, cần đeo kính -2.5', 'Tái khám sau 3 tháng', '2025-06-06 09:00:00', 'done');
+-- INSERT INTO examination_details (record_id, clinic_id, doctor_id, result, note, examined_at, status) VALUES
+-- (1, 1, 2, 'Phổi có dấu hiệu viêm, cần chụp X-quang', 'Bệnh nhân cần nhập viện điều trị', '2025-06-01 09:30:00', 'done'),
+-- (1, 9, 2, 'X-quang phổi cho thấy viêm phổi thùy dưới', 'Cần điều trị kháng sinh', '2025-06-01 10:15:00', 'done'),
+-- (2, 2, 3, 'Đau vùng hố chậu phải, dấu hiệu McBurney dương tính', 'Cần phẫu thuật cấp cứu', '2025-06-02 14:00:00', 'done'),
+-- (3, 3, 14, 'X-quang khớp gối cho thấy thoái hóa độ 2', 'Cần tập vật lý trị liệu', '2025-06-03 08:45:00', 'done'),
+-- (4, 4, 2, 'Xét nghiệm máu dương tính với sốt xuất huyết', 'Theo dõi tiểu cầu', '2025-06-04 11:20:00', 'done'),
+-- (5, 5, 3, 'Test dị ứng dương tính với penicillin', 'Tránh sử dụng nhóm thuốc beta-lactam', '2025-06-05 15:30:00', 'done'),
+-- (6, 6, 14, 'Đo thị lực: 3/10, cần đeo kính -2.5', 'Tái khám sau 3 tháng', '2025-06-06 09:00:00', 'done');
 
 -- Insert sample data into prescriptions
 INSERT INTO prescriptions (record_id) VALUES
@@ -459,68 +488,22 @@ INSERT INTO invoice_items (record_id, description, amount) VALUES
 (6, 'Khám bệnh', 300000.00),
 (6, 'Đo thị lực', 0.00);
 
--- Insert sample data into appointments
-INSERT INTO appointments (patient_id, clinic_id, doctor_id, appointment_date, appointment_time, status, priority, reason, note) VALUES
-(8, 1, 2, '2025-06-10', '09:00:00', 'pending', 0, 'Đau ngực, khó thở', 'Bệnh nhân có tiền sử bệnh tim'),
-(9, 2, 3, '2025-06-11', '14:00:00', 'pending', 0, 'Đau đầu, chóng mặt', 'Bệnh nhân bị stress nhiều'),
-(10, 3, 14, '2025-06-12', '08:30:00', 'confirmed', 0, 'Đau khớp gối', 'Cần chụp X-quang'),
-(11, 4, 2, '2025-06-13', '10:00:00', 'confirmed', 0, 'Sốt cao, phát ban', 'Cần xét nghiệm máu'),
-(12, 5, 3, '2025-06-14', '15:00:00', 'cancelled', 0, 'Dị ứng da', 'Bệnh nhân hủy do bận việc'),
-(13, 6, 14, '2025-06-15', '09:30:00', 'completed', 0, 'Khám mắt định kỳ', 'Đã đeo kính cận'),
-(8, 1, 2, '2025-06-20', '08:30:00', 'confirmed', 0, 'Tái khám sau điều trị viêm phổi', 'Kiểm tra phục hồi sau 3 tuần điều trị'),
-(9, 8, 2, '2025-06-18', '10:00:00', 'pending', 0, 'Khám tổng quát định kỳ', 'Bệnh nhân có tiền sử phẫu thuật ruột thừa'),
-(10, 3, 14, '2025-06-25', '14:30:00', 'confirmed', 0, 'Tái khám khớp gối', 'Đánh giá hiệu quả vật lý trị liệu'),
-(11, 7, 3, '2025-06-16', '09:00:00', 'pending', 0, 'Đau tai, nghe kém', 'Triệu chứng xuất hiện sau cảm lạnh'),
-(12, 11, 2, '2025-06-17', '15:30:00', 'confirmed', 0, 'Đau bụng, khó tiêu', 'Bệnh nhân có tiền sử dị ứng thuốc'),
-(13, 12, 14, '2025-06-19', '11:00:00', 'pending', 0, 'Khám tuyến tiền liệt', 'Nam giới trên 50 tuổi, khám định kỳ'),
-(8, 9, 2, '2025-06-22', '08:00:00', 'confirmed', 0, 'Chụp CT ngực kiểm tra', 'Theo dõi sau điều trị viêm phổi'),
-(9, 10, 3, '2025-06-23', '13:30:00', 'pending', 0, 'Tư vấn dinh dưỡng ung thư', 'Phòng ngừa ung thư đại tràng'),
-(10, 13, 14, '2025-06-24', '10:30:00', 'confirmed', 0, 'Khám tiểu đường', 'Kiểm tra đường huyết định kỳ'),
-(11, 1, 2, '2025-06-21', '09:30:00', 'confirmed', 0, 'Khám tim định kỳ', 'Bệnh nhân có gia đình bị bệnh tim'),
-(12, 2, 3, '2025-06-21', '14:00:00', 'pending', 0, 'Đau đầu mãn tính', 'Stress công việc, cần tư vấn'),
-(13, 4, 14, '2025-06-22', '10:00:00', 'confirmed', 0, 'Khám sức khỏe trẻ em', 'Tiêm chủng định kỳ'),
-(8, 5, 2, '2025-06-15', '16:00:00', 'cancelled', 0, 'Khám da dị ứng', 'Bệnh nhân đã khỏi, không cần khám'),
-(9, 6, 3, '2025-06-16', '11:30:00', 'cancelled', 0, 'Khám mắt', 'Xung đột lịch trình, sẽ đặt lại'),
-(10, 7, 14, '2025-06-17', '15:00:00', 'cancelled', 0, 'Khám tai mũi họng', 'Triệu chứng đã thuyên giảm'),
-(11, 8, 2, '2025-06-02', '08:30:00', 'completed', 0, 'Khám tổng quát', 'Đã hoàn thành, kết quả bình thường'),
-(12, 9, 3, '2025-06-03', '14:30:00', 'completed', 0, 'Chụp X-quang lưng', 'Phát hiện thoái hóa cột sống nhẹ'),
-(13, 10, 14, '2025-06-04', '16:00:00', 'completed', 0, 'Tư vấn phòng chống ung thư', 'Đã tư vấn lối sống lành mạnh'),
-(8, 8, 2, '2025-06-09', '07:30:00', 'completed', 2, 'Cấp cứu đau bụng', 'Đã xử lý, không nghiêm trọng'),
-(9, 1, 3, '2025-06-08', '20:00:00', 'completed', 2, 'Đau ngực cấp', 'Tim bình thường, do căng thẳng');
+-- Xóa dữ liệu cũ (nếu muốn làm sạch bảng)
+DELETE FROM available_slots;
 
--- Insert sample data into available_slots
-INSERT INTO available_slots (doctor_id, clinic_id, slot_date, start_time, end_time, is_available) VALUES
-(2, 1, '2025-06-10', '08:00:00', '08:30:00', TRUE),
-(2, 1, '2025-06-10', '08:30:00', '09:00:00', TRUE),
-(2, 1, '2025-06-10', '09:00:00', '09:30:00', FALSE),
-(2, 1, '2025-06-10', '09:30:00', '10:00:00', TRUE),
-(3, 2, '2025-06-11', '13:00:00', '13:30:00', TRUE),
-(3, 2, '2025-06-11', '13:30:00', '14:00:00', TRUE),
-(3, 2, '2025-06-11', '14:00:00', '14:30:00', FALSE),
-(3, 2, '2025-06-11', '14:30:00', '15:00:00', TRUE),
-(14, 3, '2025-06-12', '08:00:00', '08:30:00', TRUE),
-(14, 3, '2025-06-12', '08:30:00', '09:00:00', FALSE),
-(14, 3, '2025-06-12', '09:00:00', '09:30:00', TRUE),
-(14, 3, '2025-06-12', '09:30:00', '10:00:00', TRUE),
-(2, 1, '2025-06-20', '08:00:00', '08:30:00', TRUE),
-(2, 1, '2025-06-20', '08:30:00', '09:00:00', FALSE),
-(2, 1, '2025-06-20', '09:00:00', '09:30:00', TRUE),
-(2, 1, '2025-06-20', '09:30:00', '10:00:00', TRUE),
-(2, 8, '2025-06-18', '09:30:00', '10:00:00', TRUE),
-(2, 8, '2025-06-18', '10:00:00', '10:30:00', FALSE),
-(2, 8, '2025-06-18', '10:30:00', '11:00:00', TRUE),
-(14, 3, '2025-06-25', '14:00:00', '14:30:00', TRUE),
-(14, 3, '2025-06-25', '14:30:00', '15:00:00', FALSE),
-(14, 3, '2025-06-25', '15:00:00', '15:30:00', TRUE),
-(3, 7, '2025-06-16', '08:30:00', '09:00:00', TRUE),
-(3, 7, '2025-06-16', '09:00:00', '09:30:00', FALSE),
-(3, 7, '2025-06-16', '09:30:00', '10:00:00', TRUE),
-(2, 11, '2025-06-17', '15:00:00', '15:30:00', TRUE),
-(2, 11, '2025-06-17', '15:30:00', '16:00:00', FALSE),
-(2, 11, '2025-06-17', '16:00:00', '16:30:00', TRUE),
-(14, 12, '2025-06-19', '10:30:00', '11:00:00', TRUE),
-(14, 12, '2025-06-19', '11:00:00', '11:30:00', FALSE),
-(14, 12, '2025-06-19', '11:30:00', '12:00:00', TRUE);
+-- Thêm slot cho từng lịch làm việc của bác sĩ và y tá
+INSERT INTO available_slots (doctor_id, clinic_id, slot_date, start_time, end_time, is_available)
+SELECT
+  ws.user_id AS doctor_id,
+  ws.clinic_id,
+  ws.work_date AS slot_date,
+  s.start_time,
+  s.end_time,
+  TRUE AS is_available
+FROM work_schedules ws
+JOIN users u ON ws.user_id = u.id
+JOIN shifts s ON ws.shift_id = s.id
+WHERE u.role IN ('doctor', 'nurse');
 
 -- Update available_slots to reflect booked appointments
 UPDATE available_slots 
@@ -571,113 +554,9 @@ INSERT INTO doctors (user_id, specialty, bio) VALUES
 (24, 'Nội tiết', 'Bác sĩ chuyên điều trị các rối loạn hormone và tiểu đường.'),
 (25, 'Chẩn đoán hình ảnh', 'Chuyên gia về đọc và phân tích hình ảnh y khoa.');
 
--- Thêm 15 appointments mới
-INSERT INTO appointments (patient_id, clinic_id, doctor_id, appointment_date, appointment_time, status, priority, reason, note) VALUES
--- Patient 8 - Các khoa khác nhau
-(8, 2, 3, '2025-06-26', '09:00:00', 'confirmed', 0, 'Đau đầu, chóng mặt', 'Triệu chứng xuất hiện sau khi làm việc nhiều'),
-(8, 5, 19, '2025-06-27', '14:30:00', 'pending', 0, 'Nổi mẩn đỏ trên da', 'Có thể do dị ứng thời tiết'),
-(8, 7, 20, '2025-06-28', '10:00:00', 'confirmed', 0, 'Đau họng, khó nuốt', 'Triệu chứng kéo dài 3 ngày'),
-
--- Patient 9 - Các khoa khác nhau
-(9, 3, 14, '2025-06-26', '15:00:00', 'confirmed', 0, 'Đau lưng, khó vận động', 'Sau khi nâng vật nặng'),
-(9, 6, 21, '2025-06-27', '08:30:00', 'pending', 0, 'Mờ mắt, nhức mắt', 'Làm việc nhiều với máy tính'),
-(9, 11, 18, '2025-06-28', '11:30:00', 'confirmed', 0, 'Đau bụng, buồn nôn', 'Sau khi ăn đồ cay'),
-
--- Patient 10 - Các khoa khác nhau
-(10, 1, 2, '2025-06-26', '13:00:00', 'confirmed', 0, 'Đau ngực, khó thở', 'Khi leo cầu thang'),
-(10, 4, 17, '2025-06-27', '16:00:00', 'pending', 0, 'Sốt cao, ho nhiều', 'Trẻ em 5 tuổi'),
-(10, 8, 16, '2025-06-28', '09:00:00', 'confirmed', 0, 'Khám tổng quát định kỳ', 'Kiểm tra sức khỏe hàng năm'),
-
--- Patient 11 - Các khoa khác nhau
-(11, 2, 3, '2025-06-26', '10:30:00', 'confirmed', 0, 'Mất ngủ, stress', 'Công việc áp lực cao'),
-(11, 9, 25, '2025-06-27', '14:00:00', 'pending', 0, 'Chụp CT bụng', 'Theo dõi sau phẫu thuật'),
-(11, 12, 23, '2025-06-28', '15:30:00', 'confirmed', 0, 'Đau vùng thắt lưng', 'Nam giới 45 tuổi'),
-
--- Patient 12 - Các khoa khác nhau
-(12, 1, 2, '2025-06-26', '08:00:00', 'confirmed', 0, 'Tăng huyết áp', 'Có tiền sử gia đình'),
-(12, 10, 22, '2025-06-27', '11:00:00', 'pending', 0, 'Tư vấn phòng chống ung thư', 'Người thân bị ung thư'),
-(12, 13, 24, '2025-06-28', '13:30:00', 'confirmed', 0, 'Kiểm tra đường huyết', 'Tiền sử tiểu đường');
-
--- Insert additional sample data into queues
-INSERT INTO queues (patient_id, clinic_id, record_id, appointment_id, status, priority, registered_online, qr_code) VALUES
--- Queue cho các appointment đã confirmed/completed (ID 1-25)
-(10, 3, NULL, 3, 'waiting', 0, TRUE, 'QR001'), -- Appointment confirmed: patient 10, clinic 3, doctor 14
-(11, 4, NULL, 4, 'waiting', 0, TRUE, 'QR002'), -- Appointment confirmed: patient 11, clinic 4, doctor 2  
-(13, 6, NULL, 6, 'done', 0, TRUE, 'QR003'), -- Appointment completed: patient 13, clinic 6, doctor 14
-(8, 1, NULL, 7, 'waiting', 0, TRUE, 'QR004'), -- Appointment confirmed: patient 8, clinic 1, doctor 2
-(10, 3, NULL, 9, 'waiting', 0, TRUE, 'QR005'), -- Appointment confirmed: patient 10, clinic 3, doctor 14
-(12, 11, NULL, 11, 'waiting', 0, TRUE, 'QR006'), -- Appointment confirmed: patient 12, clinic 11, doctor 2
-(8, 9, NULL, 13, 'waiting', 0, TRUE, 'QR007'), -- Appointment confirmed: patient 8, clinic 9, doctor 2
-(10, 13, NULL, 15, 'waiting', 0, TRUE, 'QR008'), -- Appointment confirmed: patient 10, clinic 13, doctor 14
-(11, 1, NULL, 16, 'waiting', 0, TRUE, 'QR009'), -- Appointment confirmed: patient 11, clinic 1, doctor 2
-(13, 4, NULL, 18, 'waiting', 0, TRUE, 'QR010'), -- Appointment confirmed: patient 13, clinic 4, doctor 14
-(11, 8, NULL, 21, 'done', 0, TRUE, 'QR011'), -- Appointment completed: patient 11, clinic 8, doctor 2
-(12, 9, NULL, 22, 'done', 0, TRUE, 'QR012'), -- Appointment completed: patient 12, clinic 9, doctor 3
-(13, 10, NULL, 23, 'done', 0, TRUE, 'QR013'), -- Appointment completed: patient 13, clinic 10, doctor 14
-(8, 8, NULL, 24, 'done', 2, TRUE, 'QR014'), -- Appointment completed: patient 8, clinic 8, doctor 2
-(9, 1, NULL, 25, 'done', 2, TRUE, 'QR015'), -- Appointment completed: patient 9, clinic 1, doctor 3
-
--- Thêm queue cho các appointment confirmed mới (ID 26-40)
-(8, 2, NULL, 26, 'waiting', 0, TRUE, 'QR051'), -- Appointment confirmed: patient 8, clinic 2, doctor 3
-(8, 7, NULL, 28, 'waiting', 0, TRUE, 'QR053'), -- Appointment confirmed: patient 8, clinic 7, doctor 20
-(9, 3, NULL, 29, 'waiting', 0, TRUE, 'QR054'), -- Appointment confirmed: patient 9, clinic 3, doctor 14
-(9, 11, NULL, 31, 'waiting', 0, TRUE, 'QR056'), -- Appointment confirmed: patient 9, clinic 11, doctor 18
-(10, 1, NULL, 32, 'waiting', 0, TRUE, 'QR057'), -- Appointment confirmed: patient 10, clinic 1, doctor 2
-(10, 8, NULL, 34, 'waiting', 0, TRUE, 'QR059'), -- Appointment confirmed: patient 10, clinic 8, doctor 16
-(11, 2, NULL, 35, 'waiting', 0, TRUE, 'QR060'), -- Appointment confirmed: patient 11, clinic 2, doctor 3
-(11, 12, NULL, 37, 'waiting', 0, TRUE, 'QR062'), -- Appointment confirmed: patient 11, clinic 12, doctor 23
-(12, 1, NULL, 38, 'waiting', 0, TRUE, 'QR063'), -- Appointment confirmed: patient 12, clinic 1, doctor 2
-(12, 13, NULL, 40, 'waiting', 0, TRUE, 'QR065'); -- Appointment confirmed: patient 12, clinic 13, doctor 24
-
--- Insert sample data into doctor_ratings
-INSERT INTO doctor_ratings (doctor_id, patient_id, appointment_id, rating, comment, is_anonymous) VALUES
--- Ratings for Dr. Nguyễn Văn Minh (ID: 2) - Tim mạch
-(2, 8, 6, 4.5, 'Bác sĩ rất tận tâm và chuyên nghiệp. Giải thích bệnh tình rõ ràng, dễ hiểu.', FALSE),
-(2, 11, 4, 5.0, 'Bác sĩ Minh rất giỏi, chẩn đoán chính xác và điều trị hiệu quả.', FALSE),
-(2, 12, 11, 4.0, 'Bác sĩ có kinh nghiệm tốt, nhưng thời gian khám hơi nhanh.', FALSE),
-(2, 8, 7, 4.8, 'Tái khám rất tốt, bệnh tình cải thiện rõ rệt.', FALSE),
-(2, 10, 32, 4.2, 'Bác sĩ tận tâm nhưng phòng khám hơi đông.', FALSE),
-
--- Ratings for Dr. Trần Thị Lan (ID: 3) - Thần kinh  
-(3, 9, 2, 4.7, 'Bác sĩ Lan rất hiểu tâm lý bệnh nhân, tư vấn rất hữu ích.', FALSE),
-(3, 12, 5, 3.5, 'Bác sĩ có chuyên môn tốt nhưng ít nói chuyện.', FALSE),
-(3, 11, 35, 4.9, 'Bác sĩ rất tận tâm, giải thích chi tiết về bệnh tình.', FALSE),
-(3, 9, 25, 4.3, 'Khám cấp cứu nhanh chóng và hiệu quả.', FALSE),
-
--- Ratings for Dr. Trần Văn Nam (ID: 14) - Chấn thương chỉnh hình
-(14, 10, 3, 4.6, 'Bác sĩ Nam rất giỏi về xương khớp, điều trị hiệu quả.', FALSE),
-(14, 13, 6, 4.4, 'Bác sĩ tận tâm, hướng dẫn tập luyện chi tiết.', FALSE),
-(14, 9, 29, 4.1, 'Bác sĩ có kinh nghiệm tốt nhưng cần cải thiện thái độ.', FALSE),
-(14, 10, 9, 4.8, 'Tái khám rất tốt, khớp gối đã cải thiện nhiều.', FALSE),
-(14, 13, 18, 4.0, 'Bác sĩ chuyên môn tốt nhưng thời gian chờ hơi lâu.', FALSE),
-
--- Anonymous ratings
-(2, 8, NULL, 4.3, 'Bác sĩ rất tốt, nhưng tôi muốn giữ ẩn danh.', TRUE),
-(3, 9, NULL, 4.7, 'Chất lượng khám bệnh rất tốt.', TRUE),
-(14, 10, NULL, 4.5, 'Bác sĩ có chuyên môn cao.', TRUE),
-
--- Ratings for new doctors
-(16, 8, 26, 4.2, 'Bác sĩ mới nhưng rất tận tâm.', FALSE),
-(17, 9, 30, 4.6, 'Bác sĩ nhi khoa rất giỏi với trẻ em.', FALSE),
-(18, 11, 31, 4.4, 'Bác sĩ tiêu hóa có kinh nghiệm tốt.', FALSE),
-(19, 8, 27, 4.8, 'Bác sĩ da liễu rất chuyên nghiệp.', FALSE),
-(20, 8, 28, 4.1, 'Bác sĩ tai mũi họng khám kỹ lưỡng.', FALSE),
-(21, 9, 30, 4.3, 'Bác sĩ mắt có chuyên môn tốt.', FALSE),
-(22, 12, 39, 4.7, 'Bác sĩ ung bướu rất tận tâm.', FALSE),
-(23, 11, 37, 4.5, 'Bác sĩ tiết niệu có kinh nghiệm.', FALSE),
-(24, 12, 40, 4.4, 'Bác sĩ nội tiết tư vấn rất hữu ích.', FALSE),
-(25, 11, 36, 4.2, 'Bác sĩ chẩn đoán hình ảnh chuyên nghiệp.', FALSE);
-
 -- Update doctor average ratings based on the ratings data
-UPDATE doctors d 
-SET rating = (
-    SELECT ROUND(AVG(rating), 1)
-    FROM doctor_ratings dr 
-    WHERE dr.doctor_id = d.user_id
-)
-WHERE d.user_id IN (SELECT DISTINCT doctor_id FROM doctor_ratings);
 
--- Add new tables according to Prisma schema
+
 
 -- Table for specialties
 CREATE TABLE specialties (
@@ -793,6 +672,70 @@ UPDATE doctors SET price = 380000 WHERE user_id = 25; -- Chẩn đoán hình ả
 ALTER TABLE queues
   ADD COLUMN queue_number INT,
   ADD COLUMN shift_type VARCHAR(20);
+
+SET SQL_SAFE_UPDATES = 0;
+
+
+  
+  ALTER TABLE queues
+ADD COLUMN slot_date DATE NULL;
+
+UPDATE queues q
+JOIN appointments a ON q.appointment_id = a.id
+SET q.slot_date = a.appointment_date
+WHERE q.queue_number IS NULL
+  AND q.appointment_id IS NOT NULL
+  AND q.id IS NOT NULL;
+  
+  UPDATE queues
+SET slot_date = DATE(created_at)
+WHERE queue_number IS NULL AND appointment_id IS NULL;
+
+UPDATE queues q
+JOIN appointments a ON q.appointment_id = a.id
+SET q.shift_type = 
+  CASE
+    WHEN a.appointment_time >= '08:00:00' AND a.appointment_time < '12:00:00' THEN 'morning'
+    WHEN a.appointment_time >= '13:00:00' AND a.appointment_time < '17:00:00' THEN 'afternoon'
+    WHEN a.appointment_time >= '18:00:00' AND a.appointment_time < '22:00:00' THEN 'night'
+    ELSE NULL
+  END
+WHERE q.queue_number IS NULL AND q.appointment_id IS NOT NULL;
+
+UPDATE queues
+SET shift_type = 
+  CASE
+    WHEN TIME(created_at) >= '08:00:00' AND TIME(created_at) < '12:00:00' THEN 'morning'
+    WHEN TIME(created_at) >= '13:00:00' AND TIME(created_at) < '17:00:00' THEN 'afternoon'
+    WHEN TIME(created_at) >= '18:00:00' AND TIME(created_at) < '22:00:00' THEN 'night'
+    ELSE NULL
+  END
+WHERE queue_number IS NULL AND appointment_id IS NULL;
+
+SET @clinic := 0;
+SET @date := '';
+SET @shift := '';
+SET @num := 0;
+
+UPDATE queues q
+JOIN (
+  SELECT 
+    id,
+    clinic_id,
+    slot_date,
+    shift_type,
+    @num := IF(@clinic = clinic_id AND @date = slot_date AND @shift = shift_type, @num + 1,
+               IF(shift_type = 'morning', 1, IF(shift_type = 'afternoon', 101, IF(shift_type = 'night', 201, 1)))
+    ) AS queue_number,
+    @clinic := clinic_id,
+    @date := slot_date,
+    @shift := shift_type
+  FROM queues
+  WHERE queue_number IS NULL
+  ORDER BY clinic_id, slot_date, shift_type, created_at
+) t ON q.id = t.id
+SET q.queue_number = t.queue_number;
+
 CREATE TABLE conversations (
   id INT AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(255),
@@ -830,20 +773,25 @@ CREATE TABLE chats (
   CONSTRAINT fk_chat_send_by FOREIGN KEY (sendById) REFERENCES users(id) ON DELETE CASCADE,
   CONSTRAINT fk_chat_conversation FOREIGN KEY (conversationId) REFERENCES conversations(id) ON DELETE CASCADE
 );
-select *from users;
 
-INSERT INTO conversations (name, type, last_message_at)
-VALUES ('admin - drminh', 'direct', NOW());
-SELECT LAST_INSERT_ID() AS conversationId;
 
--- admin (user_id = 1)
-INSERT INTO conversation_participants (conversationId, userId)
-VALUES (2, 1);
+-- Tạo bảng cho notification feature
+CREATE TABLE `notification_items` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `message` TEXT NOT NULL,
+  `isSeen` BOOLEAN NOT NULL DEFAULT FALSE,
+  `navigate_url` TEXT NOT NULL,
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `userId` INT NOT NULL,
 
--- bác sĩ Minh (user_id = 2)
-INSERT INTO conversation_participants (conversationId, userId)
-VALUES (2, 2);
+  CONSTRAINT `fk_notification_user` FOREIGN KEY (`userId`) REFERENCES `users`(`id`)
+);
 
-INSERT INTO chats (text, toId, sendById, conversationId, message_type, is_read)
-VALUES ('Chào bác sĩ Minh!', 2, 1, 2, 'text', FALSE);
-select * from doctors;
+-- Tạo bảng cho documents cho rag 
+CREATE TABLE documents (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    file_name VARCHAR(200) CHARACTER SET utf8mb4,
+    file_location VARCHAR(200) CHARACTER SET utf8mb4 UNIQUE,
+    user_id INT
+);

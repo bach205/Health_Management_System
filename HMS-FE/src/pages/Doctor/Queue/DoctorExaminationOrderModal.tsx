@@ -5,7 +5,6 @@ import { getDoctorsInClinic, getDoctorAvailableSlotsByDoctorId, getDoctorAvailab
 import mainRequest from "../../../api/mainRequest";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
-import { toast } from "react-toastify";
 
 dayjs.extend(utc);
 
@@ -33,19 +32,14 @@ const ResultExaminationModal = ({
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [clinics, setClinics] = useState<any[]>([]);
-  const [doctorsInClinic, setDoctorsInClinic] = useState<any[]>([]);
-  const [availableSlots, setAvailableSlots] = useState<any[]>([]);
-  const [slotDate, setSlotDate] = useState<string>("");
+  const [clinicVolume, setClinicVolume] = useState<number>(0);
 
   const to_clinic_id = Form.useWatch("to_clinic_id", form);
-  const to_doctor_id = Form.useWatch("to_doctor_id", form);
 
   const handleClose = () => {
     form.resetFields();
-    setDoctorsInClinic([]);
-    setAvailableSlots([]);
-    setSlotDate("");
     onClose();
+    
   };
 
   useEffect(() => {
@@ -58,50 +52,25 @@ const ResultExaminationModal = ({
 
   useEffect(() => {
     if (to_clinic_id) {
-      getDoctorsInClinic(Number(to_clinic_id))
-        .then((res) => setDoctorsInClinic(res.data.metadata || []))
-        .catch(() => {
-          setDoctorsInClinic([]);
-          toast.error("Không lấy được danh sách bác sĩ");
-        });
+      const fetchClinicVolume = async () => {
+        try {
+          const response = await getClinicService();
+          const clinic = response.data.metadata.clinics.find((c: any) => c.id === Number(to_clinic_id));
+          if (clinic) {
+            setClinicVolume(clinic.patient_volume);
+          } else {
+            setClinicVolume(0);
+          }
+        } catch (error) {
+          console.error("Error fetching clinic volume:", error);
+          setClinicVolume(0);
+        }
+      }
+      fetchClinicVolume();
     } else {
-      setDoctorsInClinic([]);
-      setAvailableSlots([]);
+      setClinicVolume(0);
     }
   }, [to_clinic_id]);
-
-
-  const fetchAvailableSlots = async (slot_date: string) => {
-    try {
- 
-      const response = await getDoctorAvailableSlotsByDate(Number(to_doctor_id), slot_date, Number(to_clinic_id));
-      console.log(response)
-      if (response?.data?.data?.length > 0) {
-        setAvailableSlots([{
-          slot_date: "",
-          start_time: "",
-        }, ...response?.data?.data]);
-      } else {
-        setAvailableSlots([
-          {
-            slot_date: "",
-            start_time: "",
-          }
-        ]);
-      }
-      console.log(availableSlots)
-    } catch (error) {
-      console.log(error);
-      setAvailableSlots([
-        {
-          slot_date: "",
-          start_time: "",
-        }
-      ]);
-      toast.error("Không lấy được lịch trống của bác sĩ");
-    }
-  }
-
 
   const handleFinish = async (values: any) => {
     try {
@@ -112,7 +81,7 @@ const ResultExaminationModal = ({
         return;
       }
 
-      let slotInfo = {};
+      let slotInfo: any = {};
       if (values.slot) {
         const parsedSlot = JSON.parse(values.slot);
         slotInfo = {
@@ -155,37 +124,12 @@ const ResultExaminationModal = ({
   const clinicSelected = clinics.find((c) => c.id === Number(to_clinic_id));
 
   const handleChangeClinic = (value: any) => {
-    setAvailableSlots([]);
     form.setFieldsValue({
       to_clinic_id: value,
-      to_doctor_id: "",
-      slot: "",
-      slot_date: "",
     });
+    setClinicVolume(0); // Reset clinic volume when changing clinic
   };
 
-  const handleChangeDoctor = (value: any) => {
-    setAvailableSlots([]);
-    setSlotDate("");
-    form.setFieldsValue({
-      to_doctor_id: value,
-      slot_date: "",
-      slot: "",
-    });
-  };
-
-  const handleChangeDate = (date: any) => {
-    if (date) {
-      console.log(dayjs(date).format("YYYY-MM-DD"))
-      setSlotDate(dayjs(date).format("YYYY-MM-DD"));
-      fetchAvailableSlots(dayjs(date).format("YYYY-MM-DD"));
-      setAvailableSlots([]);
-      form.setFieldsValue({
-        slot_date: dayjs(date),
-        slot: "",
-      });
-    }
-  }
 
   return (
     <Modal
@@ -194,7 +138,7 @@ const ResultExaminationModal = ({
       onCancel={handleClose}
       footer={[
         <Button key="submit" type="primary" loading={loading} onClick={() => form.submit()}>
-          Lưu kết quả
+          Chuyển phòng
         </Button>,
       ]}
     >
@@ -230,77 +174,25 @@ const ResultExaminationModal = ({
 
         {clinicSelected && (
           <div className="mb-2 text-sm">
-            Số lượng bệnh nhân:{" "}
-            <span
-              className={`text-white px-2 py-1 rounded ${clinicSelected.patient_volume === "high"
+            Số lượng bệnh nhân:
+            <span className={`text-white ml-2 px-2 py-1 rounded 
+            ${clinicVolume > 10
                 ? "bg-red-500"
-                : clinicSelected.patient_volume === "medium"
+                : clinicVolume < 8 && clinicVolume > 5
                   ? "bg-yellow-500"
                   : "bg-green-500"
-                }`}
+              }`}
             >
-              {clinicSelected.patient_volume === "high"
+              {clinicVolume > 10
                 ? "Đông"
-                : clinicSelected.patient_volume === "medium"
+                : clinicVolume < 8 && clinicVolume > 5
                   ? "Vừa phải"
-                  : "Ít"}
+                  : "Ít"
+              }
             </span>
           </div>
         )}
 
-        {to_clinic_id && (
-          <>
-            <Form.Item
-              label="Chọn bác sĩ khám"
-              name="to_doctor_id"
-              rules={[{ required: true, message: "Vui lòng chọn bác sĩ" }]}
-            >
-              <Select placeholder="Chọn bác sĩ" onChange={handleChangeDoctor}>
-                <Option value={""}>-</Option>
-                {doctorsInClinic.map((d) => (
-                  <Option key={d.id} value={d.id}>
-                    {d.full_name}
-                  </Option>
-                ))}
-              </Select>
-            </Form.Item>
-            {
-              to_doctor_id && (
-                <Form.Item label="Ngày khám" name="slot_date" rules={[{ required: true, message: "Vui lòng chọn ngày khám" },]} >
-                  <DatePicker minDate={dayjs()} onChange={handleChangeDate} />
-                </Form.Item>
-              )
-            }
-
-            {to_doctor_id && slotDate && (
-              <Form.Item
-                label="Chọn ca khám"
-                name="slot"
-                rules={[{ required: true, message: "Vui lòng chọn ca khám" },
-
-                ]}
-
-              >
-                <Select placeholder="Chọn ca khám">
-                  {/* <Option value={""}>-</Option> */}
-                  {availableSlots.length > 1 ?
-                   availableSlots.map((slot, index) => (
-                    <Option
-                      key={index}
-                      value={JSON.stringify({
-                        slot_date: slot.slot_date,
-                        start_time: slot.start_time,
-                      })}
-                    >
-                      {slot.start_time ? `${dayjs.utc(slot.start_time).format("HH:mm")} - ${dayjs.utc(slot.end_time).format("HH:mm")}` : "-"}
-                    </Option>
-                  ))
-                    : [<Option key="none" value=""> - </Option>,]}
-                </Select>
-              </Form.Item>
-            )}
-          </>
-        )}
       </Form>
     </Modal>
   );
