@@ -10,9 +10,13 @@ interface PaginationParams {
 const useQueue = () => {
   const { setQueues, setTotalElements, setTotalPages } = useQueueStore();
 
-  const fetchQueue = async (clinicId: string, pagination?: PaginationParams) => {
+  const fetchQueue = async (clinicId: string, pagination?: PaginationParams, type?: string) => {
     try {
-      const response = await getQueueClinic(clinicId, pagination);
+      if (type === "") {
+        type = undefined; 
+      }
+      console.log("Fetching queue for clinic:", clinicId, "with pagination:", pagination, "and type:", type);
+      const response = await getQueueClinic(clinicId, pagination, type);
       setQueues(response.metadata.queueClinic);
       setTotalElements(response.metadata.total);
       setTotalPages(response.metadata.totalPages);

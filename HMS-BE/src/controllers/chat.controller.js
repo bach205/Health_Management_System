@@ -207,81 +207,6 @@ class ChatController {
         }
     }
 
-    // Stream file or image from file_url in message
-    async streamFileFromMessage(req, res) {
-        try {
-            const { messageId } = req.params;
-            const userId = req.user.id;
-            // Lấy message và kiểm tra quyền truy cập
-            const message = await ChatService.getMessageById(Number(messageId));
-            if (!message) {
-                return res.status(404).json({ message: 'Không tìm thấy tin nhắn' });
-            }
-            // Kiểm tra quyền truy cập conversation
-            const conversation = await ConversationService.getConversationById(message.conversationId, userId);
-            if (!conversation) {
-                return res.status(403).json({ message: 'Không có quyền truy cập conversation này' });
-            }
-            if (!message.file_url) {
-                return res.status(400).json({ message: 'Tin nhắn không chứa file' });
-            }
-            const url = message.file_url;
-            const isExternal = url.startsWith('http://') || url.startsWith('https://');
-            if (isExternal) {
-                // Nếu là URL ngoài, dùng axios stream
-                const axios = require('axios');
-                const response = await axios.get(url, { responseType: 'stream' });
-                // Truyền header content-type, content-disposition nếu có
-                if (response.headers['content-type']) {
-                    res.setHeader('Content-Type', response.headers['content-type']);
-                }
-                if (response.headers['content-disposition']) {
-                    res.setHeader('Content-Disposition', response.headers['content-disposition']);
-                } else if (message.file_name) {
-                    res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(message.file_name)}"`);
-                }
-                response.data.pipe(res);
-            } else {
-                // Nếu là file nội bộ (đường dẫn vật lý), dùng fs stream
-                const path = require('path');
-                const fs = require('fs');
-                const filePath = path.isAbsolute(url) ? url : path.join(process.cwd(), url);
-                if (!fs.existsSync(filePath)) {
-                    return res.status(404).json({ message: 'Không tìm thấy file vật lý' });
-                }
-                const mime = require('mime-types');
-                res.setHeader('Content-Type', mime.lookup(filePath) || 'application/octet-stream');
-                res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(message.file_name || path.basename(filePath))}"`);
-                const fileStream = fs.createReadStream(filePath);
-                fileStream.pipe(res);
-            }
-        } catch (error) {
-            console.error('Error streaming file from message:', error);
-            res.status(500).json({ message: error.message || 'Lỗi lấy file từ tin nhắn' });
-        }
-    }
-
-    // Upload file/image for chat (multipart)
-    async uploadFileForChat(req, res) {
-        try {
-            if (!req.file) {
-                return res.status(400).json({ message: 'Không có file upload' });
-            }
-            // Lưu thông tin file trả về cho FE
-            const fileUrl = req.file.path.replace(/\\/g, '/'); // Đường dẫn lưu file trên server
-            const fileName = req.file.originalname;
-            const fileType = req.file.mimetype;
-            res.json({
-                file_url: fileUrl,
-                file_name: fileName,
-                file_type: fileType
-            });
-        } catch (error) {
-            console.error('Error uploading file for chat:', error);
-            res.status(500).json({ message: error.message || 'Lỗi upload file chat' });
-        }
-    }
-
     // Upload multiple files for chat (multipart)
     async uploadFilesForChat(req, res) {
         try {
@@ -318,7 +243,144 @@ class ChatController {
             }
             res.json({ message: `Đã xóa ${deleted} file` });
         } catch (error) {
+            console.log(error.message)
             res.status(500).json({ message: error.message || 'Lỗi xóa file' });
+        }
+    }
+
+    // Stream file từ file_url
+    async streamFile(req, res) {
+        try {
+            const { filename } = req.params;
+            const path = require('path');
+            const fs = require('fs');
+
+            // Tạo đường dẫn file từ filename
+            const filePath = path.join(process.cwd(), 'uploads', 'chat', filename);
+
+            // Kiểm tra file có tồn tại không
+            if (!fs.existsSync(filePath)) {
+                return res.status(404).json({ message: 'File không tồn tại' });
+            }
+
+            // Lấy thông tin file
+            const stat = fs.statSync(filePath);
+            const fileSize = stat.size;
+            const range = req.headers.range;
+
+            // Xác định Content-Type từ file extension
+            const ext = path.extname(filename).toLowerCase();
+            let contentType = 'application/octet-stream';
+
+            console.log('Debug stream file:', {
+                filename,
+                extension: ext,
+                hasExtension: ext.length > 0
+            });
+
+            // Map extension sang MIME type chính xác
+            const mimeTypes = {
+                // Images
+                '.jpg': 'image/jpeg',
+                '.jpeg': 'image/jpeg',
+                '.png': 'image/png',
+                '.gif': 'image/gif',
+                '.webp': 'image/webp',
+                '.bmp': 'image/bmp',
+                '.svg': 'image/svg+xml',
+                '.ico': 'image/x-icon',
+
+                // Documents
+                '.pdf': 'application/pdf',
+                '.doc': 'application/msword',
+                '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                '.xls': 'application/vnd.ms-excel',
+                '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                '.ppt': 'application/vnd.ms-powerpoint',
+                '.pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                '.txt': 'text/plain',
+                '.rtf': 'application/rtf',
+                '.csv': 'text/csv',
+
+                // Videos
+                '.mp4': 'video/mp4',
+                '.avi': 'video/x-msvideo',
+                '.mov': 'video/quicktime',
+                '.wmv': 'video/x-ms-wmv',
+                '.flv': 'video/x-flv',
+                '.webm': 'video/webm',
+                '.mkv': 'video/x-matroska',
+
+                // Audio
+                '.mp3': 'audio/mpeg',
+                '.wav': 'audio/wav',
+                '.ogg': 'audio/ogg',
+                '.aac': 'audio/aac',
+                '.flac': 'audio/flac',
+                '.m4a': 'audio/mp4',
+
+                // Archives
+                '.zip': 'application/zip',
+                '.rar': 'application/x-rar-compressed',
+                '.7z': 'application/x-7z-compressed',
+                '.tar': 'application/x-tar',
+                '.gz': 'application/gzip',
+
+                // Code files
+                '.html': 'text/html',
+                '.css': 'text/css',
+                '.js': 'application/javascript',
+                '.json': 'application/json',
+                '.xml': 'application/xml',
+                '.php': 'application/x-httpd-php',
+                '.py': 'text/x-python',
+                '.java': 'text/x-java-source',
+                '.cpp': 'text/x-c++src',
+                '.c': 'text/x-csrc',
+                '.sql': 'application/sql',
+
+                // Other
+                '.exe': 'application/x-msdownload',
+                '.msi': 'application/x-msdownload',
+                '.apk': 'application/vnd.android.package-archive'
+            };
+
+            if (mimeTypes[ext]) {
+                contentType = mimeTypes[ext];
+                console.log('Mapped content-type:', contentType);
+            } else {
+                console.log('No mapping found for extension:', ext);
+            }
+
+            if (range) {
+                // Hỗ trợ range request cho video/audio streaming
+                const parts = range.replace(/bytes=/, "").split("-");
+                const start = parseInt(parts[0], 10);
+                const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+                const chunksize = (end - start) + 1;
+                const file = fs.createReadStream(filePath, { start, end });
+
+                res.writeHead(206, {
+                    'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+                    'Accept-Ranges': 'bytes',
+                    'Content-Length': chunksize,
+                    'Content-Type': contentType,
+                });
+                file.pipe(res);
+            } else {
+                // Stream toàn bộ file
+                res.writeHead(200, {
+                    'Content-Length': fileSize,
+                    'Content-Type': contentType,
+                    'Cache-Control': 'public, max-age=31536000', // Cache 1 năm
+                    'Accept-Ranges': 'bytes', // Hỗ trợ range requests
+                    'Content-Disposition': `inline; filename="${encodeURIComponent(filename)}"`, // Hiển thị inline thay vì download
+                });
+                fs.createReadStream(filePath).pipe(res);
+            }
+        } catch (error) {
+            console.error('Error streaming file:', error);
+            res.status(500).json({ message: error.message || 'Lỗi stream file' });
         }
     }
 }

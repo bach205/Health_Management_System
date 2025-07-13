@@ -34,7 +34,7 @@ const ExaminationRecordModal = ({
       if (onSuccess) onSuccess();
       reset();
       onClose();
-      toast.success("Tạo hồ sơ khám tổng quát thành công!");
+      toast.success("Tạo hồ sơ khám thành công!");
     } catch (err: any) {
       toast.error(err?.response?.data?.message || "Có lỗi xảy ra!");
     } finally {
@@ -46,7 +46,7 @@ const ExaminationRecordModal = ({
     <Modal
       open={open}
       onClose={onClose}
-      title="Tạo hồ sơ khám tổng quát"
+      title="Tạo hồ sơ khám"
       paperProps={{
         className: "w-full max-w-md",
       }}

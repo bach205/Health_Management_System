@@ -8,10 +8,11 @@ class QueueController {
   static async getQueueClinic(req, res, next) {
     try {
       const { clinicId } = req.params;
-      const { pageNumber, pageSize } = req.query;
+      const { pageNumber, pageSize, type } = req.query;
       const result = await QueueService.getQueueClinic(clinicId, {
         pageNumber,
         pageSize,
+        type,
       });
       return new OK({
         message: "Lấy danh sách queue thành công",
@@ -143,6 +144,22 @@ class QueueController {
       const { queue_id } = req.body;
       const updated = await QueueService.updateQueueStatus(queue_id, "done");
       return res.json({ message: "Đã hoàn thành khám", queue: updated });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Lấy danh sách queue của tất cả bệnh nhân theo ngày (truyền ?date=YYYY-MM-DD)
+   */
+  static async getTodayQueues(req, res, next) {
+    try {
+      const { date } = req.query;
+      const queues = await QueueService.getQueuesByDate(date);
+      return new OK({
+        message: "Lấy danh sách queue theo ngày thành công",
+        metadata: queues
+      }).send(res);
     } catch (error) {
       next(error);
     }
