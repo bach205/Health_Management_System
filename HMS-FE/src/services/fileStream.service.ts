@@ -32,6 +32,8 @@ class FileStreamService {
             }
 
             const blob = await response.blob();
+            console.log(response)
+            console.log(blob)
             const blobUrl = URL.createObjectURL(blob);
 
             // Cache blob URL

@@ -60,20 +60,34 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, onEdit, onDelete }) 
         setShowConfirm(false);
     };
 
+    // Mở file/ảnh trong window mới
+    const openFileInNewWindow = () => {
+        if (blobUrl) {
+            window.open(blobUrl, '_blank');
+        }
+    };
+
+    // Kiểm tra xem message có thể edit không (chỉ text message)
+    const canEdit = message.message_type === 'text';
+
     const renderMessageContent = () => {
         switch (message.message_type) {
             case 'image':
                 return (
                     <div className="max-w-xs">
                         {isLoadingBlob ? (
-                            <div className="w-32 h-32 bg-gray-200 rounded-lg flex items-center justify-center">
+                            <div className="w-32 h-32 bg-gray-200 rounded-lg flex items-center justify-center cursor-pointer"
+                                onClick={openFileInNewWindow}
+                                title="Click để xem ảnh trong cửa sổ mới">
                                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
                             </div>
                         ) : blobUrl ? (
                             <img
                                 src={blobUrl}
                                 alt="Image"
-                                className="rounded-lg max-w-full h-auto"
+                                className="rounded-lg max-w-full h-auto cursor-pointer hover:opacity-80 transition-opacity"
+                                onClick={openFileInNewWindow}
+                                title="Click để xem ảnh trong cửa sổ mới"
                                 onError={() => {
                                     console.error('Error loading image');
                                     setBlobUrl(null);
@@ -92,39 +106,41 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, onEdit, onDelete }) 
             case 'file':
                 return (
                     <div className="flex items-center space-x-2 p-3 bg-blue-50 rounded-lg">
-                        <div className="flex-shrink-0">
-                            <svg className="w-8 h-8 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
-                            </svg>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-gray-900 truncate">
-                                {message.file_name}
-                            </p>
-                            <p className="text-xs text-gray-500">
-                                {message.file_type}
-                            </p>
-                        </div>
-                        {isLoadingBlob ? (
+                        <div className="flex-1 flex items-center space-x-2 cursor-pointer hover:bg-blue-100 transition-colors rounded p-1"
+                            onClick={openFileInNewWindow}
+                            title="Click để mở file trong cửa sổ mới">
                             <div className="flex-shrink-0">
-                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
+                                <svg className="w-8 h-8 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
+                                </svg>
                             </div>
-                        ) : blobUrl ? (
+                            <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-gray-900 truncate">
+                                    {message.file_name}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                    {message.file_type}
+                                </p>
+                            </div>
+                            <div className="flex-shrink-0 text-blue-600">
+                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                                </svg>
+                            </div>
+                        </div>
+                        {/* Nút download */}
+                        {blobUrl && (
                             <a
                                 href={blobUrl}
                                 download={message.file_name}
-                                className="flex-shrink-0 text-blue-600 hover:text-blue-800"
+                                className="flex-shrink-0 p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded transition-colors"
+                                title="Tải xuống file"
+                                onClick={(e) => e.stopPropagation()} // Ngăn không cho trigger openFileInNewWindow
                             >
                                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                                     <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
                                 </svg>
                             </a>
-                        ) : (
-                            <div className="flex-shrink-0 text-red-500">
-                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                                </svg>
-                            </div>
                         )}
                     </div>
                 );
@@ -181,15 +197,18 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, onEdit, onDelete }) 
 
                         {showMenu && (
                             <div className="absolute -left-28 top-6 w-28 bg-white border rounded shadow-md z-50">
-                                <button
-                                    onClick={() => {
-                                        setIsEditing(true);
-                                        setShowMenu(false);
-                                    }}
-                                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                >
-                                    Chỉnh sửa
-                                </button>
+                                {/* Chỉ hiển thị nút Edit cho text message */}
+                                {canEdit && (
+                                    <button
+                                        onClick={() => {
+                                            setIsEditing(true);
+                                            setShowMenu(false);
+                                        }}
+                                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                    >
+                                        Chỉnh sửa
+                                    </button>
+                                )}
                                 <button
                                     onClick={() => {
                                         setShowMenu(false);

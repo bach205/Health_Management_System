@@ -268,6 +268,90 @@ class ChatController {
             const fileSize = stat.size;
             const range = req.headers.range;
 
+            // Xác định Content-Type từ file extension
+            const ext = path.extname(filename).toLowerCase();
+            let contentType = 'application/octet-stream';
+
+            console.log('Debug stream file:', {
+                filename,
+                extension: ext,
+                hasExtension: ext.length > 0
+            });
+
+            // Map extension sang MIME type chính xác
+            const mimeTypes = {
+                // Images
+                '.jpg': 'image/jpeg',
+                '.jpeg': 'image/jpeg',
+                '.png': 'image/png',
+                '.gif': 'image/gif',
+                '.webp': 'image/webp',
+                '.bmp': 'image/bmp',
+                '.svg': 'image/svg+xml',
+                '.ico': 'image/x-icon',
+
+                // Documents
+                '.pdf': 'application/pdf',
+                '.doc': 'application/msword',
+                '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                '.xls': 'application/vnd.ms-excel',
+                '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                '.ppt': 'application/vnd.ms-powerpoint',
+                '.pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                '.txt': 'text/plain',
+                '.rtf': 'application/rtf',
+                '.csv': 'text/csv',
+
+                // Videos
+                '.mp4': 'video/mp4',
+                '.avi': 'video/x-msvideo',
+                '.mov': 'video/quicktime',
+                '.wmv': 'video/x-ms-wmv',
+                '.flv': 'video/x-flv',
+                '.webm': 'video/webm',
+                '.mkv': 'video/x-matroska',
+
+                // Audio
+                '.mp3': 'audio/mpeg',
+                '.wav': 'audio/wav',
+                '.ogg': 'audio/ogg',
+                '.aac': 'audio/aac',
+                '.flac': 'audio/flac',
+                '.m4a': 'audio/mp4',
+
+                // Archives
+                '.zip': 'application/zip',
+                '.rar': 'application/x-rar-compressed',
+                '.7z': 'application/x-7z-compressed',
+                '.tar': 'application/x-tar',
+                '.gz': 'application/gzip',
+
+                // Code files
+                '.html': 'text/html',
+                '.css': 'text/css',
+                '.js': 'application/javascript',
+                '.json': 'application/json',
+                '.xml': 'application/xml',
+                '.php': 'application/x-httpd-php',
+                '.py': 'text/x-python',
+                '.java': 'text/x-java-source',
+                '.cpp': 'text/x-c++src',
+                '.c': 'text/x-csrc',
+                '.sql': 'application/sql',
+
+                // Other
+                '.exe': 'application/x-msdownload',
+                '.msi': 'application/x-msdownload',
+                '.apk': 'application/vnd.android.package-archive'
+            };
+
+            if (mimeTypes[ext]) {
+                contentType = mimeTypes[ext];
+                console.log('Mapped content-type:', contentType);
+            } else {
+                console.log('No mapping found for extension:', ext);
+            }
+
             if (range) {
                 // Hỗ trợ range request cho video/audio streaming
                 const parts = range.replace(/bytes=/, "").split("-");
@@ -280,15 +364,17 @@ class ChatController {
                     'Content-Range': `bytes ${start}-${end}/${fileSize}`,
                     'Accept-Ranges': 'bytes',
                     'Content-Length': chunksize,
-                    'Content-Type': 'application/octet-stream',
+                    'Content-Type': contentType,
                 });
                 file.pipe(res);
             } else {
                 // Stream toàn bộ file
                 res.writeHead(200, {
                     'Content-Length': fileSize,
-                    'Content-Type': 'application/octet-stream',
+                    'Content-Type': contentType,
                     'Cache-Control': 'public, max-age=31536000', // Cache 1 năm
+                    'Accept-Ranges': 'bytes', // Hỗ trợ range requests
+                    'Content-Disposition': `inline; filename="${encodeURIComponent(filename)}"`, // Hiển thị inline thay vì download
                 });
                 fs.createReadStream(filePath).pipe(res);
             }
