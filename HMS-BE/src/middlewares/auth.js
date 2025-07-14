@@ -3,7 +3,7 @@ const { verifyToken } = require('../helper/jwt');
 const authenticate = (req, res, next) => {
 
     try {
-
+        
         const authHeader = req.headers.authorization;
 
         //console.log("authHeader: ", authHeader);
@@ -48,6 +48,7 @@ const authenticate = (req, res, next) => {
 
 const authorize = (...roles) => {
     return (req, res, next) => {
+        
         if (!roles.includes(req.user.role)) {
             return res.status(403).json({
                 message: 'You do not have permission to perform this action'

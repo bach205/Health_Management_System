@@ -44,6 +44,7 @@ import AdminSpecialtyDashboard from "./pages/Admin/Specialty/AdminSpecialtyDashb
 import AdminDashboard from "./pages/Admin/Dashboard/AdminDashboard";
 import ForgetPage from "./pages/ForgetPage";
 import ChatPage from "./pages/Chat";
+import Monitor from "./pages/Queue/Monitor";
 
 dayjs.extend(plugin);
 dayjs.updateLocale("en", {
@@ -89,6 +90,11 @@ const PublicRoutes = [
   {
     path: "/",
     element: <Home />,
+    layout: MainLayout,
+  },
+  {
+    path: "/monitor",
+    element: <Monitor />,
     layout: MainLayout,
   },
   {
@@ -204,6 +210,12 @@ const PrivateRoutes: PrivateRoute[] = [
   {
     path: "/my-appointments",
     element: <MyAppointment />,
+    allowedRoles: ["patient"],
+    layout: MainLayout,
+  },
+  {
+    path: "/queue",
+    element: <Monitor />,
     allowedRoles: ["patient"],
     layout: MainLayout,
   },

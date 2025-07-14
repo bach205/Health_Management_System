@@ -14,8 +14,9 @@ const {
 const validate = require("../middlewares/validate");
 const authController = require("../controllers/auth.controller");
 const authRouter = express.Router();
-const { authenticate } = require("../middlewares/auth");
+const { authenticate, authorize } = require("../middlewares/auth");
 const checkUserStatus = require("../middlewares/checkUserStatus");
+const PatientService = require("../services/patient.service");
 
 authRouter.post(
   "/login",
@@ -34,9 +35,10 @@ authRouter.post(
 authRouter.put(
   "/update-patient",
   authenticate,
+  authorize("patient"),
   checkUserStatus(),
-  asyncHandler(AuthController.updatePatientFullInfo),
-  authController.updatePatientFullInfo
+  asyncHandler(PatientService.updatePatient),
+  PatientService.updatePatient
 );
 
 authRouter.post(
@@ -77,6 +79,7 @@ authRouter.post(
 authRouter.get(
   "/me",
   authenticate,
+  authorize("patient"),
   checkUserStatus(),
   asyncHandler(AuthController.getUserInfor),
   authController.getUserInfor

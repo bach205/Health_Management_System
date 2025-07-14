@@ -20,6 +20,10 @@ import type { IPatient } from "./patient.type";
 //   }
 
 export interface IQueue {
+  appointment: any;
+  slot_date: ReactNode;
+  shift_type: any;
+  queue_number: number;
   id: number;
   patient_id: number;
   clinic_id: number;
