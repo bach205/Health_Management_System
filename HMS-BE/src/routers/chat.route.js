@@ -49,9 +49,6 @@ router.get("/total-unread-count", ChatController.getTotalUnreadCount);
 // Search routes
 router.get("/conversation/:conversationId/search", ChatController.searchMessages);
 
-// Stream file or image from message
-router.get('/file/:messageId', ChatController.streamFileFromMessage);
-
 // Upload multiple files for chat (multipart)
 router.post('/upload', upload.array('files'), ChatController.uploadFilesForChat);
 
