@@ -41,7 +41,11 @@ const Sidebar = ({ isCollapsed, role }: { isCollapsed: boolean, role: string }) 
         if (sidebar.label === "Quản lý" && role !== "admin") {
           return null
         }
-
+        
+        if (sidebar.label === "Documents" && role !== "admin") {
+          return null
+        }
+        
         if (sidebar.label === "Phòng khám" && (role !== "admin")) {
           return null
         }

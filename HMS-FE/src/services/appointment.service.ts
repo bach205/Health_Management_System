@@ -95,6 +95,26 @@ export const getAvailableTimeSlotsBySpecialtyService = async (specialty: string)
   return response.data;
 };
 
+
+export const getAvailableSlots = async ({
+  doctor_id,
+  clinic_id,
+  slot_date,
+}: {
+  doctor_id?: number;
+  clinic_id?: number;
+  slot_date?: string; // YYYY-MM-DD
+}) => {
+  const params = new URLSearchParams();
+  if (doctor_id) params.append("doctor_id", doctor_id.toString());
+  if (clinic_id) params.append("clinic_id", clinic_id.toString());
+  if (slot_date) params.append("slot_date", slot_date);
+
+  const res = await mainRequest.get(`/api/v1/appointment/slots?${params.toString()}`);
+  console.log("res",res)
+  return res.data;
+}
+
 export const deleteAppointmentService = async (appointmentId: string | number) => {
   const response = await mainRequest.delete(`/api/v1/appointment/${appointmentId}`);
   return response.data;

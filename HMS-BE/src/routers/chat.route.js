@@ -49,4 +49,10 @@ router.get("/total-unread-count", ChatController.getTotalUnreadCount);
 // Search routes
 router.get("/conversation/:conversationId/search", ChatController.searchMessages);
 
+// Upload multiple files for chat (multipart)
+router.post('/upload', upload.array('files'), ChatController.uploadFilesForChat);
+
+// Xóa file đã upload khi user xóa khỏi preview
+router.delete('/upload', ChatController.deleteUploadedFile);
+
 module.exports = router; 

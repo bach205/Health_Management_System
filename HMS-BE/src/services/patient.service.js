@@ -151,11 +151,11 @@ class PatientService {
         return newPatient;
     }
 
-    async updatePatient(data) {
-        const { email, full_name, date_of_birth, gender, phone, address, identity_number } = data.body.updateData;
-        const { userId } = data.body;
-     //  console.log("data: ", data.body);
+    async updatePatient(userId, updateData) {
+        const { email, full_name, date_of_birth, gender, phone, address, identity_number } = updateData;
         // Check if patient exists
+
+        console.log(email, full_name, date_of_birth, gender, phone, address, identity_number)
         const existingPatient = await prisma.user.findUnique({
             where: {
                 id: parseInt(userId),
@@ -193,7 +193,7 @@ class PatientService {
 
         const updatedPatient = await prisma.user.update({
             where: {
-                id: userId
+                id: existingPatient.id
             },
             data: {
                 full_name,
@@ -212,7 +212,7 @@ class PatientService {
                 patient: true
             }
         });
-     //console.log("updatedPatient: ", updatedPatient);
+     console.log("updatedPatient: ", updatedPatient);
         return updatedPatient;
     }
 

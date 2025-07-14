@@ -1,8 +1,7 @@
 ### Hướng dẫn set up file .env
 
-- Có phần .env example và mọi người sẽ tự tạo 1 file .env của riêng mình để chạy local khi code ở trường
-- Sau khi đã xong xuôi hết rồi thì config lại để kết nối Atlats MongoDB
-- Có eslint với barbel nên mọi người có thể đọc thêm nhé
+- Có phần .env example và mọi người sẽ tự tạo 1 file .env của riêng mình để chạy local 
+- Có eslint với barbel
 
 ---
 

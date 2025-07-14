@@ -23,3 +23,7 @@ export const getAllNotifications = async (limit = 15, offset = 0): Promise<Notif
     const res = await axios.get(`${BASE_URL}?limit=${limit}&offset=${offset}`);
     return res.data;
 };
+
+export const deleteNotification = async (id: number) => {
+    return await axios.delete(`${BASE_URL}/${id}`);
+};
