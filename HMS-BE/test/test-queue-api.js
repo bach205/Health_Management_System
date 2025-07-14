@@ -109,8 +109,8 @@ async function testQueueService() {
   try {
     console.log('🔧 Test trực tiếp QueueService...\n');
     
-    const QueueService = require('./src/services/queue.service');
-    const prisma = require('./src/config/prisma');
+    const QueueService = require('../src/services/queue.service');
+    const prisma = require('../src/config/prisma');
 
     // Test 1: Lấy queue hôm nay
     console.log('📅 Test 1: Lấy queue hôm nay');
