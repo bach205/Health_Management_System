@@ -158,7 +158,7 @@ const PrivateRoutes: PrivateRoute[] = [
 
   {
     path: "/admin/",
-    element: <Dashboard />,
+    element: <AdminDashboard />,
     layout: DashboardLayout,
   },
   {

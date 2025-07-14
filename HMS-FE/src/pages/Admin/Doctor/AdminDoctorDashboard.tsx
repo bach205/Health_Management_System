@@ -2,12 +2,10 @@ import { useState } from "react";
 import { Table, Tag, Space, Flex, Button, Form, Input, Select, notification, Tooltip, Popconfirm, Avatar, } from "antd";
 import { Ban, CirclePlus, Eye, RefreshCcw, RotateCcw, Search, User, UserRoundPen } from "lucide-react";
 
-import ModalCreateUser from "../../../components/modal/ModalCreateUser";
-import ModalUpdateUser from "../../../components/modal/ModalUpdateUser";
 import dayjs from "dayjs";
 import { useDoctorList } from "../../../hooks/useDoctorList";
 import ModalViewUser from "../../../components/modal/ModalViewUser";
-import { specialtyOptions, TYPE_EMPLOYEE_STR, PASSWORD_DEFAULT, sortOptions } from "../../../constants/user.const";
+import { specialtyOptions, TYPE_EMPLOYEE_STR, sortOptions } from "../../../constants/user.const";
 import type { IDoctor } from "../../../types/index.type";
 import UserListTitle from "../../../components/ui/UserListTitle";
 import { createDoctor, updateDoctor, updatePassword, updateStatus } from "../../../services/doctor.service";
@@ -21,11 +19,10 @@ const AdminDoctorDashboard = () => {
   const [isViewVisible, setIsViewVisible] = useState<boolean>(false);
   const [currentUser, setCurrentUser] = useState<IDoctor | null>(null);
   const filterOptions = [{ value: "all", label: "Tất cả" }, ...specialtyOptions]
-
+  console.log("currentUser", currentUser)
   const [formCreate] = Form.useForm();
   const [formUpdate] = Form.useForm();
   const [formView] = Form.useForm();
-
   // Table column
   const columns: any = [
     {
@@ -175,7 +172,8 @@ const AdminDoctorDashboard = () => {
       formView.setFieldsValue({
         ...record,
         date_of_birth: record.date_of_birth ? dayjs(record.date_of_birth) : null,
-        specialty: record.doctor?.specialty?.id,
+        specialty_id: record.doctor?.specialty?.id,
+        price: record.doctor?.price || 0,
         bio: record.doctor?.bio
       });
       setIsViewVisible(true);
@@ -240,8 +238,10 @@ const AdminDoctorDashboard = () => {
         ...values,
         full_name: values.full_name?.trim(),
         email: values.email?.trim(),
+        price: values.price || 0,
         phone: values.phone?.trim(),
         bio: values.bio?.trim(),
+        specialty_id: values.specialty_id || null,
         address: values.address?.trim(),
         password: values.password || "",
       }
@@ -277,6 +277,7 @@ const AdminDoctorDashboard = () => {
         id: currentUser.id,
         full_name: values.full_name?.trim(),
         email: values.email?.trim(),
+        specialty_id: values.specialty_id || null,
         phone: values.phone?.trim(),
         bio: values.bio?.trim(),
         address: values.address?.trim(),
@@ -311,6 +312,7 @@ const AdminDoctorDashboard = () => {
     users, loading, keyword, reload, specialty, sort, pagination, isActive,
     setKeyword, setReload, setSpecialty, setSort, setIsActive, handleTableChange,
   } = useDoctorList();
+
   const { specialties, loading: specialtyLoading, reload: specialtyReload, handleTableChange: specialtyTableChange } = useSpecialtyList(undefined, true);
   return (
     <div>

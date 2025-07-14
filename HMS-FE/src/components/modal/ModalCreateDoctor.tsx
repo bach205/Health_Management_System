@@ -1,4 +1,4 @@
-import { DatePicker, Form, Input, Modal, Select, Checkbox, type FormInstance, type UploadFile, message, Upload, Image } from "antd";
+import { DatePicker, Form, Input, Modal, Select, Checkbox, type FormInstance, type UploadFile, message, Upload, Image, InputNumber } from "antd";
 import { useEffect, useState } from "react";
 import { specialtyOptions, TYPE_EMPLOYEE_STR } from "../../constants/user.const";
 import type { IUserBase } from "../../types/index.type";
@@ -24,7 +24,9 @@ const getBase64 = (file: File): Promise<string> =>
     reader.onerror = (error) => reject(error);
   });
 const ModalCreateDoctor = ({ role, isVisible, handleOk, handleCancel, form }: IProps) => {
-  const [specialty, setSpecialty] = useState<string>("internal");
+
+  const [specialtyId, setSpecialtyId] = useState<number | null>(null);
+
   const [showPasswordFields, setShowPasswordFields] = useState(false);
   useEffect(() => {
     form.setFieldsValue({
@@ -108,7 +110,7 @@ const ModalCreateDoctor = ({ role, isVisible, handleOk, handleCancel, form }: IP
         style={{ marginTop: 20 }}
         initialValues={{ gender: "male" }}
       >
-         <Form.Item label="Ảnh đại diện" name="avatar" valuePropName="avatar">
+        <Form.Item label="Ảnh đại diện" name="avatar" valuePropName="avatar">
           <div>
             <Upload
               listType="picture-card"
@@ -190,22 +192,29 @@ const ModalCreateDoctor = ({ role, isVisible, handleOk, handleCancel, form }: IP
             <Form.Item
               label="Khoa"
               initialValue=""
-              name="specialty"
+              name="specialty_id"
             // rules={[{ required: true, message: "Vui lòng chọn chuyên khoa!" }]}
             >
               <Select
                 style={{ width: 120 }}
-                value={specialty}
-                onChange={(value) => setSpecialty(value)}
-                options={specialties.map((specialty) => ({
-                  label: specialty.name,
-                  value: specialty.name,
-                }))}
+                value={specialtyId}
+                onChange={(value) => setSpecialtyId(value)}
+                options={[
+                  ...specialties.map((specialty) => ({
+                    label: specialty.name,
+                    value: specialty.id,
+                  }))
+                ]}
               />
+
             </Form.Item>
 
             <Form.Item name="bio" label="Tiểu sử">
               <Input placeholder="Tiểu sử bác sĩ" />
+            </Form.Item>
+            <Form.Item name="price" label="Giá khám" rules={[{ required: true, message: "Vui lòng nhập giá khám!" }]}>
+              <InputNumber placeholder="Giá khám" min={0} />
+              <span className="ml-2">Đ</span>
             </Form.Item>
           </>
         )}

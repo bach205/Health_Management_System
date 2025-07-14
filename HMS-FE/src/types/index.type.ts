@@ -27,6 +27,7 @@ export interface IDoctor extends IUserBase {
     specialty?: ISpecialty; // Khoa
     bio?: string;
     rating?: number;
+    price?: number; // Giá khám
   }
 }
 
