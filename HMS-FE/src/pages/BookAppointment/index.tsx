@@ -8,6 +8,7 @@ import { getDoctorById } from "../../services/doctor.service";
 import dayjs from "dayjs";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import { specialtyOptions } from "../../constants/user.const";
+import { getDoctorAverageRating, getDoctorComments, createFeedback, updateFeedback, deleteFeedback } from '../../api/feedback';
 dayjs.extend(isSameOrAfter);
 
 const { Title, Text } = Typography;
@@ -43,6 +44,8 @@ const PatientBookAppointment: React.FC = () => {
   const [selectedClinic, setSelectedClinic] = useState<number | null>(null);
   const [success, setSuccess] = useState(false);
   const [doctor, setDoctor] = useState<any>(null);
+  const [rating, setRating] = useState<number | null>(null);
+  const [comments, setComments] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchSlots = async () => {
@@ -52,17 +55,17 @@ const PatientBookAppointment: React.FC = () => {
           throw new Error("Missing doctor ID");
         }
         const data = await getAvailableTimeSlotsService(docId);
-        
+
         console.log(data);
         const allSlots = data.metadata || [];
-        
+
         // Lọc chỉ lấy slot từ hôm nay trở đi
         const today = dayjs().startOf('day');
         const filteredSlots = allSlots.filter((slot: AvailableSlot) => {
           const slotDate = dayjs(slot.slot_date);
           return slotDate.isSameOrAfter(today);
         });
-        
+
         setSlots(filteredSlots);
       } catch (err) {
         message.error("Không thể tải lịch khám");
@@ -88,13 +91,43 @@ const PatientBookAppointment: React.FC = () => {
     fetchDoctor();
   }, [docId]);
 
+  useEffect(() => {
+    if (docId) {
+      getDoctorAverageRating(Number(docId)).then(res => setRating(res?.average || null));
+      getDoctorComments(Number(docId)).then(res => setComments(res?.comments || []));
+    }
+  }, [docId]);
+
+  // Feedback handlers
+  const handleCreateFeedback = async (data: { content: string; rating: number }) => {
+    if (!docId) return;
+    await createFeedback({ doctorId: Number(docId), ...data });
+    // reload feedback
+    getDoctorAverageRating(Number(docId)).then(res => setRating(res?.average || null));
+    getDoctorComments(Number(docId)).then(res => setComments(res?.comments || []));
+  };
+  const handleEditFeedback = async (id: number, data: { content: string; rating: number }) => {
+    await updateFeedback(id, data);
+    if (docId) {
+      getDoctorAverageRating(Number(docId)).then(res => setRating(res?.average || null));
+      getDoctorComments(Number(docId)).then(res => setComments(res?.comments || []));
+    }
+  };
+  const handleDeleteFeedback = async (id: number) => {
+    await deleteFeedback(id);
+    if (docId) {
+      getDoctorAverageRating(Number(docId)).then(res => setRating(res?.average || null));
+      getDoctorComments(Number(docId)).then(res => setComments(res?.comments || []));
+    }
+  };
+
   const handleBookAppointment = async (values: any) => {
     if (selectedSlot) {
       try {
         const patientId = localStorage.getItem("user");
         const slotDate = dayjs(selectedSlot.slot_date).format("YYYY-MM-DD");
-        const startTime = new Date(selectedSlot.start_time).getUTCHours().toString().padStart(2, '0') + ':' + 
-                          new Date(selectedSlot.start_time).getUTCMinutes().toString().padStart(2, '0') + ':00';
+        const startTime = new Date(selectedSlot.start_time).getUTCHours().toString().padStart(2, '0') + ':' +
+          new Date(selectedSlot.start_time).getUTCMinutes().toString().padStart(2, '0') + ':00';
         const res = await bookAppointmentService({
           patient_id: JSON.parse(patientId || "").id,
           doctor_id: docId,
@@ -188,11 +221,10 @@ const PatientBookAppointment: React.FC = () => {
                 setSelectedDate(null);
                 setSelectedSlot(null);
               }}
-              className={`text-center py-4 px-6 rounded-lg cursor-pointer transition-colors ${
-                selectedClinic === clinic.id
-                  ? "bg-primary text-white"
-                  : "border border-gray-200 hover:border-primary"
-              }`}
+              className={`text-center py-4 px-6 rounded-lg cursor-pointer transition-colors ${selectedClinic === clinic.id
+                ? "bg-primary text-white"
+                : "border border-gray-200 hover:border-primary"
+                }`}
             >
               <Text className={selectedClinic === clinic.id ? "!text-white" : ""} strong>
                 {clinic.name}
@@ -217,11 +249,10 @@ const PatientBookAppointment: React.FC = () => {
                   setSelectedDate(dateKey);
                   setSelectedSlot(null);
                 }}
-                className={`text-center py-4 px-6 rounded-lg cursor-pointer transition-colors ${
-                  selectedDate === dateKey
-                    ? "bg-primary text-white"
-                    : "border border-gray-200 hover:border-primary"
-                }`}
+                className={`text-center py-4 px-6 rounded-lg cursor-pointer transition-colors ${selectedDate === dateKey
+                  ? "bg-primary text-white"
+                  : "border border-gray-200 hover:border-primary"
+                  }`}
               >
                 <Text className={selectedDate === dateKey ? "!text-white" : ""} strong>
                   {weekday.charAt(0).toUpperCase() + weekday.slice(1)}, {dateStr}
@@ -238,14 +269,14 @@ const PatientBookAppointment: React.FC = () => {
           {!selectedClinic && <Text type="secondary">Vui lòng chọn phòng khám trước</Text>}
           {selectedClinic && !selectedDate && <Text type="secondary">Vui lòng chọn ngày trước</Text>}
           {selectedClinic && selectedDate && slotsByDate[selectedDate]?.map(slot => {
-            const startTime = new Date(slot.start_time).getUTCHours().toString().padStart(2, '0') + ':' + 
-                            new Date(slot.start_time).getUTCMinutes().toString().padStart(2, '0');
-            const endTime = new Date(slot.end_time).getUTCHours().toString().padStart(2, '0') + ':' + 
-                          new Date(slot.end_time).getUTCMinutes().toString().padStart(2, '0');
-            
+            const startTime = new Date(slot.start_time).getUTCHours().toString().padStart(2, '0') + ':' +
+              new Date(slot.start_time).getUTCMinutes().toString().padStart(2, '0');
+            const endTime = new Date(slot.end_time).getUTCHours().toString().padStart(2, '0') + ':' +
+              new Date(slot.end_time).getUTCMinutes().toString().padStart(2, '0');
+
             // Kiểm tra slot có còn trống không
             const isAvailable = slot.is_available;
-            
+
             return (
               <Button
                 key={slot.id}
@@ -311,6 +342,24 @@ const PatientBookAppointment: React.FC = () => {
       <Card title="Bác sĩ cùng chuyên khoa">
         <RelatedDoctors docId={docId} speciality={""} />
       </Card>
+
+      <div className="my-8">
+        <h2 className="text-xl font-semibold mb-2">Đánh giá & Bình luận</h2>
+        <div className="mb-2">Đánh giá trung bình: <span className="font-bold">{rating ?? 'Chưa có'}</span></div>
+        <div className="mt-4">
+          <h3 className="font-semibold mb-1">Bình luận:</h3>
+          {comments.length === 0 ? <div>Chưa có bình luận</div> : (
+            <ul className="space-y-2">
+              {comments.map((c: any) => (
+                <li key={c.id} className="border rounded p-2">
+                  <div className="font-medium">{c.user_name || 'Ẩn danh'} - <span className="text-yellow-500">{c.rating}★</span></div>
+                  <div>{c.content}</div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
