@@ -94,3 +94,23 @@ export const getAvailableTimeSlotsBySpecialtyService = async (specialty: string)
   const response = await mainRequest.get(`/api/v1/appointment/slots-by-specialty?specialty=${encodeURIComponent(specialty)}`);
   return response.data;
 };
+
+
+export const getAvailableSlots = async ({
+  doctor_id,
+  clinic_id,
+  slot_date,
+}: {
+  doctor_id?: number;
+  clinic_id?: number;
+  slot_date?: string; // YYYY-MM-DD
+}) => {
+  const params = new URLSearchParams();
+  if (doctor_id) params.append("doctor_id", doctor_id.toString());
+  if (clinic_id) params.append("clinic_id", clinic_id.toString());
+  if (slot_date) params.append("slot_date", slot_date);
+
+  const res = await mainRequest.get(`/api/v1/appointment/slots?${params.toString()}`);
+  console.log("res",res)
+  return res.data;
+};

@@ -134,7 +134,7 @@ const ResultExaminationModal = ({
   return (
     <Modal
       open={open}
-      title="Nhập kết quả khám phòng"
+      title="Chuyển phòng khám"
       onCancel={handleClose}
       footer={[
         <Button key="submit" type="primary" loading={loading} onClick={() => form.submit()}>
