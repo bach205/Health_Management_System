@@ -235,6 +235,7 @@ model Queue {
   priority          Int         @default(0)
   registered_online Boolean     @default(false)
   qr_code           String?
+  slot_date         DateTime?
   called_at         DateTime?
   created_at        DateTime    @default(now())
   shift_type        String?

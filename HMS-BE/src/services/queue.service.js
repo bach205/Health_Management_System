@@ -72,7 +72,7 @@ class QueueService {
         },
       },
     });
-    // console.log(queueClinic);
+    console.log(queueClinic);
 
     // 3. Tính toán thông tin phân trang
     const total = await prisma.queue.count({

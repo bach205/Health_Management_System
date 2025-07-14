@@ -37,7 +37,7 @@ authRouter.put(
   authenticate,
   authorize("patient"),
   checkUserStatus(),
-  asyncHandler(PatientService.updatePatient),
+  asyncHandler(AuthController.updatePatientInfo),
   PatientService.updatePatient
 );
 
@@ -79,7 +79,7 @@ authRouter.post(
 authRouter.get(
   "/me",
   authenticate,
-  authorize("patient"),
+  authorize("patient", "admin" , "doctor", "nurse"),
   checkUserStatus(),
   asyncHandler(AuthController.getUserInfor),
   authController.getUserInfor
