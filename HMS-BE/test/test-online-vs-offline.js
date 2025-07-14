@@ -1,12 +1,12 @@
-const QueueService = require('./src/services/queue.service');
-const prisma = require('./src/config/prisma');
+const QueueService = require('../src/services/queue.service');
+const prisma = require('../src/config/prisma');
 
 async function testOnlineVsOffline() {
   try {
     console.log('🚀 Bắt đầu test so sánh đăng ký Online vs Offline...\n');
     
-    const QueueService = require('./src/services/queue.service');
-    const prisma = require('./src/config/prisma');
+    const QueueService = require('../src/services/queue.service');
+    const prisma = require('../src/config/prisma');
 
     // Test 1: Đăng ký Online (có appointment)
     console.log('💻 Test 1: Đăng ký Online (có appointment)');

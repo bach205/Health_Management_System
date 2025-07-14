@@ -80,6 +80,108 @@ class AppointmentService {
   }
 
   /**
+   * Đặt lịch khám bằng mã QR (tạo user mới nếu chưa có, dùng số điện thoại làm tài khoản, mật khẩu mặc định là admin123)
+   * @param {Object} data - Thông tin đặt lịch từ QR
+   * @returns {Promise<Object>} Thông tin lịch hẹn đã tạo
+   */
+  async bookAppointmentByQR(data) {
+    // 1. Kiểm tra slot còn trống không
+    let slot = await prisma.$queryRaw`
+      SELECT * FROM available_slots
+      WHERE doctor_id = ${data.doctor_id}
+        AND clinic_id = ${data.clinic_id}
+        AND slot_date = ${data.slot_date}
+        AND start_time = ${data.start_time}
+        AND is_available = 1
+      LIMIT 1;
+    `;
+    slot = slot[0];
+    if (!slot)
+      throw new BadRequestError("Khung giờ này đã được đặt hoặc không tồn tại!");
+
+    // 2. Kiểm tra bệnh nhân đã tồn tại chưa (theo phone)
+    let patient = await prisma.user.findUnique({
+      where: { phone: data.phone },
+      include: { patient: true }
+    });
+    if (!patient) {
+      // Tạo user và patient mới
+      const hashedPassword = await bcrypt.hash(
+        "admin123",
+        parseInt(process.env.BCRYPT_SALT_ROUNDS)
+      );
+      const result = await prisma.$transaction(async (prisma) => {
+        // Tạo user
+        const user = await prisma.user.create({
+          data: {
+            full_name: data.full_name,
+            phone: data.phone,
+            password: hashedPassword,
+            role: "patient",
+            sso_provider: "local",
+            is_active: true,
+            gender: data.gender,
+            address: data.address,
+            date_of_birth: data.date_of_birth,
+            email: data.email || null,
+          },
+        });
+        // Tạo patient
+        const patient = await prisma.patient.create({
+          data: {
+            id: user.id,
+            identity_number: data.identity_number || null,
+          },
+        });
+        return { user, patient };
+      });
+      patient = result.user;
+      data.patient_id = patient.id;
+    } else {
+      data.patient_id = patient.id;
+    }
+
+    // 3. Kiểm tra bệnh nhân đã có lịch trùng chưa
+    const exist = await prisma.appointment.findFirst({
+      where: {
+        patient_id: data.patient_id,
+        appointment_date: new Date(data.slot_date),
+        appointment_time: new Date(`1970-01-01T${data.start_time}`),
+        status: { in: ["pending", "confirmed"] },
+      },
+    });
+    if (exist)
+      throw new BadRequestError("Bệnh nhân đã có lịch hẹn vào khung giờ này!");
+
+    // 4. Tạo lịch hẹn
+    const appointment = await prisma.appointment.create({
+      data: {
+        patient_id: data.patient_id,
+        doctor_id: data.doctor_id,
+        clinic_id: data.clinic_id,
+        appointment_date: new Date(data.slot_date),
+        appointment_time: new Date(`1970-01-01T${data.start_time}`),
+        reason: data.reason,
+        note: data.note,
+        status: "pending",
+      },
+      include: {
+        patient: true,
+        doctor: true,
+        clinic: true
+      }
+    });
+
+    // 5. Cập nhật slot thành không còn trống
+    await prisma.availableSlot.update({
+      where: { id: slot.id },
+      data: { is_available: false },
+    });
+
+    return appointment;
+  }
+
+  /**
    * Lấy danh sách slot còn trống
    * @param {Object} params - Thông tin tìm kiếm slot
    * @returns {Promise<Array>} Danh sách slot còn trống
