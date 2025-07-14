@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from "react";
 import {
-  Layout, Row, Col, Card, Flex, Select, Table, Typography, Divider
+  Layout, Row, Col, Card, Flex, Select, Table, Typography, Divider, message,
 } from "antd";
 import { CircleDollarSign, ClipboardPlus, UserPlus } from "lucide-react";
 import { Bar, Line } from "react-chartjs-2";
 import { Chart as ChartJS, BarElement, CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend } from "chart.js";
 import dayjs from "dayjs";
+import { getPeriodStatistics, getTopDoctors, getRevenuePerDayInMonth, getRevenuePerMonthInYear, } from "../../../services/statistics.service";
+import type { IDoctor } from "../../../types/index.type";
 
 ChartJS.register(BarElement, CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend);
-
-const { Content } = Layout;
 
 const DATE_MODE = {
   today: "hôm nay",
@@ -17,6 +17,16 @@ const DATE_MODE = {
   month: "tháng này",
   year: "năm nay",
 };
+
+interface IRevenuePerDay {
+  day: string,
+  value: number,
+}
+
+interface IRevenuePerMonth {
+  month: string,
+  value: number,
+}
 type DateModeKey = keyof typeof DATE_MODE;
 
 const formatPrice = (value: number) =>
@@ -25,93 +35,38 @@ const formatPrice = (value: number) =>
     currency: "VND",
   });
 
-const listTopDoctor = [
-  {
-    _id: "1",
-    full_name: "BS. Nguyễn Văn A",
-    specialty: "Nội tổng hợp",
-    totalAppointments: 120,
-    avatar: "https://placehold.jp/150x150.png",
-  },
-  {
-    _id: "2",
-    full_name: "BS. Trần Thị B",
-    specialty: "Tai - Mũi - Họng",
-    totalAppointments: 110,
-    avatar: "https://placehold.jp/150x150.png",
-  },
-  {
-    _id: "3",
-    full_name: "BS. Lê Văn C",
-    specialty: "Tim mạch",
-    totalAppointments: 105,
-    avatar: "https://placehold.jp/150x150.png",
-  },
-  {
-    _id: "4",
-    full_name: "BS. Phạm Thị D",
-    specialty: "Nhi khoa",
-    totalAppointments: 97,
-    avatar: "https://placehold.jp/150x150.png",
-  },
-];
-
 const AdminDashboard = () => {
   const [date, setDate] = useState<DateModeKey>("today");
+  const [statistics, setStatistics] = useState({
+    totalAppointments: 0,
+    totalRevenue: 0,
+    totalPatients: 0,
+  });
+  const [topDoctors, setTopDoctors] = useState<IDoctor[]>([]);
+  const [revenueMonthData, setRevenueMonthData] = useState<IRevenuePerDay[]>([]);
+  const [revenueYearData, setRevenueYearData] = useState<IRevenuePerMonth[]>([]);
 
-  const fakeChartMonth = Array.from({ length: dayjs().daysInMonth() }, (_, i) => ({
-    day: `${i + 1}/${dayjs().month() + 1}`,
-    value: Math.floor(Math.random() * 5_000_000) + 500_000,
-  }));
+  const fetchData = async () => {
+    try {
+      const statRes = await getPeriodStatistics(date as "daily" | "weekly" | "monthly" | "yearly");
+      const doctorRes = await getTopDoctors();
+      const monthRes = await getRevenuePerDayInMonth(dayjs().year(), dayjs().month() + 1);
+      const yearRes = await getRevenuePerMonthInYear(dayjs().year());
 
-  const fakeChartYear = Array.from({ length: 12 }, (_, i) => ({
-    month: `Tháng ${i + 1}`,
-    value: Math.floor(Math.random() * 50_000_000) + 10_000_000,
-  }));
-
-  const lineChartData = {
-    labels: fakeChartMonth.map((item) => item.day),
-    datasets: [
-      {
-        label: "Doanh thu",
-        data: fakeChartMonth.map((item) => item.value),
-        borderColor: "rgb(75, 192, 192)",
-        tension: 0.3,
-        fill: false,
-        pointRadius: 4,
-        pointHoverRadius: 6,
-      },
-    ],
+      setStatistics(statRes.data.metadata);
+      setTopDoctors(doctorRes.data.metadata);
+      setRevenueMonthData(monthRes.data.metadata);
+      setRevenueYearData(yearRes.data.metadata);
+    } catch (err) {
+      message.error("Lỗi khi tải dữ liệu thống kê");
+      console.error(err);
+    }
   };
 
-  const barChartData = {
-    labels: fakeChartYear.map((item) => item.month),
-    datasets: [
-      {
-        label: "Doanh thu",
-        data: fakeChartYear.map((item) => item.value),
-        backgroundColor: "#6366f1",
-      },
-    ],
-  };
 
-  const chartOptions = {
-    responsive: true,
-    plugins: {
-      tooltip: {
-        callbacks: {
-          label: (context: any) => formatPrice(context.raw),
-        },
-      },
-    },
-    scales: {
-      y: {
-        ticks: {
-          callback: (val: any) => formatPrice(val),
-        },
-      },
-    },
-  };
+  useEffect(() => {
+    fetchData();
+  }, [date]);
 
   const topDoctorsColumns: any = [
     {
@@ -138,11 +93,55 @@ const AdminDashboard = () => {
     },
     {
       title: "Số lượt đặt lịch",
-      dataIndex: "totalAppointments",
-      key: "totalAppointments",
+      dataIndex: "appointmentCount",
+      key: "appointmentCount",
       align: "center",
     },
   ];
+
+  const lineChartData = {
+    labels: revenueMonthData.map((item) => item.day),
+    datasets: [
+      {
+        label: "Doanh thu",
+        data: revenueMonthData.map((item) => item.value),
+        borderColor: "rgb(75, 192, 192)",
+        tension: 0.3,
+        fill: false,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+      },
+    ],
+  };
+
+  const barChartData = {
+    labels: revenueYearData.map((item) => item.month),
+    datasets: [
+      {
+        label: "Doanh thu",
+        data: revenueYearData.map((item) => item.value),
+        backgroundColor: "#6366f1",
+      },
+    ],
+  };
+
+  const chartOptions = {
+    responsive: true,
+    plugins: {
+      tooltip: {
+        callbacks: {
+          label: (context: any) => formatPrice(context.raw),
+        },
+      },
+    },
+    scales: {
+      y: {
+        ticks: {
+          callback: (val: any) => formatPrice(val),
+        },
+      },
+    },
+  };
 
   return (
     <div className="p-6 bg-white rounded-2xl">
@@ -165,7 +164,7 @@ const AdminDashboard = () => {
           <Card title={`Tổng ca đặt lịch ${DATE_MODE[date]}`} variant="outlined">
             <div className="flex items-center gap-1">
               <ClipboardPlus className="w-9 h-9 inline mr-2" />
-              <span style={{ fontSize: 24 }}>100</span>
+              <span style={{ fontSize: 24 }}>{statistics.totalAppointments}</span>
               <span style={{ fontSize: 16 }}> ca</span>
             </div>
           </Card>
@@ -174,7 +173,7 @@ const AdminDashboard = () => {
           <Card title={`Tổng doanh thu ${DATE_MODE[date]}`} variant="outlined">
             <div className="flex items-center gap-1">
               <CircleDollarSign className="w-9 h-9 inline mr-2" />
-              <span style={{ fontSize: 24 }}>{formatPrice(99999999)}</span>
+              <span style={{ fontSize: 24 }}>{formatPrice(statistics.totalRevenue)}</span>
             </div>
           </Card>
         </Col>
@@ -182,7 +181,7 @@ const AdminDashboard = () => {
           <Card title={`Tổng bệnh nhân mới ${DATE_MODE[date]}`} variant="outlined">
             <div className="flex items-center gap-1">
               <UserPlus className="w-9 h-9 inline mr-2" />
-              <span style={{ fontSize: 24 }}>100</span>
+              <span style={{ fontSize: 24 }}>{statistics.totalPatients}</span>
               <span style={{ fontSize: 16 }}> bệnh nhân</span>
             </div>
           </Card>
@@ -191,9 +190,9 @@ const AdminDashboard = () => {
 
       <Card title="Danh sách bác sĩ được đặt lịch nhiều nhất" style={{ marginTop: 24 }}>
         <Table
-          rowKey="_id"
+          rowKey="id"
           columns={topDoctorsColumns}
-          dataSource={listTopDoctor}
+          dataSource={topDoctors}
           pagination={false}
         />
       </Card>

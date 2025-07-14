@@ -123,6 +123,8 @@ class QueueService {
       });
     }
 
+    // ?? Chưa có tạo queue mới 
+
     // 3. Kiểm tra bệnh nhân đã có trong hàng đợi phòng mới chưa
     const existing = await prisma.queue.findFirst({
       where: {
@@ -155,6 +157,17 @@ class QueueService {
         // record_id,
         priority
       }
+    });
+
+    const newOrder = await prisma.examinationOrder.findFirst({
+      where: {
+        patient_id: newQueue.patient_id,
+        clinic_id: newQueue.clinic_id,
+        from_clinic_id: currentQueue ? currentQueue.clinic_id : null,
+        to_clinic_id: to_clinic_id,
+        reason,
+      },
+      orderBy: { created_at: "desc" }
     });
 
     // 6. Emit socket event để thông báo cho phòng khám mới
@@ -401,17 +414,17 @@ class QueueService {
     try {
       if (newQueue.patient?.user?.email) {
         // Đảm bảo slot_time được format đúng cho email
-        const emailTime = typeof slot_time === 'string' ? slot_time : 
-                         (slot_time instanceof Date ? 
-                           `${slot_time.getHours().toString().padStart(2, '0')}:${slot_time.getMinutes().toString().padStart(2, '0')}:${slot_time.getSeconds().toString().padStart(2, '0')}` : 
-                           '08:00:00');
-        
+        const emailTime = typeof slot_time === 'string' ? slot_time :
+          (slot_time instanceof Date ?
+            `${slot_time.getHours().toString().padStart(2, '0')}:${slot_time.getMinutes().toString().padStart(2, '0')}:${slot_time.getSeconds().toString().padStart(2, '0')}` :
+            '08:00:00');
+
         await sendPatientQueueNumberEmail(
           newQueue.patient.user.email,
           newQueue.patient.user.full_name || "Bệnh nhân",
           newQueue.queue_number,
           newQueue.shift_type,
-          newQueue.slot_date instanceof Date ? newQueue.slot_date.toISOString().slice(0,10) : newQueue.slot_date,
+          newQueue.slot_date instanceof Date ? newQueue.slot_date.toISOString().slice(0, 10) : newQueue.slot_date,
           emailTime,
           newQueue.appointment?.doctor?.full_name || "Bác sĩ chưa xác định",
           newQueue.clinic?.name || "Phòng khám"

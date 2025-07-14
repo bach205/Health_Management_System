@@ -1,8 +1,8 @@
-import { Modal, Form, Input, Button, Checkbox, Flex, InputNumber, Popconfirm, Select, Space, Table, Tag, Typography, Tooltip, DatePicker } from "antd";
+import { Modal, Form, Input, Button, Checkbox, Flex, InputNumber, Popconfirm, Select, Space, Table, Tooltip } from "antd";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import mainRequest from "../../../api/mainRequest";
-import { CircleCheck, CircleX, Delete, Edit } from "lucide-react";
+import { Delete, Edit } from "lucide-react";
 import { useMedicineList } from "../../../hooks/useMedicineList";
 import type { IMedicine } from "../../../types/index.type";
 import TextArea from "antd/es/input/TextArea";
@@ -141,6 +141,8 @@ const DoctorExaminationRecordModal = ({
       }
 
       toast.success("Tạo hồ sơ khám thành công!");
+      handleSetIsFollowUp(false)
+      handleSetMedicineVisible(false);
       form.resetFields();
       setSelectedDate(null);
       setSelectedSlotId(null);

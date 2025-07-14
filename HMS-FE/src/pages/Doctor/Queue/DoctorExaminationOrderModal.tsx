@@ -10,7 +10,7 @@ dayjs.extend(utc);
 
 const { Option } = Select;
 
-interface ResultExaminationModalProps {
+interface ExaminationOrderModalProps {
   open: boolean;
   onClose: () => void;
   patient_id: number;
@@ -20,7 +20,7 @@ interface ResultExaminationModalProps {
   onSuccess?: () => void;
 }
 
-const ResultExaminationModal = ({
+const ExaminationOrderModal = ({
   open,
   onClose,
   patient_id,
@@ -28,7 +28,7 @@ const ResultExaminationModal = ({
   doctor_id,
   currentUserId,
   onSuccess,
-}: ResultExaminationModalProps) => {
+}: ExaminationOrderModalProps) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [clinics, setClinics] = useState<any[]>([]);
@@ -94,14 +94,15 @@ const ResultExaminationModal = ({
         message.error("Vui lòng chọn ca khám");
         return;
       }
-      await mainRequest.post("/api/v1/examination-detail", {
+      await mainRequest.post("/api/v1/queue/assign-clinic", {
         ...values,
         patient_id: patient_id,
         clinic_id: clinic_id,
         doctor_id: doctor_id,
         from_clinic_id: clinic_id,
-        created_by_user_id: currentUserId,
-        examined_at: new Date().toISOString(),
+        priority: 2, // Chuyển phòng khám
+        // created_by_user_id: currentUserId,
+        // examined_at: new Date().toISOString(),
         ...(values.to_clinic_id
           ? {
             to_clinic_id: Number(values.to_clinic_id),
@@ -155,13 +156,12 @@ const ResultExaminationModal = ({
           <Input.TextArea />
         </Form.Item>
 
-        <Form.Item label="Tổng chi phí" name="total_cost" >
+        <Form.Item label="Chi phí phụ" name="total_cost" >
           <InputNumber style={{ width: "100%" }} min={0} />
         </Form.Item>
 
-        <Form.Item label="Chỉ định phòng khám tiếp theo" name="to_clinic_id">
-          <Select allowClear placeholder="Không chỉ định phòng tiếp theo" onChange={handleChangeClinic}>
-            <Option value={""}>Không chỉ định phòng tiếp theo</Option>
+        <Form.Item label="Chỉ định phòng khám tiếp theo" name="to_clinic_id" rules={[{ required: true, message: "Vui lòng chọn phòng khám tiếp theo" }]}>
+          <Select allowClear placeholder="Chọn phòng khám" onChange={handleChangeClinic}>
             {clinics
               .filter((c) => c.id !== clinic_id)
               .map((c) => (
@@ -169,6 +169,8 @@ const ResultExaminationModal = ({
                   {c.name}
                 </Option>
               ))}
+            <Option value={""}>-</Option>
+
           </Select>
         </Form.Item>
 
@@ -198,4 +200,4 @@ const ResultExaminationModal = ({
   );
 };
 
-export default ResultExaminationModal;
+export default ExaminationOrderModal;
