@@ -42,9 +42,9 @@ export interface IPatient extends IUserBase {
   identity_number?: string;
 }
 export interface IClinicBase {
-  id : String,
-  name : String,
-  description : String,
+  id: String,
+  name: String,
+  description: String,
 }
 
 
@@ -63,7 +63,14 @@ export interface IMedicine {
   id: number;
   name: string;
   // price: number;
-  note:string
+  note?: string;
+  dosage?: string;
+  frequency?: string;
+  duration?: string;
+  dosageAmount?: number;
+  dosageUnit?: string;
+  frequencyAmount?: number;
+  frequencyUnit?: string;
 }
 
 export type EmployeeType = keyof typeof TYPE_EMPLOYEE;

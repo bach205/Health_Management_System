@@ -17,6 +17,8 @@ class PrescriptionItemService {
         record_id,
         medicine_id: item.medicine_id,
         note: item.note ?? null,
+        dosage: item.dosage ?? null,
+        frequency: item.frequency ?? null,
       };
     });
 

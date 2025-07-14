@@ -28,12 +28,14 @@ class QueueController {
    */
   static async assignAdditionalClinic(req, res, next) {
     try {
-      const { patient_id, to_clinic_id, record_id, priority } = req.body;
+      const { patient_id, to_clinic_id, record_id, priority, reason, note } = req.body;
       const queue = await QueueService.assignAdditionalClinic({
         patient_id,
         to_clinic_id,
         record_id,
         priority,
+        reason,
+        note
       });
       return new OK({
         message: "Chỉ định phòng khám thành công",

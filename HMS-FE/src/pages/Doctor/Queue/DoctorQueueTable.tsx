@@ -84,7 +84,7 @@ const QueueTable = () => {
             const appointmentDate = dayjs.utc(queue.appointment.appointment_date);
 
             // Kiểm tra xem giờ khám, ngày khám có đã qua hay không
-            if (appointmentTime.hour() > dayjs().hour() && appointmentDate > dayjs()) {
+            if ( appointmentDate > dayjs() && appointmentTime.hour() > dayjs().hour() && appointmentTime.minute() > dayjs().minute()) {
                 message.error("Chưa đến giờ khám");
                 return;
             }

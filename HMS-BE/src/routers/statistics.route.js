@@ -26,4 +26,25 @@ statisticsRouter.get(
   asyncHandler(statisticsController.getPeriodStatistics),
   statisticsController.getPeriodStatistics
 );
+
+statisticsRouter.get(
+  "/revenue-days",
+  // authenticate,
+  // checkUserStatus(),
+  // authorize("admin"),
+  // validate("getRevenuePerDayInMonth"),
+  asyncHandler(statisticsController.getRevenuePerDayInMonth),
+  statisticsController.getRevenuePerDayInMonth
+);
+
+statisticsRouter.get(
+  "/revenue-months",
+  // authenticate,
+  // checkUserStatus(),
+  // authorize("admin"),
+  // validate("getRevenuePerMonthInYear"),
+  asyncHandler(statisticsController.getRevenuePerMonthInYear),
+  statisticsController.getRevenuePerMonthInYear
+);
+
 module.exports = statisticsRouter;
