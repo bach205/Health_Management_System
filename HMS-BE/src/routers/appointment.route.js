@@ -11,5 +11,6 @@ router.post("/confirm", appointmentController.confirmAppointment);
 router.post("/cancel", appointmentController.cancelAppointment);
 router.get("/slots-by-specialty", appointmentController.getAvailableSlotsBySpecialty);
 router.post("/nurse/reschedule", appointmentController.nurseRescheduleAppointment);
-
+router.put("/:id", appointmentController.updateAppointment);
+router.delete("/:id", appointmentController.deleteAppointment);
 module.exports = router;

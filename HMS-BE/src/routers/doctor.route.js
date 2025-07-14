@@ -71,7 +71,7 @@ doctorRouter.post(
 doctorRouter.get(
   "/:id",
   authenticate,
-  authorize("admin"),
+  authorize("admin", "patient"),
   asyncHandler(doctorController.getDoctorById),
   doctorController.getDoctorById
 );
