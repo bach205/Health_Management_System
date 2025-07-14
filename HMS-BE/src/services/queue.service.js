@@ -398,7 +398,7 @@ class QueueService {
     } catch (err) {
       console.error('Không thể gửi email thông báo số thứ tự:', err.message);
     }
-
+    
     return newQueue;
   }
 

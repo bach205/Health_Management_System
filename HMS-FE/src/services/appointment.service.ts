@@ -94,3 +94,8 @@ export const getAvailableTimeSlotsBySpecialtyService = async (specialty: string)
   const response = await mainRequest.get(`/api/v1/appointment/slots-by-specialty?specialty=${encodeURIComponent(specialty)}`);
   return response.data;
 };
+
+export const deleteAppointmentService = async (appointmentId: string | number) => {
+  const response = await mainRequest.delete(`/api/v1/appointment/${appointmentId}`);
+  return response.data;
+};

@@ -1,10 +1,13 @@
-import { DatePicker, Form, Input, Modal, Select, TimePicker, type FormInstance } from "antd";
+import { DatePicker, Form, Input, Modal, Select, type FormInstance } from "antd";
 import { useState, useEffect } from "react";
 import dayjs from "dayjs";
+import { getDoctorsInClinic } from "../../services/doctor.service";
+import { getWorkSchedulesService } from "../../services/workschedule.service";
+import { getAllAvailableSlotsService } from "../../services/appointment.service";
 
 interface IProps {
     isVisible: boolean;
-    handleOk: () => void;
+    handleOk: (data: any) => void;
     handleCancel: () => void;
     form: FormInstance;
     role: string;
@@ -13,18 +16,93 @@ interface IProps {
 
 const ModalUpdateAppointment = ({ role, isVisible, handleOk, handleCancel, form, selectedAppointment }: IProps) => {
     const [loading, setLoading] = useState(false);
+    const [doctorOptions, setDoctorOptions] = useState<any[]>([]);
+    const [dateOptions, setDateOptions] = useState<any[]>([]);
+    const [timeOptions, setTimeOptions] = useState<any[]>([]);
+    const [selectedDoctor, setSelectedDoctor] = useState<number | null>(null);
+    const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
-    // Reset form when modal opens/closes
+    // Fetch doctors in clinic on open
+    useEffect(() => {
+        const fetchDoctors = async () => {
+            if (!selectedAppointment?.clinic_id) return;
+            setLoading(true);
+            try {
+                const res = await getDoctorsInClinic(selectedAppointment.clinic_id);
+                const doctors = (res.data?.metadata || res.data)?.map((d: any) => ({ value: d.id, label: d.full_name }));
+                setDoctorOptions(doctors);
+            } catch {
+                setDoctorOptions([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+        if (isVisible) fetchDoctors();
+        if (!isVisible) {
+            setDoctorOptions([]);
+            setDateOptions([]);
+            setTimeOptions([]);
+            setSelectedDoctor(null);
+            setSelectedDate(null);
+            form.resetFields();
+        }
+    }, [isVisible, selectedAppointment]);
+
+    // When doctor changes, fetch work schedule dates
+    const handleDoctorChange = async (doctorId: number) => {
+        setSelectedDoctor(doctorId);
+        setSelectedDate(null);
+        setTimeOptions([]);
+        form.setFieldsValue({ appointment_date: undefined, appointment_time: undefined });
+        if (!doctorId || !selectedAppointment?.clinic_id) {
+            setDateOptions([]);
+            return;
+        }
+        setLoading(true);
+        try {
+            const res = await getWorkSchedulesService();
+            // Unique dates
+            const dates = Array.from(new Set((res.data || res).map((ws: any) => ws.work_date)));
+            setDateOptions(dates.map(date => ({ value: date, label: dayjs(date).format('DD/MM/YYYY') })));
+        } catch {
+            setDateOptions([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // When date changes, fetch available slots
+    const handleDateChange = async (date: string) => {
+        setSelectedDate(date);
+        setTimeOptions([]);
+        form.setFieldsValue({ appointment_time: undefined });
+        if (!selectedDoctor || !selectedAppointment?.clinic_id || !date) {
+            setTimeOptions([]);
+            return;
+        }
+        setLoading(true);
+        try {
+            const slots = await getAllAvailableSlotsService();
+            setTimeOptions(slots.map((slot: any) => ({ value: slot.start_time, label: slot.start_time.slice(0,5) })));
+        } catch {
+            setTimeOptions([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Set initial values when modal opens
     useEffect(() => {
         if (isVisible && selectedAppointment) {
             form.setFieldsValue({
-                appointment_date: selectedAppointment.formatted_date ? dayjs(selectedAppointment.formatted_date) : null,
-                appointment_time: selectedAppointment.formatted_time ? dayjs(`2000-01-01 ${selectedAppointment.formatted_time}`) : null,
+                doctor_id: selectedAppointment.doctor_id,
+                appointment_date: selectedAppointment.formatted_date || undefined,
+                appointment_time: selectedAppointment.formatted_time || undefined,
                 reason: selectedAppointment.reason || "",
                 note: selectedAppointment.note || "",
             });
-        } else if (!isVisible) {
-            form.resetFields();
+            setSelectedDoctor(selectedAppointment.doctor_id);
+            setSelectedDate(selectedAppointment.formatted_date);
         }
     }, [isVisible, selectedAppointment, form]);
 
@@ -32,23 +110,14 @@ const ModalUpdateAppointment = ({ role, isVisible, handleOk, handleCancel, form,
         try {
             setLoading(true);
             const values = await form.validateFields();
-            
-            // Format data for API
             const updateData = {
-                appointment_date: values.appointment_date ? values.appointment_date.format("YYYY-MM-DD") : undefined,
-                appointment_time: values.appointment_time ? values.appointment_time.format("HH:mm:ss") : undefined,
+                doctor_id: values.doctor_id,
+                appointment_date: values.appointment_date,
+                appointment_time: values.appointment_time,
                 reason: values.reason || undefined,
                 note: values.note || undefined,
             };
-
-            // Remove undefined values
-            Object.keys(updateData).forEach(key => {
-                if (updateData[key] === undefined) {
-                    delete updateData[key];
-                }
-            });
-
-            handleOk();
+            handleOk(updateData);
         } catch (error) {
             console.error("Form validation failed:", error);
         } finally {
@@ -78,69 +147,52 @@ const ModalUpdateAppointment = ({ role, isVisible, handleOk, handleCancel, form,
                 layout="vertical"
             >
                 <Form.Item
-                    label="Ngày khám"
-                    name="appointment_date"
-                    rules={[
-                        {
-                            required: true,
-                            message: "Vui lòng chọn ngày khám!",
-                        },
-                    ]}
+                    label="Bác sĩ"
+                    name="doctor_id"
+                    rules={[{ required: true, message: "Vui lòng chọn bác sĩ!" }]}
                 >
-                    <DatePicker 
-                        format="DD/MM/YYYY" 
-                        placeholder="Chọn ngày khám"
-                        style={{ width: '100%' }}
-                        disabledDate={(current) => {
-                            // Disable past dates
-                            return current && current < dayjs().startOf('day');
-                        }}
+                    <Select
+                        placeholder="Chọn bác sĩ"
+                        options={doctorOptions}
+                        onChange={(value) => handleDoctorChange(Number(value))}
+                        showSearch
+                        optionFilterProp="label"
+                        filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
                     />
                 </Form.Item>
-
+                <Form.Item
+                    label="Ngày khám"
+                    name="appointment_date"
+                    rules={[{ required: true, message: "Vui lòng chọn ngày khám!" }]}
+                >
+                    <Select
+                        placeholder="Chọn ngày khám"
+                        options={dateOptions}
+                        onChange={(value) => handleDateChange(value as string)}
+                        showSearch
+                        optionFilterProp="label"
+                        disabled={!selectedDoctor}
+                    />
+                </Form.Item>
                 <Form.Item
                     label="Giờ khám"
                     name="appointment_time"
-                    rules={[
-                        {
-                            required: true,
-                            message: "Vui lòng chọn giờ khám!",
-                        },
-                    ]}
+                    rules={[{ required: true, message: "Vui lòng chọn giờ khám!" }]}
                 >
-                    <TimePicker 
-                        format="HH:mm" 
+                    <Select
                         placeholder="Chọn giờ khám"
-                        style={{ width: '100%' }}
-                        minuteStep={15}
+                        options={timeOptions}
+                        showSearch
+                        optionFilterProp="label"
+                        disabled={!selectedDate}
                     />
                 </Form.Item>
-
-                <Form.Item
-                    label="Lý do khám"
-                    name="reason"
-                >
-                    <Input.TextArea 
-                        placeholder="Nhập lý do khám (tuỳ chọn)"
-                        rows={3}
-                        maxLength={500}
-                        showCount
-                    />
+                <Form.Item label="Lý do khám" name="reason">
+                    <Input.TextArea placeholder="Nhập lý do khám (tuỳ chọn)" rows={3} maxLength={500} showCount />
                 </Form.Item>
-
-                <Form.Item
-                    label="Ghi chú"
-                    name="note"
-                >
-                    <Input.TextArea 
-                        placeholder="Nhập ghi chú (tuỳ chọn)"
-                        rows={3}
-                        maxLength={500}
-                        showCount
-                    />
+                <Form.Item label="Ghi chú" name="note">
+                    <Input.TextArea placeholder="Nhập ghi chú (tuỳ chọn)" rows={3} maxLength={500} showCount />
                 </Form.Item>
-
-                {/* Display current information (read-only) */}
                 {selectedAppointment && (
                     <div className="bg-gray-50 p-4 rounded-lg mt-4">
                         <h4 className="font-medium text-gray-700 mb-3">Thông tin hiện tại:</h4>

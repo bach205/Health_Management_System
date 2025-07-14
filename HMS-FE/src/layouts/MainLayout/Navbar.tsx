@@ -88,6 +88,12 @@ const Navbar: React.FC = () => {
                       Lịch hẹn của tôi
                     </p>
                     <p
+                      onClick={() => navigate("/queue")}
+                      className="hover:text-black cursor-pointer"
+                    >
+                      Xem số thứ tự khám
+                    </p>
+                    <p
                       onClick={() => auth.handleLogout()}
                       className="hover:text-black cursor-pointer"
                     >
