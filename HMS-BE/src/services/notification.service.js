@@ -48,11 +48,11 @@ class NotificationService {
     }
 
 
-    // async deleteNotification(notificationId) {
-    //     return prisma.notificationItems.delete({
-    //         where: { id: notificationId },
-    //     });
-    // }
+    async deleteNotification(notificationId) {
+        return prisma.notificationItems.delete({
+            where: { id: notificationId },
+        });
+    }
 }
 
 module.exports = new NotificationService(); 

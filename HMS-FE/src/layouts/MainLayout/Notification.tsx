@@ -2,14 +2,17 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Bell } from 'lucide-react';
 import { useNotificationSocket } from '../../hooks/socket/useNotification';
 import type { ListNotificationProps } from '../../types/notification.type';
+import type { NotificationItem } from '../../types/notification.type';
+import { deleteNotification } from '../../api/notification';
 
 const ListNotification = ({
     modalRef,
     setOpen,
     notifications,
+    setNotifications,
     loadMoreNotifications,
     hasMore
-}: ListNotificationProps & { loadMoreNotifications: () => void, hasMore: boolean }) => {
+}: ListNotificationProps & { setNotifications: React.Dispatch<React.SetStateAction<NotificationItem[]>>, loadMoreNotifications: () => void, hasMore: boolean }) => {
     const listRef = useRef<HTMLUListElement>(null);
 
     // Gọi loadMore khi scroll tới cuối
@@ -53,7 +56,22 @@ const ListNotification = ({
                             {!item.isSeen && (
                                 <span className="w-2 h-2 bg-blue-500 rounded-full mr-2 inline-block"></span>
                             )}
-                            <span>{item.message}</span>
+                            <span className="flex-1">{item.message}</span>
+                            <button
+                                className="ml-2 text-xs text-red-500 hover:text-red-700"
+                                title="Xóa thông báo"
+                                onClick={async () => {
+                                    try {
+                                        await deleteNotification(item.id);
+                                        // Xóa khỏi danh sách local
+                                        setNotifications((prev) => prev.filter(n => n.id !== item.id));
+                                    } catch (err) {
+                                        alert('Xóa thông báo thất bại!');
+                                    }
+                                }}
+                            >
+                                Xóa
+                            </button>
                         </li>
                     ))
                 )}
@@ -113,6 +131,7 @@ export default function Notification() {
                     modalRef={modalRef as React.RefObject<HTMLDivElement>}
                     setOpen={setOpen}
                     notifications={notifications}
+                    setNotifications={setNotifications}
                     loadMoreNotifications={loadMoreNotifications}
                     hasMore={hasMore}
                 />
