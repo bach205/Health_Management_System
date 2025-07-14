@@ -200,10 +200,13 @@ const PatientBookAppointment: React.FC = () => {
                 </Text>
               </Space>
               {doctor?.metadata?.doctor?.specialty && (
-                <Text type="secondary">Chuyên khoa: {specialtyOptions.find(item => item.value === doctor.metadata.doctor.specialty)?.label || "Không xác định"}</Text>
+                <Text type="secondary">Chuyên khoa: {doctor.metadata.doctor.specialty || "Không xác định"}</Text>
               )}
               {doctor?.metadata?.doctor?.bio && (
                 <Text type="secondary">Tiểu sử: {doctor.metadata.doctor.bio}</Text>
+              )}
+              {doctor?.metadata?.doctor?.price && (
+                <Text>Giá khám: {doctor.metadata.doctor.price} Đ</Text>
               )}
             </Space>
           </div>
@@ -338,28 +341,10 @@ const PatientBookAppointment: React.FC = () => {
           </Form.Item>
         </Form>
       </Card>
-
+      {/* 
       <Card title="Bác sĩ cùng chuyên khoa">
         <RelatedDoctors docId={docId} speciality={""} />
-      </Card>
-
-      <div className="my-8">
-        <h2 className="text-xl font-semibold mb-2">Đánh giá & Bình luận</h2>
-        <div className="mb-2">Đánh giá trung bình: <span className="font-bold">{rating ?? 'Chưa có'}</span></div>
-        <div className="mt-4">
-          <h3 className="font-semibold mb-1">Bình luận:</h3>
-          {comments.length === 0 ? <div>Chưa có bình luận</div> : (
-            <ul className="space-y-2">
-              {comments.map((c: any) => (
-                <li key={c.id} className="border rounded p-2">
-                  <div className="font-medium">{c.user_name || 'Ẩn danh'} - <span className="text-yellow-500">{c.rating}★</span></div>
-                  <div>{c.content}</div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </div>
+      </Card> */}
     </div>
   );
 };

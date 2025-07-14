@@ -1,7 +1,7 @@
-import Modal from "../../components/ui/Modal";
+import Modal from "../ui/Modal";
 import { useForm } from "react-hook-form";
-import TextFieldControl from "../../components/form/TextFieldControl";
-import SelectFieldControl from "../../components/form/SelectFieldControl";
+import TextFieldControl from "../form/TextFieldControl";
+import SelectFieldControl from "../form/SelectFieldControl";
 import mainRequest from "../../api/mainRequest";
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
@@ -11,7 +11,7 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import { Button, message } from "antd";
 dayjs.extend(utc);
-interface ResultExaminationModalProps {
+interface ExaminationOrderModalProps {
   open: boolean;
   onClose: () => void;
   patientId: number;
@@ -19,9 +19,9 @@ interface ResultExaminationModalProps {
   doctorId?: number;
   currentUserId?: number;
   onSuccess?: () => void;
-} 
+}
 
-const ResultExaminationModal = ({
+const ExaminationOrderModal = ({
   open,
   onClose,
   patientId,
@@ -29,7 +29,7 @@ const ResultExaminationModal = ({
   doctorId,
   currentUserId,
   onSuccess,
-}: ResultExaminationModalProps) => {
+}: ExaminationOrderModalProps) => {
   const { control, handleSubmit, reset, watch } = useForm({
     defaultValues: {
       to_clinic_id: "",
@@ -195,7 +195,7 @@ const ResultExaminationModal = ({
             name="total_cost"
             control={control}
             type="number"
-            label="Tổng chi phí"
+            label="Chi phí phụ"
           />
 
           <div className="flex flex-col gap-4">
@@ -299,4 +299,4 @@ const ResultExaminationModal = ({
   );
 };
 
-export default ResultExaminationModal;
+export default ExaminationOrderModal;

@@ -149,7 +149,7 @@ const Monitor: React.FC = () => {
                         <ul style={{ fontSize: 22, listStyle: "none", padding: 0 }}>
                           <li><b>Số thứ tự:</b> <span style={{ color: "#1890ff", fontWeight: 700, fontSize: 28 }}>{item.queue_number}</span></li>
                           <li><b>Ca khám:</b> {getShiftTypeText(item.shift_type)}</li>
-                          <li><b>Ngày khám:</b> {item.slot_date.slice(0,10)}</li>
+                          <li><b>Ngày khám:</b> {item?.slot_date?.slice(0,10)}</li>
                           <li><b>Bác sĩ:</b> {item.appointment.doctor.full_name}</li>
                         </ul>
                       </div>

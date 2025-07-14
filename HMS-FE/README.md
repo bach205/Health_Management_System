@@ -1,5 +1,6 @@
-### Hướng dẫn clone Repo code này về máy các bạn chuẩn nhất ở video này:
+### Hướng dẫn clone Repo code này về máy các bạn chuẩn nhất:
 
+- Có phần .env example và mọi người sẽ tự tạo 1 file .env của riêng mình để chạy local 
 - Có eslint nên mọi người có thể đọc thêm nhé
 
 ---
@@ -17,9 +18,9 @@
 * "lodash": "^4.17.21"
 *"pdf-viewer-reactjs": "^2.2.3"
 
-* "react": "^18.2.0"
-* "react-chat-elements": "^12.0.14"
-* "react-dom": "^18.2.0"
+* "react": "^19.1.0",
+* "react-chartjs-2": "^5.3.0",
+* "react-dom": "^19.1.0",
 * "react-redux": "^9.1.0"
 * "react-router-dom": "^6.22.0"
 *"socket.io-client": "^4.7.5"

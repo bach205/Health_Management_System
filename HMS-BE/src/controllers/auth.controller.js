@@ -1,5 +1,6 @@
 const { CREATED, OK } = require("../core/success.response");
 const AuthService = require("../services/auth.service");
+const patientService = require("../services/patient.service");
 
 class AuthController {
   async register(req, res) {
@@ -277,6 +278,24 @@ class AuthController {
       return res.status(error.status || 400).json({
         success: false,
         message: error.message || "Check password match failed",
+      });
+    }
+  }
+  
+  async updatePatientInfo(req, res) {  
+    try {
+      const { userId, updateData } = req.body;
+
+      const result = await patientService.updatePatient(userId, updateData);
+      return new OK({
+        message: "Cập nhật thông tin người dùng thành công",
+        metadata: result,
+      }).send(res);
+    } catch (error) {
+      return res.status(error.status || 400).json({
+        success: false,
+        message: error.message || "Cập nhật thông tin người dùng thất bại",
+        error: error.name,
       });
     }
   }

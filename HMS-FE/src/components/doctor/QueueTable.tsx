@@ -8,7 +8,7 @@ import ExaminationOrderModal from "./ExaminationOrderModal";
 // import { useSocket } from "../../hooks/useSocket";
 import { updateQueueStatus } from "../../services/queue.service";
 import { Ellipsis } from "lucide-react";
-import ResultExaminationModal from "./ResultExaminationModal";
+import ResultExaminationModal from "./DoctorExaminationOrder";
 import ExaminationRecordModal from "../../components/doctor/ExaminationRecordModal";
 import { useAuthStore } from "../../store/authStore";
 import { useSocket } from "../../hooks/socket/useSocket";
