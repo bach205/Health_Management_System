@@ -1,5 +1,6 @@
 const prisma = require("../config/prisma");
 const { getIO } = require("../config/socket.js");
+const DoctorService = require("./doctor.service");
 
 class ExaminationOrderService {
     /**
@@ -21,16 +22,25 @@ class ExaminationOrderService {
             }
         });
 
-        // 2. Lấy thông tin bác sĩ phòng tiếp theo (lấy bác sĩ đầu tiên có lịch ở phòng đó)
-        const workSchedule = await prisma.workSchedule.findFirst({
-            where: {
-                clinic_id: to_clinic_id,
-            },
-            include: {
-                user: true,
-            },
-        });
-        const nextDoctor = workSchedule ? workSchedule.user : null;
+        // 2. Lấy danh sách bác sĩ rảnh và slot gần nhất ở phòng tiếp theo
+        const availableDoctors = await DoctorService.getAvailableDoctorsWithNearestSlot(to_clinic_id);
+        // Chọn bác sĩ có slot gần nhất (ưu tiên slot sớm nhất)
+        let nextDoctor = null;
+        let nearestSlot = null;
+        if (availableDoctors.length > 0) {
+            // Lọc ra những bác sĩ thực sự có slot
+            const doctorsWithSlot = availableDoctors.filter(d => d.nearestSlot);
+            if (doctorsWithSlot.length > 0) {
+                // Sắp xếp theo slot gần nhất
+                doctorsWithSlot.sort((a, b) => {
+                    const aTime = new Date(a.nearestSlot.slot_date).getTime() + (a.nearestSlot.start_time ? new Date(`1970-01-01T${a.nearestSlot.start_time}`).getTime() : 0);
+                    const bTime = new Date(b.nearestSlot.slot_date).getTime() + (b.nearestSlot.start_time ? new Date(`1970-01-01T${b.nearestSlot.start_time}`).getTime() : 0);
+                    return aTime - bTime;
+                });
+                nextDoctor = doctorsWithSlot[0];
+                nearestSlot = doctorsWithSlot[0].nearestSlot;
+            }
+        }
 
         // 3. Emit socket event để thông báo chuyển phòng
         const io = getIO();
@@ -38,11 +48,12 @@ class ExaminationOrderService {
             io.to(`clinic_${to_clinic_id}`).emit("examination:transfer", {
                 order,
                 nextDoctor,
+                nearestSlot,
                 clinicId: to_clinic_id
             });
         }
 
-        return { order, nextDoctor };
+        return { order, nextDoctor, nearestSlot };
     }
 
     /**
