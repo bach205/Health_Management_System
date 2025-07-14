@@ -165,35 +165,17 @@ const SIDEBAR_ITEMS = [
         icon: <Stethoscope className="w-4 h-4" />,
         href: "/admin/specialties",
       },
-    ],
-  },
-  {
-    id: 3,
-    label: "Phòng khám",
-    items: [
-      {
-        id: "appointments",
-        label: "Quản lý lịch hẹn",
-        icon: <Calendar className="w-4 h-4" />,
-        href: "/appointments",
-      },
       {
         id: "rooms",
         label: "Quản lý phòng khám",
         icon: <Hospital className="w-4 h-4" />,
         href: "/rooms",
       },
-      // {
-      //   id: "queues",
-      //   label: "Hàng chờ phòng khám",
-      //   icon: <CalendarArrowDown className="w-4 h-4" />,
-      //   href: "/queues",
-      // },
     ],
-
   },
+
   {
-    id: 4,
+    id: 3,
     label: "Bác sĩ",
     items: [
       {
@@ -205,7 +187,7 @@ const SIDEBAR_ITEMS = [
     ],
   },
   {
-    id: 5,
+    id: 4,
     label: "Y Tá",
     items: [
       {
@@ -223,7 +205,7 @@ const SIDEBAR_ITEMS = [
     ],
   },
   {
-    id: 6,
+    id: 5,
     label: "Documents",
     items: [
       {
@@ -235,7 +217,7 @@ const SIDEBAR_ITEMS = [
     ],
   },
   {
-    id: 7,
+    id: 6,
     label: "Chat",
     items: [
       {

@@ -23,8 +23,8 @@ export const getProfile = async () => {
   return response;
 };
 
-export const updatePassword = async (id: number) => {
-  const response = await instance.post(`${patientURL}/update-password`, { id });
+export const updatePassword = async (updateData : any) => {
+  const response = await instance.post(`${patientURL}/update-password`, { ...updateData });
   return response;
 };
 

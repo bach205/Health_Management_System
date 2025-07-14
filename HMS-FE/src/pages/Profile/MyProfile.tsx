@@ -18,7 +18,7 @@ const MyProfile: React.FC = () => {
   const fetchProfile = async () => {
     try {
       const res = await getProfile()
-      console.log(res)
+      console.log("profile:",res)
       if (res.data.success) {
         // setUserData(res.data.user)
   

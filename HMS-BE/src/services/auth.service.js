@@ -140,11 +140,12 @@ class AuthService {
     if (user.role !== "patient") {
       throw new BadRequestError("User is not a patient");
     }
+    console.log(updateData)
 
     // Cập nhật thông tin trong transaction để đảm bảo tính nhất quán
     const result = await prisma.$transaction(async (prisma) => {
       // Cập nhật thông tin user
-      const updatedUser = await ({
+      const updatedUser = await prisma.user.update({
         where: { id: userId },
         data: {
           full_name: updateData.full_name,

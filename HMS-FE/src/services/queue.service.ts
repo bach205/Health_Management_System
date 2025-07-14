@@ -6,11 +6,12 @@ interface PaginationParams {
   pageSize?: number;
 }
 
-export const getQueueClinic = async (clinicId: string, params?: PaginationParams) => {
+export const getQueueClinic = async (clinicId: string, params?: PaginationParams, type?: string) => {
   const query = new URLSearchParams();
 
   if (params?.pageNumber) query.append("pageNumber", String(params.pageNumber));
   if (params?.pageSize) query.append("pageSize", String(params.pageSize));
+  if (type) query.append("type", type);
 
   const response = await mainRequest.get(
     `${BASE_URL}/clinic/${clinicId}?${query.toString()}`

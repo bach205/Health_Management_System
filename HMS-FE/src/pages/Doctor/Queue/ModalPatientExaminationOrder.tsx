@@ -1,6 +1,9 @@
 import { Button, Modal, Table } from "antd";
 import { useEffect, useState } from "react";
 import { getPatientExaminationOrder } from "../../../services/patient.service";
+
+// Modal hiển thị lịch sử chuyển phòng của bệnh nhân
+
 const ModalPatientExaminationOrder = ({ open, onClose, patient }: { open: boolean, onClose: () => void, patient: any }) => {
     const [examinationOrders, setExaminationOrders] = useState<any[]>([]);
     const [pagination, setPagination] = useState<any>({

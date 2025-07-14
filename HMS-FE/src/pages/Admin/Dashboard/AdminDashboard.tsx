@@ -1,185 +1,152 @@
 import React, { useEffect, useState } from "react";
 import {
-  Layout,
-  Row,
-  Col,
-  Card,
-  Flex,
-  Select,
-  Table,
-  Typography,
-  DatePicker,
-  Divider,
+  Layout, Row, Col, Card, Flex, Select, Table, Typography, Divider
 } from "antd";
-import {
-  DollarCircleOutlined,
-  ShoppingCartOutlined,
-  UserAddOutlined,
-} from "@ant-design/icons";
-// import Title from "src/components/Title";
-// import { FORMAT_DATE, formatPrice, formatedDate } from "src/utils";
-// import { Column, Line } from "@ant-design/charts";
-// import SpaceDiv from "src/components/SpaceDiv";
-// import { getStatistic } from "src/api/statistic";
-import dayjs from "dayjs";
-import UserListTitle from "../../../components/ui/UserListTitle";
 import { CircleDollarSign, ClipboardPlus, UserPlus } from "lucide-react";
+import { Bar, Line } from "react-chartjs-2";
+import { Chart as ChartJS, BarElement, CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend } from "chart.js";
+import dayjs from "dayjs";
+
+ChartJS.register(BarElement, CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend);
 
 const { Content } = Layout;
 
 const DATE_MODE = {
-  TODAY: "today",
-  WEEK: "week",
-  MONTH: "month",
-  YEAR: "year",
+  today: "hôm nay",
+  week: "tuần này",
+  month: "tháng này",
+  year: "năm nay",
 };
+type DateModeKey = keyof typeof DATE_MODE;
+
+const formatPrice = (value: number) =>
+  value.toLocaleString("vi-VN", {
+    style: "currency",
+    currency: "VND",
+  });
+
+const listTopDoctor = [
+  {
+    _id: "1",
+    full_name: "BS. Nguyễn Văn A",
+    specialty: "Nội tổng hợp",
+    totalAppointments: 120,
+    avatar: "https://placehold.jp/150x150.png",
+  },
+  {
+    _id: "2",
+    full_name: "BS. Trần Thị B",
+    specialty: "Tai - Mũi - Họng",
+    totalAppointments: 110,
+    avatar: "https://placehold.jp/150x150.png",
+  },
+  {
+    _id: "3",
+    full_name: "BS. Lê Văn C",
+    specialty: "Tim mạch",
+    totalAppointments: 105,
+    avatar: "https://placehold.jp/150x150.png",
+  },
+  {
+    _id: "4",
+    full_name: "BS. Phạm Thị D",
+    specialty: "Nhi khoa",
+    totalAppointments: 97,
+    avatar: "https://placehold.jp/150x150.png",
+  },
+];
 
 const AdminDashboard = () => {
-  const [date, setDate] = useState(DATE_MODE.TODAY);
-  const [statistic, setStatistic] = useState({});
+  const [date, setDate] = useState<DateModeKey>("today");
 
-  // const renderDate = (date) => {
-  //   switch (date) {
-  //     case DATE_MODE.TODAY:
-  //       return { startDate: dayjs(), endDate: dayjs() };
-  //     case DATE_MODE.WEEK:
-  //       return {
-  //         startDate: dayjs().startOf("week"),
-  //         endDate: dayjs().endOf("week"),
-  //       };
-  //     case DATE_MODE.MONTH:
-  //       return {
-  //         startDate: dayjs().startOf("month"),
-  //         endDate: dayjs().endOf("month"),
-  //       };
-  //     case DATE_MODE.YEAR:
-  //       return {
-  //         startDate: dayjs().startOf("year"),
-  //         endDate: dayjs().endOf("year"),
-  //       };
-  //     default:
-  //       return { startDate: dayjs(), endDate: dayjs() };
-  //   }
-  // };
+  const fakeChartMonth = Array.from({ length: dayjs().daysInMonth() }, (_, i) => ({
+    day: `${i + 1}/${dayjs().month() + 1}`,
+    value: Math.floor(Math.random() * 5_000_000) + 500_000,
+  }));
 
-  useEffect(() => {
-    const initData = async () => {
-      // const dateFilter = renderDate(date);
+  const fakeChartYear = Array.from({ length: 12 }, (_, i) => ({
+    month: `Tháng ${i + 1}`,
+    value: Math.floor(Math.random() * 50_000_000) + 10_000_000,
+  }));
 
-      // const { statistic: total } = await getStatistic(dateFilter);
+  const lineChartData = {
+    labels: fakeChartMonth.map((item) => item.day),
+    datasets: [
+      {
+        label: "Doanh thu",
+        data: fakeChartMonth.map((item) => item.value),
+        borderColor: "rgb(75, 192, 192)",
+        tension: 0.3,
+        fill: false,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+      },
+    ],
+  };
 
-      // setStatistic(total);
-      // Fetch data from the backend here
-      // console.log(total);
-    };
+  const barChartData = {
+    labels: fakeChartYear.map((item) => item.month),
+    datasets: [
+      {
+        label: "Doanh thu",
+        data: fakeChartYear.map((item) => item.value),
+        backgroundColor: "#6366f1",
+      },
+    ],
+  };
 
-    initData();
-  }, [date]);
+  const chartOptions = {
+    responsive: true,
+    plugins: {
+      tooltip: {
+        callbacks: {
+          label: (context: any) => formatPrice(context.raw),
+        },
+      },
+    },
+    scales: {
+      y: {
+        ticks: {
+          callback: (val: any) => formatPrice(val),
+        },
+      },
+    },
+  };
 
-  // Configurations for the line chart
-  // const lineChartConfig = {
-  //   data: statistic?.chartMonth,
-  //   height: 300,
-  //   xField: "day",
-  //   yField: "value",
-  //   point: {
-  //     size: 5,
-  //     shape: "circle",
-  //   },
-  //   axis: {
-  //     y: { labelFormatter: (v) => formatPrice(v) },
-  //   },
-  //   interaction: {
-  //     tooltip: {
-  //       render: (event, { title, items }) => {
-  //         return (
-  //           <div style={{ padding: "8px 16px" }}>
-  //             <p>{title}</p>
-  //             <ul>
-  //               {items.map((item) =>
-  //                 item.name === "value" ? (
-  //                   <li key={item.name} style={{ color: item.color }}>
-  //                     Doanh thu: {formatPrice(item.value)}
-  //                   </li>
-  //                 ) : null
-  //               )}
-  //             </ul>
-  //           </div>
-  //         );
-  //       },
-  //     },
-  //   },
-  // };
-
-  // Configurations for the column chart
-  // const columnChartConfig = {
-  //   data: statistic?.chartYear,
-  //   height: 300,
-  //   xField: "month",
-  //   yField: "value",
-  //   columnWidthRatio: 0.6,
-  //   label: {
-  //     position: "top",
-  //     text: (d) => formatPrice(d.value),
-  //     style: {
-  //       fill: "#000",
-  //       fontSize: 12,
-  //       y: -20,
-  //     },
-  //   },
-  //   axis: {
-  //     y: { labelFormatter: (v) => formatPrice(v) },
-  //   },
-  //   interaction: {
-  //     tooltip: {
-  //       render: (event, { title, items }) => {
-  //         return (
-  //           <div style={{ padding: "8px 16px" }}>
-  //             <p>{title}</p>
-  //             <ul>
-  //               {items.map((item) =>
-  //                 item.name === "value" ? (
-  //                   <li key={item.name} style={{ color: item.color }}>
-  //                     Doanh thu: {formatPrice(item.value)}
-  //                   </li>
-  //                 ) : null
-  //               )}
-  //             </ul>
-  //           </div>
-  //         );
-  //       },
-  //     },
-  //   },
-  // };
-
-  // const topMedicinesColumns = [
-  //   {
-  //     title: "Tên thuốc",
-  //     dataIndex: "name",
-  //     key: "name",
-  //   },
-  //   {
-  //     align: "right",
-  //     title: "Giá",
-  //     dataIndex: "price",
-  //     key: "price",
-  //     render: (price) => formatPrice(price),
-  //   },
-  //   {
-  //     align: "center",
-  //     title: "Số lượng bán được",
-  //     dataIndex: "total",
-  //     key: "total",
-  //   },
-  // ];
+  const topDoctorsColumns: any = [
+    {
+      title: "Ảnh",
+      dataIndex: "avatar",
+      key: "avatar",
+      render: (url: string) => (
+        <img
+          src={url}
+          alt="doctor"
+          style={{ width: 50, height: 50, borderRadius: "50%", objectFit: "cover" }}
+        />
+      ),
+    },
+    {
+      title: "Họ tên",
+      dataIndex: "full_name",
+      key: "full_name",
+    },
+    {
+      title: "Chuyên khoa",
+      dataIndex: "specialty",
+      key: "specialty",
+    },
+    {
+      title: "Số lượt đặt lịch",
+      dataIndex: "totalAppointments",
+      key: "totalAppointments",
+      align: "center",
+    },
+  ];
 
   return (
-    <div style={{ padding: 24, background: "#fff", minHeight: 360 }}>
-      {/* <Title title="Tổng kết thống kê" /> 
-      */}
-      <h2 className="text-indigo-600! text-2xl font-bold mb-3">
-        Tổng kết thống kê
-      </h2>
+    <div className="p-6 bg-white rounded-2xl">
+      <h2 className="text-indigo-600 text-2xl font-bold mb-3">Tổng kết thống kê</h2>
       <p className="text-gray-500 text-sm mb-5">
         <span className="text-indigo-600">Quản lý</span> &gt; Tổng kết thống kê
       </p>
@@ -191,95 +158,61 @@ const AdminDashboard = () => {
           <Select.Option value="month">Tháng này</Select.Option>
           <Select.Option value="year">Năm nay</Select.Option>
         </Select>
-        {/* <Typography.Text strong style={{ fontSize: 20 }}>
-          {formatedDate(renderDate(date).startDate)}
-          {" ~ "}
-          {formatedDate(renderDate(date).endDate)}
-        </Typography.Text> */}
       </Flex>
       <Divider />
       <Row gutter={[16, 16]}>
         <Col xs={24} sm={24} md={8}>
-          <Card
-            title="Tổng ca đặt lịch"
-            bordered={false}
-            style={{ height: "100%" }}
-          >
+          <Card title={`Tổng ca đặt lịch ${DATE_MODE[date]}`} variant="outlined">
             <div className="flex items-center gap-1">
-              <ClipboardPlus className="w-9 h-9 inline" style={{ fontSize: 32, marginRight: 8 }} />
-              <span style={{ fontSize: 24 }}>
-                {/* {statistic?.totalOrder} */}
-                100
-              </span>
+              <ClipboardPlus className="w-9 h-9 inline mr-2" />
+              <span style={{ fontSize: 24 }}>100</span>
               <span style={{ fontSize: 16 }}> ca</span>
             </div>
           </Card>
         </Col>
         <Col xs={24} sm={24} md={8}>
-          <Card
-            title="Tổng doanh thu"
-            bordered={false}
-            style={{ height: "100%" }}
-          >
+          <Card title={`Tổng doanh thu ${DATE_MODE[date]}`} variant="outlined">
             <div className="flex items-center gap-1">
-
-              <CircleDollarSign className="w-9 h-9 inline" style={{ fontSize: 32, marginRight: 8 }} />
-              <span style={{ fontSize: 24 }}>
-                100
-                {/* {formatPrice(statistic?.totalRevenue)} */}
-              </span>
+              <CircleDollarSign className="w-9 h-9 inline mr-2" />
+              <span style={{ fontSize: 24 }}>{formatPrice(99999999)}</span>
             </div>
           </Card>
         </Col>
         <Col xs={24} sm={24} md={8}>
-          <Card
-            title="Tổng bệnh nhân mới"
-            bordered={false}
-            style={{ height: "100%" }}
-          >
-            <div className="flex items-center gap-1" >
-              <UserPlus className="w-9 h-9 inline" style={{ fontSize: 32, marginRight: 8 }} />
-              <span style={{ fontSize: 24 }}>
-                {/* {statistic?.totalPatient} */}
-                100
-              </span>
+          <Card title={`Tổng bệnh nhân mới ${DATE_MODE[date]}`} variant="outlined">
+            <div className="flex items-center gap-1">
+              <UserPlus className="w-9 h-9 inline mr-2" />
+              <span style={{ fontSize: 24 }}>100</span>
               <span style={{ fontSize: 16 }}> bệnh nhân</span>
             </div>
           </Card>
         </Col>
       </Row>
-      {/* <SpaceDiv height={16} /> */}
-      <Card
-        title="Danh sách bác sĩ được đặt lịch nhiều nhất"
-        bordered={false}
-        style={{ marginTop: 24 }}
-      >
+
+      <Card title="Danh sách bác sĩ được đặt lịch nhiều nhất" style={{ marginTop: 24 }}>
         <Table
           rowKey="_id"
-          // columns={topMedicinesColumns}
-          // dataSource={statistic?.listTopMedicine}
+          columns={topDoctorsColumns}
+          dataSource={listTopDoctor}
           pagination={false}
         />
       </Card>
-      {/* <SpaceDiv height={16} /> */}
-      <Row gutter={[16, 16]}>
+
+      <Row gutter={[16, 16]} style={{ marginTop: 24 }}>
         <Col xs={24} sm={24} md={12}>
           <Card
-            title={`Biểu đồ doanh thu theo ngày trong tháng ${dayjs().month() + 1
-              }`}
-            bordered={false}
+            title={`Biểu đồ doanh thu theo ngày trong tháng ${dayjs().month() + 1}`}
             style={{ height: 400 }}
           >
-            {/* <Line {...lineChartConfig} /> */}
+            <Line data={lineChartData} options={chartOptions} />
           </Card>
         </Col>
         <Col xs={24} sm={24} md={12}>
           <Card
             title={`Biểu đồ doanh thu theo tháng trong năm ${dayjs().year()}`}
-            bordered={false}
             style={{ height: 400 }}
           >
-            {/* <Column {...columnChartConfig} /> */}
+            <Bar data={barChartData} options={chartOptions} />
           </Card>
         </Col>
       </Row>
