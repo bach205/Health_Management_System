@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { IMessage, IConversation, ISendMessageData } from '../../types/chat.type';
 import chatService from '../../services/chat.service';
+import fileStreamService from '../../services/fileStream.service';
 import { useAuthStore } from '../../store/authStore';
 import { toast } from 'react-toastify';
 import { getSocket } from '../../services/socket';
@@ -24,6 +25,15 @@ export const useChat = () => {
                 if (selectedConversation && message.conversationId === selectedConversation.id) {
                     // Gọi API đánh dấu đã đọc luôn
                     chatService.markConversationAsRead(message.conversationId);
+
+                    // Nếu là file/image message, preload blob URL
+                    if (fileStreamService.isFileMessage(message) && message.file_url) {
+                        // Preload blob URL trong background
+                        fileStreamService.getBlobUrl(message.file_url).catch(error => {
+                            console.error('Error preloading blob URL:', error);
+                        });
+                    }
+
                     return [...prev, message];
                 }
                 return [...prev]
@@ -36,7 +46,7 @@ export const useChat = () => {
         });
         // Lắng nghe tin nhắn bị xóa
         socket.on('message_deleted', (id: number) => {
-            setMessages((prev) => prev.filter((msg) => msg.id !== id));
+            setMessages((prev) => prev.filter((msg) => (msg.id !== id)));
         });
 
         return () => {
@@ -67,6 +77,15 @@ export const useChat = () => {
             const data = await chatService.getMessagesByConversationId(conversationId);
             if (data) {
                 setMessages(data);
+
+                // Preload blob URLs cho tất cả file/image messages
+                data.forEach(message => {
+                    if (fileStreamService.isFileMessage(message) && message.file_url) {
+                        fileStreamService.getBlobUrl(message.file_url).catch(error => {
+                            console.error('Error preloading blob URL:', error);
+                        });
+                    }
+                });
             }
             // Đánh dấu đã đọc
             await chatService.markConversationAsRead(conversationId);
@@ -88,21 +107,24 @@ export const useChat = () => {
 
     // Gửi tin nhắn qua socket
     const sendMessage = useCallback((data: ISendMessageData) => {
+        if (!user) return;
         const socket = getSocket(user.id);
         socket.emit('send_message', data);
-    }, []);
+    }, [user]);
 
     // Sửa tin nhắn qua socket
     const editMessage = useCallback((messageId: number, newText: string) => {
+        if (!user) return;
         const socket = getSocket(user.id);
         socket.emit('edit_message', { messageId, text: newText });
-    }, []);
+    }, [user]);
 
     // Xóa tin nhắn qua socket
     const deleteMessage = useCallback((messageId: number) => {
+        if (!user) return;
         const socket = getSocket(user.id);
         socket.emit('delete_message', { messageId });
-    }, []);
+    }, [user]);
 
     // Chọn conversation
     const selectConversation = (conversation: IConversation) => {
@@ -125,8 +147,10 @@ export const useChat = () => {
         try {
             const newMessages = await chatService.getMessagesByConversationId(conversationId, limit, page);
             setMessages(prev => [...newMessages, ...prev]);
+            return newMessages;
         } catch (error) {
             toast.error('Không thể tải thêm tin nhắn');
+            return [];
         }
     };
 
