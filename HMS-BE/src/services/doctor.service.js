@@ -33,7 +33,7 @@ class DoctorService {
             include: {
                 doctor: {
                     include: {
-                        specialtyRel: true
+                        specialty: true
                     }
                 }
             }
@@ -121,7 +121,7 @@ class DoctorService {
                 include: {
                     doctor: {
                         include: {
-                            specialtyRel: true
+                            specialty: true
                         }
                     }
                 },
@@ -229,7 +229,7 @@ class DoctorService {
                 include: {
                     doctor: {
                         include: {
-                            specialtyRel: true
+                            specialty: true
                         }
                     },
                 },
@@ -313,7 +313,7 @@ class DoctorService {
                 include: {
                     doctor: {
                         include: {
-                            specialtyRel: true
+                            specialty: true
                         }
                     }
                 },
@@ -472,7 +472,7 @@ class DoctorService {
                     price: updateData.price,
                 },
                 include: {
-                    specialtyRel: true
+                    specialty: true
                 }
             });
 

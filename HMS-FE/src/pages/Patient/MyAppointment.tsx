@@ -83,24 +83,13 @@ export default function AppointmentsPage() {
         });
     };
 
-    const handleUpdateAppointment = async () => {
+    const handleUpdateAppointment = async (updateData?: any) => {
         try {
-            const values = await form.validateFields();
-            const updateData: Record<string, any> = {
-                appointment_date: values.appointment_date ? values.appointment_date.format("YYYY-MM-DD") : undefined,
-                appointment_time: values.appointment_time ? values.appointment_time.format("HH:mm:ss") : undefined,
-                reason: values.reason || undefined,
-                note: values.note || undefined,
-            };
-
-            // Remove undefined values
-            Object.keys(updateData).forEach(key => {
-                if (updateData[key] === undefined) {
-                    delete updateData[key];
-                }
-            });
-
-            await updateAppointmentService(selectedAppointent._id || selectedAppointent.id, updateData);
+            let values = updateData;
+            if (!values) {
+                values = await form.validateFields();
+            }
+            await updateAppointmentService(selectedAppointent._id || selectedAppointent.id, values);
             message.success("Cập nhật lịch hẹn thành công");
             setViewVisibleAppointmentModal(false);
             setReload(r => !r);

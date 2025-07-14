@@ -156,7 +156,7 @@ class AuthService {
           date_of_birth: updateData.date_of_birth,
         },
       });
-
+      
       // Cập nhật thông tin patient (sử dụng cùng id với user)
       const updatedPatient = await prisma.patient.update({
         where: { id: userId },

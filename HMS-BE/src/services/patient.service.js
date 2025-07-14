@@ -152,16 +152,18 @@ class PatientService {
     }
 
     async updatePatient(data) {
-        const { id, email, full_name, date_of_birth, gender, phone, address, identity_number } = data;
-
+        const { email, full_name, date_of_birth, gender, phone, address, identity_number } = data.body.updateData;
+        const { userId } = data.body;
+     //  console.log("data: ", data.body);
         // Check if patient exists
         const existingPatient = await prisma.user.findUnique({
             where: {
-                id: parseInt(id),
+                id: parseInt(userId),
                 role: "patient"
             }
         });
-
+        
+       // console.log("existingPatient: ", existingPatient);
         if (!existingPatient) {
             throw new BadRequestError("Bệnh nhân không tồn tại");
         }
@@ -191,10 +193,9 @@ class PatientService {
 
         const updatedPatient = await prisma.user.update({
             where: {
-                id: parseInt(id)
+                id: userId
             },
             data: {
-                email,
                 full_name,
                 date_of_birth: date_of_birth ? new Date(date_of_birth) : null,
                 gender,
@@ -202,7 +203,7 @@ class PatientService {
                 address,
                 patient: {
                     update: {
-                        where: { id: parseInt(id) },
+                        where: { id: userId },
                         data: { identity_number }
                     }
                 }
@@ -211,7 +212,7 @@ class PatientService {
                 patient: true
             }
         });
-
+     //console.log("updatedPatient: ", updatedPatient);
         return updatedPatient;
     }
 

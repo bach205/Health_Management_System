@@ -85,6 +85,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
         try {
             const metas = await chatService.uploadFiles(fileArr);
             console.log(metas)
+            console.log(fileArr)
             const newPendingFiles = fileArr.map((file, i) => ({ file, preview: URL.createObjectURL(file), meta: metas[i] }));
             setPendingFiles(prev => [...prev, ...newPendingFiles]);
         } catch (err) {

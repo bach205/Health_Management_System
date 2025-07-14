@@ -222,3 +222,43 @@ exports.getAvailableSlotsBySpecialty = async (req, res, next) => {
   }
 };
 
+exports.deleteAppointment = async (req, res, next) => {
+  try {
+    const appointment_id = parseInt(req.params.id);
+    if (isNaN(appointment_id)) {
+      return res.status(400).json({
+        success: false,
+        message: "ID lịch hẹn không hợp lệ"
+      });
+    }
+    const result = await appointmentService.deleteAppointment(appointment_id);
+    res.status(200).json({
+      success: true,
+      message: "Xóa lịch hẹn thành công",
+      data: result
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.updateAppointment = async (req, res, next) => {
+  try {
+    const appointment_id = parseInt(req.params.id);
+    if (isNaN(appointment_id)) {
+      return res.status(400).json({
+        success: false,
+        message: "ID lịch hẹn không hợp lệ"
+      });
+    }
+    const result = await appointmentService.updateAppointment(appointment_id, req.body);
+    res.status(200).json({
+      success: true,
+      message: "Cập nhật lịch hẹn thành công",
+      data: result
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+

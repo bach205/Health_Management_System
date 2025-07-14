@@ -28,7 +28,7 @@ import {
   ReloadOutlined,
 } from "@ant-design/icons";
 
-import { cancelAppointmentService } from '../../services/appointment.service';
+import { cancelAppointmentService, deleteAppointmentService } from '../../services/appointment.service';
 
 const style = {
   ".ant-table-thead .ant-table-cell": {
@@ -80,6 +80,28 @@ const ScheduleTable = ({ data = [], setReload, loading = false, visible, selecte
     }
   };
 
+  const handleDeleteAppointment = async (record: any) => {
+    try {
+      Modal.confirm({
+        title: 'Xác nhận xoá lịch khám',
+        content: (
+          <>
+            <Typography.Text>Bạn có chắc muốn xoá lịch hẹn này?</Typography.Text>
+          </>
+        ),
+        onOk: async () => {
+          await deleteAppointmentService(record._id || record.id);
+          setReload(!reload);
+          notification.success({ message: 'Xoá lịch thành công' });
+        },
+        okText: 'Xác nhận',
+        cancelText: 'Không',
+      });
+    } catch (error) {
+      notification.error({ message: 'Xoá lịch không thành công' });
+    }
+  };
+
   const hasPermissionEdit = (record: any) => {
     //Có thể chỉnh sửa nếu thời gian đặt cách thời gian hiện tại 2 tiếng
     return (
@@ -123,6 +145,13 @@ const ScheduleTable = ({ data = [], setReload, loading = false, visible, selecte
             </Button>
           </Tooltip>
         </Popconfirm>
+        {record.status !== 'cancelled' && record.status !== 'completed' && (
+          <Tooltip title="Xoá lịch hẹn">
+            <Button type="default" danger size="small" onClick={() => handleDeleteAppointment(record)}>
+              <DeleteOutlined />
+            </Button>
+          </Tooltip>
+        )}
       </>
     )
   }

@@ -8,7 +8,7 @@ interface PaginationParams {
 }
 
 const useQueue = () => {
-  const { setQueues, setTotalElements, setTotalPages } = useQueueStore();
+  const { setQueues, setTotalElements, setTotalPages, queues } = useQueueStore();
 
   const fetchQueue = async (clinicId: string, pagination?: PaginationParams, type?: string) => {
     try {

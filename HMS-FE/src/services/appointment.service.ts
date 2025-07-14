@@ -113,4 +113,9 @@ export const getAvailableSlots = async ({
   const res = await mainRequest.get(`/api/v1/appointment/slots?${params.toString()}`);
   console.log("res",res)
   return res.data;
+}
+
+export const deleteAppointmentService = async (appointmentId: string | number) => {
+  const response = await mainRequest.delete(`/api/v1/appointment/${appointmentId}`);
+  return response.data;
 };
