@@ -254,7 +254,7 @@ enum QueueStatus {
   waiting
   in_progress
   done
-  skipped
+  skipped     
 }
 
 model PrescriptionItem {
