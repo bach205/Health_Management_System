@@ -46,6 +46,7 @@ import ForgetPage from "./pages/ForgetPage";
 import ChatPage from "./pages/Chat";
 import Monitor from "./pages/Queue/Monitor";
 import QRBookAppointment from "./pages/QRBookAppointment";
+import SaleMedicinePage from "./pages/SaleMedicinePage";
 
 dayjs.extend(plugin);
 dayjs.updateLocale("en", {
@@ -70,7 +71,7 @@ function App() {
           <Route
             path={route.path}
             element={
-              <Authentication allowedRoles={route.allowedRoles || ["admin", "nurse", "doctor", "patient"]}>
+              <Authentication allowedRoles={route.allowedRoles || ["admin", "nurse", "doctor"]}>
                 <route.layout>{route.element}</route.layout>
               </Authentication>
             }
@@ -161,7 +162,11 @@ interface PrivateRoute {
   layout: React.ComponentType<{ children: React.ReactNode }>;
 }
 const PrivateRoutes: PrivateRoute[] = [
-
+  {
+    path : "/sale-medicine",
+    element: <SaleMedicinePage />,
+    layout: DashboardLayout,
+  },
   {
     path: "/admin/",
     element: <Dashboard />,

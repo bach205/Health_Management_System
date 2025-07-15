@@ -313,7 +313,11 @@ class PatientService {
                     include: {
                         prescriptionItems: {
                             include: { medicine: true }
-                        }
+                        },
+                        doctor: {
+                            include: { user: true }
+                        },
+                        clinic: true
                     }
                 }
             }
