@@ -49,6 +49,16 @@ class MedicineController {
       metadata: result,
     }).send(res);
   };
+
+  // Bán thuốc dựa trên record_id (examination record) - mở rộng
+  sellMedicinesByRecord = async (req, res) => {
+    const { record_id, items } = req.body;
+    const result = await MedicineService.sellMedicinesByRecord(record_id, items);
+    return new OK({
+      message: "Bán thuốc thành công",
+      metadata: result,
+    }).send(res);
+  };
 }
 
 module.exports = new MedicineController();

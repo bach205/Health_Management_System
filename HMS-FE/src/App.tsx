@@ -45,6 +45,7 @@ import AdminDashboard from "./pages/Admin/Dashboard/AdminDashboard";
 import ForgetPage from "./pages/ForgetPage";
 import ChatPage from "./pages/Chat";
 import Monitor from "./pages/Queue/Monitor";
+import QRBookAppointment from "./pages/QRBookAppointment";
 
 dayjs.extend(plugin);
 dayjs.updateLocale("en", {
@@ -144,6 +145,11 @@ const PublicRoutes = [
   {
     path: "/reset-password",
     element: <ForgetPage />,
+    layout: MainLayout,
+  },
+  {
+    path: "/qr-book-appointment",
+    element: <QRBookAppointment />,
     layout: MainLayout,
   },
 ];

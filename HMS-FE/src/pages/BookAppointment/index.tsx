@@ -167,13 +167,10 @@ const PatientBookAppointment: React.FC = () => {
                 </Text>
               </Space>
               {doctor?.metadata?.doctor?.specialty && (
-                <Text type="secondary">Chuyên khoa: {doctor.metadata.doctor.specialty || "Không xác định"}</Text>
+                <Text type="secondary">Chuyên khoa: {specialtyOptions.find(item => item.value === doctor.metadata.doctor.specialty)?.label || "Không xác định"}</Text>
               )}
               {doctor?.metadata?.doctor?.bio && (
                 <Text type="secondary">Tiểu sử: {doctor.metadata.doctor.bio}</Text>
-              )}
-              {doctor?.metadata?.doctor?.price && (
-                <Text>Giá khám: {doctor.metadata.doctor.price} Đ</Text>
               )}
             </Space>
           </div>
@@ -310,10 +307,10 @@ const PatientBookAppointment: React.FC = () => {
           </Form.Item>
         </Form>
       </Card>
-{/* 
+
       <Card title="Bác sĩ cùng chuyên khoa">
         <RelatedDoctors docId={docId} speciality={""} />
-      </Card> */}
+      </Card>
     </div>
   );
 };

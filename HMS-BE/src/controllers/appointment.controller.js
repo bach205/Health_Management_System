@@ -7,6 +7,7 @@ const {
   cancelAppointmentSchema,
   nurseBookAppointmentSchema,
   nurseRescheduleAppointmentSchema,
+  bookAppointmentByQRSchema
 } = require("../validators/appointment.validator");
 
 exports.bookAppointment = async (req, res, next) => {
@@ -255,6 +256,26 @@ exports.updateAppointment = async (req, res, next) => {
     res.status(200).json({
       success: true,
       message: "Cập nhật lịch hẹn thành công",
+      data: result
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.bookAppointmentByQR = async (req, res, next) => {
+  try {
+    const { error } = bookAppointmentByQRSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: error.details[0].message
+      });
+    }
+    const result = await appointmentService.bookAppointmentByQR(req.body);
+    res.status(201).json({
+      success: true,
+      message: "Đặt lịch thành công bằng mã QR",
       data: result
     });
   } catch (error) {

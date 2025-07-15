@@ -1,5 +1,5 @@
-const QueueService = require('./src/services/queue.service');
-const { sendPatientQueueNumberEmail } = require('./src/utils/staff.email');
+const QueueService = require('../src/services/queue.service');
+const { sendPatientQueueNumberEmail } = require('../src/utils/staff.email');
 
 async function testFullFlow() {
   console.log('=== TEST TOÀN BỘ FLOW APPOINTMENT -> QUEUE -> EMAIL ===\n');
