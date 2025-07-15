@@ -112,6 +112,15 @@ doctorRouter.post(
   doctorController.updateStaffInfo
 );
 
+doctorRouter.post(
+  "/create-doctors-from-csv",
+  authenticate,
+  checkUserStatus(),
+  authorize("admin"),
+  asyncHandler(doctorController.createDoctorsFromCSV),
+  doctorController.createDoctorsFromCSV
+);
+
 // Ví dụ check authen bên trong router
 // authRouter.get("/users", authenticateToken, authorizeRoles("admin"), asyncHandler(AuthController.getUsers));
 

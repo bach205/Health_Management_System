@@ -23,6 +23,7 @@ const notificationRouter = require('./notification.route');
 const sepayRouter = require('./sepay.route');
 const feedbackRouter = require("./feedback.route");
 const statisticsRouter = require("./statistics.route");
+const paymentRouter = require("./payment.routes");
 
 router.use("/nurse", nurseRouter);
 router.use("/doctor", doctorRouter);
@@ -47,4 +48,8 @@ router.use('/notification', notificationRouter);
 router.use('/sepay', sepayRouter);
 router.use('/feedback', feedbackRouter);
 router.use("/statistics", statisticsRouter);
+router.use("/payment", paymentRouter);
+
+
+
 module.exports = router;

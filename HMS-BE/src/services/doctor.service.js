@@ -295,6 +295,7 @@ class DoctorService {
                     gender: value.gender,
                     date_of_birth: value.date_of_birth,
                     address: value.address?.trim() || "",
+                    // avatar: value.avatar || null,
                     doctor: {
                         upsert: {
                             update: {
@@ -512,6 +513,100 @@ class DoctorService {
 
         return result;
     }
+    async createDoctorsFromCSV(data) {
+        if (!data || !Array.isArray(data) || data.length === 0) {
+            throw new BadRequestError("Dữ liệu không hợp lệ");
+        }
+
+        const preparedData = [];
+
+        for (let i = 0; i < data.length; i++) {
+            const row = data[i];
+
+            // Tạo bản sao để tránh sửa gốc
+            const doctorData = {
+                full_name: row.full_name?.trim(),
+                email: row.email?.trim(),
+                phone: row.phone?.trim() || '',
+                gender: row.gender,
+                date_of_birth: row.date_of_birth,
+                address: row.address?.trim() || '',
+                avatar: row.avatar,
+                password: row.password?.trim(),
+                specialty_id: row.specialty_id || null,
+                price: parseInt(row.price, 10),
+                bio: row.bio?.trim() || '',
+            };
+
+            // Tự tạo password nếu chưa có
+            if (!doctorData.password) {
+                doctorData.password = this.#createRandomPassword().toString();
+            }
+
+            // Validate bằng Joi schema
+            const { error, value } = createDoctorSchema.validate(doctorData, { abortEarly: false });
+            if (error) {
+                throw new BadRequestError(`Dòng ${i + 1}: ${error.details[0].message}`);
+            }
+
+            // Kiểm tra email trùng
+            const existing = await prisma.user.findUnique({ where: { email: value.email } });
+            if (existing) {
+                throw new BadRequestError(`Dòng ${i + 1}: Email ${value.email} đã tồn tại`);
+            }
+
+            // Kiểm tra phone trùng
+
+            if (value.price < 0) {
+                throw new BadRequestError(`Dòng ${i + 1}: Giá không hợp lệ`);
+            }
+
+            const hashedPassword = await bcrypt.hash(value.password, parseInt(process.env.BCRYPT_SALT_ROUNDS));
+
+            // Chuẩn bị cho transaction
+            preparedData.push({
+                user: {
+                    full_name: value.full_name,
+                    email: value.email,
+                    phone: value.phone,
+                    password: hashedPassword,
+                    gender: value.gender,
+                    date_of_birth: value.date_of_birth,
+                    address: value.address,
+                    is_active: true,
+                    role: 'doctor',
+                    sso_provider: 'local',
+                    avatar: value.avatar,
+                },
+                doctor: {
+                    specialty_id: value.specialty_id,
+                    bio: value.bio,
+                    price: value.price,
+                },
+            });
+        }
+
+        // Nếu không lỗi, tiến hành tạo tất cả trong transaction
+        const result = await prisma.$transaction(
+            preparedData.map((entry) =>
+                prisma.user.create({
+                    data: {
+                        ...entry.user,
+                        doctor: {
+                            create: entry.doctor,
+                        },
+                    },
+                    include: {
+                        doctor: true,
+                    },
+                })
+            )
+        );
+
+        return result;
+    }
+
+
 }
 
 module.exports = new DoctorService();

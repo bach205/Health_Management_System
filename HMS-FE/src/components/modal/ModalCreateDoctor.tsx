@@ -6,6 +6,7 @@ import dayjs from "dayjs";
 import imageCompression from "browser-image-compression";
 import { PlusOutlined } from "@ant-design/icons";
 import { useSpecialtyList } from "../../hooks/useSpecialtyList";
+import { toast } from "react-toastify";
 // import dayjs from "dayjs";
 
 interface IProps {
@@ -91,6 +92,8 @@ const ModalCreateDoctor = ({ role, isVisible, handleOk, handleCancel, form }: IP
     </div>
   );
   const { specialties, loading: specialtyLoading, reload: specialtyReload, handleTableChange: specialtyTableChange } = useSpecialtyList(undefined, true);
+
+ 
   return (
     <Modal
       open={isVisible}

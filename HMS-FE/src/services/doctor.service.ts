@@ -42,3 +42,7 @@ export const getDoctorAvailableSlotsByDate = (doctorId: number, date: string, cl
 export const updateDoctorProfile = (doctor: any) => {
     return instance.post(`${BASE_URL}/update-info`, doctor);
 };
+
+export const createDoctorsFromCSV = (data: any) => {
+    return instance.post(`${BASE_URL}/create-doctors-from-csv`, data);
+};

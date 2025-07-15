@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Table, Tag, Space, Flex, Button, Form, Input, Select, notification, Tooltip, Popconfirm, Avatar, } from "antd";
+import { Table, Tag, Space, Flex, Button, Form, Input, Select, notification, Tooltip, Popconfirm, Avatar, Upload, } from "antd";
 import { Ban, CirclePlus, Eye, RefreshCcw, RotateCcw, Search, User, UserRoundPen } from "lucide-react";
 
 import dayjs from "dayjs";
@@ -12,6 +12,9 @@ import { createDoctor, updateDoctor, updatePassword, updateStatus } from "../../
 import ModalCreateDoctor from "../../../components/modal/ModalCreateDoctor";
 import ModalUpdateDoctor from "../../../components/modal/ModalUpdateDoctor";
 import { useSpecialtyList } from "../../../hooks/useSpecialtyList";
+import { toast } from "react-toastify";
+import Papa from "papaparse";
+import ImportCSV from "../../../components/doctor/ImportCSV";
 
 const AdminDoctorDashboard = () => {
   const [isCreateVisible, setIsCreateVisible] = useState<boolean>(false);
@@ -121,7 +124,7 @@ const AdminDoctorDashboard = () => {
                 icon={<UserRoundPen size={17.5} />}
               ></Button>
             </Tooltip>
-          )}  
+          )}
 
           <Popconfirm
             title="Khôi phục mật khẩu"
@@ -307,6 +310,8 @@ const AdminDoctorDashboard = () => {
     setReload(!reload);
   }
 
+
+
   // custom hook
   const {
     users, loading, keyword, reload, specialty, sort, pagination, isActive,
@@ -337,9 +342,16 @@ const AdminDoctorDashboard = () => {
           </Button>
         </Flex>
 
-        <Button type="primary" icon={<CirclePlus size={16} />} onClick={() => setIsCreateVisible(true)} >
-          Thêm bác sĩ
-        </Button>
+        <Space>
+          {/* <Button type="default" icon={<CirclePlus size={16} />} onClick={() => setIsCreateVisible(true)} >
+            Import CSV
+          </Button> */}
+
+          <ImportCSV type="doctor"></ImportCSV>
+          <Button type="primary" icon={<CirclePlus size={16} />} onClick={() => setIsCreateVisible(true)} >
+            Thêm bác sĩ
+          </Button>
+        </Space>
       </Flex>
       <Flex gap={10} justify="space-between" style={{ marginBottom: 10 }}>
         <Form>

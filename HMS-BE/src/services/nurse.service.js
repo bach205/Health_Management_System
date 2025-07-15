@@ -380,6 +380,68 @@ class NurseService {
             throw new BadRequestError(error.message);
         }
     }
+    createNursesFromCSV = async (csvData) => {
+        try {
+            // Validate CSV data
+            if (!csvData || csvData.length === 0) {
+                throw new BadRequestError("Dữ liệu CSV không hợp lệ");
+            }
+
+            // Process each row in the CSV data
+            for (let i = 0; i < csvData.length; i++) {
+                const row = csvData[i];
+                // Validate each row using Joi schema
+                const { error, value } = createNurseSchema.validate(row, { abortEarly: false });
+                if (error) {
+                    throw new BadRequestError(`Dòng ${i + 1}: ${error.details.map(detail => detail.message).join(', ')}`);
+                }
+
+                // Check if email already exists
+                const existingEmail = await prisma.user.findUnique({
+                    where: { email: value.email }
+                });
+                if (existingEmail) {
+                    throw new BadRequestError(`Dòng ${i + 1}: Email ${value.email} đã tồn tại`);
+                }
+
+                // Check if phone already exists
+                if (value.phone) {
+                    const existingPhone = await prisma.user.findUnique({
+                        where: { phone: value.phone }
+                    });
+                    if (existingPhone) {
+                        throw new BadRequestError(`Dòng ${i + 1}: Số điện thoại ${value.phone} đã tồn tại`);
+                    }
+                }
+
+                // Hash password
+                const hashedPassword = await bcrypt.hash(
+                    value.password,
+                    parseInt(process.env.BCRYPT_SALT_ROUNDS)
+                );
+
+                // Create nurse
+                await prisma.user.create({
+                    data: {
+                        full_name: value.full_name,
+                        email: value.email,
+                        phone: value.phone || null,
+                        password: hashedPassword,
+                    }
+                });
+            }
+
+            return {
+                status: 201,
+                data: {
+                    message: "Tạo tài khoản từ file CSV thành công"
+                }
+            };
+        } catch (error) {
+            throw new BadRequestError(error.message);
+        }
+    }
+
 }
 
 module.exports = new NurseService();
