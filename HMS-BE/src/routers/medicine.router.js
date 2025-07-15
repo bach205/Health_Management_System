@@ -45,4 +45,10 @@ medicineRouter.delete(
     asyncHandler(medicineController.deleteMedicine)
 );
 
+medicineRouter.post(
+    "/sell",
+    authorize("nurse"),
+    asyncHandler(medicineController.sellMedicinesByRecord)
+);
+
 module.exports = medicineRouter;

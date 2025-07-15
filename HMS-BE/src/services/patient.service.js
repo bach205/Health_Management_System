@@ -302,6 +302,29 @@ class PatientService {
         return patient;
     }
 
+    // Lấy bệnh nhân theo số CCCD và hồ sơ khám gần nhất có đơn thuốc
+    async getPatientByIdentityNumber(identity_number) {
+        const patient = await prisma.patient.findFirst({
+            where: { identity_number },
+            include: {
+                user: true,
+                records: {
+                    orderBy: { created_at: 'desc' },
+                    include: {
+                        prescriptionItems: {
+                            include: { medicine: true }
+                        }
+                    }
+                }
+            }
+        });
+        if (!patient) throw new BadRequestError("Không tìm thấy bệnh nhân với số CCCD này");
+        // Tìm hồ sơ khám gần nhất có đơn thuốc
+        const record = patient.records.find(r => r.prescriptionItems && r.prescriptionItems.length > 0);
+        if (!record) throw new BadRequestError("Bệnh nhân chưa có kết quả khám có kê đơn thuốc");
+        return { patient, record };
+    }
+
     #createRandomPassword() {
         const upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         const lower = "abcdefghijklmnopqrstuvwxyz";

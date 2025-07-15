@@ -158,5 +158,52 @@ class MedicineService {
       throw new BadRequestError(error.message);
     }
   }
+
+  // Bán thuốc mở rộng: chọn từng thuốc, nhập số lượng thực tế
+  async sellMedicinesByRecord(record_id, items) {
+    const prescriptionItemService = require("./prescriptionItem.service");
+    // Lấy prescription items gốc
+    const originalItems = await prescriptionItemService.prototype.getByRecordId(record_id);
+    if (!originalItems || originalItems.length === 0) throw new BadRequestError("Không có đơn thuốc để bán");
+
+    // Map prescription_item_id -> original item
+    const originalMap = {};
+    for (const item of originalItems) originalMap[item.id] = item;
+
+    // Kiểm tra từng item thực tế
+    const updates = [];
+    let total = 0;
+    const soldItems = [];
+    for (const { prescription_item_id, quantity } of items) {
+      const orig = originalMap[prescription_item_id];
+      if (!orig) throw new BadRequestError(`Thuốc kê đơn không hợp lệ`);
+      if (quantity < 1) throw new BadRequestError(`Số lượng phải lớn hơn 0`);
+      // Nếu prescription item có trường quantity gốc, kiểm tra không vượt quá
+      if (orig.quantity && quantity > orig.quantity) throw new BadRequestError(`Không được bán vượt quá số lượng kê`);
+      // Kiểm tra tồn kho
+      const medicine = await prisma.medicine.findUnique({ where: { id: orig.medicine_id } });
+      if (!medicine) throw new BadRequestError(`Thuốc không tồn tại`);
+      if (medicine.stock < quantity) throw new BadRequestError(`Thuốc ${medicine.name} không đủ tồn kho`);
+      // Trừ kho
+      updates.push(
+        prisma.medicine.update({
+          where: { id: orig.medicine_id },
+          data: { stock: medicine.stock - quantity },
+        })
+      );
+      total += Number(medicine.price) * quantity;
+      soldItems.push({
+        prescription_item_id,
+        medicine_id: orig.medicine_id,
+        medicine_name: medicine.name,
+        quantity,
+        price: Number(medicine.price),
+        total: Number(medicine.price) * quantity
+      });
+    }
+    await Promise.all(updates);
+    // (Có thể lưu lịch sử phát thuốc, tạo hóa đơn ở đây)
+    return { success: true, total, items: soldItems };
+  }
 }
 module.exports = new MedicineService();
