@@ -4,14 +4,15 @@ import { InboxOutlined } from '@ant-design/icons';
 import type { UploadFile } from 'antd';
 import Papa from 'papaparse';
 import { createDoctorsFromCSV } from '../../services/doctor.service';
+import { createNursesFromCSV } from '../../api/nurse';
 
 const { Dragger } = Upload;
 
 interface IProps {
-    type: string,
+    role: string,
 }
 
-const CSVImportModal = ({ type }: IProps) => {
+const CSVImportModal = ({ role }: IProps) => {
     const [visible, setVisible] = useState(false);
     const [fileList, setFileList] = useState<any[]>([]);
     const [csvData, setCsvData] = useState<any[]>([]);
@@ -29,7 +30,15 @@ const CSVImportModal = ({ type }: IProps) => {
         if (csvData.length > 0) {
             // Call the service to create doctors from CSV
             try {
-                await createDoctorsFromCSV(csvData);
+                if (role === 'doctor') {
+                    await createDoctorsFromCSV(csvData);
+                } else if (role === 'nurse') {
+                    await createNursesFromCSV(csvData);
+                } else {
+                    notification.error({ message: "Loại user không hợp lệ" });
+                    setConfirming(false);
+                    return;
+                }
                 message.success("Import CSV thành công!");
                 closeModal();
             } catch (error: any) {
@@ -91,7 +100,7 @@ const CSVImportModal = ({ type }: IProps) => {
         },
         fileList,
     };
-                    console.log(csvData);
+    console.log(csvData);
 
 
     return (

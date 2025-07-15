@@ -1,10 +1,11 @@
-import { Modal, Form, Input, Select, InputNumber, Button, message, DatePicker } from "antd";
+import { Modal, Form, Input, Select, InputNumber, Button, message, DatePicker, Checkbox } from "antd";
 import { useEffect, useState } from "react";
 import { getClinicService } from "../../../services/clinic.service";
-import { getDoctorsInClinic, getDoctorAvailableSlotsByDoctorId, getDoctorAvailableSlotsByDate } from "../../../services/doctor.service";
+import { getDoctorsInClinic, getDoctorAvailableSlotsByDoctorId, getDoctorAvailableSlotsByDate, getAvailableDoctors } from "../../../services/doctor.service";
 import mainRequest from "../../../api/mainRequest";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
+import type { IDoctor } from "../../../types/index.type";
 
 dayjs.extend(utc);
 
@@ -33,13 +34,15 @@ const ExaminationOrderModal = ({
   const [loading, setLoading] = useState(false);
   const [clinics, setClinics] = useState<any[]>([]);
   const [clinicVolume, setClinicVolume] = useState<number>(0);
+  const [isShowOtherPrice, setIsShowOtherPrice] = useState<boolean>(false);
+  const [availableDoctors, setAvailableDoctors] = useState<IDoctor[]>([]);
 
   const to_clinic_id = Form.useWatch("to_clinic_id", form);
 
   const handleClose = () => {
     form.resetFields();
     onClose();
-    
+
   };
 
   useEffect(() => {
@@ -52,26 +55,26 @@ const ExaminationOrderModal = ({
 
   useEffect(() => {
     if (to_clinic_id) {
-      const fetchClinicVolume = async () => {
+      const fetchClinicVolumeAndDoctors = async () => {
         try {
           const response = await getClinicService();
           const clinic = response.data.metadata.clinics.find((c: any) => c.id === Number(to_clinic_id));
-          if (clinic) {
-            setClinicVolume(clinic.patient_volume);
-          } else {
-            setClinicVolume(0);
-          }
+          setClinicVolume(clinic?.patient_volume || 0);
+
+          const doctors = await getAvailableDoctors(Number(to_clinic_id));
+          setAvailableDoctors(doctors || []);
         } catch (error) {
-          console.error("Error fetching clinic volume:", error);
+          console.error("Lỗi khi lấy thông tin phòng khám hoặc bác sĩ:", error);
           setClinicVolume(0);
+          setAvailableDoctors([]);
         }
-      }
-      fetchClinicVolume();
+      };
+      fetchClinicVolumeAndDoctors();
     } else {
       setClinicVolume(0);
+      setAvailableDoctors([]);
     }
   }, [to_clinic_id]);
-
   const handleFinish = async (values: any) => {
     try {
       console.log(values)
@@ -156,9 +159,20 @@ const ExaminationOrderModal = ({
           <Input.TextArea />
         </Form.Item>
 
-        <Form.Item label="Chi phí phụ" name="total_cost" >
-          <InputNumber style={{ width: "100%" }} min={0} />
+        <Form.Item
+          label="Chi phí phụ"
+          valuePropName="checked"
+          layout="horizontal"
+        >
+          <Checkbox onChange={(e) => setIsShowOtherPrice(e.target.checked)} />
         </Form.Item>
+        {
+          isShowOtherPrice &&
+          <Form.Item name="side_cost" >
+            <InputNumber style={{ width: "100%" }} min={0} />
+          </Form.Item>
+        }
+
 
         <Form.Item label="Chỉ định phòng khám tiếp theo" name="to_clinic_id" rules={[{ required: true, message: "Vui lòng chọn phòng khám tiếp theo" }]}>
           <Select allowClear placeholder="Chọn phòng khám" onChange={handleChangeClinic}>
@@ -194,6 +208,32 @@ const ExaminationOrderModal = ({
             </span>
           </div>
         )}
+
+        {clinicSelected && availableDoctors.length > 0 ? (
+          <Form.Item
+            label="Bác sĩ tiếp nhận"
+            name="to_doctor_id"
+            rules={[{ required: true, message: "Vui lòng chọn bác sĩ" }]}
+          >
+            <Select
+              placeholder="Chọn bác sĩ rảnh"
+              optionFilterProp="children"
+              onChange={(value) => {
+                form.setFieldsValue({ slot: undefined }); // Reset slot when changing doctor
+              }}
+            >
+              {availableDoctors.map((doctor) => (
+                <Option key={doctor.id} value={doctor.id}>
+                  {doctor.full_name}
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
+        )
+          :
+          <p>Không có bác sĩ nào rảnh</p>
+        }
+
 
       </Form>
     </Modal>

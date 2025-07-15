@@ -986,3 +986,18 @@ CREATE TABLE documents (
     file_location VARCHAR(200) CHARACTER SET utf8mb4 UNIQUE,
     user_id INT
 );
+
+-- SELECT 
+--   u.email,
+--   u.password,
+--   u.full_name,
+--   u.date_of_birth,
+--   u.gender,
+--   u.phone,
+--   u.address,
+--   u.avatar,
+--   d.specialty_id,
+--   d.bio,
+--   d.price
+-- FROM hospital.users u
+-- JOIN hospital.doctors d ON u.id = d.user_id;

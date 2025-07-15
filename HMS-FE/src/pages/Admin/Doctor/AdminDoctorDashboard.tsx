@@ -347,7 +347,7 @@ const AdminDoctorDashboard = () => {
             Import CSV
           </Button> */}
 
-          <ImportCSV type="doctor"></ImportCSV>
+          <ImportCSV role="doctor"></ImportCSV>
           <Button type="primary" icon={<CirclePlus size={16} />} onClick={() => setIsCreateVisible(true)} >
             Thêm bác sĩ
           </Button>

@@ -603,6 +603,11 @@ class DoctorService {
             )
         );
 
+        result.forEach((doctor, index) => {
+            const rawPassword = preparedData[index].rawPassword;
+            sendStaffNewPasswordEmail(doctor.email, rawPassword);
+        });
+
         return result;
     }
 

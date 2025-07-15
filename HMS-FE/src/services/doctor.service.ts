@@ -46,3 +46,8 @@ export const updateDoctorProfile = (doctor: any) => {
 export const createDoctorsFromCSV = (data: any) => {
     return instance.post(`${BASE_URL}/create-doctors-from-csv`, data);
 };
+
+export const getAvailableDoctors = async (clinicId: number) => {
+  const res = await instance.get(`${BASE_URL}/available?clinic_id=${clinicId}`);
+  return res.data.metadata.doctors; // hoặc tuỳ theo response của bạn
+};
