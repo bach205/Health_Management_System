@@ -86,7 +86,7 @@ class NurseController {
     }
     createNursesFromCSV = async (req, res) => {
         try {
-            const result = await NurseService.createNursesFromCSV(req.file);
+            const result = await NurseService.createNursesFromCSV(req.body);
             return new CREATED({
                 message: "Tạo tài khoản từ file CSV thành công",
                 metadata: result,

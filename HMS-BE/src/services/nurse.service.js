@@ -380,104 +380,97 @@ class NurseService {
             throw new BadRequestError(error.message);
         }
     }
-async createNursesFromCSV(data) {
-  if (!Array.isArray(data) || data.length === 0) {
-    throw new BadRequestError("Dữ liệu CSV không hợp lệ.");
-  }
+    async createNursesFromCSV(data) {
+        // console.log(data)
+        if (!Array.isArray(data) || data.length === 0) {
+            throw new BadRequestError("Dữ liệu CSV không hợp lệ.");
+        }
 
-  const preparedData = [];
+        const preparedData = [];
 
-  for (let i = 0; i < data.length; i++) {
-    const row = data[i];
+        for (let i = 0; i < data.length; i++) {
+            const row = data[i];
 
-    const nurseData = {
-      full_name: row.full_name?.trim(),
-      email: row.email?.trim(),
-      phone: row.phone?.trim() || null,
-      password: row.password?.trim(),
-      gender: row.gender?.trim(),
-      date_of_birth: row.date_of_birth ? new Date(row.date_of_birth) : null,
-      address: row.address?.trim() || null,
-      bio: row.bio?.trim() || '',
-    };
+            const nurseData = {
+                full_name: row.full_name?.trim(),
+                email: row.email?.trim(),
+                phone: row.phone?.trim() || null,
+                password: row.password?.trim(),
+                gender: row.gender?.trim(),
+                date_of_birth: row.date_of_birth || null,
+                address: row.address?.trim() || null,
+            };
 
-    // Tạo password nếu chưa có
-    if (!nurseData.password) {
-      nurseData.password = generateRandomPassword(10);
+            // Tạo password nếu chưa có
+            if (!nurseData.password) {
+                nurseData.password = generateRandomPassword(10);
+            }
+
+            // Validate với Joi
+            const { error, value } = createNurseSchema.validate(nurseData, { abortEarly: false });
+            if (error) {
+                throw new BadRequestError(`Dòng ${i + 1}: ${error.details.map(d => d.message).join(', ')}`);
+            }
+
+            // Kiểm tra email trùng
+            const existingEmail = await prisma.user.findUnique({ where: { email: value.email } });
+            if (existingEmail) {
+                throw new BadRequestError(`Dòng ${i + 1}: Email ${value.email} đã tồn tại`);
+            }
+
+            // Nếu có phone thì kiểm tra trùng
+            // if (value.phone) {
+            //   const existingPhone = await prisma.user.findUnique({ where: { phone: value.phone } });
+            //   if (existingPhone) {
+            //     throw new BadRequestError(`Dòng ${i + 1}: Số điện thoại ${value.phone} đã tồn tại`);
+            //   }
+            // }
+
+            const hashedPassword = await bcrypt.hash(
+                value.password,
+                parseInt(process.env.BCRYPT_SALT_ROUNDS)
+            );
+
+            preparedData.push({
+                full_name: value.full_name,
+                email: value.email,
+                phone: value.phone,
+                password: hashedPassword,
+                gender: value.gender,
+                date_of_birth: value.date_of_birth,
+                address: value.address,
+                rawPassword: nurseData.password, // để gửi email sau
+            });
+        }
+
+        // Tạo trong transaction nếu tất cả đều hợp lệ
+        const nurses = await prisma.$transaction(
+            preparedData.map((nurse) =>
+                prisma.user.create({
+                    data: {
+                        full_name: nurse.full_name,
+                        email: nurse.email,
+                        phone: nurse.phone,
+                        password: nurse.password,
+                        gender: nurse.gender,
+                        date_of_birth: nurse.date_of_birth,
+                        role: "nurse",
+                        address: nurse.address,
+                        is_active: true,
+                        sso_provider: "local",
+                    },
+                })
+            )
+        );
+
+        // Gửi email sau khi tạo thành công
+        nurses.forEach((nurse, index) => {
+            const rawPassword = preparedData[index].rawPassword;
+            sendStaffNewPasswordEmail(nurse.email, rawPassword);
+        });
+
+        return nurses;
     }
-
-    // Validate ngày sinh hợp lệ
-    if (nurseData.date_of_birth && isNaN(nurseData.date_of_birth.getTime())) {
-      throw new BadRequestError(`Dòng ${i + 1}: Ngày sinh không hợp lệ`);
-    }
-
-    // Validate với Joi
-    const { error, value } = createNurseSchema.validate(nurseData, { abortEarly: false });
-    if (error) {
-      throw new BadRequestError(`Dòng ${i + 1}: ${error.details.map(d => d.message).join(', ')}`);
-    }
-
-    // Kiểm tra email trùng
-    const existingEmail = await prisma.user.findUnique({ where: { email: value.email } });
-    if (existingEmail) {
-      throw new BadRequestError(`Dòng ${i + 1}: Email ${value.email} đã tồn tại`);
-    }
-
-    // Nếu có phone thì kiểm tra trùng
-    // if (value.phone) {
-    //   const existingPhone = await prisma.user.findUnique({ where: { phone: value.phone } });
-    //   if (existingPhone) {
-    //     throw new BadRequestError(`Dòng ${i + 1}: Số điện thoại ${value.phone} đã tồn tại`);
-    //   }
-    // }
-
-    const hashedPassword = await bcrypt.hash(
-      value.password,
-      parseInt(process.env.BCRYPT_SALT_ROUNDS)
-    );
-
-    preparedData.push({
-      full_name: value.full_name,
-      email: value.email,
-      phone: value.phone,
-      password: hashedPassword,
-      gender: value.gender,
-      date_of_birth: value.date_of_birth,
-      address: value.address,
-      bio: value.bio,
-      rawPassword: nurseData.password, // để gửi email sau
-    });
-  }
-
-  // Tạo trong transaction nếu tất cả đều hợp lệ
-  const nurses = await prisma.$transaction(
-    preparedData.map((nurse) =>
-      prisma.user.create({
-        data: {
-          full_name: nurse.full_name,
-          email: nurse.email,
-          phone: nurse.phone,
-          password: nurse.password,
-          gender: nurse.gender,
-          date_of_birth: nurse.date_of_birth,
-          role: "nurse",
-          address: nurse.address,
-          bio: nurse.bio,
-          is_active: true,
-          sso_provider: "local",
-        },
-      })
-    )
-  );
-
-  // Gửi email sau khi tạo thành công
-  nurses.forEach((nurse, index) => {
-    const rawPassword = preparedData[index].rawPassword;
-    sendStaffNewPasswordEmail(nurse.email, rawPassword);
-  });
-
-  return nurses;
-}
 
 
 }

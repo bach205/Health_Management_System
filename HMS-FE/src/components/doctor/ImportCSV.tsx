@@ -137,11 +137,11 @@ const CSVImportModal = ({ role }: IProps) => {
                     <p className="ant-upload-hint">Chỉ chấp nhận file có định dạng .csv</p>
                 </Dragger>
 
-                {/* {csvData.length > 0 && (
+                {csvData.length > 0 && (
                     <pre style={{ marginTop: 20, maxHeight: 300, overflowY: 'auto', background: '#f6f6f6', padding: 10 }}>
                         {JSON.stringify(csvData, null, 2)}
                     </pre>
-                )} */}
+                )}
             </Modal>
         </>
     );

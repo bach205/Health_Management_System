@@ -24,6 +24,9 @@ const sepayRouter = require('./sepay.route');
 const feedbackRouter = require("./feedback.route");
 const statisticsRouter = require("./statistics.route");
 const paymentRouter = require("./payment.routes");
+const blogRouter = require("./blog.route");
+const blogCategoryRouter = require("./blogCategory.route");
+const blogTagRouter = require("./blogTag.route");
 
 router.use("/nurse", nurseRouter);
 router.use("/doctor", doctorRouter);
@@ -52,4 +55,7 @@ router.use("/payment", paymentRouter);
 
 
 
+router.use("/blog", blogRouter);
+router.use("/blog-category", blogCategoryRouter);
+router.use("/blog-tag", blogTagRouter);
 module.exports = router;

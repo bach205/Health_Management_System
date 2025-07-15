@@ -82,11 +82,11 @@ class ExaminationRecordService {
             where: { id: Number(id) },
             include: {
                 patient: true,
-                primaryDoctor: true,
-                createdByUser: true,
-                prescriptions: true,
-                invoiceItems: true,
-                queues: true,
+                // primaryDoctor: true,
+                // createdByUser: true,
+                // prescriptions: true,
+                // invoiceItems: true,
+                // queues: true,
                 payments: true,
             },
         });
