@@ -32,6 +32,7 @@ model User {
   appointments        Appointment[]        @relation("DoctorAppointment")
   availableSlots      AvailableSlot[]
   documents           Documents[]
+  blogs               Blog[]
 
   chatsSent                Chat[]                    @relation("ChatSendBy")
   chatsReceived            Chat[]                    @relation("ChatTo")
@@ -253,7 +254,7 @@ enum QueueStatus {
   waiting
   in_progress
   done
-  skipped
+  skipped     
 }
 
 model PrescriptionItem {
@@ -477,4 +478,35 @@ model Documents {
   file_location String? @unique @db.VarChar(200)
   user_id       Int?
   user          User?   @relation(fields: [user_id], references: [id])
+}
+
+model BlogCategory {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  blogs Blog[]
+}
+
+model BlogTag {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  blogs Blog[] @relation("BlogTags")
+}
+
+// Cập nhật Blog để liên kết với category và tags
+model Blog {
+  id          Int      @id @default(autoincrement())
+  title       String
+  slug        String   @unique
+  content     String   @db.Text
+  summary     String?  @db.Text
+  image_url   String?
+  author_id   Int
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  published   Boolean  @default(false)
+
+  author      User     @relation(fields: [author_id], references: [id])
+  category_id Int?
+  category    BlogCategory? @relation(fields: [category_id], references: [id])
+  tags        BlogTag[] @relation("BlogTags")
 }
