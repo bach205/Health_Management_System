@@ -157,6 +157,22 @@ const nurseRescheduleAppointmentSchema = Joi.object({
   })
 });
 
+const bookAppointmentByQRSchema = Joi.object({
+  full_name: Joi.string().required(),
+  phone: Joi.string().required(),
+  gender: Joi.string().valid("male", "female", "other").required(),
+  address: Joi.string().required(),
+  date_of_birth: Joi.date().required(),
+  identity_number: Joi.string().required(),
+  doctor_id: Joi.number().integer().required(),
+  clinic_id: Joi.number().integer().required(),
+  slot_date: Joi.date().required(),
+  start_time: Joi.string().pattern(/^([0-1][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/).required(),
+  reason: Joi.string().max(1000).allow("", null),
+  note: Joi.string().max(1000).allow("", null),
+  email: Joi.string().email().allow(null, "")
+});
+
 module.exports = {
   bookAppointmentSchema,
   // getAvailableSlotsSchema,
@@ -166,5 +182,6 @@ module.exports = {
   getAppointmentDetailSchema,
   nurseBookAppointmentSchema,
   IsPatientIdValid,
-  nurseRescheduleAppointmentSchema
+  nurseRescheduleAppointmentSchema,
+  bookAppointmentByQRSchema
 };

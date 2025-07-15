@@ -1,5 +1,5 @@
-const QueueService = require('./src/services/queue.service');
-const prisma = require('./src/config/prisma');
+const QueueService = require('../src/services/queue.service');
+const prisma = require('../src/config/prisma');
 
 async function testQueueEmail() {
   try {
