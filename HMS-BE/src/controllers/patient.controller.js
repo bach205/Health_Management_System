@@ -57,6 +57,16 @@ class PatientController {
             metadata: result,
         }).send(res);
     }
+
+    // Lấy bệnh nhân và hồ sơ khám gần nhất có đơn thuốc theo số CCCD
+    getPatientByIdentityNumber = async (req, res) => {
+        const { identity_number } = req.body;
+        const result = await PatientService.getPatientByIdentityNumber(identity_number);
+        return new OK({
+            message: "Lấy thông tin bệnh nhân và đơn thuốc thành công",
+            metadata: result,
+        }).send(res);
+    }
 }
 
 module.exports = new PatientController(); 
