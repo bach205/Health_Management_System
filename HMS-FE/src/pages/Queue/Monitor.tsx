@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 
-import { Typography, Row, Col, Result, Select, Spin } from "antd";
+import { Typography, Row, Col, Result, Select, Spin, Table } from "antd";
 import { getClinicService } from "../../services/clinic.service";
 import { getQueueClinic } from "../../services/queue.service";
 import { useQueueStore } from "../../store/queueStore";
@@ -90,6 +90,41 @@ const Monitor: React.FC = () => {
       default: return shift;
     }
   };
+
+  // Table columns
+  const columns = [
+    {
+      title: "Số thứ tự",
+      dataIndex: "queue_number",
+      key: "queue_number",
+      align: "center" as const,
+      render: (text: any) => (
+        <span style={{ color: "#1890ff", fontWeight: 700, fontSize: 28 }}>{text}</span>
+      ),
+    },
+    {
+      title: "Ca khám",
+      dataIndex: "shift_type",
+      key: "shift_type",
+      align: "center" as const,
+      render: (text: string) => getShiftTypeText(text),
+    },
+    {
+      title: "Ngày khám",
+      dataIndex: "slot_date",
+      key: "slot_date",
+      align: "center" as const,
+      render: (text: string) => text?.slice(0, 10),
+    },
+    {
+      title: "Bác sĩ",
+      dataIndex: ["appointment", "doctor", "full_name"],
+      key: "doctor_name",
+      align: "center" as const,
+      render: (_: any, record: any) => record.appointment?.doctor?.full_name || "",
+    },
+  ];
+
   return (
     <Row justify="center" align="middle" style={{ minHeight: "100vh" }}>
       <Col span={24}>
@@ -112,7 +147,7 @@ const Monitor: React.FC = () => {
           }}
         >
           <Title level={2} style={{ textAlign: "center", color: "#1890ff", marginBottom: 32 }}>
-            SỐ ĐANG ĐƯỢC GỌI : {currentqueuenumber ? 'ok' : 'No Data'}
+            SỐ ĐANG ĐƯỢC GỌI
           </Title>
           <div style={{ marginBottom: 32, textAlign: "center" }}>
             <Select
@@ -140,23 +175,15 @@ const Monitor: React.FC = () => {
             />
           ) : loading ? (
             <div style={{ textAlign: "center", margin: 32 }}><Spin size="large" /></div>
-          ) : currentQueue ? (
-            <>
-              {
-                currentQueue.map((item) => {       
-                    return (
-                      <div style={{ textAlign: "left", maxWidth: 480, margin: "0 auto" }}>
-                        <ul style={{ fontSize: 22, listStyle: "none", padding: 0 }}>
-                          <li><b>Số thứ tự:</b> <span style={{ color: "#1890ff", fontWeight: 700, fontSize: 28 }}>{item.queue_number}</span></li>
-                          <li><b>Ca khám:</b> {getShiftTypeText(item.shift_type)}</li>
-                          <li><b>Ngày khám:</b> {item?.slot_date?.slice(0,10)}</li>
-                          <li><b>Bác sĩ:</b> {item.appointment.doctor.full_name}</li>
-                        </ul>
-                      </div>
-                    )
-                })
-              }
-            </>
+          ) : currentQueue && currentQueue.length > 0 ? (
+            <Table
+              columns={columns}
+              dataSource={currentQueue}
+              rowKey="id"
+              pagination={false}
+              bordered
+              style={{ width: "100%", maxWidth: 700, margin: "0 auto" }}
+            />
           ) : (
             <Result
               icon={<span role="img" aria-label="waiting" style={{ fontSize: 80, color: "#1890ff" }}>⏳</span>}
