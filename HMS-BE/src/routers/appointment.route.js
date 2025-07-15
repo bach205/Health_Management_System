@@ -13,4 +13,5 @@ router.get("/slots-by-specialty", appointmentController.getAvailableSlotsBySpeci
 router.post("/nurse/reschedule", appointmentController.nurseRescheduleAppointment);
 router.put("/:id", appointmentController.updateAppointment);
 router.delete("/:id", appointmentController.deleteAppointment);
+router.post("/book-by-qr", appointmentController.bookAppointmentByQR);
 module.exports = router;

@@ -68,8 +68,8 @@ async function testCreateQueue() {
     // Test 3: Tạo queue walk-in (không có appointment)
     console.log('🚶 Test 3: Tạo queue walk-in (test service trực tiếp)');
     try {
-      const QueueService = require('./src/services/queue.service');
-      const prisma = require('./src/config/prisma');
+      const QueueService = require('../src/services/queue.service');
+      const prisma = require('../src/config/prisma');
 
       const walkInData = {
         appointment_id: null,
@@ -129,8 +129,8 @@ async function testQueueServiceDirect() {
   try {
     console.log('🔧 Test trực tiếp QueueService...\n');
     
-    const QueueService = require('./src/services/queue.service');
-    const prisma = require('./src/config/prisma');
+    const QueueService = require('../src/services/queue.service');
+    const prisma = require('../src/config/prisma');
 
     // Test 1: Tạo queue sáng
     console.log('🌅 Test 1: Tạo queue ca sáng');
