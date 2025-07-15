@@ -72,7 +72,8 @@ patientRouter.get(
 // Lấy bệnh nhân và hồ sơ khám gần nhất có đơn thuốc theo số CCCD (nurse)
 patientRouter.post(
     "/find-by-cccd",
-    authorize("nurse"),
+    // authenticate,
+    // authorize("nurse"),
     asyncHandler(patientController.getPatientByIdentityNumber)
 );
 

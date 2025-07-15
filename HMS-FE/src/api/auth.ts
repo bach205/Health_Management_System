@@ -12,7 +12,6 @@ export const register = async (body : object) => {
 export const login = async (body : object) => {
   const data = JSON.stringify(body);
   const response = await mainRequest.post(`${baseURL}/login`, data);
-  console.log(response.data);
   return response;
 };
 

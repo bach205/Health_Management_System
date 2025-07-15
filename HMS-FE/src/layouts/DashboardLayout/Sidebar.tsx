@@ -41,11 +41,11 @@ const Sidebar = ({ isCollapsed, role }: { isCollapsed: boolean, role: string }) 
         if (sidebar.label === "Quản lý" && role !== "admin") {
           return null
         }
-        
+
         if (sidebar.label === "Documents" && role !== "admin") {
           return null
         }
-        
+
         if (sidebar.label === "Phòng khám" && (role !== "admin")) {
           return null
         }
@@ -194,6 +194,12 @@ const SIDEBAR_ITEMS = [
     id: 4,
     label: "Y Tá",
     items: [
+      {
+        id: "sale-medicine",
+        label: "Bán Thuốc",
+        icon: <ClipboardType className="w-4 h-4" />,
+        href: "/sale-medicine",
+      },
       {
         id: "nurse-book-appointments",
         label: "Đặt Lịch Hẹn",

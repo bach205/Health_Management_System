@@ -484,15 +484,18 @@ model BlogCategory {
   id    Int    @id @default(autoincrement())
   name  String @unique
   blogs Blog[]
+
+  @@map("blog_categories")
 }
 
 model BlogTag {
   id    Int    @id @default(autoincrement())
   name  String @unique
   blogs Blog[] @relation("BlogTags")
+
+  @@map("blog_tags")
 }
 
-// Cập nhật Blog để liên kết với category và tags
 model Blog {
   id          Int      @id @default(autoincrement())
   title       String
@@ -509,4 +512,6 @@ model Blog {
   category_id Int?
   category    BlogCategory? @relation(fields: [category_id], references: [id])
   tags        BlogTag[] @relation("BlogTags")
+
+  @@map("blogs")
 }
