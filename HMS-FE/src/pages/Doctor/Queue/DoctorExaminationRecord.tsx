@@ -10,6 +10,7 @@ import dayjs from "dayjs";
 import "dayjs/locale/vi";
 dayjs.locale("vi");
 import { bookAppointmentService, getAvailableTimeSlotsService } from "../../../services/appointment.service";
+import { PushANotification } from "../../../api/notification";
 interface ExaminationRecordModalProps {
   open: boolean;
   onClose: () => void;
@@ -168,6 +169,8 @@ const DoctorExaminationRecordModal = ({
       setIsFormDisabled(false);
       onClose();
       onSuccess?.();
+      PushANotification({ message: `Bạn đã nhận được kết quả khám bệnh từ bác sĩ`, userId: patient_id })
+
     } catch (err: any) {
       console.error("Error creating examination record:", err);
       toast.error(err?.response?.data?.message || "Có lỗi xảy ra!");
