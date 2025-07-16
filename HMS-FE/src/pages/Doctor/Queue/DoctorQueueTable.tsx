@@ -34,6 +34,7 @@ const QueueTable = () => {
     const [selectedPatient, setSelectedPatient] = useState<any>(null);
     const [clinics, setClinics] = useState<any[]>([]);
     const [selectedClinic, setSelectedClinic] = useState("");
+    const [selectedAppointment, SetSelectedAppointment] = useState(null)
     const { fetchQueue } = useQueue();
     const { user } = useAuthStore();
     const currentDoctorId = user?.id;
@@ -84,7 +85,7 @@ const QueueTable = () => {
             const appointmentDate = dayjs.utc(queue.appointment.appointment_date);
 
             // Kiểm tra xem giờ khám, ngày khám có đã qua hay không
-            if ( appointmentDate > dayjs() && appointmentTime.hour() > dayjs().hour() && appointmentTime.minute() > dayjs().minute()) {
+            if (appointmentDate > dayjs() && appointmentTime.hour() > dayjs().hour() && appointmentTime.minute() > dayjs().minute()) {
                 message.error("Chưa đến giờ khám");
                 return;
             }
@@ -120,7 +121,8 @@ const QueueTable = () => {
         else reset();
     }, [selectedClinic]);
 
-    const handleFinishExam = (patient: any) => {
+    const handleFinishExam = (patient: any, appointment_id: any) => {
+        SetSelectedAppointment(appointment_id)
         setSelectedPatient(patient);
         setShowRecordModal(true);
     };
@@ -204,6 +206,7 @@ const QueueTable = () => {
             ellipsis: true,
             width: 200,
             render: (_: any, record: any) => {
+                console.log(record)
                 return (
                     //  kiem tra tai khoan bac si co trung voi appointment ko
                     record?.appointment?.doctor?.id === currentDoctorId &&
@@ -231,7 +234,7 @@ const QueueTable = () => {
                                 <Button color="pink" key="viewExaminationOrder" onClick={() => handleViewExaminationOrder(record.patient)}>
                                     Xem lịch sử chuyển phòng
                                 </Button>
-                                <Button type="primary" key="finish" onClick={() => handleFinishExam(record.patient)}>
+                                <Button type="primary" key="finish" onClick={() => handleFinishExam(record.patient, record.appointment_id)}>
                                     Khám xong
                                 </Button>
                                 <Button type="dashed" key="assign" onClick={() => handleAssignClinic(record.patient)}>
@@ -354,6 +357,7 @@ const QueueTable = () => {
                 patient_id={selectedPatient?.id}
                 clinic_id={Number(selectedClinic)}
                 doctor_id={Number(currentDoctorId)}
+                appointment_id={Number(selectedAppointment)}
                 onSuccess={() => {
                     setShowRecordModal(false);
                     setSelectedPatient(null);
