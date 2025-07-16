@@ -27,6 +27,14 @@ class DoctorController {
     }).send(res);
   }
 
+  getAllDoctorsWithAvgRating = async (req, res) => {
+    const result = await DoctorService.getAllDoctorsWithAvgRating(req.body);
+    return new OK({
+      message: "Lấy danh sách bác sĩ kèm rating thành công",
+      metadata: result,
+    }).send(res);
+  }
+
 
   updateDoctor = async (req, res) => {
     const result = await DoctorService.updateDoctor(req.body);
@@ -90,7 +98,7 @@ class DoctorController {
       metadata: result,
     }).send(res);
   }
-  
+
   createDoctorsFromCSV = async (req, res) => {
     const result = await DoctorService.createDoctorsFromCSV(req.body);
     return new OK({
