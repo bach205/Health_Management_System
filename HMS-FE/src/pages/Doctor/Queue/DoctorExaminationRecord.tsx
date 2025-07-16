@@ -2,7 +2,7 @@ import { Modal, Form, Input, Button, Checkbox, Flex, InputNumber, Popconfirm, Se
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import mainRequest from "../../../api/mainRequest";
-import { Delete, Edit } from "lucide-react";
+import { Check, CircleCheck, Delete, Edit } from "lucide-react";
 import { useMedicineList } from "../../../hooks/useMedicineList";
 import type { IMedicine } from "../../../types/index.type";
 import TextArea from "antd/es/input/TextArea";
@@ -12,21 +12,21 @@ dayjs.locale("vi");
 import { bookAppointmentService, getAvailableTimeSlotsService } from "../../../services/appointment.service";
 import { PushANotification } from "../../../api/notification";
 interface ExaminationRecordModalProps {
-  appointment_id: number,
   open: boolean;
   onClose: () => void;
   patient_id: number;
   clinic_id: number;
+  appointment_id: number;
   doctor_id?: number;
   onSuccess?: () => void;
 }
 
 
 const DoctorExaminationRecordModal = ({
-  appointment_id,
   open,
   onClose,
   patient_id,
+  appointment_id,
   clinic_id,
   doctor_id,
   onSuccess,
@@ -50,6 +50,12 @@ const DoctorExaminationRecordModal = ({
 
   const [selectedMedicine, setSelectedMedicine] = useState<IMedicine | null>(null);
   const { medicines } = useMedicineList();
+
+  const [isFormDisabled, setIsFormDisabled] = useState(false);  // disable form
+  const [isReadyToSubmit, setIsReadyToSubmit] = useState(false); // đã bấm "lưu hồ sơ"
+
+  const [isSaved, setIsSaved] = useState(false);                // đã lưu hồ sơ
+
 
   // Fetch slot theo doctor
   useEffect(() => {
@@ -111,18 +117,13 @@ const DoctorExaminationRecordModal = ({
     try {
       const selectedSlot = slots.find(s => s.id === selectedSlotId);
 
-      await mainRequest.post("/api/v1/examination-record", {
-        patient_id,
-        doctor_id,
-        clinic_id,
-        result: values.result,
-        note: values.note ?? "",
-        prescription_items: medicinesAdded.map((med) => ({
-          medicine_id: med.id,
-          note: med.note ?? null,
-          dosage: med.dosage ?? null,
-        }))
-      });
+      if (isFollowUp && !selectedSlotId) {
+        toast.error("Vui lòng chọn giờ tái khám!");
+        setLoading(false);
+        return;
+      }
+
+
 
       if (isFollowUp && selectedSlot) {
 
@@ -143,17 +144,35 @@ const DoctorExaminationRecordModal = ({
         if (res.status !== 201) throw new Error("Đặt lịch tái khám thất bại");
       }
 
+      await mainRequest.post("/api/v1/examination-record", {
+        patient_id,
+        doctor_id,
+        clinic_id,
+        appointment_id,
+        result: values.result,
+        note: values.note ?? "",
+        prescription_items: medicinesAdded.map((med) => ({
+          medicine_id: med.id,
+          note: med.note ?? null,
+          dosage: med.dosage ?? null,
+        }))
+      });
+
+
       toast.success("Tạo hồ sơ khám thành công!");
       handleSetIsFollowUp(false)
       handleSetMedicineVisible(false);
       form.resetFields();
       setSelectedDate(null);
       setSelectedSlotId(null);
+      setIsSaved(false);
+      setIsFormDisabled(false);
       onClose();
       onSuccess?.();
-      //fix_here
       PushANotification({ message: `Bạn đã nhận được kết quả khám bệnh từ bác sĩ`, userId: patient_id })
+
     } catch (err: any) {
+      console.error("Error creating examination record:", err);
       toast.error(err?.response?.data?.message || "Có lỗi xảy ra!");
     } finally {
       setLoading(false);
@@ -216,6 +235,7 @@ const DoctorExaminationRecordModal = ({
 
 
 
+
   const handleRemoveMedicine = (record: any) => {
     const newList = medicinesAdded.filter((item) => item.id !== record.id);
     setMedicinesAdded(newList);
@@ -231,16 +251,57 @@ const DoctorExaminationRecordModal = ({
         form.resetFields();
         setSelectedDate(null);
         setSelectedSlotId(null);
+        setIsFormDisabled(false);
+        setIsSaved(false);
         onClose();
       }}
+
       onOk={() => form.submit()}
       confirmLoading={loading}
-      okText="Lưu hồ sơ"
-      cancelText="Hủy"
+      // okText="Lưu hồ sơ"
+      // cancelText="Hủy"
       centered
       width={700}
+      footer={[
+        <Button key="cancel" onClick={onClose}>Hủy</Button>,
+
+        !isReadyToSubmit ? (
+          <Button
+            key="preview"
+            type="primary"
+            onClick={() => {
+              setIsFormDisabled(true);
+              setIsReadyToSubmit(true);
+            }}
+          >
+            Lưu hồ sơ
+          </Button>
+        ) : (
+          <>
+            <Button
+              key="edit"
+              onClick={() => {
+                setIsFormDisabled(false);
+                setIsReadyToSubmit(false);
+              }}
+            >
+              Cập nhật hồ sơ
+            </Button>
+            <Button
+              key="submit"
+              type="primary" className="!bg-green-500 !border-green-500 hover:!bg-green-600 hover:!border-green-600"
+              loading={loading}
+              onClick={() => form.submit()}
+            >
+              <CircleCheck className="mr-1 w-3 h-3" />
+              Khám xong
+            </Button>
+          </>
+        )
+      ]}
+      destroyOnHidden
     >
-      <Form form={form} layout="vertical" onFinish={onFinish} className="pt-2">
+      <Form disabled={isFormDisabled} form={form} layout="vertical" onFinish={onFinish} className="pt-2">
         <Form.Item
           label="Kết quả khám chuyên khoa"
           name="result"
@@ -296,6 +357,10 @@ const DoctorExaminationRecordModal = ({
                     {Object.keys(slotsByDate).map(date => {
                       const weekday = dayjs(date).locale('vi').format("dddd");
                       const dateStr = dayjs(date).format("DD/MM/YYYY");
+                      // Kiểm tra nếu ngày khám <= hôm nay thì bỏ qua
+                      if (dayjs(date).isBefore(dayjs(), 'minute')) {
+                        return null; // Nếu ngày khám là quá khứ thì bỏ qua
+                      }
                       return (
                         <Button
                           key={date}
@@ -353,8 +418,8 @@ const DoctorExaminationRecordModal = ({
           medicineVisible && (
             <>
               <Form.Item label="Đơn thuốc" layout="horizontal">
-                {/* <Flex wrap="wrap" gap={8}> */}
-                <Select showSearch
+                <Select
+                  showSearch
                   style={{ width: 200 }}
                   placeholder="Chọn thuốc"
                   options={optionMedicines}
@@ -371,9 +436,10 @@ const DoctorExaminationRecordModal = ({
                       setIsCreate(true);
                     }
                   }}
-                  disabled={!isCreate}
+                  disabled={!isCreate || isFormDisabled} // <-- THÊM Ở ĐÂY
                 />
               </Form.Item>
+
               {
                 selectedMedicine && (
                   <>
@@ -500,5 +566,6 @@ const DoctorExaminationRecordModal = ({
     </Modal>
   );
 };
+
 
 export default DoctorExaminationRecordModal;

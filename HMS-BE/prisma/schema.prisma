@@ -32,7 +32,6 @@ model User {
   appointments        Appointment[]        @relation("DoctorAppointment")
   availableSlots      AvailableSlot[]
   documents           Documents[]
-  blogs               Blog[]
 
   chatsSent                Chat[]                    @relation("ChatSendBy")
   chatsReceived            Chat[]                    @relation("ChatTo")
@@ -181,8 +180,8 @@ model WorkSchedule {
 model ExaminationOrder {
   id             Int      @id @default(autoincrement())
   doctor_id      Int
+  appointment_id Int     // id cua appointment
   patient_id     Int
-  record_id      Int      // ExaminationRecord
   from_clinic_id Int
   to_clinic_id   Int
   reason         String?  @db.Text
@@ -194,7 +193,7 @@ model ExaminationOrder {
   fromClinic Clinic  @relation("FromClinic", fields: [from_clinic_id], references: [id])
   toClinic   Clinic  @relation("ToClinic", fields: [to_clinic_id], references: [id])
 
-  record     ExaminationRecord? @relation(fields: [record_id], references: [id])
+  appointment Appointment @relation(fields: [appointment_id], references: [id])
 
   @@map("examination_orders")
 }
@@ -204,6 +203,7 @@ model ExaminationRecord {
   id                 Int      @id @default(autoincrement())
   patient_id         Int
   clinic_id          Int
+  appointment_id     Int?     @unique  // 1 appointment chi co 1 examination record
   doctor_id          Int      // id cua doctor dam nhiem kham 
   result             String?  @db.Text      // add from removed ExaminationDetail 
   note               String?  @db.Text      // add from ExaminationDetail
@@ -211,11 +211,12 @@ model ExaminationRecord {
   created_at         DateTime @default(now())
   updated_at         DateTime @updatedAt
 
+  appointment Appointment? @relation("AppointmentToExaminationRecord", fields: [appointment_id], references: [id], onDelete: SetNull)
+ 
   patient       Patient @relation(fields: [patient_id], references: [id])
   clinic        Clinic  @relation(fields: [clinic_id], references: [id])
   doctor        Doctor    @relation(fields: [doctor_id], references: [user_id])
 
-  examinationOrder ExaminationOrder[]
   prescriptionItems PrescriptionItem[]
 
   invoiceItems  InvoiceItem[]
@@ -363,8 +364,11 @@ model Appointment {
   clinic  Clinic  @relation(fields: [clinic_id], references: [id])
   doctor  User    @relation("DoctorAppointment", fields: [doctor_id], references: [id])
   queues  Queue[] // Một appointment có thể có nhiều queue
+  examinationRecord ExaminationRecord? @relation("AppointmentToExaminationRecord")
+
 
   doctorRatings DoctorRating[]
+  examinationOrder ExaminationOrder[]
 
   @@map("appointments")
 }
@@ -488,30 +492,18 @@ model BlogCategory {
   @@map("blog_categories")
 }
 
-model BlogTag {
-  id    Int    @id @default(autoincrement())
-  name  String @unique
-  blogs Blog[] @relation("BlogTags")
-
-  @@map("blog_tags")
-}
-
 model Blog {
   id          Int      @id @default(autoincrement())
   title       String
-  slug        String   @unique
   content     String   @db.Text
   summary     String?  @db.Text
   image_url   String?
-  author_id   Int
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
   published   Boolean  @default(false)
 
-  author      User     @relation(fields: [author_id], references: [id])
   category_id Int?
   category    BlogCategory? @relation(fields: [category_id], references: [id])
-  tags        BlogTag[] @relation("BlogTags")
 
   @@map("blogs")
 }

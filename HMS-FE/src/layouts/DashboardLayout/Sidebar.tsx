@@ -14,6 +14,7 @@ import {
   Pill,
   Stethoscope,
   MessageCircle,
+  LetterText,
 } from "lucide-react";
 import type { JSX } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -38,9 +39,15 @@ const Sidebar = ({ isCollapsed, role }: { isCollapsed: boolean, role: string }) 
       </div>
 
       {SIDEBAR_ITEMS.map((sidebar) => {
+        
         if (sidebar.label === "Quản lý" && role !== "admin") {
           return null
         }
+        
+        if (sidebar.label === "Trang chủ" && role !== "admin") {
+          return null
+        }
+
 
         if (sidebar.label === "Documents" && role !== "admin") {
           return null
@@ -56,6 +63,7 @@ const Sidebar = ({ isCollapsed, role }: { isCollapsed: boolean, role: string }) 
         if (sidebar.label === "Y Tá" && (role !== "nurse" && role !== "admin")) {
           return null
         }
+
         return (
           <div key={sidebar.id} className="mb-4">
             {!isCollapsed && (
@@ -174,6 +182,12 @@ const SIDEBAR_ITEMS = [
         label: "Quản lý phòng khám",
         icon: <Hospital className="w-4 h-4" />,
         href: "/rooms",
+      },
+      {
+        id: "blogs",
+        label: "Quản lý bài viết",
+        icon: <LetterText className="w-4 h-4" />,
+        href: "/admin/blogs",
       },
     ],
   },

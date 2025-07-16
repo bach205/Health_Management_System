@@ -84,6 +84,19 @@ class NurseController {
             });
         }
     }
+    createNursesFromCSV = async (req, res) => {
+        try {
+            const result = await NurseService.createNursesFromCSV(req.body);
+            return new CREATED({
+                message: "Tạo tài khoản từ file CSV thành công",
+                metadata: result,
+            }).send(res);
+        } catch (error) {
+            return res.status(error.status || 400).json({
+                message: error.message,
+            });
+        }
+    }
 }
 
 module.exports = new NurseController();

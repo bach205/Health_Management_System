@@ -18,6 +18,11 @@ class ExaminationRecordController {
         const record = await examinationRecordService.getById(id);
         return new OK({ message: "Lấy hồ sơ khám thành công", metadata: record }).send(res);
     }
+    static async getByAppointmentId(req, res) {
+        const { appointmentId } = req.params;
+        const record = await examinationRecordService.getByAppointmentId(appointmentId);
+        return new OK({ message: "Lấy hồ sơ khám theo lịch hẹn thành công", metadata: record }).send(res);
+    }
 
     static async getAll(req, res) {
         const records = await examinationRecordService.getAll(req.query);

@@ -23,6 +23,7 @@ const notificationRouter = require('./notification.route');
 const sepayRouter = require('./sepay.route');
 const feedbackRouter = require("./feedback.route");
 const statisticsRouter = require("./statistics.route");
+const paymentRouter = require("./payment.routes");
 const blogRouter = require("./blog.route");
 const blogCategoryRouter = require("./blogCategory.route");
 const blogTagRouter = require("./blogTag.route");
@@ -50,6 +51,10 @@ router.use('/notification', notificationRouter);
 router.use('/sepay', sepayRouter);
 router.use('/feedback', feedbackRouter);
 router.use("/statistics", statisticsRouter);
+router.use("/payment", paymentRouter);
+
+
+
 router.use("/blog", blogRouter);
 router.use("/blog-category", blogCategoryRouter);
 router.use("/blog-tag", blogTagRouter);

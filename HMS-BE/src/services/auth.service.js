@@ -266,6 +266,8 @@ class AuthService {
       // }
 
       // Kiểm tra mật khẩu cũ
+      console.log("Old password:", oldPassword);
+      console.log("User password:", user.password);
       const isValidOldPassword = await bcrypt.compare(
         oldPassword,
         user.password
@@ -278,14 +280,14 @@ class AuthService {
       const isSamePassword = await bcrypt.compare(newPassword, user.password);
       if (isSamePassword) {
         throw new BadRequestError(
-          "New password must be different from old password"
+          "Mật khẩu mới không được trùng với mật khẩu cũ"
         );
       }
 
       // Kiểm tra mật khẩu mới và xác nhận mật khẩu mới có khớp nhau không
       if (newPassword !== confirmPassword) {
         throw new BadRequestError(
-          "New password and confirm password do not match"
+          "Mật khẩu mới và xác nhận mật khẩu mới không khớp nhau"
         );
       }
 
@@ -301,7 +303,7 @@ class AuthService {
         data: { password: hashedPassword },
       });
 
-      return { message: "Password has been changed successfully" };
+      return { message: "Mật khẩu đã được thay đổi thành công" };
     } catch (error) {
       console.error("Reset password error:", error);
       if (error.name === "JsonWebTokenError") {

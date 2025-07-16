@@ -29,6 +29,7 @@ import {
 } from "@ant-design/icons";
 
 import { cancelAppointmentService, deleteAppointmentService } from '../../services/appointment.service';
+import { useNavigate } from "react-router-dom";
 
 const style = {
   ".ant-table-thead .ant-table-cell": {
@@ -37,10 +38,11 @@ const style = {
 }
 
 const ScheduleTable = ({ data = [], setReload, loading = false, visible, selectedPatient, onEdit, onCancel, reload, isPage, }: any) => {
- // const [reload, setReload] = useState(false);
+  // const [reload, setReload] = useState(false);
   const [viewModalVisible, setViewModalVisible] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<any>(null);
 
+  const navigate = useNavigate();
   const handleEditAppointment = (record: any) => {
     onEdit(record);
   };
@@ -70,7 +72,7 @@ const ScheduleTable = ({ data = [], setReload, loading = false, visible, selecte
           await cancelAppointmentService({ id: record._id || record.id, reason });
           setReload(!reload);
           notification.success({ message: 'Huỷ lịch thành công' });
-       //   if (typeof reloadSchedule === 'function') reloadSchedule((r: any) => !r);
+          //   if (typeof reloadSchedule === 'function') reloadSchedule((r: any) => !r);
         },
         okText: 'Xác nhận',
         cancelText: 'Không',
@@ -103,7 +105,19 @@ const ScheduleTable = ({ data = [], setReload, loading = false, visible, selecte
   };
 
   const hasPermissionEdit = (record: any) => {
-    //Có thể chỉnh sửa nếu thời gian đặt cách thời gian hiện tại 2 tiếng
+    if (record.status === "completed") {
+      return (
+        <Tooltip title="Xem kết quả khám">
+          <Button
+            type="primary"
+            size="small"
+            onClick={() => navigate(`record/${record._id || record.id}`)}
+          >
+            Xem kết quả khám
+          </Button>
+        </Tooltip>
+      );
+    }
     return (
       <>
         <Tooltip title="Xem chi tiết">
@@ -177,7 +191,7 @@ const ScheduleTable = ({ data = [], setReload, loading = false, visible, selecte
       key: "formatted_time",
       width: 110,
       align: "center" as const,
-      render: (time: any) => time ? time.slice(0,5) : "",
+      render: (time: any) => time ? time.slice(0, 5) : "",
     },
     {
       title: "Phòng khám",
@@ -235,7 +249,7 @@ const ScheduleTable = ({ data = [], setReload, loading = false, visible, selecte
           colorPrimaryHover: "#5f8aff",
           colorPrimaryActive: "#5f8aff",
         }
-          
+
       },
     }}>
       <Table
@@ -274,7 +288,7 @@ const ScheduleTable = ({ data = [], setReload, loading = false, visible, selecte
             <Row gutter={[16, 16]}>
               <Col span={12}>
                 <div className="font-medium text-gray-700">Giờ khám:</div>
-                <div>{selectedRecord.formatted_time ? selectedRecord.formatted_time.slice(0,5) : "Chưa xác định"}</div>
+                <div>{selectedRecord.formatted_time ? selectedRecord.formatted_time.slice(0, 5) : "Chưa xác định"}</div>
               </Col>
               <Col span={12}>
                 <div className="font-medium text-gray-700">Trạng thái:</div>

@@ -24,7 +24,7 @@ export const getProfile = async () => {
 };
 
 export const updatePassword = async (updateData : any) => {
-  const response = await instance.post(`${patientURL}/update-password`, { ...updateData });
+  const response = await instance.post(`${baseURL}/reset-password`, { ...updateData });
   return response;
 };
 

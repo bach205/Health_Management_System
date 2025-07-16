@@ -7,13 +7,11 @@ const checkUserStatus = require("../middlewares/checkUserStatus");
 const statisticsController = require("../controllers/statistics.controller");
 
 // Apply middleware to all routes
-// statisticsRouter.use(authenticate);  
-// statisticsRouter.use(checkUserStatus());
+statisticsRouter.use(authenticate);  
+statisticsRouter.use(checkUserStatus());
 statisticsRouter.get(
   "/top-doctors",
-  // authenticate,
-  // checkUserStatus(),
-  // authorize("admin"),?
+  authorize("admin"),
   asyncHandler(statisticsController.getTopDoctors),
   statisticsController.getTopDoctors
 );
@@ -22,7 +20,7 @@ statisticsRouter.get(
   "/period-statistics",
   // authenticate,
   // checkUserStatus(),
-  // authorize("admin"),
+  authorize("admin"),
   asyncHandler(statisticsController.getPeriodStatistics),
   statisticsController.getPeriodStatistics
 );
@@ -31,7 +29,7 @@ statisticsRouter.get(
   "/revenue-days",
   // authenticate,
   // checkUserStatus(),
-  // authorize("admin"),
+  authorize("admin"),
   // validate("getRevenuePerDayInMonth"),
   asyncHandler(statisticsController.getRevenuePerDayInMonth),
   statisticsController.getRevenuePerDayInMonth
@@ -41,7 +39,7 @@ statisticsRouter.get(
   "/revenue-months",
   // authenticate,
   // checkUserStatus(),
-  // authorize("admin"),
+  authorize("admin"),
   // validate("getRevenuePerMonthInYear"),
   asyncHandler(statisticsController.getRevenuePerMonthInYear),
   statisticsController.getRevenuePerMonthInYear

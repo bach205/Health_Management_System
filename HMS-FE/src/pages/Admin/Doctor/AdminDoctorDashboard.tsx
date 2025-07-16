@@ -1,19 +1,20 @@
 import { useState } from "react";
-import { Table, Tag, Space, Flex, Button, Form, Input, Select, notification, Tooltip, Popconfirm, Avatar, } from "antd";
+import { Table, Tag, Space, Flex, Button, Form, Input, Select, notification, Tooltip, Popconfirm, Avatar, Upload, } from "antd";
 import { Ban, CirclePlus, Eye, RefreshCcw, RotateCcw, Search, User, UserRoundPen } from "lucide-react";
 
-import ModalCreateUser from "../../../components/modal/ModalCreateUser";
-import ModalUpdateUser from "../../../components/modal/ModalUpdateUser";
 import dayjs from "dayjs";
 import { useDoctorList } from "../../../hooks/useDoctorList";
 import ModalViewUser from "../../../components/modal/ModalViewUser";
-import { specialtyOptions, TYPE_EMPLOYEE_STR, PASSWORD_DEFAULT, sortOptions } from "../../../constants/user.const";
+import { specialtyOptions, TYPE_EMPLOYEE_STR, sortOptions } from "../../../constants/user.const";
 import type { IDoctor } from "../../../types/index.type";
 import UserListTitle from "../../../components/ui/UserListTitle";
 import { createDoctor, updateDoctor, updatePassword, updateStatus } from "../../../services/doctor.service";
 import ModalCreateDoctor from "../../../components/modal/ModalCreateDoctor";
 import ModalUpdateDoctor from "../../../components/modal/ModalUpdateDoctor";
 import { useSpecialtyList } from "../../../hooks/useSpecialtyList";
+import { toast } from "react-toastify";
+import Papa from "papaparse";
+import ImportCSV from "../../../components/doctor/ImportCSV";
 
 const AdminDoctorDashboard = () => {
   const [isCreateVisible, setIsCreateVisible] = useState<boolean>(false);
@@ -21,11 +22,10 @@ const AdminDoctorDashboard = () => {
   const [isViewVisible, setIsViewVisible] = useState<boolean>(false);
   const [currentUser, setCurrentUser] = useState<IDoctor | null>(null);
   const filterOptions = [{ value: "all", label: "Tất cả" }, ...specialtyOptions]
-
+  console.log("currentUser", currentUser)
   const [formCreate] = Form.useForm();
   const [formUpdate] = Form.useForm();
   const [formView] = Form.useForm();
-
   // Table column
   const columns: any = [
     {
@@ -124,7 +124,7 @@ const AdminDoctorDashboard = () => {
                 icon={<UserRoundPen size={17.5} />}
               ></Button>
             </Tooltip>
-          )}  
+          )}
 
           <Popconfirm
             title="Khôi phục mật khẩu"
@@ -175,7 +175,8 @@ const AdminDoctorDashboard = () => {
       formView.setFieldsValue({
         ...record,
         date_of_birth: record.date_of_birth ? dayjs(record.date_of_birth) : null,
-        specialty: record.doctor?.specialty?.id,
+        specialty_id: record.doctor?.specialty?.id,
+        price: record.doctor?.price || 0,
         bio: record.doctor?.bio
       });
       setIsViewVisible(true);
@@ -240,8 +241,10 @@ const AdminDoctorDashboard = () => {
         ...values,
         full_name: values.full_name?.trim(),
         email: values.email?.trim(),
+        price: values.price || 0,
         phone: values.phone?.trim(),
         bio: values.bio?.trim(),
+        specialty_id: values.specialty_id || null,
         address: values.address?.trim(),
         password: values.password || "",
       }
@@ -277,6 +280,7 @@ const AdminDoctorDashboard = () => {
         id: currentUser.id,
         full_name: values.full_name?.trim(),
         email: values.email?.trim(),
+        specialty_id: values.specialty_id || null,
         phone: values.phone?.trim(),
         bio: values.bio?.trim(),
         address: values.address?.trim(),
@@ -306,11 +310,14 @@ const AdminDoctorDashboard = () => {
     setReload(!reload);
   }
 
+
+
   // custom hook
   const {
     users, loading, keyword, reload, specialty, sort, pagination, isActive,
     setKeyword, setReload, setSpecialty, setSort, setIsActive, handleTableChange,
   } = useDoctorList();
+
   const { specialties, loading: specialtyLoading, reload: specialtyReload, handleTableChange: specialtyTableChange } = useSpecialtyList(undefined, true);
   return (
     <div>
@@ -335,9 +342,16 @@ const AdminDoctorDashboard = () => {
           </Button>
         </Flex>
 
-        <Button type="primary" icon={<CirclePlus size={16} />} onClick={() => setIsCreateVisible(true)} >
-          Thêm bác sĩ
-        </Button>
+        <Space>
+          {/* <Button type="default" icon={<CirclePlus size={16} />} onClick={() => setIsCreateVisible(true)} >
+            Import CSV
+          </Button> */}
+
+          <ImportCSV role="doctor"></ImportCSV>
+          <Button type="primary" icon={<CirclePlus size={16} />} onClick={() => setIsCreateVisible(true)} >
+            Thêm bác sĩ
+          </Button>
+        </Space>
       </Flex>
       <Flex gap={10} justify="space-between" style={{ marginBottom: 10 }}>
         <Form>

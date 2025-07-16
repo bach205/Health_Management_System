@@ -101,6 +101,7 @@ const DoctorProfile = () => {
             const value = formPassword.getFieldsValue();
             const updateData = {
                 token: localStorage.getItem("token"),
+                userId: profile?.id,
                 oldPassword: value.oldPassword,
                 newPassword: value.newPassword,
                 confirmPassword: value.confirmPassword,
@@ -126,6 +127,7 @@ const DoctorProfile = () => {
     }
     const handleCancelPassword = () => {
         setIsVisiblePassword(false);
+        formPassword.resetFields();
     };
     return (
         <div style={{ padding: "20px" }}>

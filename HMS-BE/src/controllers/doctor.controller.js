@@ -90,6 +90,15 @@ class DoctorController {
       metadata: result,
     }).send(res);
   }
+  
+  createDoctorsFromCSV = async (req, res) => {
+    const result = await DoctorService.createDoctorsFromCSV(req.body);
+    return new OK({
+      message: "Tạo bác sĩ từ file CSV thành công",
+      metadata: result,
+    }).send(res);
+  }
+
 }
 
 module.exports = new DoctorController();

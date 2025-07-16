@@ -53,4 +53,13 @@ nurseRouter.delete("/delete/:id",
         return await NurseController.deleteNurse(req, res);
     });
 
+    // CSV
+nurseRouter.post(
+    "/create-nurses-from-csv",
+    authenticate,
+    authorize("admin"),
+    async (req, res) => {
+        return await NurseController.createNursesFromCSV(req, res);
+    });
+
 module.exports = nurseRouter; 

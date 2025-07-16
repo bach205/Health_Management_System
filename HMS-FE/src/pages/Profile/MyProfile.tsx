@@ -123,6 +123,7 @@ const MyProfile: React.FC = () => {
     }
   }
   const handleCancelPassword = () => {
+    formPassword.resetFields();
     setIsVisiblePassword(false);
   }
     return (

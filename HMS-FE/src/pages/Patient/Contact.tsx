@@ -3,7 +3,7 @@ import { assets } from "../../assets/assets";
 
 const Contact: React.FC = () => {
   return (
-    <div>
+    <div >
       <div className="text-center text-2xl pt-10 text-gray-500">
         <p>
           LIÊN HỆ

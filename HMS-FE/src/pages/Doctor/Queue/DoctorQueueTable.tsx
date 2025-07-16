@@ -38,6 +38,8 @@ const QueueTable = () => {
     const { fetchQueue } = useQueue();
     const { user } = useAuthStore();
     const currentDoctorId = user?.id;
+    const [selectedAppointmentId, setSelectedAppointmentId] = useState<number | null>(null);
+
 
     const [statusFilter, setStatusFilter] = useState<string>("");
 
@@ -121,14 +123,13 @@ const QueueTable = () => {
         else reset();
     }, [selectedClinic]);
 
-    const handleFinishExam = (patient: any, appointment_id: any) => {
-        SetSelectedAppointment(appointment_id)
+    const handleFinishExam = (patient: any) => {
         setSelectedPatient(patient);
         setShowRecordModal(true);
+        console.log("selectedAppointmentId, selectedPatient", selectedAppointmentId, selectedPatient);
     };
-
-    const handleAssignClinic = (patient: any) => {
-        setSelectedPatient(patient);
+    const handleAssignClinic = (record: any) => {
+        setSelectedPatient(record.patient);
         setShowDoctorExaminationOrderModal(true);
         // setShowResultModal(true);
     };
@@ -234,10 +235,10 @@ const QueueTable = () => {
                                 <Button color="pink" key="viewExaminationOrder" onClick={() => handleViewExaminationOrder(record.patient)}>
                                     Xem lịch sử chuyển phòng
                                 </Button>
-                                <Button type="primary" key="finish" onClick={() => handleFinishExam(record.patient, record.appointment_id)}>
+                                <Button type="primary" key="finish" onClick={() => handleFinishExam(record.patient)}>
                                     Khám xong
                                 </Button>
-                                <Button type="dashed" key="assign" onClick={() => handleAssignClinic(record.patient)}>
+                                <Button type="dashed" key="assign" onClick={() => handleAssignClinic(record)}>
                                     Chỉ định phòng tiếp
                                 </Button>
                             </>
@@ -296,7 +297,7 @@ const QueueTable = () => {
                                 </label>
                                 <Select style={{ minWidth: 200 }} value={statusFilter} onChange={handleFilter} placeholder="Chọn trạng thái">
                                     <Option key={"clinic.id"} value={""}>
-                                        Khám bệnh
+                                        Chờ khám và đang khám
                                     </Option>
 
                                     <Option value={"waiting"}>Chờ khám</Option>
@@ -341,6 +342,8 @@ const QueueTable = () => {
                 open={showDoctorExaminationOrderModal}
                 onClose={() => setShowDoctorExaminationOrderModal(false)}
                 patient_id={selectedPatient?.id}
+                    appointment_id={selectedAppointmentId ?? 0}
+
                 clinic_id={Number(selectedClinic)}
                 doctor_id={(Number)(currentDoctorId)}
                 currentUserId={(Number)(user?.id)}
@@ -353,6 +356,8 @@ const QueueTable = () => {
             {/* viet ket qua kham + don thuoc */}
             <DoctorExaminationRecordModal
                 open={showRecordModal}
+                appointment_id={selectedAppointmentId ?? 0}
+
                 onClose={() => setShowRecordModal(false)}
                 patient_id={selectedPatient?.id}
                 clinic_id={Number(selectedClinic)}
