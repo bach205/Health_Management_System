@@ -103,11 +103,14 @@ class StatisticsService {
             },
         })
 
-        const revenues = doctors.map(d =>
-            (doctorIds.find(doc => doc.doctor_id === d.id)?._count._all || 0) * d.doctor.price
-        )
+        const payments = await prisma.payment.findMany({
+            where: {
+                status: "paid",
+                payment_time: { gte: date },
+            },
+        });
 
-        const totalRevenue = revenues.reduce((sum, e) => (sum + e), 0)
+        const totalRevenue = payments.reduce((sum, p) => sum + Number(p.amount), 0);
 
         return {
             totalPatients,
@@ -117,76 +120,69 @@ class StatisticsService {
     };
 
     getRevenuePerDayInMonth = async (month, year) => {
-        const startDate = new Date(year, month - 1, 1)
-        const endDate = new Date(year, month, 0, 23, 59, 59, 999)
+        const startDate = new Date(year, month - 1, 1);
+        const endDate = new Date(year, month, 0, 23, 59, 59, 999);
 
-        const appointments = await prisma.appointment.findMany({
+        const payments = await prisma.payment.findMany({
             where: {
-                created_at: {
+                status: "paid",
+                payment_time: {
                     gte: startDate,
                     lte: endDate,
                 },
-                status: 'completed',
             },
-            include: {
-                doctor: true,
-            },
-        })
+        });
 
-        const resultMap = new Map()
+        const resultMap = new Map();
 
-        for (const appt of appointments) {
-            const day = new Date(appt.created_at).getDate() // 1 -> 31
-            const price = appt.doctor?.price || 0;
-            resultMap.set(day, (resultMap.get(day) || 0) + price)
+        for (const p of payments) {
+            const day = new Date(p.payment_time).getDate();
+            resultMap.set(day, (resultMap.get(day) || 0) + Number(p.amount));
         }
 
-        const daysInMonth = new Date(year, month, 0).getDate()
+        const daysInMonth = new Date(year, month, 0).getDate();
         const result = [];
         for (let i = 1; i <= daysInMonth; i++) {
             result.push({
                 day: `${i}/${month}`,
                 value: resultMap.get(i) || 0,
-            })
+            });
         }
 
         return result;
+
     };
     getRevenuePerMonthInYear = async (year) => {
-        const startDate = new Date(year, 0, 1)
-        const endDate = new Date(year, 11, 31, 23, 59, 59, 999)
+        const startDate = new Date(year, 0, 1);
+        const endDate = new Date(year, 11, 31, 23, 59, 59, 999);
 
-        const appointments = await prisma.appointment.findMany({
+        const payments = await prisma.payment.findMany({
             where: {
-                created_at: {
+                status: "paid",
+                payment_time: {
                     gte: startDate,
                     lte: endDate,
                 },
-                status: 'completed',
             },
-            include: {
-                doctor: true,
-            },
-        })
+        });
 
-        const resultMap = new Map() // month => revenue
+        const resultMap = new Map();
 
-        for (const appt of appointments) {
-            const month = new Date(appt.created_at).getMonth() // 0 -> 11
-            const price = appt.doctor?.price || 0;
-            resultMap.set(month, (resultMap.get(month) || 0) + price)
+        for (const p of payments) {
+            const month = new Date(p.payment_time).getMonth(); // 0-11
+            resultMap.set(month, (resultMap.get(month) || 0) + Number(p.amount));
         }
 
-        // Format: [{ month: 'Tháng 1', value: 1000000 }, ...]
         const result = [];
         for (let i = 0; i < 12; i++) {
             result.push({
                 month: `Tháng ${i + 1}`,
                 value: resultMap.get(i) || 0,
-            })
+            });
         }
 
         return result;
+
     };
 
 }

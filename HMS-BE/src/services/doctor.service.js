@@ -423,9 +423,12 @@ class DoctorService {
     }
 
     getAvailableDoctorsWithNearestSlot = async (clinicId) => {
+        if (!clinicId) {
+            throw new BadRequestError("Clinic ID không được để trống");
+        }
         const slots = await prisma.availableSlot.findMany({
             where: {
-                clinic_id: clinicId,
+                clinic_id: Number(clinicId),
                 is_available: true,
                 slot_date: {
                     gte: new Date(), // Chỉ lấy từ hôm nay trở đi
@@ -436,11 +439,12 @@ class DoctorService {
                 { start_time: 'asc' },
             ],
             include: {
-                doctor: {
-                    include: {
-                        doctor: true, // lấy từ bảng Doctor
-                    },
-                },
+                doctor : {
+                    select: {
+                        id: true,
+                        full_name: true,
+                    }
+                }, // lấy từ bảng Doctor
             },
         });
 
@@ -456,8 +460,9 @@ class DoctorService {
                 });
             }
         }
-
-        return Array.from(doctorMap.values());
+        const data = Array.from(doctorMap.values())
+        console.log(data)
+        return data;
     };
 
 

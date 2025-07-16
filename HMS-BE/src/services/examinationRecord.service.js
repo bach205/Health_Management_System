@@ -1,5 +1,6 @@
 const prisma = require("../config/prisma");
 const { getIO } = require("../config/socket");
+const paymentService = require("./payment.service");
 const prescriptionItemService = require("./prescriptionItem.service");
 
 class ExaminationRecordService {
@@ -65,6 +66,12 @@ class ExaminationRecordService {
         // Gọi tạo nhiều thuốc nếu có
         if (prescription_items.length > 0) {
             await prescriptionItemService.createMany(record.id, prescription_items);
+        }
+        try {
+            await paymentService.createInvoiceAndPaymentAfterExamination(record, appointment_id, doctor_id, patient_id);
+        } catch (error) {
+            console.error("Error creating invoice and payment:", error);
+            throw new Error("Lỗi khi tạo hóa đơn và thanh toán: " + error.message);
         }
 
         const io = getIO();

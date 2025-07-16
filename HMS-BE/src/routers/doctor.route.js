@@ -121,6 +121,15 @@ doctorRouter.post(
   doctorController.createDoctorsFromCSV
 );
 
+doctorRouter.get(
+  "/nearest-slot/:clinicId",
+  // authenticate,
+  // checkUserStatus(),
+  // authorize("admin", "doctor"),
+  asyncHandler(doctorController.getAvailableDoctorsWithNearestSlot),
+  doctorController.getAvailableDoctorsWithNearestSlot
+);
+
 // Ví dụ check authen bên trong router
 // authRouter.get("/users", authenticateToken, authorizeRoles("admin"), asyncHandler(AuthController.getUsers));
 

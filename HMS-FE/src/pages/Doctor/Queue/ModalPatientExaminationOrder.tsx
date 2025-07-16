@@ -14,7 +14,7 @@ const ModalPatientExaminationOrder = ({ open, onClose, patient }: { open: boolea
         if (patient) {
             const fetchExaminationOrders = async () => {
                 const res = await getPatientExaminationOrder(patient.id);
-                console.log(res.data.metadata); 
+                console.log("examination orders: ",res.data.metadata); 
                 setExaminationOrders(res.data.metadata);
             };
             fetchExaminationOrders();
@@ -24,10 +24,11 @@ const ModalPatientExaminationOrder = ({ open, onClose, patient }: { open: boolea
         {
             title: "STT",
             dataIndex: "id",
-            key: "id",
+            render: (_: any, record: any, index: number) => index + 1,
+            width: 50,
         },
         {
-            title: "Bác sĩ khám",
+            title: "Bác sĩ chỉ định",
             dataIndex: "doctor_id",
             key: "doctor_id",
             render: (_: any, record: any) => record?.doctor?.full_name || "-",
@@ -44,6 +45,14 @@ const ModalPatientExaminationOrder = ({ open, onClose, patient }: { open: boolea
             key: "toClinic",
             render: (toClinic: any) => toClinic?.name || "-",
         },
+        
+        {
+            title: "Lý do chuyển",
+            dataIndex: "reason",
+            key: "reason",
+            render: (reason: any) => reason || "-",
+        },
+
 
     ];
     return (
@@ -51,7 +60,7 @@ const ModalPatientExaminationOrder = ({ open, onClose, patient }: { open: boolea
             <Table
                 columns={columns}
                 dataSource={examinationOrders}
-                pagination={{ ...pagination, showSizeChanger: false }}
+                pagination={false}
                 onChange={(pagination: any) => setPagination(pagination)}
             />
         </Modal>

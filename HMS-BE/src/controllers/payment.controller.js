@@ -1,35 +1,43 @@
 const { CREATED, OK } = require("../core/success.response");
-const statisticsService = require("../services/statistics.service");
+const paymentService = require("../services/payment.service");
 
-class StatisticsController {
+class PaymentController {
+  createPayment = async (req, res) => {
+    const paymentData = req.body;
+    const result = await paymentService.createPayment(paymentData);
+    return new CREATED({
+      message: "Tạo mới thanh toán thành công",
+      metadata: result,
+    }).send(res);
+  };
 
-  getTopDoctors = async (req, res) => {
-    const paymentUrl = vnpay.buildPaymentUrl({
-      vnp_Amount: 100000,
-      vnp_IpAddr: req.ip,
-      vnp_ReturnUrl: 'http://localhost:8080/api/v1/payment/payment-return',
-      vnp_TxnRef: 'ORDER123',
-      vnp_OrderInfo: 'Thanh toán đơn hàng #123',
-    });
-  
-    res.json({ paymentUrl });
-//   });
-    // return new OK({
-    //   message: "Lấy danh sách bác sĩ hàng đầu thành công",
-    //   metadata: result,
-    // }).send(res);
+  getAllPayments = async (req, res) => {
+    const payments = await paymentService.getAllPayments(req.query);
+    return new OK({
+      message: "Lấy danh sách thanh toán thành công",
+      metadata: payments,
+    }).send(res);
   }
 
-  getPeriodStatistics = async (req, res) => {
-    console.log(req.query)
-    const query = req.query;
-    const result = await statisticsService.getPeriodStatistics(query);
+  updatePaymentStatus = async (req, res) => {
+    const { id } = req.params;
+    const { status } = req.body;
+    const result = await paymentService.updatePaymentStatus(id, status);
     return new OK({
-      message: "Lấy thống kê theo khoảng thời gian thành công",
+      message: "Cập nhật trạng thái thanh toán thành công",
+      metadata: result,
+    }).send(res);
+  };
+
+  getPaymentById = async (req, res) => {
+    const { id } = req.params;
+    const result = await paymentService.getPaymentById(id);
+    return new OK({
+      message: "Lấy thông tin thanh toán thành công",
       metadata: result,
     }).send(res);
   };
 
 }
 
-module.exports = new StatisticsController();
+module.exports = new PaymentController();

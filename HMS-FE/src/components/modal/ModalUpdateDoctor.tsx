@@ -106,7 +106,7 @@ const ModalUpdateDoctor = ({ role, isVisible, handleOk, handleCancel, form, user
             </Form.Item>
             <Form.Item name="price" label="Giá khám" rules={[{ required: true, message: "Vui lòng nhập giá khám!" }]}>
               <InputNumber placeholder="Giá khám" min={0} />  
-              <span className="ml-2">Đ</span>
+              {/* <span className="ml-2">Đ</span> */}
             </Form.Item>
           </>
         )}
