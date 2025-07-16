@@ -121,7 +121,7 @@ doctorRouter.post(
   doctorController.createDoctorsFromCSV
 );
 
-doctorRouter.get(
+doctorRouter.post(
   "/all/with-rating",
   asyncHandler(doctorController.getAllDoctorsWithAvgRating),
   doctorController.getAllDoctorsWithAvgRating
