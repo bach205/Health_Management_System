@@ -7,10 +7,12 @@ import { useMedicineList } from "../../../hooks/useMedicineList";
 import type { IMedicine } from "../../../types/index.type";
 import TextArea from "antd/es/input/TextArea";
 import dayjs from "dayjs";
-import "dayjs/locale/vi"; 
-dayjs.locale("vi"); 
+import "dayjs/locale/vi";
+dayjs.locale("vi");
 import { bookAppointmentService, getAvailableTimeSlotsService } from "../../../services/appointment.service";
+import { PushANotification } from "../../../api/notification";
 interface ExaminationRecordModalProps {
+  appointment_id: number,
   open: boolean;
   onClose: () => void;
   patient_id: number;
@@ -21,6 +23,7 @@ interface ExaminationRecordModalProps {
 
 
 const DoctorExaminationRecordModal = ({
+  appointment_id,
   open,
   onClose,
   patient_id,
@@ -131,7 +134,7 @@ const DoctorExaminationRecordModal = ({
           clinic_id: selectedSlot.clinic_id,
           slot_date: dayjs(selectedSlot.slot_date).format("YYYY-MM-DD"),
           start_time: startTime,
-          reason: "Tái khám", 
+          reason: "Tái khám",
           note: "",
         };
 
@@ -148,6 +151,8 @@ const DoctorExaminationRecordModal = ({
       setSelectedSlotId(null);
       onClose();
       onSuccess?.();
+      //fix_here
+      PushANotification({ message: `Bạn đã nhận được kết quả khám bệnh từ bác sĩ`, userId: patient_id })
     } catch (err: any) {
       toast.error(err?.response?.data?.message || "Có lỗi xảy ra!");
     } finally {
