@@ -178,7 +178,23 @@ class AppointmentService {
       data: { is_available: false },
     });
 
-    return appointment;
+    // 6. Ghi nhận số thứ tự khám (offline)
+    let queue_number = null;
+    try {
+      const queue = await QueueService.assignQueueNumber({
+        appointment_id: appointment.id,
+        patient_id: appointment.patient_id,
+        clinic_id: appointment.clinic_id,
+        slot_date: appointment.appointment_date,
+        slot_time: (typeof appointment.appointment_time === 'string') ? appointment.appointment_time : appointment.appointment_time.toTimeString().slice(0,8),
+        registered_online: false // Đặt lịch offline
+      });
+      queue_number = queue?.queue_number || null;
+    } catch (err) {
+      console.error('Không thể cấp số thứ tự cho queue:', err.message);
+    }
+
+    return { ...appointment, queue_number };
   }
 
   /**
@@ -201,6 +217,7 @@ class AppointmentService {
       LEFT JOIN doctors d ON s.doctor_id = d.user_id
       WHERE s.is_available = 1
       AND u.role = 'doctor'
+      AND s.slot_date >= CURDATE()
     `;
     const params = [];
 

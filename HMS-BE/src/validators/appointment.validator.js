@@ -162,15 +162,18 @@ const bookAppointmentByQRSchema = Joi.object({
   phone: Joi.string().required(),
   gender: Joi.string().valid("male", "female", "other").required(),
   address: Joi.string().required(),
-  date_of_birth: Joi.date().required(),
+  date_of_birth: Joi.date().less(new Date(Date.now() - 16 * 365.25 * 24 * 60 * 60 * 1000)).required().messages({
+    'date.less': 'Người đặt lịch phải trên 16 tuổi',
+    'date.base': 'Ngày sinh không hợp lệ',
+    'any.required': 'Ngày sinh là bắt buộc'
+  }),
   identity_number: Joi.string().required(),
   doctor_id: Joi.number().integer().required(),
   clinic_id: Joi.number().integer().required(),
   slot_date: Joi.date().required(),
   start_time: Joi.string().pattern(/^([0-1][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/).required(),
   reason: Joi.string().max(1000).allow("", null),
-  note: Joi.string().max(1000).allow("", null),
-  email: Joi.string().email().allow(null, "")
+  note: Joi.string().max(1000).allow("", null)
 });
 
 module.exports = {
