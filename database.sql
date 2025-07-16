@@ -1102,45 +1102,54 @@ VALUES (
   2 -- Ví dụ ID của chuyên mục "Sức khỏe"
 );
 
-INSERT INTO blogs (title, content, image_url, published, category_id)
-VALUES 
-(
-  'Làm thế nào để đặt lịch khám trực tuyến tại bệnh viện?',
-  '<p>Ngày nay, việc <strong>đặt lịch khám trực tuyến</strong> đang trở thành xu hướng giúp bệnh nhân tiết kiệm thời gian và giảm tải cho bệnh viện.</p>
-  <h2>Các bước đặt lịch:</h2>
-  <ol>
-    <li>Truy cập <a href="https://benhvienabc.vn">website bệnh viện</a> hoặc ứng dụng trên điện thoại.</li>
-    <li>Chọn chuyên khoa và bác sĩ phù hợp.</li>
-    <li>Chọn ngày giờ khám và xác nhận thông tin cá nhân.</li>
-    <li>Nhận mã đặt lịch và đến khám đúng hẹn.</li>
-  </ol>
-  <p><img src="https://i.imgur.com/vmYuO3O.jpg" alt="Đặt lịch khám online" style="max-width:100%;border-radius:8px;"/></p>
-  <p>Hệ thống của bệnh viện cũng cho phép <strong>hủy lịch</strong> hoặc <strong>đổi giờ khám</strong> linh hoạt nếu bạn có việc bận.</p>
-  <blockquote>“Đặt lịch online giúp bệnh nhân chủ động và giảm thời gian chờ đợi.” – TS. Trần Thị B</blockquote>',
-  'https://i.imgur.com/vmYuO3O.jpg',
-  true,
-  7
-),
-(
-  'Chế độ ăn uống cho bệnh nhân tiểu đường: Những điều cần lưu ý',
-  '<p>Bệnh nhân tiểu đường cần có <strong>chế độ dinh dưỡng nghiêm ngặt</strong> để kiểm soát đường huyết. Dưới đây là những nguyên tắc cơ bản:</p>
-  <h2>1. Nên ăn gì?</h2>
-  <ul>
-    <li>Ngũ cốc nguyên hạt (gạo lứt, yến mạch)</li>
-    <li>Rau xanh và trái cây ít ngọt (bưởi, táo, lê)</li>
-    <li>Thịt nạc, cá, đậu phụ</li>
-    <li>Uống đủ nước, hạn chế nước ngọt</li>
-  </ul>
-  <h2>2. Tránh những thực phẩm sau:</h2>
-  <ul>
-    <li>Đồ chiên rán nhiều dầu</li>
-    <li>Bánh ngọt, nước ngọt, kẹo</li>
-    <li>Thức ăn nhanh, nhiều muối</li>
-  </ul>
-  <p><img src="https://i.imgur.com/4tsWJnW.jpg" alt="Ăn uống cho người tiểu đường" style="max-width:100%;border-radius:8px;"/></p>
-  <p><em>Hãy tuân thủ theo chỉ định bác sĩ dinh dưỡng để đảm bảo sức khỏe lâu dài.</em></p>',
-  'https://i.imgur.com/4tsWJnW.jpg',
-  true,
-  8
-);
+INSERT INTO doctor_ratings (appointment_id, doctor_id, patient_id, rating, comment, is_anonymous)
+VALUES
+(6, 14, 13, 4.9, 'Khám mắt rất tốt, bác sĩ tận tâm.', false),
+(22, 2, 11, 4.5, 'Bác sĩ rất nhẹ nhàng, hướng dẫn kỹ.', true),
+(23, 3, 12, 4.0, 'Khám kỹ nhưng hơi đông bệnh nhân.', false),
+(24, 14, 13, 5.0, 'Tư vấn phòng chống ung thư rất hữu ích.', false),
+(25, 2, 8, 4.8, 'Khám cấp cứu nhanh chóng, xử lý tốt.', false),
+(26, 3, 9, 4.6, 'Rất hài lòng với cách tư vấn.', true);
+
+-- INSERT INTO blogs (title, content, image_url, published, category_id)
+-- VALUES 
+-- (
+--   'Làm thế nào để đặt lịch khám trực tuyến tại bệnh viện?',
+--   '<p>Ngày nay, việc <strong>đặt lịch khám trực tuyến</strong> đang trở thành xu hướng giúp bệnh nhân tiết kiệm thời gian và giảm tải cho bệnh viện.</p>
+--   <h2>Các bước đặt lịch:</h2>
+--   <ol>
+--     <li>Truy cập <a href="https://benhvienabc.vn">website bệnh viện</a> hoặc ứng dụng trên điện thoại.</li>
+--     <li>Chọn chuyên khoa và bác sĩ phù hợp.</li>
+--     <li>Chọn ngày giờ khám và xác nhận thông tin cá nhân.</li>
+--     <li>Nhận mã đặt lịch và đến khám đúng hẹn.</li>
+--   </ol>
+--   <p><img src="https://i.imgur.com/vmYuO3O.jpg" alt="Đặt lịch khám online" style="max-width:100%;border-radius:8px;"/></p>
+--   <p>Hệ thống của bệnh viện cũng cho phép <strong>hủy lịch</strong> hoặc <strong>đổi giờ khám</strong> linh hoạt nếu bạn có việc bận.</p>
+--   <blockquote>“Đặt lịch online giúp bệnh nhân chủ động và giảm thời gian chờ đợi.” – TS. Trần Thị B</blockquote>',
+--   'https://i.imgur.com/vmYuO3O.jpg',
+--   true,
+--   7
+-- ),
+-- (
+--   'Chế độ ăn uống cho bệnh nhân tiểu đường: Những điều cần lưu ý',
+--   '<p>Bệnh nhân tiểu đường cần có <strong>chế độ dinh dưỡng nghiêm ngặt</strong> để kiểm soát đường huyết. Dưới đây là những nguyên tắc cơ bản:</p>
+--   <h2>1. Nên ăn gì?</h2>
+--   <ul>
+--     <li>Ngũ cốc nguyên hạt (gạo lứt, yến mạch)</li>
+--     <li>Rau xanh và trái cây ít ngọt (bưởi, táo, lê)</li>
+--     <li>Thịt nạc, cá, đậu phụ</li>
+--     <li>Uống đủ nước, hạn chế nước ngọt</li>
+--   </ul>
+--   <h2>2. Tránh những thực phẩm sau:</h2>
+--   <ul>
+--     <li>Đồ chiên rán nhiều dầu</li>
+--     <li>Bánh ngọt, nước ngọt, kẹo</li>
+--     <li>Thức ăn nhanh, nhiều muối</li>
+--   </ul>
+--   <p><img src="https://i.imgur.com/4tsWJnW.jpg" alt="Ăn uống cho người tiểu đường" style="max-width:100%;border-radius:8px;"/></p>
+--   <p><em>Hãy tuân thủ theo chỉ định bác sĩ dinh dưỡng để đảm bảo sức khỏe lâu dài.</em></p>',
+--   'https://i.imgur.com/4tsWJnW.jpg',
+--   true,
+--   8
+-- );
 
