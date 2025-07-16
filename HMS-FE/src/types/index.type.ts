@@ -27,6 +27,7 @@ export interface IDoctor extends IUserBase {
     specialty?: ISpecialty; // Khoa
     bio?: string;
     rating?: number;
+    price?: number; // Giá khám
   }
 }
 
@@ -74,3 +75,18 @@ export interface IMedicine {
 }
 
 export type EmployeeType = keyof typeof TYPE_EMPLOYEE;
+
+
+export interface IBlogCategory {
+  id: number;
+  name: string;
+}
+
+export interface IBlog {
+  id: number;
+  title: string;
+  content: string;
+  image_url?: string;
+  published: boolean;
+  category?: IBlogCategory;
+}

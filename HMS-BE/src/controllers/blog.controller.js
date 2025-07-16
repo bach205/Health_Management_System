@@ -9,16 +9,31 @@ class BlogController {
   }
 
   // Lấy danh sách bài viết
+  // GET /api/v1/blog?page=1&pageSize=10&published=true&category_id=1&keyword=abc
   async getAll(req, res) {
-    const { page = 1, pageSize = 10, ...filters } = req.query;
+    const { page = 1, pageSize = 8, ...filters } = req.query;
+
     const skip = (Number(page) - 1) * Number(pageSize);
     const take = Number(pageSize);
     const where = {};
-    if (filters.published !== undefined) where.published = filters.published === 'true';
-    if (filters.author_id) where.author_id = Number(filters.author_id);
-    const result = await BlogService.getBlogs({ where, skip, take });
+
+    if (filters.published !== undefined) {
+      where.published = filters.published === 'true';
+    }
+    if (filters.category_id) {
+      where.category_id = Number(filters.category_id);
+    }
+
+    const result = await BlogService.getBlogs({
+      where,
+      skip,
+      take,
+      keyword: filters.keyword || '',
+    });
+
     return new OK({ message: 'Lấy danh sách bài viết thành công', metadata: result }).send(res);
   }
+
 
   // Lấy chi tiết 1 bài viết
   async getById(req, res) {

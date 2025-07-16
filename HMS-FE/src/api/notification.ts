@@ -5,9 +5,9 @@ const BASE_URL = "api/v1/notification";
 
 interface NotificationData {
     message: string;
-    isSeen: boolean;
+    isSeen?: boolean;
     userId: number;
-    navigate_url: string;
+    navigate_url?: string;
 }
 
 export const PushANotification = async (data: NotificationData) => {

@@ -13,6 +13,15 @@ class NotificationService {
             throw error;
         }
     }
+    postNotification = async () => {
+        try {
+            const response = await mainRequest.get(`${BASE_URL}/conversation`)
+            return response.data
+        } catch (error) {
+            console.error('Error fetching conversations:', error);
+            throw error
+        }
+    }
 
 }
 export default new NotificationService(); 

@@ -15,7 +15,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       <div className="flex-1 overflow-y-auto">
         <Topbar isCollapsed={isCollapsed} setCollapsed={setIsCollapsed} />
         
-        <div className={`px-12 rounded-t-3xl shadow-md bg-[#F4F7FB] min-h-full ${(pathname === "/doctor/queue" || pathname === "/admin/dashboard") && "pt-5"}`}>
+        <div className={`px-12 rounded-t-3xl shadow-md bg-[#F4F7FB] min-h-full pt-5`}>
           {children}
         </div>
       </div>

@@ -1,14 +1,13 @@
 import React from "react";
 import { assets } from "../../assets/assets";
+import Title from "antd/es/typography/Title";
 
 const About: React.FC = () => {
   return (
-    <div>
-      <div className="text-center text-2xl pt-10 text-gray-500">
-        <p>
-          VỀ CHÚNG TÔI
-        </p>
-      </div>
+    <div style={{ padding: '24px' }}>
+      <Title level={3} style={{ borderLeft: '4px solid #1890ff', paddingLeft: 12 }}>
+        Về chúng tôi
+      </Title>
       <div className="my-10 flex flex-col md:flex-row gap-12">
         <img
           className="w-full md:max-w-[360px]"
