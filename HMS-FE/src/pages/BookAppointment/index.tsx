@@ -8,6 +8,7 @@ import { getDoctorById } from "../../services/doctor.service";
 import dayjs from "dayjs";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import { specialtyOptions } from "../../constants/user.const";
+import FeedbackDoctorComments from "../../components/feedback/FeedbackDoctorComments";
 dayjs.extend(isSameOrAfter);
 
 const { Title, Text } = Typography;
@@ -209,7 +210,7 @@ const PatientBookAppointment: React.FC = () => {
             const dateObj = new Date(dateKey);
             const weekday = dateObj.toLocaleDateString('vi-VN', { weekday: 'long' });
             const dateStr = dateObj.toLocaleDateString('vi-VN');
-            
+
             if (dayjs(dateKey).isBefore(dayjs(), 'minute')) {
               return null; // Nếu ngày khám đã qua hoặc là hiện tại, không hiển thị
             }
@@ -314,6 +315,7 @@ const PatientBookAppointment: React.FC = () => {
       <Card title="Bác sĩ cùng chuyên khoa">
         <RelatedDoctors docId={docId} speciality={""} />
       </Card> */}
+      <FeedbackDoctorComments doctorId={docId} />
     </div>
   );
 };
