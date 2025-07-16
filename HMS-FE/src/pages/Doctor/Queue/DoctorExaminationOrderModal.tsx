@@ -17,6 +17,7 @@ interface ExaminationOrderModalProps {
   patient_id: number;
   clinic_id: number;
   doctor_id?: number;
+  appointment_id?: number;
   currentUserId?: number;
   onSuccess?: () => void;
 }
@@ -27,6 +28,7 @@ const ExaminationOrderModal = ({
   patient_id,
   clinic_id,
   doctor_id,
+  appointment_id,
   currentUserId,
   onSuccess,
 }: ExaminationOrderModalProps) => {
@@ -75,6 +77,7 @@ const ExaminationOrderModal = ({
       setAvailableDoctors([]);
     }
   }, [to_clinic_id]);
+
   const handleFinish = async (values: any) => {
     try {
       console.log(values)
@@ -103,17 +106,22 @@ const ExaminationOrderModal = ({
         clinic_id: clinic_id,
         doctor_id: doctor_id,
         from_clinic_id: clinic_id,
+        appointment_id: appointment_id,
+        reason: values.reason || "",
+        note: values.note || "",
+        extra_cost: isShowOtherPrice ? values.extra_cost || 0 : 0,
+        
         priority: 2, // Chuyển phòng khám
         // created_by_user_id: currentUserId,
         // examined_at: new Date().toISOString(),
-        ...(values.to_clinic_id
-          ? {
-            to_clinic_id: Number(values.to_clinic_id),
-            to_doctor_id: Number(values.to_doctor_id),
-            total_cost: values.total_cost || 0,
-            ...slotInfo,
-          }
-          : {}),
+        // ...(values.to_clinic_id
+        //   ? {
+        //     to_clinic_id: Number(values.to_clinic_id),
+        //     to_doctor_id: Number(values.to_doctor_id),
+        //     total_cost: values.total_cost || 0,
+        //     ...slotInfo,
+        //   }
+        //   : {}),
       });
 
       onSuccess?.();
@@ -148,9 +156,9 @@ const ExaminationOrderModal = ({
     >
       <Form layout="vertical" form={form} onFinish={handleFinish}>
         <Form.Item
-          label="Kết quả khám"
-          name="result"
-          rules={[{ required: true, whitespace: true, message: "Vui lòng nhập kết quả khám" }]}
+          label="Lý do chuyển phòng khám"
+          name="reason"
+          rules={[{ required: true, whitespace: true, message: "Vui lòng nhập lý do chuyển phòng khám" }]}
         >
           <Input.TextArea />
         </Form.Item>
@@ -168,7 +176,7 @@ const ExaminationOrderModal = ({
         </Form.Item>
         {
           isShowOtherPrice &&
-          <Form.Item name="side_cost" >
+          <Form.Item name="extra_cost" >
             <InputNumber style={{ width: "100%" }} min={0} />
           </Form.Item>
         }

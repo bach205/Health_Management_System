@@ -22,7 +22,7 @@ class ExaminationRecordService {
 
     // edited after removed examinationDetail service
     static async create(data) {
-        const { patient_id, clinic_id, doctor_id, result, note, prescription_items = [] } = data;
+        const { patient_id, clinic_id, doctor_id, appointment_id, result, note, prescription_items = [] } = data;
         console.log(data)
         if (!result.trim()) throw new Error("Không được để trống kết quả khám");
 
@@ -37,11 +37,6 @@ class ExaminationRecordService {
             data: { status: "done" },
         });
 
-        const io = getIO();
-        io.to(`clinic_${queue.clinic_id}`).emit("queue:statusChanged", {
-            queue: { ...queue, status: "done" },
-            clinicId: queue.clinic_id,
-        });
 
         const record = await prisma.examinationRecord.create({
             data: {
@@ -54,21 +49,62 @@ class ExaminationRecordService {
                 doctor: {
                     connect: { user_id: doctor_id }
                 },
+                appointment: appointment_id ? { connect: { id: appointment_id } } : undefined,
+
                 result,
                 note,
                 examined_at: new Date(),
             },
         });
 
-
+        await prisma.appointment.update({
+            where: { id: appointment_id },
+            data: { status: "completed" },
+        });
 
         // Gọi tạo nhiều thuốc nếu có
         if (prescription_items.length > 0) {
             await prescriptionItemService.createMany(record.id, prescription_items);
         }
+
+        const io = getIO();
+        io.to(`clinic_${queue.clinic_id}`).emit("queue:statusChanged", {
+            queue: { ...queue, status: "done" },
+            clinicId: queue.clinic_id,
+        });
+
+
         return record
     }
 
+    static async getByAppointmentId(appointmentId) {
+        if (!appointmentId) throw new Error("Appointment ID is required");
+
+        const record = await prisma.examinationRecord.findFirst({
+            where: { appointment_id: Number(appointmentId) },
+            include: {
+                clinic: true,
+                doctor: {
+                    include: {
+                        user: true,
+                    },
+                },
+                patient: {
+                    include: {
+                        user: true,
+                    },
+                },
+                prescriptionItems: {
+                    include: {
+                        medicine: true,
+                    },
+                },
+            }
+
+        });
+        // console.log(record)
+        return record;
+    }
 
     static async update(id, data) {
         return prisma.examinationRecord.update({

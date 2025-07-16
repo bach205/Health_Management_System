@@ -105,7 +105,7 @@ const ScheduleTable = ({ data = [], setReload, loading = false, visible, selecte
   };
 
   const hasPermissionEdit = (record: any) => {
-    if (record.status === "completed" || true) {
+    if (record.status === "completed") {
       return (
         <Tooltip title="Xem kết quả khám">
           <Button

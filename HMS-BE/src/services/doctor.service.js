@@ -422,6 +422,45 @@ class DoctorService {
         return doctors;
     }
 
+    getAvailableDoctorsWithNearestSlot = async (clinicId) => {
+        const slots = await prisma.availableSlot.findMany({
+            where: {
+                clinic_id: clinicId,
+                is_available: true,
+                slot_date: {
+                    gte: new Date(), // Chỉ lấy từ hôm nay trở đi
+                },
+            },
+            orderBy: [
+                { slot_date: 'asc' },
+                { start_time: 'asc' },
+            ],
+            include: {
+                doctor: {
+                    include: {
+                        doctor: true, // lấy từ bảng Doctor
+                    },
+                },
+            },
+        });
+
+        // Group theo doctor_id để lấy slot gần nhất cho mỗi bác sĩ
+        const doctorMap = new Map();
+
+        for (const slot of slots) {
+            const docId = slot.doctor_id;
+            if (!doctorMap.has(docId)) {
+                doctorMap.set(docId, {
+                    doctor: slot.doctor,
+                    nearestSlot: slot,
+                });
+            }
+        }
+
+        return Array.from(doctorMap.values());
+    };
+
+
     getDoctorAvailableSlots = async (doctorId) => {
         const now = new Date();
         const todayStart = new Date(now.setHours(0, 0, 0, 0));

@@ -48,6 +48,11 @@ import Monitor from "./pages/Queue/Monitor";
 import QRBookAppointment from "./pages/QRBookAppointment";
 import SaleMedicinePage from "./pages/SaleMedicinePage";
 import ExaminationResult from "./pages/Patient/ExaminationResult";
+import BlogDashboard from "./pages/Blog/BlogDashboard";
+import BlogDetail from "./pages/Blog/BlogDetail";
+import CreateBlog from "./pages/Admin/Blog/CreateBlog";
+import AdminBlogDashboard from "./pages/Admin/Blog/AdminBlogDashboard";
+import EditBlog from "./pages/Blog/BlogEdit";
 
 dayjs.extend(plugin);
 dayjs.updateLocale("en", {
@@ -154,6 +159,16 @@ const PublicRoutes = [
     element: <QRBookAppointment />,
     layout: MainLayout,
   },
+  {
+    path: "/blogs",
+    element: <BlogDashboard />,
+    layout: MainLayout,
+  },
+  {
+    path: "/blogs/:blogId",
+    element: <BlogDetail />,
+    layout: MainLayout,
+  },
 ];
 
 interface PrivateRoute {
@@ -164,13 +179,14 @@ interface PrivateRoute {
 }
 const PrivateRoutes: PrivateRoute[] = [
   {
-    path : "/sale-medicine",
+    path: "/sale-medicine",
     element: <SaleMedicinePage />,
     layout: DashboardLayout,
   },
   {
     path: "/admin/",
     element: <AdminDashboard />,
+    allowedRoles: ["admin"],
     layout: DashboardLayout,
   },
   {
@@ -187,10 +203,31 @@ const PrivateRoutes: PrivateRoute[] = [
     path: "/user-book-appointments",
     element: <NurseManageAppointment />,
     layout: DashboardLayout,
-  },
+  },  
   {
     path: "/admin/dashboard",
     element: <AdminDashboard />,
+    allowedRoles: ["admin"],
+    layout: DashboardLayout,
+  },
+  
+  {
+    path: "/admin/blogs",
+    element: <AdminBlogDashboard />,
+    allowedRoles: ["admin"],
+    layout: DashboardLayout,
+  },
+  
+  {
+    path: "/admin/blogs/create",
+    element: <CreateBlog />,
+    allowedRoles: ["admin"],
+    layout: DashboardLayout,
+  },
+  {
+    path: "/admin/blogs/update/:blogId",
+    element: <EditBlog />,
+    allowedRoles: ["admin"],
     layout: DashboardLayout,
   },
   {
@@ -225,7 +262,7 @@ const PrivateRoutes: PrivateRoute[] = [
     allowedRoles: ["patient"],
     layout: MainLayout,
   },
-  
+
   {
     path: "/my-appointments/record/:appointmentId",
     element: <ExaminationResult />,

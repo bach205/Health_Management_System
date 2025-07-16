@@ -82,7 +82,7 @@ CREATE TABLE work_schedules (
 --     patient_id INT NOT NULL COMMENT 'Patient',
 --     from_clinic_id INT NOT NULL COMMENT 'Current clinic',
 --     to_clinic_id INT NOT NULL COMMENT 'Referred clinic',
---     total_cost DECIMAL(10,2) DEFAULT 0 COMMENT 'Estimated total cost',
+--     extra_cost DECIMAL(10,2) DEFAULT 0 COMMENT 'Estimated total cost',
 --     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 --     FOREIGN KEY (doctor_id) REFERENCES users(id) ON DELETE CASCADE,
 --     FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
@@ -90,11 +90,34 @@ CREATE TABLE work_schedules (
 --     FOREIGN KEY (to_clinic_id) REFERENCES clinics(id) ON DELETE CASCADE
 -- );
 
+-- Table for appointments
+CREATE TABLE appointments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    patient_id INT NOT NULL,
+    clinic_id INT NOT NULL,
+    doctor_id INT NOT NULL,
+    appointment_date DATE NOT NULL,
+    appointment_time TIME NOT NULL,
+    status ENUM('pending', 'confirmed', 'cancelled', 'completed') DEFAULT 'pending',
+    reason TEXT COMMENT 'Reason for visit',
+    note TEXT COMMENT 'Additional notes',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
+    FOREIGN KEY (clinic_id) REFERENCES clinics(id) ON DELETE CASCADE,
+    FOREIGN KEY (doctor_id) REFERENCES users(id) ON DELETE CASCADE
+);
+ALTER TABLE appointments
+ADD COLUMN priority INT DEFAULT 0 COMMENT '0: normal booking, 1: nurse booking, 2: urgent' AFTER status;
+
+
+
 CREATE TABLE examination_records (
     id INT AUTO_INCREMENT PRIMARY KEY,
     patient_id INT NOT NULL,
     clinic_id INT NOT NULL,
     doctor_id INT NOT NULL,
+    appointment_id INT,  -- ✅ NEW: liên kết đến bảng appointments
     result TEXT,
     note TEXT,
     examined_at DATETIME,
@@ -103,7 +126,8 @@ CREATE TABLE examination_records (
 
     FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
     FOREIGN KEY (clinic_id) REFERENCES clinics(id) ON DELETE CASCADE,
-    FOREIGN KEY (doctor_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (doctor_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (appointment_id) REFERENCES appointments(id) ON DELETE SET NULL
 );
 
 
@@ -111,16 +135,16 @@ CREATE TABLE examination_orders (
     id INT AUTO_INCREMENT PRIMARY KEY,
     doctor_id INT NOT NULL COMMENT 'Referring doctor',
     patient_id INT NOT NULL COMMENT 'Patient',
-    record_id INT NOT NULL COMMENT 'Linked examination record',
+    appointment_id INT NOT NULL COMMENT 'Linked appointment',
     from_clinic_id INT NOT NULL COMMENT 'Current clinic',
     to_clinic_id INT NOT NULL COMMENT 'Referred clinic',
     reason TEXT COMMENT 'Referral reason',
-    total_cost DECIMAL(10,2) DEFAULT 0.00 COMMENT 'Estimated total cost',
+    extra_cost DECIMAL(10,2) DEFAULT 0.00 COMMENT 'Estimated total cost',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (doctor_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
-    FOREIGN KEY (record_id) REFERENCES examination_records(id) ON DELETE CASCADE,
+    FOREIGN KEY (appointment_id) REFERENCES appointments(id) ON DELETE CASCADE,
     FOREIGN KEY (from_clinic_id) REFERENCES clinics(id) ON DELETE CASCADE,
     FOREIGN KEY (to_clinic_id) REFERENCES clinics(id) ON DELETE CASCADE
 );
@@ -273,23 +297,7 @@ CREATE TABLE invoice_items (
     FOREIGN KEY (record_id) REFERENCES examination_records(id) ON DELETE CASCADE
 );
 
--- Table for appointments
-CREATE TABLE appointments (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    patient_id INT NOT NULL,
-    clinic_id INT NOT NULL,
-    doctor_id INT NOT NULL,
-    appointment_date DATE NOT NULL,
-    appointment_time TIME NOT NULL,
-    status ENUM('pending', 'confirmed', 'cancelled', 'completed') DEFAULT 'pending',
-    reason TEXT COMMENT 'Reason for visit',
-    note TEXT COMMENT 'Additional notes',
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
-    FOREIGN KEY (clinic_id) REFERENCES clinics(id) ON DELETE CASCADE,
-    FOREIGN KEY (doctor_id) REFERENCES users(id) ON DELETE CASCADE
-);
+
 
 
 -- Table for available slots
@@ -408,8 +416,6 @@ SET SQL_SAFE_UPDATES = 0;
 
 -- Add priority column to appointments (fixing the original error)
 
-ALTER TABLE appointments
-ADD COLUMN priority INT DEFAULT 0 COMMENT '0: normal booking, 1: nurse booking, 2: urgent' AFTER status;
 
 
 -- Insert sample data into doctors
@@ -582,21 +588,34 @@ INSERT INTO work_schedules (user_id, clinic_id, work_date, shift_id) VALUES
 --  6, 14, 'Đo thị lực: 3/10, cần đeo kính -2.5', 'Tái khám sau 3 tháng', '2025-06-06 09:00:00', 'done');
 
 INSERT INTO examination_records 
-(patient_id, clinic_id, doctor_id, result, note, examined_at)
+(patient_id, clinic_id, doctor_id, appointment_id, result, note, examined_at)
 VALUES
-(8, 1, 2, 'Phổi có dấu hiệu viêm, cần chụp X-quang', 'Bệnh nhân cần nhập viện điều trị', '2025-06-01 09:30:00'),
+(8, 1, 2, 1, 'Phổi có dấu hiệu viêm, cần chụp X-quang', 'Bệnh nhân cần nhập viện điều trị', '2025-06-01 09:30:00'),
 
-(8, 9, 2, 'X-quang phổi cho thấy viêm phổi thùy dưới', 'Cần điều trị kháng sinh', '2025-06-01 10:15:00'),
+(8, 9, 2, 2, 'X-quang phổi cho thấy viêm phổi thùy dưới', 'Cần điều trị kháng sinh', '2025-06-01 10:15:00'),
 
-(9, 2, 3, 'Đau vùng hố chậu phải, dấu hiệu McBurney dương tính', 'Cần phẫu thuật cấp cứu', '2025-06-02 14:00:00'),
+(9, 2, 3, 3, 'Đau vùng hố chậu phải, dấu hiệu McBurney dương tính', 'Cần phẫu thuật cấp cứu', '2025-06-02 14:00:00'),
 
-(10, 3, 14, 'X-quang khớp gối cho thấy thoái hóa độ 2', 'Cần tập vật lý trị liệu', '2025-06-03 08:45:00'),
+(10, 3, 14, 4, 'X-quang khớp gối cho thấy thoái hóa độ 2', 'Cần tập vật lý trị liệu', '2025-06-03 08:45:00'),
 
-(11, 4, 2, 'Xét nghiệm máu dương tính với sốt xuất huyết', 'Theo dõi tiểu cầu', '2025-06-04 11:20:00'),
+(11, 4, 2, 5, 'Xét nghiệm máu dương tính với sốt xuất huyết', 'Theo dõi tiểu cầu', '2025-06-04 11:20:00'),
 
-(12, 5, 3, 'Test dị ứng dương tính với penicillin', 'Tránh sử dụng nhóm thuốc beta-lactam', '2025-06-05 15:30:00'),
+(12, 5, 3, 6, 'Test dị ứng dương tính với penicillin', 'Tránh sử dụng nhóm thuốc beta-lactam', '2025-06-05 15:30:00'),
 
-(13, 6, 14, 'Đo thị lực: 3/10, cần đeo kính -2.5', 'Tái khám sau 3 tháng', '2025-06-06 09:00:00');
+(13, 6, 14, 7, 'Đo thị lực: 3/10, cần đeo kính -2.5', 'Tái khám sau 3 tháng', '2025-06-06 09:00:00');
+
+INSERT INTO examination_orders 
+(doctor_id, patient_id, appointment_id, from_clinic_id, to_clinic_id, reason, extra_cost)
+VALUES
+(2, 8, 1, 1, 9, 'Cần chuyển sang phòng chụp X-quang', 50000),
+
+(3, 9, 3, 2, 10, 'Cần phẫu thuật cấp cứu, chuyển phòng mổ', 2000000),
+
+(14, 10, 4, 3, 11, 'Chuyển sang vật lý trị liệu', 150000),
+
+(2, 11, 5, 4, 12, 'Chuyển sang phòng nội trú theo dõi sốt xuất huyết', 0),
+
+(3, 12, 6, 5, 13, 'Chuyển sang khoa miễn dịch tư vấn thêm', 100000);
 
 
 -- Insert sample data into examination_details
@@ -1002,13 +1021,14 @@ CREATE TABLE documents (
 -- FROM hospital.users u
 -- JOIN hospital.doctors d ON u.id = d.user_id;
 -- Blog categories
-CREATE TABLE blog_categories (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) UNIQUE NOT NULL
-);
 
 -- Blog tags
-CREATE TABLE blog_tags (
+-- CREATE TABLE blog_tags (
+--     id INT AUTO_INCREMENT PRIMARY KEY,
+--     name VARCHAR(255) UNIQUE NOT NULL
+-- );
+
+CREATE TABLE blog_categories (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) UNIQUE NOT NULL
 );
@@ -1017,24 +1037,110 @@ CREATE TABLE blog_tags (
 CREATE TABLE blogs (
     id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
-    slug VARCHAR(255) UNIQUE NOT NULL,
     content TEXT NOT NULL,
-    summary TEXT,
     image_url VARCHAR(255),
-    author_id INT NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     published BOOLEAN DEFAULT FALSE,
     category_id INT,
-    FOREIGN KEY (author_id) REFERENCES users(id),
     FOREIGN KEY (category_id) REFERENCES blog_categories(id)
 );
 
 -- Blog <-> Tag many-to-many
-CREATE TABLE _BlogTags (
-    A INT NOT NULL, -- blog_id
-    B INT NOT NULL, -- tag_id
-    PRIMARY KEY (A, B),
-    FOREIGN KEY (A) REFERENCES blogs(id) ON DELETE CASCADE,
-    FOREIGN KEY (B) REFERENCES blog_tags(id) ON DELETE CASCADE
+-- CREATE TABLE _BlogTags (
+--     A INT NOT NULL, -- blog_id
+--     B INT NOT NULL, -- tag_id
+--     PRIMARY KEY (A, B),
+--     FOREIGN KEY (A) REFERENCES blogs(id) ON DELETE CASCADE,
+--     FOREIGN KEY (B) REFERENCES blog_tags(id) ON DELETE CASCADE
+-- );
+INSERT INTO blog_categories (name) VALUES 
+('Sức khỏe cộng đồng'),
+('Dịch vụ bệnh viện'),
+('Dinh dưỡng y khoa');
+INSERT INTO blogs (title, content, image_url, published, category_id)
+VALUES (
+  'Những điều cần biết khi đi khám bệnh tại bệnh viện',
+  '<h2>1. Chuẩn bị trước khi đi khám</h2>
+  <p>Để buổi khám diễn ra hiệu quả, bạn nên chuẩn bị:</p>
+  <ul>
+    <li>Giấy tờ tùy thân: <strong>CMND/CCCD</strong></li>
+    <li>Thẻ bảo hiểm y tế (nếu có)</li>
+    <li>Sổ khám bệnh cũ (nếu từng khám)</li>
+    <li>Danh sách triệu chứng và thuốc đang dùng</li>
+  </ul>
+
+  <h2>2. Quy trình khám bệnh tại bệnh viện</h2>
+  <ol>
+    <li><strong>Đăng ký khám:</strong> Bạn có thể đăng ký khám tại quầy hoặc qua ứng dụng đặt lịch.</li>
+    <li><strong>Chờ đến lượt:</strong> Mỗi bệnh nhân sẽ có số thứ tự hoặc được gọi tên qua màn hình/loa.</li>
+    <li><strong>Gặp bác sĩ:</strong> Trình bày rõ triệu chứng, tiền sử bệnh, và các loại thuốc đang sử dụng.</li>
+    <li><strong>Chỉ định cận lâm sàng:</strong> Bác sĩ có thể yêu cầu bạn xét nghiệm máu, siêu âm, chụp X-quang,...</li>
+    <li><strong>Trả kết quả & tư vấn:</strong> Sau khi có kết quả, quay lại phòng khám để bác sĩ kết luận.</li>
+  </ol>
+
+  <h2>3. Lưu ý khi sử dụng thuốc</h2>
+  <p>Sau khi khám, bác sĩ sẽ kê đơn thuốc. Bạn cần:</p>
+  <ul>
+    <li>Đọc kỹ hướng dẫn sử dụng thuốc</li>
+    <li>Không tự ý ngưng hoặc tăng liều</li>
+    <li>Thông báo cho bác sĩ nếu có tác dụng phụ</li>
+  </ul>
+
+  <h2>4. Một số hình ảnh tại bệnh viện</h2>
+  <p><img src="https://i.imgur.com/U1Mbz7Q.jpg" alt="Khu tiếp đón bệnh nhân" style="max-width:100%; border-radius:8px;"/></p>
+  <p><img src="https://i.imgur.com/8xMzgLR.jpg" alt="Phòng khám nội tổng quát" style="max-width:100%; border-radius:8px;"/></p>
+
+  <h2>5. Lời khuyên từ bác sĩ</h2>
+  <blockquote>
+    “Đừng chờ đến khi bệnh trở nặng mới đi khám. Việc kiểm tra sức khỏe định kỳ giúp phát hiện sớm và điều trị hiệu quả hơn.” – <em>Bác sĩ Nguyễn Văn A</em>
+  </blockquote>
+
+  <p style="font-style: italic; color: gray;">Hy vọng bài viết đã giúp bạn hiểu rõ hơn về quy trình đi khám bệnh tại bệnh viện. Chúc bạn luôn mạnh khỏe!</p>',
+  'https://i.imgur.com/U1Mbz7Q.jpg',
+  true,
+  2 -- Ví dụ ID của chuyên mục "Sức khỏe"
 );
+
+INSERT INTO blogs (title, content, image_url, published, category_id)
+VALUES 
+(
+  'Làm thế nào để đặt lịch khám trực tuyến tại bệnh viện?',
+  '<p>Ngày nay, việc <strong>đặt lịch khám trực tuyến</strong> đang trở thành xu hướng giúp bệnh nhân tiết kiệm thời gian và giảm tải cho bệnh viện.</p>
+  <h2>Các bước đặt lịch:</h2>
+  <ol>
+    <li>Truy cập <a href="https://benhvienabc.vn">website bệnh viện</a> hoặc ứng dụng trên điện thoại.</li>
+    <li>Chọn chuyên khoa và bác sĩ phù hợp.</li>
+    <li>Chọn ngày giờ khám và xác nhận thông tin cá nhân.</li>
+    <li>Nhận mã đặt lịch và đến khám đúng hẹn.</li>
+  </ol>
+  <p><img src="https://i.imgur.com/vmYuO3O.jpg" alt="Đặt lịch khám online" style="max-width:100%;border-radius:8px;"/></p>
+  <p>Hệ thống của bệnh viện cũng cho phép <strong>hủy lịch</strong> hoặc <strong>đổi giờ khám</strong> linh hoạt nếu bạn có việc bận.</p>
+  <blockquote>“Đặt lịch online giúp bệnh nhân chủ động và giảm thời gian chờ đợi.” – TS. Trần Thị B</blockquote>',
+  'https://i.imgur.com/vmYuO3O.jpg',
+  true,
+  7
+),
+(
+  'Chế độ ăn uống cho bệnh nhân tiểu đường: Những điều cần lưu ý',
+  '<p>Bệnh nhân tiểu đường cần có <strong>chế độ dinh dưỡng nghiêm ngặt</strong> để kiểm soát đường huyết. Dưới đây là những nguyên tắc cơ bản:</p>
+  <h2>1. Nên ăn gì?</h2>
+  <ul>
+    <li>Ngũ cốc nguyên hạt (gạo lứt, yến mạch)</li>
+    <li>Rau xanh và trái cây ít ngọt (bưởi, táo, lê)</li>
+    <li>Thịt nạc, cá, đậu phụ</li>
+    <li>Uống đủ nước, hạn chế nước ngọt</li>
+  </ul>
+  <h2>2. Tránh những thực phẩm sau:</h2>
+  <ul>
+    <li>Đồ chiên rán nhiều dầu</li>
+    <li>Bánh ngọt, nước ngọt, kẹo</li>
+    <li>Thức ăn nhanh, nhiều muối</li>
+  </ul>
+  <p><img src="https://i.imgur.com/4tsWJnW.jpg" alt="Ăn uống cho người tiểu đường" style="max-width:100%;border-radius:8px;"/></p>
+  <p><em>Hãy tuân thủ theo chỉ định bác sĩ dinh dưỡng để đảm bảo sức khỏe lâu dài.</em></p>',
+  'https://i.imgur.com/4tsWJnW.jpg',
+  true,
+  8
+);
+

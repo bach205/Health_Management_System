@@ -9,7 +9,7 @@ class ExaminationOrderService {
      * @returns {Promise<Object>} Thông tin yêu cầu đã tạo
      */
     static async create(data) {
-        const { doctor_id, patient_id, from_clinic_id, to_clinic_id, total_cost } = data;
+        const { doctor_id, patient_id, from_clinic_id, to_clinic_id, total_cost, appointment_id } = data;
 
         // 1. Tạo order chuyển phòng
         const order = await prisma.examinationOrder.create({
@@ -19,6 +19,7 @@ class ExaminationOrderService {
                 patient: true,
                 fromClinic: true,
                 toClinic: true,
+                appointment: true,
             }
         });
 

@@ -17,6 +17,7 @@ import ScheduleTable from "./ScheduleTable";
 import { getPatientAppointmentsService, updateAppointmentService } from "../../services/appointment.service";
 import ModalUpdateAppointment from "./ModalUpdateAppointment";
 import { useNavigate } from "react-router-dom";
+import { ChevronLeft } from "lucide-react";
 
 export default function AppointmentsPage() {
     const [viewVisibleAppointmentModal, setViewVisibleAppointmentModal] =
