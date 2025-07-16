@@ -47,7 +47,6 @@ export default function AppointmentsPage() {
             setLoading(true);
             try {
                 const data = await getPatientAppointmentsService(JSON.parse(patientId || "").id);
-                console.log(data.data);
                 setAppointments(Array.isArray(data) ? data : (data?.data ?? []));
             } catch (error) {
                 setAppointments([]);
@@ -63,21 +62,13 @@ export default function AppointmentsPage() {
         setSelectedAppointent(null);
         form.resetFields();
     };
-    const handleAddAppointmentCancel = (reset: any) => {
-        setAddVisiableAppointment(false);
-
-        if (!viewVisibleAppointmentModal) {
-            setSelectedAppointent(null);
-        }
-        reset();
-    };
 
     const handleViewAppointmentEdit = (record: any) => {
         setSelectedAppointent(record);
         setViewVisibleAppointmentModal(true);
         form.setFieldsValue({
-            appointment_date: record.formatted_date ? dayjs(record.formatted_date) : null,
-            appointment_time: record.formatted_time ? dayjs(`2000-01-01 ${record.formatted_time}`) : null,
+            appointment_date: typeof record.formatted_date === 'string' ? dayjs(record.formatted_date) : null,
+            appointment_time: typeof record.formatted_time === 'string' ? dayjs(`2000-01-01 ${record.formatted_time}`) : null,
             reason: record.reason || "",
             note: record.note || "",
         });
@@ -86,6 +77,7 @@ export default function AppointmentsPage() {
     const handleUpdateAppointment = async (updateData?: any) => {
         try {
             let values = updateData;
+            console.log(values);
             if (!values) {
                 values = await form.validateFields();
             }
