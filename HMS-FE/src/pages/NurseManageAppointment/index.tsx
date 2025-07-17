@@ -87,6 +87,7 @@ const NurseManageAppointment: React.FC = () => {
       setLoading(true);
       const response = await getAllAppointmentsService();
       let filteredData = response.data;
+      console.log(filteredData)
 
       // Filter by status
       if (filters.status !== 'all') {

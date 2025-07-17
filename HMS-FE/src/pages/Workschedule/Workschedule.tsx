@@ -266,16 +266,16 @@ const Workschedule = () => {
           </Form.Item>
           <Form.Item name="work_date" label="Ngày làm việc" rules={[{ required: true, message: 'Vui lòng chọn ngày làm việc' }, ({ getFieldValue }) => ({
             validator(_, value) {
-              if (!value || value.isAfter(dayjs(), 'day')) {
+              if (!value || value.isSameOrAfter(dayjs(), 'day')) {
                 return Promise.resolve();
               }
-              return Promise.reject(new Error('Chỉ được chọn ngày lớn hơn ngày hiện tại!'));
+              return Promise.reject(new Error('Chỉ được chọn ngày hiện tại hoặc lớn hơn!'));
             },
           })]}>
             <DatePicker
               style={{ width: '100%' }}
               format="DD/MM/YYYY"
-              disabledDate={current => current && current.isBefore(dayjs(), 'day')}
+              disabledDate={current => current && current.isBefore(dayjs().startOf('day'))}
             />
           </Form.Item>
           <Form.Item name="shift_id" label="Ca làm" rules={[{ required: true }]}>
