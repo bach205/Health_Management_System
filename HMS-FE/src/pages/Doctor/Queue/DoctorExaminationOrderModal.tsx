@@ -63,6 +63,7 @@ const ExaminationOrderModal = ({
           console.log(res)
 
           const resDoctors = await getAvailableDoctors(Number(to_clinic_id));
+          console.log(resDoctors.data)
           const doctors = resDoctors.data.metadata;
           setAvailableDoctors(doctors || []);
           console.log(doctors);

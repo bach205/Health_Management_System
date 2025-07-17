@@ -19,6 +19,8 @@ class PrescriptionItemService {
         note: item.note ?? null,
         dosage: item.dosage ?? null,
         frequency: item.frequency ?? null,
+        // duration: item.duration ?? null,
+        quantity: item.quantity != null ? Number(item.quantity) : 1, // Mặc định là 1 nếu không có quantity
       };
     });
 

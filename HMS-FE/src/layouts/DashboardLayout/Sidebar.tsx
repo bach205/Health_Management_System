@@ -23,6 +23,22 @@ import { useLocation, useNavigate } from "react-router-dom";
 const Sidebar = ({ isCollapsed, role }: { isCollapsed: boolean, role: string }) => {
   const location = useLocation();
   const navigate = useNavigate();
+
+  // Hàm lọc sidebar theo role
+  const getSidebarItemsByRole = (role: string) => {
+    if (role === "nurse") {
+      return SIDEBAR_ITEMS.filter((item) => item.label === "Y Tá");
+    }
+    if (role === "doctor") {
+      return SIDEBAR_ITEMS.filter((item) => item.label === "Bác sĩ");
+    }
+    if (role === "admin") {
+      return SIDEBAR_ITEMS.filter((item) => item.label !== "Y Tá" && item.label !== "Bác sĩ");
+    }
+    // Nếu role khác, có thể trả về rỗng hoặc một số mặc định
+    return [];
+  };
+
   return (
     <aside
       className={`${isCollapsed ? "w-20" : "w-64"
@@ -39,54 +55,27 @@ const Sidebar = ({ isCollapsed, role }: { isCollapsed: boolean, role: string }) 
         </div>
       </div>
 
-      {SIDEBAR_ITEMS.map((sidebar) => {
-        
-        if (sidebar.label === "Quản lý" && role !== "admin") {
-          return null
-        }
-        
-        if (sidebar.label === "Trang chủ" && role !== "admin") {
-          return null
-        }
-
-
-        if (sidebar.label === "Documents" && role !== "admin") {
-          return null
-        }
-
-        if (sidebar.label === "Phòng khám" && (role !== "admin")) {
-          return null
-        }
-        if (sidebar.label === "Bác sĩ" && (role !== "doctor" && role !== "admin")) {
-          return null
-        }
-
-        if (sidebar.label === "Y Tá" && (role !== "nurse" && role !== "admin")) {
-          return null
-        }
-
-        return (
-          <div key={sidebar.id} className="mb-4">
-            {!isCollapsed && (
-              <p className="text-xs font-semibold text-gray-500 uppercase mb-3">
-                {sidebar.label}
-              </p>
-            )}
-            <div className="flex flex-col gap-1">
-              {sidebar.items.map((item) => (
-                <SidebarItem
-                  key={item.id}
-                  icon={item.icon}
-                  label={item.label}
-                  isActive={location.pathname === item.href}
-                  onClick={() => navigate(item.href)}
-                  isCollapsed={isCollapsed}
-                />
-              ))}
-            </div>
+      {getSidebarItemsByRole(role).map((sidebar) => (
+        <div key={sidebar.id} className="mb-4">
+          {!isCollapsed && (
+            <p className="text-xs font-semibold text-gray-500 uppercase mb-3">
+              {sidebar.label}
+            </p>
+          )}
+          <div className="flex flex-col gap-1">
+            {sidebar.items.map((item) => (
+              <SidebarItem
+                key={item.id}
+                icon={item.icon}
+                label={item.label}
+                isActive={location.pathname === item.href}
+                onClick={() => navigate(item.href)}
+                isCollapsed={isCollapsed}
+              />
+            ))}
           </div>
-        )
-      })}
+        </div>
+      ))}
     </aside>
   );
 };
@@ -230,7 +219,7 @@ const SIDEBAR_ITEMS = [
       
       {
         id: "nurse-manage-payments",
-        label: "Quản lý thanh toán",
+        label: "Quản lý hóa đơn",
         icon: <Wallet className="w-4 h-4" />,
         href: "/nurse-manage-payments",
       },

@@ -119,3 +119,7 @@ export const deleteAppointmentService = async (appointmentId: string | number) =
   const response = await mainRequest.delete(`/api/v1/appointment/${appointmentId}`);
   return response.data;
 };
+
+export const bookAppointmentByQRService = (data: any) => {
+  return mainRequest.post('/api/v1/appointment/book-by-qr', data);
+};

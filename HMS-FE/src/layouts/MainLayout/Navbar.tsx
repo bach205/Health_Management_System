@@ -16,7 +16,7 @@ const Navbar: React.FC = () => {
   const [showMenu, setShowMenu] = useState<boolean>(false);
   const { isAuthenticated, user } = useAuthStore();
   const auth = useAuth();
-
+  
   const { userData } = useContext(ProfileContext);
   console.log(userData)
   return (
@@ -115,6 +115,7 @@ const Navbar: React.FC = () => {
             ) :
             // nurse
             userData?.role === "nurse" ? (
+              
               <Link to="/user-book-appointments">Trang làm việc</Link>
             ) : userData?.role === "admin" && (
               <Link to="/admin/dashboard">Trang quản lý</Link>

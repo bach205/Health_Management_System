@@ -221,7 +221,7 @@ class QueueService {
         doctor_id: to_doctor_id,
         clinic_id: to_clinic_id,
         is_available: true,
-        slot_date: { gte: new Date() },
+  //      slot_date: { gte: new Date() },
       },
       orderBy: [
         { slot_date: "asc" },
@@ -266,7 +266,7 @@ class QueueService {
         status: { in: ['waiting', 'in_progress'] },
       },
     });
-
+    console.log(existingQueue)
     if (existingQueue) {
       throw new Error("Bệnh nhân đã có trong hàng đợi phòng khám này.");
     }

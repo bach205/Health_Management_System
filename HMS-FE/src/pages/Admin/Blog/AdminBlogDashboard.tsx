@@ -5,11 +5,12 @@ import {
     Tooltip,
     Flex
 } from 'antd';
-import { SearchOutlined, ArrowRightOutlined, PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { SearchOutlined, ArrowRightOutlined, PlusOutlined, EditOutlined, DeleteOutlined, EyeOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { deleteBlog, getBlogCategories, getBlogs } from '../../../services/blog.service';
 import type { IBlog, IBlogCategory } from '../../../types/index.type';
 import { RotateCcw, Search } from 'lucide-react';
+import ModalViewBlog from '../../../components/modal/ModalViewBlog';
 
 const { Title, Paragraph } = Typography;
 const { Option } = Select;
@@ -23,6 +24,8 @@ const AdminBlogDashboard = () => {
     const [page, setPage] = useState(1);
     const [totalRows, setTotalRows] = useState(0);
     const [loading, setLoading] = useState(false);
+    const [isViewVisible, setIsViewVisible] = useState(false);
+    const [currentBlog, setCurrentBlog] = useState<IBlog | null>(null);
 
     const navigate = useNavigate();
 
@@ -69,6 +72,11 @@ const AdminBlogDashboard = () => {
         } catch {
             message.error('Xoá bài viết thất bại');
         }
+    };
+
+    const handleView = (blog: IBlog) => {
+        setCurrentBlog(blog);
+        setIsViewVisible(true);
     };
 
     const truncate = (text: string, maxLength = 100) => {
@@ -155,6 +163,7 @@ const AdminBlogDashboard = () => {
                                 ) : null
                             }
                             actions={[
+                                <EyeOutlined key="view" onClick={() => handleView(blog)} />,
                                 <EditOutlined key="edit" onClick={() => navigate(`/blog/${blog.id}`)} />,
                                 <Popconfirm
                                     title="Bạn chắc chắn xoá?"
@@ -184,6 +193,13 @@ const AdminBlogDashboard = () => {
                     onChange={setPage}
                 />
             </div>
+
+            <ModalViewBlog
+                isVisible={isViewVisible}
+                handleCancel={() => setIsViewVisible(false)}
+                form={{} as any}
+                blog={currentBlog}
+            />
         </div>
     );
 };

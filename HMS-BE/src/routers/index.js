@@ -27,6 +27,7 @@ const paymentRouter = require("./payment.routes");
 const blogRouter = require("./blog.route");
 const blogCategoryRouter = require("./blogCategory.route");
 const blogTagRouter = require("./blogTag.route");
+const invoiceRouter = require("./invoice.route");
 
 router.use("/nurse", nurseRouter);
 router.use("/doctor", doctorRouter);
@@ -52,6 +53,7 @@ router.use('/sepay', sepayRouter);
 router.use('/feedback', feedbackRouter);
 router.use("/statistics", statisticsRouter);
 router.use("/payment", paymentRouter);
+router.use("/invoice", invoiceRouter);
 
 
 

@@ -59,6 +59,7 @@ const ExaminationResult = () => {
             { title: "Tên thuốc", dataIndex: "medicine_name", key: "medicine_name" },
             { title: "Liều lượng", dataIndex: "dosage", key: "dosage" },
             { title: "Tần suất", dataIndex: "frequency", key: "frequency" },
+            { title: "Số lượng", dataIndex: "quantity", key: "quantity" },
             { title: "Ghi chú", dataIndex: "note", key: "note" },
         ];
 
@@ -67,7 +68,7 @@ const ExaminationResult = () => {
             medicine_name: item.medicine?.name || "Không rõ",
             dosage: item.dosage,
             frequency: item.frequency,
-            duration: item.duration,
+            quantity: item.quantity != null ? item.quantity : 1, // Mặc định là 1 nếu không có quantity
             note: item.note,
         })) || [];
 

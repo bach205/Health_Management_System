@@ -363,13 +363,11 @@ const QueueTable = () => {
             {/* viet ket qua kham + don thuoc */}
             <DoctorExaminationRecordModal
                 open={showRecordModal}
-                appointment_id={selectedAppointmentId ?? 0}
-
+                appointment_id={Number(selectedAppointmentId)}
                 onClose={() => setShowRecordModal(false)}
                 patient_id={selectedPatient?.id}
                 clinic_id={Number(selectedClinic)}
                 doctor_id={Number(currentDoctorId)}
-                // appointment_id={Number(selectedAppointment)}
                 onSuccess={() => {
                     setShowRecordModal(false);
                     setSelectedPatient(null);

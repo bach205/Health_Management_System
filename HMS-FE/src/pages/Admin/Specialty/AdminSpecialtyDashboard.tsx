@@ -9,10 +9,12 @@ import { deleteMedicine } from "../../../services/medicine.service";
 import { deleteSpecialty } from "../../../services/specialty.service";
 import ModalCreateSpecialty from "../../../components/modal/Specialty/ModalCreateSpecialty";
 import ModalUpdateSpecialty from "../../../components/modal/Specialty/ModalUpdateSpecialty";
+import ModalViewSpecialty from "../../../components/modal/Specialty/ModalViewSpecialty";
 
 const AdminSpecialtyDashboard = () => {
   const [isCreateVisible, setIsCreateVisible] = useState(false);
   const [isUpdateVisible, setIsUpdateVisible] = useState(false);
+  const [isViewVisible, setIsViewVisible] = useState(false);
   const [currentSpecialty, setCurrentSpecialty] = useState<ISpecialty | null>(null);
   const [formCreate] = Form.useForm();
   const [formUpdate] = Form.useForm();
@@ -59,6 +61,13 @@ const AdminSpecialtyDashboard = () => {
       width: 150,
       render: (_: any, record: ISpecialty) => (
         <Flex gap={10} justify="center">
+          <Tooltip title="Xem">
+            <Button
+              type="text"
+              icon={<Eye size={17.5} />}
+              onClick={() => handleView(record)}
+            />
+          </Tooltip>
           <Tooltip title="Chỉnh sửa">
             <Button
               type="text"
@@ -97,6 +106,11 @@ const AdminSpecialtyDashboard = () => {
 
       notification.error({ message: "Có lỗi xảy ra" });
     }
+  };
+
+  const handleView = (record: ISpecialty) => {
+    setCurrentSpecialty(record);
+    setIsViewVisible(true);
   };
 
   return (
@@ -165,6 +179,12 @@ const AdminSpecialtyDashboard = () => {
         onCreated={() => setReload(!reload)}
       />
       <ModalUpdateSpecialty isVisible={isUpdateVisible} handleOk={() => setIsUpdateVisible(false)} handleCancel={() => setIsUpdateVisible(false)} form={formUpdate} currentSpecialty={currentSpecialty} onUpdated={() => setReload(!reload)} />
+      <ModalViewSpecialty
+        isVisible={isViewVisible}
+        handleCancel={() => setIsViewVisible(false)}
+        form={formUpdate}
+        specialty={currentSpecialty}
+      />
     </div>
   );
 };
