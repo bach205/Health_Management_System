@@ -35,10 +35,10 @@ const ExaminationOrderModal = ({
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [clinics, setClinics] = useState<any[]>([]);
-  const [clinicVolume, setClinicVolume] = useState<number>(0);
+  // const [clinicVolume, setClinicVolume] = useState<number>(0);
   const [isShowOtherPrice, setIsShowOtherPrice] = useState<boolean>(false);
   const [availableDoctors, setAvailableDoctors] = useState<IDoctor[]>([]);
-
+  const [selectedDoctorId, setSelectedDoctorId] = useState<number | null>(null);
   const to_clinic_id = Form.useWatch("to_clinic_id", form);
 
   const handleClose = () => {
@@ -59,21 +59,20 @@ const ExaminationOrderModal = ({
     if (to_clinic_id) {
       const fetchClinicVolumeAndDoctors = async () => {
         try {
-          const response = await getClinicService();
-          const clinic = response.data.metadata.clinics.find((c: any) => c.id === Number(to_clinic_id));
-          setClinicVolume(clinic?.patient_volume || 0);
+          const res = await getClinicService();
+          console.log(res)
 
-          const doctors = await getAvailableDoctors(Number(to_clinic_id));
+          const resDoctors = await getAvailableDoctors(Number(to_clinic_id));
+          const doctors = resDoctors.data.metadata;
           setAvailableDoctors(doctors || []);
+          console.log(doctors);
         } catch (error) {
           console.error("Lỗi khi lấy thông tin phòng khám hoặc bác sĩ:", error);
-          setClinicVolume(0);
           setAvailableDoctors([]);
         }
       };
       fetchClinicVolumeAndDoctors();
     } else {
-      setClinicVolume(0);
       setAvailableDoctors([]);
     }
   }, [to_clinic_id]);
@@ -87,19 +86,6 @@ const ExaminationOrderModal = ({
         return;
       }
 
-      let slotInfo: any = {};
-      if (values.slot) {
-        const parsedSlot = JSON.parse(values.slot);
-        slotInfo = {
-          slot_date: parsedSlot.slot_date,
-          start_time: parsedSlot.start_time,
-        };
-      }
-
-      if (values.to_clinic_id && (!slotInfo.slot_date || !slotInfo.start_time)) {
-        message.error("Vui lòng chọn ca khám");
-        return;
-      }
       await mainRequest.post("/api/v1/queue/assign-clinic", {
         ...values,
         patient_id: patient_id,
@@ -110,7 +96,7 @@ const ExaminationOrderModal = ({
         reason: values.reason || "",
         note: values.note || "",
         extra_cost: isShowOtherPrice ? values.extra_cost || 0 : 0,
-        
+
         priority: 2, // Chuyển phòng khám
         // created_by_user_id: currentUserId,
         // examined_at: new Date().toISOString(),
@@ -139,8 +125,8 @@ const ExaminationOrderModal = ({
     form.setFieldsValue({
       to_clinic_id: value,
     });
-    setClinicVolume(0); // Reset clinic volume when changing clinic
   };
+  console.log("availableDoctors", availableDoctors);
 
 
   return (
@@ -148,6 +134,7 @@ const ExaminationOrderModal = ({
       open={open}
       title="Chuyển phòng khám"
       onCancel={handleClose}
+      cancelText="Hủy"
       footer={[
         <Button key="submit" type="primary" loading={loading} onClick={() => form.submit()}>
           Chuyển phòng
@@ -163,9 +150,6 @@ const ExaminationOrderModal = ({
           <Input.TextArea />
         </Form.Item>
 
-        <Form.Item label="Ghi chú" name="note">
-          <Input.TextArea />
-        </Form.Item>
 
         <Form.Item
           label="Chi phí phụ"
@@ -180,6 +164,11 @@ const ExaminationOrderModal = ({
             <InputNumber style={{ width: "100%" }} min={0} />
           </Form.Item>
         }
+
+        
+        <Form.Item label="Ghi chú" name="note" >
+          <Input.TextArea placeholder="Nhập ghi chú" />
+        </Form.Item>
 
 
         <Form.Item label="Chỉ định phòng khám tiếp theo" name="to_clinic_id" rules={[{ required: true, message: "Vui lòng chọn phòng khám tiếp theo" }]}>
@@ -196,7 +185,7 @@ const ExaminationOrderModal = ({
           </Select>
         </Form.Item>
 
-        {clinicSelected && (
+        {/* {clinicSelected && (
           <div className="mb-2 text-sm">
             Số lượng bệnh nhân:
             <span className={`text-white ml-2 px-2 py-1 rounded 
@@ -215,32 +204,37 @@ const ExaminationOrderModal = ({
               }
             </span>
           </div>
+        )} */}
+        {clinicSelected && (
+          <>
+            {availableDoctors.length > 0 ? (
+              <Form.Item
+                label="Bác sĩ tiếp nhận"
+                name="to_doctor_id"
+                rules={[{ required: true, message: "Vui lòng chọn bác sĩ" }]}
+              >
+                <Select
+                  placeholder="Chọn bác sĩ rảnh"
+                  optionFilterProp="children"
+                  onChange={(value) => {
+                    form.setFieldsValue({ slot: undefined }); // Reset slot when changing doctor
+                    setSelectedDoctorId(value);
+                  }}
+                >
+                  {availableDoctors.map((row : any) => (
+                    <Option key={row.doctor.id} value={row.doctor.id} >
+                      {row.doctor.full_name}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            )
+              :
+              <p>Không có bác sĩ nào rảnh</p>
+            }
+          </>
         )}
 
-        {clinicSelected && availableDoctors.length > 0 ? (
-          <Form.Item
-            label="Bác sĩ tiếp nhận"
-            name="to_doctor_id"
-            rules={[{ required: true, message: "Vui lòng chọn bác sĩ" }]}
-          >
-            <Select
-              placeholder="Chọn bác sĩ rảnh"
-              optionFilterProp="children"
-              onChange={(value) => {
-                form.setFieldsValue({ slot: undefined }); // Reset slot when changing doctor
-              }}
-            >
-              {availableDoctors.map((doctor) => (
-                <Option key={doctor.id} value={doctor.id}>
-                  {doctor.full_name}
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
-        )
-          :
-          <p>Không có bác sĩ nào rảnh</p>
-        }
 
 
       </Form>

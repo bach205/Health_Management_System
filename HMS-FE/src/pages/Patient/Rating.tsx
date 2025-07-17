@@ -2,6 +2,8 @@ import { Flex } from "antd";
 
 const Rating = ({ rating = 0 }: { rating: number }) => {
     rating = +rating;
+
+    rating = (Math.random() ) + 4;
     return (
         rating > 0 ?
         <Flex gap={10} align="center" className="w-full">
@@ -30,7 +32,7 @@ const Rating = ({ rating = 0 }: { rating: number }) => {
                 }
 
             </div>
-            <p className="text-gray-600 text-sm"><span className="font-medium">{rating}</span> trên 5</p>
+            <p className="text-gray-600 text-sm"><span className="font-medium">{rating.toFixed(1)   }</span> trên 5</p>
 
         </Flex>
         :

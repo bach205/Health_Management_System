@@ -106,6 +106,15 @@ class DoctorController {
       metadata: result,
     }).send(res);
   }
+  getAvailableDoctorsWithNearestSlot = async (req, res) => {
+    const { clinicId } = req.params;
+    console.log("clinicId:", clinicId);
+    const result = await DoctorService.getAvailableDoctorsWithNearestSlot(clinicId);
+    return new OK({
+      message: "Lấy danh sách bác sĩ khả dụng với slot gần nhất thành công",
+      metadata: result,
+    }).send(res);
+  }
 
 }
 

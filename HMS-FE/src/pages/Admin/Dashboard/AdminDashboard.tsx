@@ -136,10 +136,14 @@ const AdminDashboard = () => {
     },
     scales: {
       y: {
+        beginAtZero: true,
         ticks: {
+
           callback: (val: any) => formatPrice(val),
+          
         },
       },
+      
     },
   };
 

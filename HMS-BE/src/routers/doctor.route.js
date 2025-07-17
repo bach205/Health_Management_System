@@ -121,6 +121,15 @@ doctorRouter.post(
   doctorController.createDoctorsFromCSV
 );
 
+doctorRouter.get(
+  "/nearest-slot/:clinicId",
+  // authenticate,
+  // checkUserStatus(),
+  // authorize("admin", "doctor"),
+  asyncHandler(doctorController.getAvailableDoctorsWithNearestSlot),
+  doctorController.getAvailableDoctorsWithNearestSlot
+);
+
 doctorRouter.post(
   "/all/with-rating",
   asyncHandler(doctorController.getAllDoctorsWithAvgRating),

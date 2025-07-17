@@ -166,6 +166,15 @@ class QueueController {
       next(error);
     }
   }
+
+  static async assignClinic(req, res) {
+    const result = await QueueService.createOrderAndAssignToDoctorQueue(req.body);
+    return new OK({
+      message: "Chuyển phòng và thêm vào hàng đợi thành công",
+      metadata: result
+    }).send(res)
+  }
+
 }
 
 module.exports = QueueController;

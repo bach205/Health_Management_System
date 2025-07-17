@@ -131,23 +131,24 @@ CREATE TABLE examination_records (
 );
 
 
-CREATE TABLE examination_orders (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    doctor_id INT NOT NULL COMMENT 'Referring doctor',
-    patient_id INT NOT NULL COMMENT 'Patient',
-    appointment_id INT NOT NULL COMMENT 'Linked appointment',
-    from_clinic_id INT NOT NULL COMMENT 'Current clinic',
-    to_clinic_id INT NOT NULL COMMENT 'Referred clinic',
-    reason TEXT COMMENT 'Referral reason',
-    extra_cost DECIMAL(10,2) DEFAULT 0.00 COMMENT 'Estimated total cost',
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  CREATE TABLE examination_orders (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      doctor_id INT NOT NULL COMMENT 'Referring doctor',
+      patient_id INT NOT NULL COMMENT 'Patient',
+      appointment_id INT NOT NULL COMMENT 'Linked appointment',
+      from_clinic_id INT NOT NULL COMMENT 'Current clinic',
+      to_clinic_id INT NOT NULL COMMENT 'Referred clinic',
+      reason TEXT COMMENT 'Referral reason',
+      note TEXT COMMENT 'Additional notes',
+      extra_cost DECIMAL(10,2) DEFAULT 0.00 COMMENT 'Estimated total cost',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
-    FOREIGN KEY (doctor_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
-    FOREIGN KEY (appointment_id) REFERENCES appointments(id) ON DELETE CASCADE,
-    FOREIGN KEY (from_clinic_id) REFERENCES clinics(id) ON DELETE CASCADE,
-    FOREIGN KEY (to_clinic_id) REFERENCES clinics(id) ON DELETE CASCADE
-);
+      FOREIGN KEY (doctor_id) REFERENCES users(id) ON DELETE CASCADE,
+      FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
+      FOREIGN KEY (appointment_id) REFERENCES appointments(id) ON DELETE CASCADE,
+      FOREIGN KEY (from_clinic_id) REFERENCES clinics(id) ON DELETE CASCADE,
+      FOREIGN KEY (to_clinic_id) REFERENCES clinics(id) ON DELETE CASCADE
+  );
 
 
 -- CREATE TABLE examination_records (
@@ -579,17 +580,17 @@ VALUES
 (13, 6, 14, 7, 'Đo thị lực: 3/10, cần đeo kính -2.5', 'Tái khám sau 3 tháng', '2025-06-06 09:00:00');
 
 INSERT INTO examination_orders 
-(doctor_id, patient_id, appointment_id, from_clinic_id, to_clinic_id, reason, extra_cost)
+(doctor_id, patient_id, appointment_id, from_clinic_id, to_clinic_id, reason,note, extra_cost)
 VALUES
-(2, 8, 1, 1, 9, 'Cần chuyển sang phòng chụp X-quang', 50000),
+(2, 8, 1, 1, 9, 'Cần chuyển sang phòng chụp X-quang', 'Chuyển phòng khẩn cấp', 50000),
 
-(3, 9, 3, 2, 10, 'Cần phẫu thuật cấp cứu, chuyển phòng mổ', 2000000),
+(3, 9, 3, 2, 10, 'Cần phẫu thuật cấp cứu, chuyển phòng mổ', 'Chuyển phòng khẩn cấp', 2000000),
 
-(14, 10, 4, 3, 11, 'Chuyển sang vật lý trị liệu', 150000),
+(14, 10, 4, 3, 11, 'Chuyển sang vật lý trị liệu', 'Chuyển phòng khẩn cấp', 150000),
 
-(2, 11, 5, 4, 12, 'Chuyển sang phòng nội trú theo dõi sốt xuất huyết', 0),
+(2, 11, 5, 4, 12, 'Chuyển sang phòng nội trú theo dõi sốt xuất huyết', 'Chuyển phòng khẩn cấp', 0),
 
-(3, 12, 6, 5, 13, 'Chuyển sang khoa miễn dịch tư vấn thêm', 100000);
+(3, 12, 6, 5, 13, 'Chuyển sang khoa miễn dịch tư vấn thêm', 'Tạm chuyển phòng', 100000);
 
 
 -- Insert sample data into examination_details
@@ -636,15 +637,6 @@ INSERT INTO payments (patient_id, record_id, amount, method, payment_time, note,
 (11, 4, 1200000.00, 'e_wallet', '2025-06-04 12:00:00', 'Thanh toán toàn bộ', FALSE),
 (12, 5, 500000.00, 'card', '2025-06-05 16:00:00', 'Thanh toán lần 1', FALSE),
 (13, 6, 300000.00, 'cash', '2025-06-06 10:00:00', 'Thanh toán toàn bộ', FALSE);
-
--- Insert sample data into payment_balances
-INSERT INTO payment_balances (patient_id, balance) VALUES
-(8, 0.00),
-(9, 0.00),
-(10, 0.00),
-(11, 0.00),
-(12, 0.00),
-(13, 0.00);
 
 -- Insert sample data into invoice_items
 INSERT INTO invoice_items (record_id, description, amount) VALUES

@@ -73,7 +73,6 @@ model Patient {
   records           ExaminationRecord[]
   queues            Queue[]
   payments          Payment[]
-  balance           PaymentBalance?
   appointments      Appointment[]
 
   doctorRatings DoctorRating[]
@@ -185,7 +184,8 @@ model ExaminationOrder {
   from_clinic_id Int
   to_clinic_id   Int
   reason         String?  @db.Text
-  total_cost     Decimal  @default(0.00)
+  extra_cost     Int
+  note           String?  @db.Text
   created_at     DateTime @default(now())
 
   doctor     User    @relation("DoctorExaminationOrder", fields: [doctor_id], references: [id])
@@ -295,7 +295,7 @@ model Payment {
   method       PaymentMethod?
   payment_time DateTime       @default(now())
   note         String?        @db.Text
-  is_refund    Boolean        @default(false)
+  status       PaymentStatus  @default(pending)
 
   patient Patient            @relation(fields: [patient_id], references: [id])
   record  ExaminationRecord? @relation(fields: [record_id], references: [id])
@@ -309,16 +309,12 @@ enum PaymentMethod {
   bank_transfer
   e_wallet
 }
-
-model PaymentBalance {
-  patient_id Int      @id
-  balance    Decimal  @default(0.00)
-  updated_at DateTime @updatedAt
-
-  patient Patient @relation(fields: [patient_id], references: [id])
-
-  @@map("payment_balances")
+enum PaymentStatus {
+  pending   // 
+  paid      //
+  canceled  // 
 }
+
 
 model InvoiceItem {
   id          Int      @id @default(autoincrement())

@@ -248,6 +248,8 @@ const DoctorExaminationRecordModal = ({
       title="Tạo hồ sơ khám"
       open={open}
       onCancel={() => {
+        handleSetIsFollowUp(false)
+        handleSetMedicineVisible(false);
         form.resetFields();
         setSelectedDate(null);
         setSelectedSlotId(null);
@@ -255,6 +257,7 @@ const DoctorExaminationRecordModal = ({
         setIsSaved(false);
         onClose();
       }}
+
 
       onOk={() => form.submit()}
       confirmLoading={loading}
