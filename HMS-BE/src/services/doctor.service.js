@@ -430,9 +430,12 @@ class DoctorService {
             where: {
                 clinic_id: Number(clinicId),
                 is_available: true,
-                slot_date: {
-                    gte: new Date(), // Chỉ lấy từ hôm nay trở đi
+                doctor: {
+                    role: 'doctor', // Chỉ lấy slot của bác sĩ
                 },
+                // slot_date: {
+                //     gte: new Date(), // Chỉ lấy từ hôm nay trở đi
+                // },
             },
             orderBy: [
                 { slot_date: 'asc' },
@@ -447,7 +450,7 @@ class DoctorService {
                 }, // lấy từ bảng Doctor
             },
         });
-
+        console.log("doctor",slots)
         // Group theo doctor_id để lấy slot gần nhất cho mỗi bác sĩ
         const doctorMap = new Map();
 

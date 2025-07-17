@@ -509,59 +509,22 @@ INSERT INTO shifts (name, start_time, end_time) VALUES
 
 -- Insert sample data into work_schedules
 INSERT INTO work_schedules (user_id, clinic_id, work_date, shift_id) VALUES
-(2, 2, '2025-07-16', 2),
 (2, 2, '2025-07-17', 1),
-(2, 2, '2025-07-18', 2),
-(2, 2, '2025-07-19', 2),
-(2, 2, '2025-07-20', 1),
-(2, 2, '2025-07-21', 2),
-(2, 2, '2025-07-23', 2),
-(2, 2, '2025-07-24', 1),
-(2, 2, '2025-07-25', 2),
-(2, 2, '2025-07-26', 1),
-(2, 2, '2025-07-27', 2),
-(2, 2, '2025-07-28', 1),
-(14, 3, '2025-07-16', 1),
+(2, 2, '2025-07-17', 3),
 (14, 3, '2025-07-17', 2),
-(14, 3, '2025-07-18', 1),
-(14, 3, '2025-07-19', 1),
-(14, 3, '2025-07-20', 2),
-(14, 3, '2025-07-21', 1),
-(14, 3, '2025-07-23', 1),
-(14, 3, '2025-07-24', 1),
-(14, 3, '2025-07-25', 2),
-(14, 3, '2025-07-26', 1),
-(14, 3, '2025-07-27', 1),
-(14, 3, '2025-07-28', 2),
-(3, 1, '2025-07-16', 1),
-(3, 2, '2025-07-16', 2),
+(14, 3, '2025-07-17', 4),
+(3, 1, '2025-07-17', 5),
+(3, 2, '2025-07-17', 2),
 (3, 3, '2025-07-17', 1),
-(3, 4, '2025-07-17', 2),
-(3, 1, '2025-07-18', 1),
-(3, 2, '2025-07-19', 2),
-(3, 3, '2025-07-20', 1),
-(4, 5, '2025-07-16', 1),
-(4, 6, '2025-07-16', 2),
-(4, 7, '2025-07-17', 1),
-(4, 8, '2025-07-17', 2),
-(4, 9, '2025-07-18', 1),
-(4, 10, '2025-07-19', 2),
-(4, 11, '2025-07-20', 1),
-(15, 1, '2025-07-16', 3),
-(15, 2, '2025-07-17', 3),
-(15, 8, '2025-07-21', 5),
-(15, 8, '2025-07-22', 5),
-(5, 1, '2025-07-16', 5),
-(5, 2, '2025-07-17', 5),
-(5, 3, '2025-07-18', 5),
-(5, 8, '2025-07-19', 5),
-(5, 1, '2025-07-20', 5),
-(6, 4, '2025-07-16', 2),
-(6, 5, '2025-07-17', 2),
-(6, 6, '2025-07-18', 2),
-(6, 7, '2025-07-19', 2),
-(6, 8, '2025-07-21', 2),
-(6, 8, '2025-07-22', 2);
+(4, 5, '2025-07-17', 3),
+(4, 6, '2025-07-17', 4),
+(4, 7, '2025-07-17', 5),
+(15, 1, '2025-07-17', 2),
+(15, 2, '2025-07-17', 1),
+(5, 1, '2025-07-17', 4),
+(5, 2, '2025-07-17', 3),
+(6, 4, '2025-07-17', 5),
+(6, 5, '2025-07-17', 2);
 
 INSERT INTO examination_records 
 (patient_id, clinic_id, doctor_id, appointment_id, result, note, examined_at)
@@ -796,60 +759,60 @@ UPDATE doctors SET price = 380000 WHERE user_id = 25; -- Chẩn đoán hình ả
 -- Thêm 15 appointments mới
 INSERT INTO appointments (patient_id, clinic_id, doctor_id, appointment_date, appointment_time, status, priority, reason, note) VALUES
 -- Patient 8 - Các khoa khác nhau
-(8, 2, 3, '2025-07-26', '09:00:00', 'confirmed', 0, 'Đau đầu, chóng mặt', 'Triệu chứng xuất hiện sau khi làm việc nhiều'),
-(8, 5, 19, '2025-07-27', '14:30:00', 'pending', 0, 'Nổi mẩn đỏ trên da', 'Có thể do dị ứng thời tiết'),
-(8, 7, 20, '2025-07-28', '10:00:00', 'confirmed', 0, 'Đau họng, khó nuốt', 'Triệu chứng kéo dài 3 ngày'),
+(8, 2, 3, '2025-07-17', '09:00:00', 'confirmed', 0, 'Đau đầu, chóng mặt', 'Triệu chứng xuất hiện sau khi làm việc nhiều'),
+(8, 5, 19, '2025-07-18', '14:30:00', 'pending', 0, 'Nổi mẩn đỏ trên da', 'Có thể do dị ứng thời tiết'),
+(8, 7, 20, '2025-07-19', '10:00:00', 'confirmed', 0, 'Đau họng, khó nuốt', 'Triệu chứng kéo dài 3 ngày'),
 
 -- Patient 9 - Các khoa khác nhau
-(9, 3, 14, '2025-07-26', '15:00:00', 'confirmed', 0, 'Đau lưng, khó vận động', 'Sau khi nâng vật nặng'),
-(9, 6, 21, '2025-07-27', '08:30:00', 'pending', 0, 'Mờ mắt, nhức mắt', 'Làm việc nhiều với máy tính'),
-(9, 11, 18, '2025-07-28', '11:30:00', 'confirmed', 0, 'Đau bụng, buồn nôn', 'Sau khi ăn đồ cay'),
+(9, 3, 14, '2025-07-17', '15:00:00', 'confirmed', 0, 'Đau lưng, khó vận động', 'Sau khi nâng vật nặng'),
+(9, 6, 21, '2025-07-18', '08:30:00', 'pending', 0, 'Mờ mắt, nhức mắt', 'Làm việc nhiều với máy tính'),
+(9, 11, 18, '2025-07-19', '11:30:00', 'confirmed', 0, 'Đau bụng, buồn nôn', 'Sau khi ăn đồ cay'),
 
 -- Patient 10 - Các khoa khác nhau
-(10, 1, 2, '2025-07-26', '13:00:00', 'confirmed', 0, 'Đau ngực, khó thở', 'Khi leo cầu thang'),
-(10, 4, 17, '2025-07-27', '16:00:00', 'pending', 0, 'Sốt cao, ho nhiều', 'Trẻ em 5 tuổi'),
-(10, 8, 16, '2025-07-28', '09:00:00', 'confirmed', 0, 'Khám tổng quát định kỳ', 'Kiểm tra sức khỏe hàng năm'),
+(10, 1, 2, '2025-07-17', '13:00:00', 'confirmed', 0, 'Đau ngực, khó thở', 'Khi leo cầu thang'),
+(10, 4, 17, '2025-07-18', '16:00:00', 'pending', 0, 'Sốt cao, ho nhiều', 'Trẻ em 5 tuổi'),
+(10, 8, 16, '2025-07-19', '09:00:00', 'confirmed', 0, 'Khám tổng quát định kỳ', 'Kiểm tra sức khỏe hàng năm'),
 
 -- Patient 11 - Các khoa khác nhau
-(11, 2, 3, '2025-07-26', '10:30:00', 'confirmed', 0, 'Mất ngủ, stress', 'Công việc áp lực cao'),
-(11, 9, 25, '2025-07-27', '14:00:00', 'pending', 0, 'Chụp CT bụng', 'Theo dõi sau phẫu thuật'),
-(11, 12, 23, '2025-07-28', '15:30:00', 'confirmed', 0, 'Đau vùng thắt lưng', 'Nam giới 45 tuổi'),
+(11, 2, 3, '2025-07-17', '10:30:00', 'confirmed', 0, 'Mất ngủ, stress', 'Công việc áp lực cao'),
+(11, 9, 25, '2025-07-18', '14:00:00', 'pending', 0, 'Chụp CT bụng', 'Theo dõi sau phẫu thuật'),
+(11, 12, 23, '2025-07-19', '15:30:00', 'confirmed', 0, 'Đau vùng thắt lưng', 'Nam giới 45 tuổi'),
 
 -- Patient 12 - Các khoa khác nhau
-(12, 1, 2, '2025-07-26', '08:00:00', 'confirmed', 0, 'Tăng huyết áp', 'Có tiền sử gia đình'),
-(12, 10, 22, '2025-07-27', '11:00:00', 'pending', 0, 'Tư vấn phòng chống ung thư', 'Người thân bị ung thư'),
-(12, 13, 24, '2025-07-28', '13:30:00', 'confirmed', 0, 'Kiểm tra đường huyết', 'Tiền sử tiểu đường');
+(12, 1, 2, '2025-07-17', '08:00:00', 'confirmed', 0, 'Tăng huyết áp', 'Có tiền sử gia đình'),
+(12, 10, 22, '2025-07-18', '11:00:00', 'pending', 0, 'Tư vấn phòng chống ung thư', 'Người thân bị ung thư'),
+(12, 13, 24, '2025-07-19', '13:30:00', 'confirmed', 0, 'Kiểm tra đường huyết', 'Tiền sử tiểu đường');
 
 -- Insert additional sample data into queues
 INSERT INTO queues (patient_id, clinic_id, record_id, appointment_id, status, priority, registered_online, qr_code, queue_number, shift_type, slot_date) VALUES
 -- Queue cho các appointment đã confirmed/completed (ID 1-25)
-(10, 3, NULL, 3, 'waiting', 0, TRUE, 'QR001', 100, 'afternoon', '2025-07-26'), -- Appointment confirmed: patient 10, clinic 3, doctor 14, 13:00:00
-(11, 4, NULL, 4, 'waiting', 0, TRUE, 'QR002', 100, 'morning', '2025-07-26'), -- Appointment confirmed: patient 11, clinic 4, doctor 2, 10:30:00
-(13, 6, NULL, 6, 'done', 0, TRUE, 'QR003', 100, 'morning', '2025-07-28'), -- Appointment completed: patient 13, clinic 6, doctor 14, 09:30:00
-(8, 1, NULL, 7, 'waiting', 0, TRUE, 'QR004', 100, 'morning', '2025-07-26'), -- Appointment confirmed: patient 8, clinic 1, doctor 2, 08:00:00
-(10, 3, NULL, 9, 'waiting', 0, TRUE, 'QR005', 101, 'afternoon', '2025-07-26'), -- Appointment confirmed: patient 10, clinic 3, doctor 14, 15:00:00
-(12, 11, NULL, 11, 'waiting', 0, TRUE, 'QR006', 100, 'afternoon', '2025-07-27'), -- Appointment confirmed: patient 12, clinic 11, doctor 2, 15:30:00
-(8, 9, NULL, 13, 'waiting', 0, TRUE, 'QR007', 100, 'morning', '2025-07-28'), -- Appointment confirmed: patient 8, clinic 9, doctor 2, 10:15:00
-(10, 13, NULL, 15, 'waiting', 0, TRUE, 'QR008', 100, 'morning', '2025-07-28'), -- Appointment confirmed: patient 10, clinic 13, doctor 14, 09:00:00
-(11, 1, NULL, 16, 'waiting', 0, TRUE, 'QR009', 101, 'morning', '2025-07-26'), -- Appointment confirmed: patient 11, clinic 1, doctor 2, 09:30:00
-(13, 4, NULL, 18, 'waiting', 0, TRUE, 'QR010', 101, 'morning', '2025-07-28'), -- Appointment confirmed: patient 13, clinic 4, doctor 14, 10:00:00
-(11, 8, NULL, 21, 'done', 0, TRUE, 'QR011', 100, 'morning', '2025-07-28'), -- Appointment completed: patient 11, clinic 8, doctor 2, 08:30:00
-(12, 9, NULL, 22, 'done', 0, TRUE, 'QR012', 101, 'afternoon', '2025-07-27'), -- Appointment completed: patient 12, clinic 9, doctor 3, 14:30:00
-(13, 10, NULL, 23, 'done', 0, TRUE, 'QR013', 100, 'morning', '2025-07-28'), -- Appointment completed: patient 13, clinic 10, doctor 14, 09:30:00
-(8, 8, NULL, 24, 'done', 2, TRUE, 'QR014', 101, 'morning', '2025-07-28'), -- Appointment completed: patient 8, clinic 8, doctor 2, 07:30:00
-(9, 1, NULL, 25, 'done', 2, TRUE, 'QR015', 102, 'night', '2025-07-27'), -- Appointment completed: patient 9, clinic 1, doctor 3, 20:00:00
+(10, 3, NULL, 3, 'waiting', 0, TRUE, 'QR001', 100, 'afternoon', '2025-07-17'), -- Appointment confirmed: patient 10, clinic 3, doctor 14, 13:00:00
+(11, 4, NULL, 4, 'waiting', 0, TRUE, 'QR002', 100, 'morning', '2025-07-17'), -- Appointment confirmed: patient 11, clinic 4, doctor 2, 10:30:00
+(13, 6, NULL, 6, 'done', 0, TRUE, 'QR003', 100, 'morning', '2025-07-19'), -- Appointment completed: patient 13, clinic 6, doctor 14, 09:30:00
+(8, 1, NULL, 7, 'waiting', 0, TRUE, 'QR004', 100, 'morning', '2025-07-17'), -- Appointment confirmed: patient 8, clinic 1, doctor 2, 08:00:00
+(10, 3, NULL, 9, 'waiting', 0, TRUE, 'QR005', 101, 'afternoon', '2025-07-17'), -- Appointment confirmed: patient 10, clinic 3, doctor 14, 15:00:00
+(12, 11, NULL, 11, 'waiting', 0, TRUE, 'QR006', 100, 'afternoon', '2025-07-18'), -- Appointment confirmed: patient 12, clinic 11, doctor 2, 15:30:00
+(8, 9, NULL, 13, 'waiting', 0, TRUE, 'QR007', 100, 'morning', '2025-07-19'), -- Appointment confirmed: patient 8, clinic 9, doctor 2, 10:15:00
+(10, 13, NULL, 15, 'waiting', 0, TRUE, 'QR008', 100, 'morning', '2025-07-19'), -- Appointment confirmed: patient 10, clinic 13, doctor 14, 09:00:00
+(11, 1, NULL, 16, 'waiting', 0, TRUE, 'QR009', 101, 'morning', '2025-07-17'), -- Appointment confirmed: patient 11, clinic 1, doctor 2, 09:30:00
+(13, 4, NULL, 18, 'waiting', 0, TRUE, 'QR010', 101, 'morning', '2025-07-19'), -- Appointment confirmed: patient 13, clinic 4, doctor 14, 10:00:00
+(11, 8, NULL, 21, 'done', 0, TRUE, 'QR011', 100, 'morning', '2025-07-19'), -- Appointment completed: patient 11, clinic 8, doctor 2, 08:30:00
+(12, 9, NULL, 22, 'done', 0, TRUE, 'QR012', 101, 'afternoon', '2025-07-18'), -- Appointment completed: patient 12, clinic 9, doctor 3, 14:30:00
+(13, 10, NULL, 23, 'done', 0, TRUE, 'QR013', 100, 'morning', '2025-07-19'), -- Appointment completed: patient 13, clinic 10, doctor 14, 09:30:00
+(8, 8, NULL, 24, 'done', 2, TRUE, 'QR014', 101, 'morning', '2025-07-19'), -- Appointment completed: patient 8, clinic 8, doctor 2, 07:30:00
+(9, 1, NULL, 25, 'done', 2, TRUE, 'QR015', 102, 'night', '2025-07-18'), -- Appointment completed: patient 9, clinic 1, doctor 3, 20:00:00
 
 -- Thêm queue cho các appointment confirmed mới (ID 26-40)
-(8, 2, NULL, 26, 'waiting', 0, TRUE, 'QR051', 100, 'morning', '2025-07-26'), -- Appointment confirmed: patient 8, clinic 2, doctor 3, 09:00:00
-(8, 7, NULL, 28, 'waiting', 0, TRUE, 'QR053', 100, 'morning', '2025-07-28'), -- Appointment confirmed: patient 8, clinic 7, doctor 20, 10:00:00
-(9, 3, NULL, 29, 'waiting', 0, TRUE, 'QR054', 102, 'afternoon', '2025-07-26'), -- Appointment confirmed: patient 9, clinic 3, doctor 14, 15:00:00
-(9, 11, NULL, 31, 'waiting', 0, TRUE, 'QR056', 101, 'afternoon', '2025-07-27'), -- Appointment confirmed: patient 9, clinic 11, doctor 18, 14:00:00
-(10, 1, NULL, 32, 'waiting', 0, TRUE, 'QR057', 103, 'afternoon', '2025-07-26'), -- Appointment confirmed: patient 10, clinic 1, doctor 2, 13:00:00
-(10, 8, NULL, 34, 'waiting', 0, TRUE, 'QR059', 101, 'morning', '2025-07-28'), -- Appointment confirmed: patient 10, clinic 8, doctor 16, 09:00:00
-(11, 2, NULL, 35, 'waiting', 0, TRUE, 'QR060', 101, 'morning', '2025-07-26'), -- Appointment confirmed: patient 11, clinic 2, doctor 3, 10:30:00
-(11, 12, NULL, 37, 'waiting', 0, TRUE, 'QR062', 100, 'afternoon', '2025-07-28'), -- Appointment confirmed: patient 11, clinic 12, doctor 23, 15:30:00
-(12, 1, NULL, 38, 'waiting', 0, TRUE, 'QR063', 104, 'morning', '2025-07-26'), -- Appointment confirmed: patient 12, clinic 1, doctor 2, 08:00:00
-(12, 13, NULL, 40, 'waiting', 0, TRUE, 'QR065', 101, 'afternoon', '2025-07-28'); -- Appointment confirmed: patient 12, clinic 13, doctor 24, 13:30:00
+(8, 2, NULL, 26, 'waiting', 0, TRUE, 'QR051', 100, 'morning', '2025-07-17'), -- Appointment confirmed: patient 8, clinic 2, doctor 3, 09:00:00
+(8, 7, NULL, 28, 'waiting', 0, TRUE, 'QR053', 100, 'morning', '2025-07-19'), -- Appointment confirmed: patient 8, clinic 7, doctor 20, 10:00:00
+(9, 3, NULL, 29, 'waiting', 0, TRUE, 'QR054', 102, 'afternoon', '2025-07-17'), -- Appointment confirmed: patient 9, clinic 3, doctor 14, 15:00:00
+(9, 11, NULL, 31, 'waiting', 0, TRUE, 'QR056', 101, 'afternoon', '2025-07-18'), -- Appointment confirmed: patient 9, clinic 11, doctor 18, 14:00:00
+(10, 1, NULL, 32, 'waiting', 0, TRUE, 'QR057', 103, 'afternoon', '2025-07-17'), -- Appointment confirmed: patient 10, clinic 1, doctor 2, 13:00:00
+(10, 8, NULL, 34, 'waiting', 0, TRUE, 'QR059', 101, 'morning', '2025-07-19'), -- Appointment confirmed: patient 10, clinic 8, doctor 16, 09:00:00
+(11, 2, NULL, 35, 'waiting', 0, TRUE, 'QR060', 101, 'morning', '2025-07-17'), -- Appointment confirmed: patient 11, clinic 2, doctor 3, 10:30:00
+(11, 12, NULL, 37, 'waiting', 0, TRUE, 'QR062', 100, 'afternoon', '2025-07-19'), -- Appointment confirmed: patient 11, clinic 12, doctor 23, 15:30:00
+(12, 1, NULL, 38, 'waiting', 0, TRUE, 'QR063', 104, 'morning', '2025-07-17'), -- Appointment confirmed: patient 12, clinic 1, doctor 2, 08:00:00
+(12, 13, NULL, 40, 'waiting', 0, TRUE, 'QR065', 101, 'afternoon', '2025-07-19'); -- Appointment confirmed: patient 12, clinic 13, doctor 24, 13:30:00
 
 
 -- SET SQL_SAFE_UPDATES = 1;
@@ -1061,13 +1024,13 @@ VALUES (
 
   <h2>5. Lời khuyên từ bác sĩ</h2>
   <blockquote>
-    “Đừng chờ đến khi bệnh trở nặng mới đi khám. Việc kiểm tra sức khỏe định kỳ giúp phát hiện sớm và điều trị hiệu quả hơn.” – <em>Bác sĩ Nguyễn Văn A</em>
+    "Đừng chờ đến khi bệnh trở nặng mới đi khám. Việc kiểm tra sức khỏe định kỳ giúp phát hiện sớm và điều trị hiệu quả hơn.” – <em>Bác sĩ Nguyễn Văn A</em>
   </blockquote>
 
   <p style="font-style: italic; color: gray;">Hy vọng bài viết đã giúp bạn hiểu rõ hơn về quy trình đi khám bệnh tại bệnh viện. Chúc bạn luôn mạnh khỏe!</p>',
   'https://i.imgur.com/U1Mbz7Q.jpg',
   true,
-  2 -- Ví dụ ID của chuyên mục "Sức khỏe"
+  1
 );
 
 INSERT INTO doctor_ratings (appointment_id, doctor_id, patient_id, rating, comment, is_anonymous)
@@ -1133,7 +1096,7 @@ INSERT INTO doctor_ratings (appointment_id, doctor_id, patient_id, rating, comme
 --   </ol>
 --   <p><img src="https://i.imgur.com/vmYuO3O.jpg" alt="Đặt lịch khám online" style="max-width:100%;border-radius:8px;"/></p>
 --   <p>Hệ thống của bệnh viện cũng cho phép <strong>hủy lịch</strong> hoặc <strong>đổi giờ khám</strong> linh hoạt nếu bạn có việc bận.</p>
---   <blockquote>“Đặt lịch online giúp bệnh nhân chủ động và giảm thời gian chờ đợi.” – TS. Trần Thị B</blockquote>',
+--   <blockquote>"Đặt lịch online giúp bệnh nhân chủ động và giảm thời gian chờ đợi." – TS. Trần Thị B</blockquote>',
 --   'https://i.imgur.com/vmYuO3O.jpg',
 --   true,
 --   7

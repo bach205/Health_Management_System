@@ -210,10 +210,10 @@ const PatientBookAppointment: React.FC = () => {
             const dateObj = new Date(dateKey);
             const weekday = dateObj.toLocaleDateString('vi-VN', { weekday: 'long' });
             const dateStr = dateObj.toLocaleDateString('vi-VN');
-
-            if (dayjs(dateKey).isBefore(dayjs(), 'minute')) {
-              return null; // Nếu ngày khám đã qua hoặc là hiện tại, không hiển thị
-            }
+            
+            // if (dayjs(dateKey).isBefore(dayjs(), 'day')) {
+            //   return null; // Nếu ngày khám đã qua, không hiển thị
+            // }
 
             return (
               <div
@@ -315,7 +315,7 @@ const PatientBookAppointment: React.FC = () => {
       <Card title="Bác sĩ cùng chuyên khoa">
         <RelatedDoctors docId={docId} speciality={""} />
       </Card> */}
-      <FeedbackDoctorComments doctorId={docId} />
+      <FeedbackDoctorComments doctorId={Number(docId)} />
     </div>
   );
 };

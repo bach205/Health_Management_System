@@ -153,7 +153,7 @@ const NurseBookAppointment: React.FC = () => {
         value: dayjs.utc(slot.start_time).format('HH:mm:ss'),
         label: `${dayjs.utc(slot.start_time).format('HH:mm')} - ${dayjs.utc(slot.end_time).format('HH:mm')}`
       }));
-    console.log(times);
+   // console.log(times);
     setAvailableTimes(times);
 
     // Reset time field

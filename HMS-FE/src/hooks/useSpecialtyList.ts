@@ -11,7 +11,7 @@ export const useSpecialtyList = (initialPagination?: Partial<IPagination>, getAl
   const [sort, setSort] = useState<string>("name_asc");
   const [pagination, setPagination] = useState<IPagination>({
     total: 0,
-    pageSize: initialPagination?.pageSize || 10,
+    pageSize: initialPagination?.pageSize || 5,
     current: initialPagination?.current || 1,
   });
 

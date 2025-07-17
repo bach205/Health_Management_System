@@ -86,15 +86,17 @@ class AppointmentService {
    */
   async bookAppointmentByQR(data) {
     // 1. Kiểm tra slot còn trống không
+    console.log(data.start_time);
     let slot = await prisma.$queryRaw`
       SELECT * FROM available_slots
       WHERE doctor_id = ${data.doctor_id}
         AND clinic_id = ${data.clinic_id}
         AND slot_date = ${data.slot_date}
-        AND start_time = ${data.start_time}
+        AND start_time = ${data.start_time.slice(11,19)}
         AND is_available = 1
       LIMIT 1;
     `;
+    console.log(slot);
     slot = slot[0];
     if (!slot)
       throw new BadRequestError("Khung giờ này đã được đặt hoặc không tồn tại!");
@@ -123,7 +125,7 @@ class AppointmentService {
             gender: data.gender,
             address: data.address,
             date_of_birth: data.date_of_birth,
-            email: data.email || null,
+            email: `${data.phone}@gmail.com`,
           },
         });
         // Tạo patient
@@ -140,13 +142,13 @@ class AppointmentService {
     } else {
       data.patient_id = patient.id;
     }
-
+    console.log(data.start_time)
     // 3. Kiểm tra bệnh nhân đã có lịch trùng chưa
     const exist = await prisma.appointment.findFirst({
       where: {
         patient_id: data.patient_id,
         appointment_date: new Date(data.slot_date),
-        appointment_time: new Date(`1970-01-01T${data.start_time}`),
+        appointment_time: data.start_time,
         status: { in: ["pending", "confirmed"] },
       },
     });
@@ -160,7 +162,7 @@ class AppointmentService {
         doctor_id: data.doctor_id,
         clinic_id: data.clinic_id,
         appointment_date: new Date(data.slot_date),
-        appointment_time: new Date(`1970-01-01T${data.start_time}`),
+        appointment_time: data.start_time,
         reason: data.reason,
         note: data.note,
         status: "pending",
@@ -350,7 +352,7 @@ class AppointmentService {
       LEFT JOIN clinics c ON a.clinic_id = c.id
       ORDER BY a.id ASC
     `;
-
+    console.log(appointments)
     return appointments;
   }
 
@@ -419,6 +421,7 @@ class AppointmentService {
         // Tạo user
         const user = await prisma.user.create({
           data: {
+            full_name :data.patientName,
             email: data.email,
             password: hashedPassword,
             phone: data.phoneNumber || null,
@@ -460,9 +463,10 @@ class AppointmentService {
         status: { in: ["pending", "confirmed"] },
       },
     });
+
     if (exist)
       throw new BadRequestError("Bệnh nhân đã có lịch hẹn vào khung giờ này!");
-
+    console.log(data.appointment_time)
     // 5. Tạo lịch hẹn
     const appointment = await prisma.appointment.create({
       data: {
@@ -481,7 +485,7 @@ class AppointmentService {
         clinic: true
       }
     });
-
+    console.log(appointment)
     // 6. Cập nhật slot thành không còn trống
     await prisma.availableSlot.update({
       where: { id: slot.id },
@@ -676,56 +680,16 @@ class AppointmentService {
    */
   async updateAppointment(appointment_id, data) {
     // 1. Lấy thông tin lịch hẹn cũ
-    const oldAppointment = await prisma.appointment.findUnique({
-      where: { id: parseInt(appointment_id) },
-    });
-    if (!oldAppointment) {
-      throw new BadRequestError("Không tìm thấy lịch hẹn");
-    }
-
-    // 2. Nếu đổi ngày/giờ khám thì kiểm tra slot mới
-    let updateSlot = false;
-    if ((data.appointment_date && data.appointment_date !== oldAppointment.appointment_date) ||
-        (data.appointment_time && data.appointment_time !== oldAppointment.appointment_time)) {
-      updateSlot = true;
-    }
-    if (updateSlot) {
-      // Kiểm tra slot mới có trống không
-      const slot = await prisma.availableSlot.findFirst({
-        where: {
-          doctor_id: oldAppointment.doctor_id,
-          clinic_id: oldAppointment.clinic_id,
-          slot_date: data.appointment_date || oldAppointment.appointment_date,
-          start_time: data.appointment_time || oldAppointment.appointment_time,
-          is_available: true,
-        },
-      });
-      if (!slot) {
-        throw new BadRequestError("Khung giờ mới không còn trống!");
-      }
-      // Đánh dấu slot mới là đã đặt
-      await prisma.availableSlot.update({
-        where: { id: slot.id },
-        data: { is_available: false },
-      });
-      // Mở lại slot cũ
-      await prisma.availableSlot.updateMany({
-        where: {
-          doctor_id: oldAppointment.doctor_id,
-          clinic_id: oldAppointment.clinic_id,
-          slot_date: oldAppointment.appointment_date,
-          start_time: oldAppointment.appointment_time,
-        },
-        data: { is_available: true },
-      });
-    }
+    console.log(data)
 
     // 3. Cập nhật lịch hẹn
     const updated = await prisma.appointment.update({
       where: { id: parseInt(appointment_id) },
       data: {
-        appointment_date: data.appointment_date ? new Date(data.appointment_date) : undefined,
-        appointment_time: data.appointment_time ? new Date(`1970-01-01T${data.appointment_time}`) : undefined,
+        appointment_date: data.appointment_date,
+        appointment_time: data.appointment_time,
+        doctor_id: data.doctor_id,
+        clinic_id: data.clinic_id,
         reason: data.reason,
         note: data.note,
       },

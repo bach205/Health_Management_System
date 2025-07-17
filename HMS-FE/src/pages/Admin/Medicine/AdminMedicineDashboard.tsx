@@ -7,6 +7,7 @@ import { CirclePlus, Eye, RefreshCcw, Search, Pencil, Trash2 } from "lucide-reac
 import dayjs from "dayjs";
 import ModalCreateMedicine from "./ModalCreateMedicine";
 import ModalUpdateMedicine from "./ModalUpdateMedicine";
+import ModalViewMedicine from "./ModalViewMedicine";
 import { useMedicineList } from "../../../hooks/useMedicineList";
 import { createMedicine, updateMedicine, deleteMedicine } from "../../../services/medicine.service";
 import UserListTitle from "../../../components/ui/UserListTitle";
@@ -15,6 +16,7 @@ import { sortOptions } from "../../../constants/user.const";
 const AdminMedicineDashboard = () => {
     const [isCreateVisible, setIsCreateVisible] = useState(false);
     const [isUpdateVisible, setIsUpdateVisible] = useState(false);
+    const [isViewVisible, setIsViewVisible] = useState(false);
     const [currentMedicine, setCurrentMedicine] = useState<any>(null);
     const [formCreate] = Form.useForm();
     const [formUpdate] = Form.useForm();
@@ -60,6 +62,13 @@ const AdminMedicineDashboard = () => {
             width: 150,
             render: (_: any, record: any) => (
                 <Space>
+                    <Tooltip title="Xem">
+                        <Button
+                            type="text"
+                            icon={<Eye size={17.5} />}
+                            onClick={() => handleView(record)}
+                        />
+                    </Tooltip>
                     <Tooltip title="Chỉnh sửa">
                         <Button
                             type="text"
@@ -142,6 +151,12 @@ const AdminMedicineDashboard = () => {
             }
         }
     };
+
+    const handleView = (record: any) => {
+        setCurrentMedicine(record);
+        setIsViewVisible(true);
+    };
+
     const handleResetFilter = () => {
         setKeyword("");
         setSort("name_asc");
@@ -220,6 +235,13 @@ const AdminMedicineDashboard = () => {
                 medicine={currentMedicine}
                 reload={reload}
                 setReload={setReload}
+            />
+
+            <ModalViewMedicine
+                form={formUpdate}
+                isVisible={isViewVisible}
+                handleCancel={() => setIsViewVisible(false)}
+                medicine={currentMedicine}
             />
         </div>
     );

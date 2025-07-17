@@ -43,6 +43,7 @@ const DoctorExaminationRecordModal = ({
   const [selectedClinic, setSelectedClinic] = useState<number | null>(null);
   const [isFollowUp, setIsFollowUp] = useState<boolean>(false);
 
+  console.log("slotsByDate",slotsByDate);
   const [medicinesAdded, setMedicinesAdded] = useState<IMedicine[]>([]);
   const [isCreate, setIsCreate] = useState(true);
   const [medicineVisible, setMedicineVisible] = useState(false);
@@ -56,6 +57,10 @@ const DoctorExaminationRecordModal = ({
 
   const [isSaved, setIsSaved] = useState(false);                // đã lưu hồ sơ
 
+  // console.log("isFormDisabled",isFormDisabled);
+  // console.log("isReadyToSubmit",isReadyToSubmit);
+  // console.log("isCreate",isCreate);
+  // console.log("isSaved",isSaved);
 
   // Fetch slot theo doctor
   useEffect(() => {
@@ -84,7 +89,7 @@ const DoctorExaminationRecordModal = ({
         available.forEach((slot: any) => {
           if (selectedClinic && slot.clinic_id !== selectedClinic) return;
           if (!groupedByDate[slot.slot_date]) groupedByDate[slot.slot_date] = [];
-          groupedByDate[slot.slot_date].push(slot);
+         groupedByDate[slot.slot_date || {}].push(slot);
         });
 
         setSlotsByDate(groupedByDate);
@@ -163,6 +168,7 @@ const DoctorExaminationRecordModal = ({
       toast.success("Tạo hồ sơ khám thành công!");
       handleSetIsFollowUp(false)
       handleSetMedicineVisible(false);
+      setIsReadyToSubmit(false)
       form.resetFields();
       setSelectedDate(null);
       setSelectedSlotId(null);
@@ -252,7 +258,6 @@ const DoctorExaminationRecordModal = ({
     setMedicinesAdded(newList);
   };
 
-  console.log("selectec medicine", selectedMedicine);
 
   return (
     <Modal
@@ -349,7 +354,7 @@ const DoctorExaminationRecordModal = ({
             <>
               <Form.Item label="Chọn phòng khám">
                 <div className="flex gap-2 flex-wrap">
-                  {clinics.map(clinic => (
+                  {clinics?.map(clinic => (
                     <Button
                       key={clinic.id}
                       type={selectedClinic === clinic.id ? "primary" : "default"}
@@ -373,9 +378,9 @@ const DoctorExaminationRecordModal = ({
                       const weekday = dayjs(date).locale('vi').format("dddd");
                       const dateStr = dayjs(date).format("DD/MM/YYYY");
                       // Kiểm tra nếu ngày khám <= hôm nay thì bỏ qua
-                      if (dayjs(date).isBefore(dayjs(), 'minute')) {
-                        return null; // Nếu ngày khám là quá khứ thì bỏ qua
-                      }
+                      // if (dayjs(date).isBefore(dayjs(), 'minute')) {
+                      //   return null; // Nếu ngày khám là quá khứ thì bỏ qua
+                      // }
                       return (
                         <Button
                           key={date}

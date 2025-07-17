@@ -105,28 +105,6 @@ const ScheduleTable = ({ data = [], setReload, loading = false, visible, selecte
     }
   };
 
-  const handleDeleteAppointment = async (record: any) => {
-    try {
-      Modal.confirm({
-        title: 'Xác nhận xoá lịch khám',
-        content: (
-          <>
-            <Typography.Text>Bạn có chắc muốn xoá lịch hẹn này?</Typography.Text>
-          </>
-        ),
-        onOk: async () => {
-          await deleteAppointmentService(record._id || record.id);
-          setReload(!reload);
-          notification.success({ message: 'Xoá lịch thành công' });
-        },
-        okText: 'Xác nhận',
-        cancelText: 'Không',
-      });
-    } catch (error) {
-      notification.error({ message: 'Xoá lịch không thành công' });
-    }
-  };
-
   const hasPermissionEdit = (record: any) => {
     if (record.status === "completed") {
       const invoice = selectedInvoiceList.find(i => i.record_id === record.id); // giả sử bạn truyền invoiceList từ parent hoặc fetch trước
@@ -165,43 +143,43 @@ const ScheduleTable = ({ data = [], setReload, loading = false, visible, selecte
             <InfoCircleOutlined />
           </Button>
         </Tooltip>
-        <Tooltip title="Chỉnh sửa lịch khám">
-          <Button
-            type="default"
-            size="small"
-            onClick={() => handleEditAppointment(record)}
-          >
-            <EditOutlined />
-          </Button>
-        </Tooltip>
-        <Popconfirm
-          icon={<DeleteOutlined style={{ color: "red" }} />}
-          title="Hủy lịch khám bệnh"
-          description={
-            <>
-              <Typography.Text>Xác nhận hủy lịch ngày: </Typography.Text>{" "}
-              <strong>
-                {record.date} - {record.time}?
-              </strong>
-            </>
-          }
-          onConfirm={() => handleCancelAppmt(record)}
-          okText="Xác nhận"
-          cancelText="Không"
-        >
-          <Tooltip title="Hủy lịch khám">
-            <Button type="default" danger size="small">
-              <CloseOutlined />
-            </Button>
-          </Tooltip>
-        </Popconfirm>
-        {record.status !== 'cancelled' && record.status !== 'completed' && (
-          <Tooltip title="Xoá lịch hẹn">
-            <Button type="default" danger size="small" onClick={() => handleDeleteAppointment(record)}>
-              <DeleteOutlined />
+        {/* Ẩn nút chỉnh sửa nếu trạng thái là 'confirmed' */}
+        {record.status !== 'confirmed' && (
+          <Tooltip title="Chỉnh sửa lịch khám">
+            <Button
+              type="default"
+              size="small"
+              onClick={() => handleEditAppointment(record)}
+            >
+              <EditOutlined />
             </Button>
           </Tooltip>
         )}
+        {/* Ẩn nút huỷ nếu trạng thái là 'confirmed' */}
+        {record.status !== 'confirmed' && (
+          <Popconfirm
+            icon={<DeleteOutlined style={{ color: "red" }} />}
+            title="Hủy lịch khám bệnh"
+            description={
+              <>
+                <Typography.Text>Xác nhận hủy lịch ngày: </Typography.Text>{" "}
+                <strong>
+                  {record.date} - {record.time}?
+                </strong>
+              </>
+            }
+            onConfirm={() => handleCancelAppmt(record)}
+            okText="Xác nhận"
+            cancelText="Không"
+          >
+            <Tooltip title="Hủy lịch khám">
+              <Button type="default" danger size="small">
+                <CloseOutlined />
+              </Button>
+            </Tooltip>
+          </Popconfirm>
+        )}
+        {/* Đã xoá nút xoá lịch hẹn */}
       </>
     )
   }
@@ -293,7 +271,7 @@ const ScheduleTable = ({ data = [], setReload, loading = false, visible, selecte
         loading={loading}
         columns={columns}
         rowKey={record => record._id || record.id}
-        pagination={{ pageSize: 10 }}
+        pagination={{  showSizeChanger: true, pageSizeOptions: ["1", "3", "5", "7", "9"] }}
       />
 
       {/* View Appointment Modal */}
