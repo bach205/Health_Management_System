@@ -40,9 +40,10 @@ const BlogDashboard = () => {
             }
 
             const res = await getBlogs(params);
+
             console.log(res.data.metadata)
             setBlogs(res.data.metadata);
-            setTotalRows(res.data.metadata.length / 3);
+            setTotalRows(res.data.metadata.length);
         } catch (err) {
             message.error('Lỗi khi tải blog');
         }
@@ -109,7 +110,7 @@ const BlogDashboard = () => {
                                 {blog.title}
                             </Title>
                             <Paragraph type="secondary" style={{ fontSize: 13, minHeight: 60 }}>
-                                {truncate(blog.content)}
+                                {/* {truncate(blog.content)} */}
                             </Paragraph>
                             {blog.category?.name && <Tag color="blue">{blog.category.name}</Tag>}
                             <div style={{ marginTop: 8 }}>

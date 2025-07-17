@@ -107,6 +107,18 @@ const ScheduleTable = ({ data = [], setReload, loading = false, visible, selecte
 
   const hasPermissionEdit = (record: any) => {
     if (record.status === "completed") {
+      // // const invoice = selectedInvoiceList.find(i => i.record_id === record.id); // giả sử bạn truyền invoiceList từ parent hoặc fetch trước
+
+      // if (invoice?.status === "pending") {
+      //   return (
+      //     <Tooltip title="Bạn cần thanh toán trước khi xem kết quả khám">
+      //       <Button type="primary" size="small" disabled>
+      //         Xem kết quả khám
+      //       </Button>
+      //     </Tooltip>
+      //   );
+      // }
+
       return (
         <Tooltip title="Xem kết quả khám">
           <Button
@@ -172,7 +184,7 @@ const ScheduleTable = ({ data = [], setReload, loading = false, visible, selecte
     )
   }
 
-  console.log("selectedRecord",selectedRecord)
+  console.log("selectedRecord", selectedRecord)
   const columns = [
     {
       title: "Ngày đặt",

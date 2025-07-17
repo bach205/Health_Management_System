@@ -166,7 +166,7 @@ const PublicRoutes = [
     layout: MainLayout,
   },
   {
-    path: "/blogs/:blogId",
+    path: "/blogs/:id",
     element: <BlogDetail />,
     layout: MainLayout,
   },
@@ -204,21 +204,21 @@ const PrivateRoutes: PrivateRoute[] = [
     path: "/user-book-appointments",
     element: <NurseManageAppointment />,
     layout: DashboardLayout,
-  },  
+  },
   {
     path: "/admin/dashboard",
     element: <AdminDashboard />,
     allowedRoles: ["admin"],
     layout: DashboardLayout,
   },
-  
+
   {
     path: "/admin/blogs",
     element: <AdminBlogDashboard />,
     allowedRoles: ["admin"],
     layout: DashboardLayout,
   },
-  
+
   {
     path: "/admin/blogs/create",
     element: <CreateBlog />,
@@ -257,7 +257,7 @@ const PrivateRoutes: PrivateRoute[] = [
     element: <ShiftManager />,
     layout: DashboardLayout,
   },
-  
+
   {
     path: "/nurse-manage-payments",
     element: <PaymentList />,
@@ -349,6 +349,12 @@ const PrivateRoutes: PrivateRoute[] = [
   {
     path: "/chat",
     element: <ChatPage />,
+    layout: DashboardLayout,
+    allowedRoles: ["admin", "doctor", "nurse", "patient"],
+  },
+  {
+    path: "/blog/:id",
+    element: <EditBlog />,
     layout: DashboardLayout,
     allowedRoles: ["admin", "doctor", "nurse", "patient"],
   },

@@ -11,6 +11,7 @@ class BlogController {
   // Lấy danh sách bài viết
   // GET /api/v1/blog?page=1&pageSize=10&published=true&category_id=1&keyword=abc
   async getAll(req, res) {
+    console.log(1)
     const { page = 1, pageSize = 8, ...filters } = req.query;
 
     const skip = (Number(page) - 1) * Number(pageSize);
@@ -23,13 +24,13 @@ class BlogController {
     if (filters.category_id) {
       where.category_id = Number(filters.category_id);
     }
-
     const result = await BlogService.getBlogs({
       where,
       skip,
       take,
       keyword: filters.keyword || '',
     });
+
 
     return new OK({ message: 'Lấy danh sách bài viết thành công', metadata: result }).send(res);
   }

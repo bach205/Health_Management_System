@@ -23,4 +23,8 @@ yarn-debug.log*
 yarn-error.log*
 
 .env
-uploads/chat/*
+# Ignore all files inside uploads/chat
+/uploads/chat/*
+
+# But still track the folder itself
+!/uploads/chat/
