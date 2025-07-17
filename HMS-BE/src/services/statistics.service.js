@@ -43,22 +43,22 @@ class StatisticsService {
             specialty: doc.doctor.specialty.name,
             appointmentCount: doctorIds.find(d => d.doctor_id === doc.id)?._count._all || 0
         }))
-        console.log(result)
+        // console.log(result)
         return result;
     };
 
     getPeriodStatistics = async (query) => {
-        const { time = 'weekly' } = query;
+        const { time = 'week' } = query;
 
         const date = new Date()
-        if (time === 'daily') {
+        if (time === 'today') {
             date.setDate(date.getDate() - 1)
-        } else if (time === 'weekly') {
+        } else if (time === 'week') {
             date.setDate(date.getDate() - 7)
-        } else if (time === 'monthly') {
-            date.setDate(date.getMonth() - 1)
-        } else if (time === 'yearly') {
-            date.setDate(date.getFullYear() - 1)
+        } else if (time === 'month') {
+            date.setMonth(date.getMonth() - 1); // Sửa chỗ này
+        } else if (time === 'year') {
+            date.setFullYear(date.getFullYear() - 1); // Sửa chỗ này
         }
 
         const totalPatients = await prisma.patient.count({
@@ -91,17 +91,19 @@ class StatisticsService {
             },
         })
 
-        const doctors = await prisma.user.findMany({
-            where: {
-                is_active: true,
-                id: {
-                    in: doctorIds.map(d => d.doctor_id)
-                }
-            },
-            include: {
-                doctor: true
-            },
-        })
+        // const doctors = await prisma.user.findMany({
+        //     where: {
+        //         is_active: true,
+        //         id: {
+        //             in: doctorIds.map(d => d.doctor_id)
+        //         }
+        //     },
+        //     include: {
+        //         doctor: true
+        //     },
+        // })
+
+        console.log(date.toISOString())
 
         const payments = await prisma.payment.findMany({
             where: {
@@ -109,6 +111,8 @@ class StatisticsService {
                 payment_time: { gte: date },
             },
         });
+
+        console.log(payments)
 
         const totalRevenue = payments.reduce((sum, p) => sum + Number(p.amount), 0);
 
