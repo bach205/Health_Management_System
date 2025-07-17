@@ -105,21 +105,20 @@ class FeedbackService {
     }
 
     // Get list of comments for a doctor with offset & limit
-    async getDoctorComments(doctorId, offset = 0, limit = 15) {
+    async getDoctorComments(doctorId, offset = 0, limit = 15, sortBy = "newest", star) {
         // Lấy tổng số feedback có comment
+        const where = {
+            doctor_id: Number(doctorId),
+            comment: { not: null, notIn: [""] },
+            ...(star ? { rating: Number(star) } : {})
+        };
         const total = await prisma.doctorRating.count({
-            where: {
-                doctor_id: Number(doctorId),
-                comment: { not: null, notIn: [""] }
-            }
+            where
         });
         // Lấy danh sách feedback có comment
         const comments = await prisma.doctorRating.findMany({
-            where: {
-                doctor_id: Number(doctorId),
-                comment: { not: null, notIn: [""] }
-            },
-            orderBy: { created_at: "desc" },
+            where,
+            orderBy: { created_at: sortBy === "oldest" ? "asc" : "desc" },
             skip: offset,
             take: limit,
             select: {

@@ -7,8 +7,10 @@ export const getDoctorAverageRating = async (doctorId: number) => {
     return res.data;
 };
 
-export const getDoctorComments = async (doctorId: number, limit = 10, offset = 0) => {
-    const res = await mainRequest.get(`${BASE_URL}/doctor/${doctorId}/comments?limit=${limit}&offset=${offset}`);
+export const getDoctorComments = async (doctorId: number, limit = 15, offset = 0, sortBy = "newest", star?: number) => {
+    let url = `${BASE_URL}/doctor/${doctorId}/comments?limit=${limit}&offset=${offset}&sortBy=${sortBy}`;
+    if (star) url += `&star=${star}`;
+    const res = await mainRequest.get(url);
     return res.data;
 };
 

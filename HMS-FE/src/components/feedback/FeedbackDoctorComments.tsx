@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { getDoctorComments } from "../../api/feedback";
-import { Button, List, Spin, Avatar, Typography, message, Rate, Card, Space } from "antd";
+import { Button, List, Spin, Avatar, Typography, message, Rate, Card, Space, Select, Row, Col } from "antd";
 
 interface FeedbackDoctorCommentsProps {
     doctorId: number;
@@ -24,19 +24,30 @@ interface CommentItem {
 const LIMIT = 15;
 const DEFAULT_AVATAR = "https://png.pngtree.com/png-clipart/20250102/original/pngtree-user-avatar-placeholder-black-png-image_6796227.png";
 
+const sortOptions = [
+    { label: "Mới nhất", value: "newest" },
+    { label: "Cũ nhất", value: "oldest" },
+];
+const starOptions = [
+    { label: "Tất cả", value: undefined },
+    ...[5, 4, 3, 2, 1].map(star => ({ label: `${star} sao`, value: star }))
+];
+
 const FeedbackDoctorComments: React.FC<FeedbackDoctorCommentsProps> = ({ doctorId }) => {
     const [comments, setComments] = useState<CommentItem[]>([]);
     const [total, setTotal] = useState(0);
     const [page, setPage] = useState(1);
     const [loading, setLoading] = useState(false);
     const [loadingMore, setLoadingMore] = useState(false);
+    const [sortBy, setSortBy] = useState<string>("newest");
+    const [star, setStar] = useState<number | undefined>(undefined);
 
-    const fetchComments = async (pageNum = 1, append = false) => {
+    const fetchComments = async (pageNum = 1, append = false, sort = sortBy, starFilter = star) => {
         try {
             if (pageNum === 1) setLoading(true);
             else setLoadingMore(true);
             const offset = (pageNum - 1) * LIMIT;
-            const res = await getDoctorComments(doctorId, LIMIT, offset);
+            const res = await getDoctorComments(doctorId, LIMIT, offset, sort, starFilter);
             if (res && res.metadata) {
                 setTotal(res.metadata.total);
                 setComments(prev => append ? [...prev, ...res.metadata.comments] : res.metadata.comments);
@@ -51,19 +62,40 @@ const FeedbackDoctorComments: React.FC<FeedbackDoctorCommentsProps> = ({ doctorI
 
     useEffect(() => {
         setPage(1);
-        fetchComments(1, false);
+        fetchComments(1, false, sortBy, star);
         // eslint-disable-next-line
-    }, [doctorId]);
+    }, [doctorId, sortBy, star]);
 
     const handleLoadMore = () => {
         const nextPage = page + 1;
         setPage(nextPage);
-        fetchComments(nextPage, true);
+        fetchComments(nextPage, true, sortBy, star);
     };
 
     return (
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
             <Typography.Title level={4} style={{ marginBottom: 24 }}>Bình luận của bệnh nhân</Typography.Title>
+            <Row gutter={16} style={{ marginBottom: 16 }}>
+                <Col>
+                    <Select
+                        value={sortBy}
+                        options={sortOptions}
+                        onChange={v => setSortBy(v)}
+                        style={{ minWidth: 120 }}
+                        placeholder="Sắp xếp"
+                    />
+                </Col>
+                <Col>
+                    <Select
+                        value={star}
+                        options={starOptions}
+                        onChange={v => setStar(v)}
+                        style={{ minWidth: 120 }}
+                        placeholder="Số sao"
+                        allowClear
+                    />
+                </Col>
+            </Row>
             {loading ? (
                 <Spin />
             ) : (

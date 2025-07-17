@@ -42,8 +42,8 @@ class FeedbackController {
     // Get list of comments for a doctor with offset & limit
     async getDoctorComments(req, res) {
         const doctorId = req.params.doctorId;
-        const { offset = 0, limit = 15 } = req.query;
-        const result = await FeedbackService.getDoctorComments(doctorId, Number(offset), Number(limit));
+        const { offset = 0, limit = 15, sortBy = "newest", star } = req.query;
+        const result = await FeedbackService.getDoctorComments(doctorId, Number(offset), Number(limit), sortBy, star);
         return res.status(200).json({
             message: "Comments fetched successfully",
             metadata: result,

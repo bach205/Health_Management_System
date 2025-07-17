@@ -1104,12 +1104,12 @@ VALUES (
 
 INSERT INTO doctor_ratings (appointment_id, doctor_id, patient_id, rating, comment, is_anonymous)
 VALUES
-(6, 14, 13, 4.9, 'Khám mắt rất tốt, bác sĩ tận tâm.', false),
-(22, 2, 11, 4.5, 'Bác sĩ rất nhẹ nhàng, hướng dẫn kỹ.', true),
+(6, 14, 13, 5.0, 'Khám mắt rất tốt, bác sĩ tận tâm.', false),
+(22, 2, 11, 4.0, 'Bác sĩ rất nhẹ nhàng, hướng dẫn kỹ.', true),
 (23, 3, 12, 4.0, 'Khám kỹ nhưng hơi đông bệnh nhân.', false),
 (24, 14, 13, 5.0, 'Tư vấn phòng chống ung thư rất hữu ích.', false),
-(25, 2, 8, 4.8, 'Khám cấp cứu nhanh chóng, xử lý tốt.', false),
-(26, 3, 9, 4.6, 'Rất hài lòng với cách tư vấn.', true);
+(25, 2, 8, 5.0, 'Khám cấp cứu nhanh chóng, xử lý tốt.', false),
+(26, 3, 9, 5.0, 'Rất hài lòng với cách tư vấn.', true);
 
 -- INSERT INTO blogs (title, content, image_url, published, category_id)
 -- VALUES 
