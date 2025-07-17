@@ -322,6 +322,7 @@ class PatientService {
                 }
             }
         });
+        console.log(patient)
         if (!patient) throw new BadRequestError("Không tìm thấy bệnh nhân với số CCCD này");
         // Tìm hồ sơ khám gần nhất có đơn thuốc
         const record = patient.records.find(r => r.prescriptionItems && r.prescriptionItems.length > 0);
