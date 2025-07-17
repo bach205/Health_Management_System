@@ -7,7 +7,7 @@ export const createDoctor = (doctor: IDoctor) => {
 };
 
 export const getDoctors = async (searchOptions: any) => {
-    return instance.post(`${BASE_URL}`, searchOptions);
+    return instance.post(`${BASE_URL}/all/with-rating`, searchOptions);
 };
 
 export const updateDoctor = (doctor: IDoctor) => {
@@ -48,6 +48,6 @@ export const createDoctorsFromCSV = (data: any) => {
 };
 
 export const getAvailableDoctors = async (clinicId: number) => {
-  const res = await instance.get(`${BASE_URL}/available?clinic_id=${clinicId}`);
-  return res.data.metadata.doctors; // hoặc tuỳ theo response của bạn
+  const res = await instance.get(`${BASE_URL}/nearest-slot/${clinicId}`);
+  return res // hoặc tuỳ theo response của bạn
 };

@@ -21,6 +21,7 @@ import { PDFDownloadLink } from "@react-pdf/renderer";
 import ExaminationPDF from "../../components/pdf/ExaminationPDF";
 import { ChevronLeft, Download } from "lucide-react";
 import { getAppointmentRecordByAppointmentId } from "../../services/examinationRecord.service";
+import FeedbackActionButtons from "../../components/feedback/FeedbackActionButtons";
 
 const { Title, Text } = Typography;
 
@@ -82,7 +83,14 @@ const ExaminationResult = () => {
     }
 
     if (!record) {
-        return <Text type="danger">Không tìm thấy kết quả khám</Text>;
+        return (
+            <>
+                <Text type="danger">Không tìm thấy kết quả khám</Text>
+                <div style={{ maxWidth: 900, margin: "0 auto" }} >
+                    <FeedbackActionButtons appointmentId={appointmentId} />
+                </div>;
+            </>
+        )
     }
     return (
         <>
@@ -141,7 +149,7 @@ const ExaminationResult = () => {
                     </>
                 )}
                 <div style={{ maxWidth: 900, margin: "0 auto" }} >
-
+                    <FeedbackActionButtons appointmentId={appointmentId} />
                 </div>
             </Card>
         </>

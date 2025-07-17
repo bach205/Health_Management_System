@@ -14,13 +14,13 @@ queueRouter.get("/clinic/:clinicId",
   asyncHandler(QueueController.getQueueClinic));
 
 // Chỉ định thêm phòng khám cho bệnh nhân
-queueRouter.post(
-  "/assign-clinic",
-  authenticate,
-  checkUserStatus(),
-  authorize("admin", "doctor", "nurse"),
-  asyncHandler(QueueController.assignAdditionalClinic)
-);
+// queueRouter.post(
+//   "/assign-clinic",
+//   authenticate,
+//   checkUserStatus(),
+//   authorize("admin", "doctor", "nurse"),
+//   asyncHandler(QueueController.assignAdditionalClinic)
+// );
 
 // Cập nhật trạng thái queue
 queueRouter.patch(
@@ -65,6 +65,14 @@ queueRouter.get(
   checkUserStatus(),
   authorize("admin", "doctor", "nurse"),
   asyncHandler(QueueController.getTodayQueues)
+);
+
+queueRouter.post(
+  "/assign-clinic",
+  authenticate,
+  checkUserStatus(),
+  authorize("admin", "doctor", "nurse"),
+  asyncHandler(QueueController.assignClinic)
 );
 
 module.exports = queueRouter;

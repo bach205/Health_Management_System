@@ -423,9 +423,12 @@ class DoctorService {
     }
 
     getAvailableDoctorsWithNearestSlot = async (clinicId) => {
+        if (!clinicId) {
+            throw new BadRequestError("Clinic ID không được để trống");
+        }
         const slots = await prisma.availableSlot.findMany({
             where: {
-                clinic_id: clinicId,
+                clinic_id: Number(clinicId),
                 is_available: true,
                 slot_date: {
                     gte: new Date(), // Chỉ lấy từ hôm nay trở đi
@@ -436,11 +439,12 @@ class DoctorService {
                 { start_time: 'asc' },
             ],
             include: {
-                doctor: {
-                    include: {
-                        doctor: true, // lấy từ bảng Doctor
-                    },
-                },
+                doctor : {
+                    select: {
+                        id: true,
+                        full_name: true,
+                    }
+                }, // lấy từ bảng Doctor
             },
         });
 
@@ -456,8 +460,9 @@ class DoctorService {
                 });
             }
         }
-
-        return Array.from(doctorMap.values());
+        const data = Array.from(doctorMap.values())
+        console.log(data)
+        return data;
     };
 
 
@@ -650,7 +655,32 @@ class DoctorService {
         return result;
     }
 
-
+    async getAllDoctorsWithAvgRating(pagination = {}) {
+        const { total, doctors } = await this.getDoctors(pagination);
+        // Lấy rating trung bình cho từng bác sĩ
+        const doctorIds = doctors.map(doc => doc.id);
+        const ratings = await prisma.doctorRating.groupBy({
+            by: ['doctor_id'],
+            where: { doctor_id: { in: doctorIds } },
+            _avg: { rating: true },
+        });
+        // Map doctorId -> avg_rating
+        const ratingMap = {};
+        ratings.forEach(r => {
+            ratingMap[r.doctor_id] = Number(r._avg.rating) || 0;
+        });
+        // Gắn avg_rating vào từng bác sĩ
+        const doctorsWithRating = doctors.map(doc => ({
+            ...doc,
+            avg_rating: ratingMap[doc.id] || 0,
+        }));
+        return { total, doctors: doctorsWithRating };
+    } catch(error) {
+        return {
+            status: false,
+            message: error.message
+        };
+    }
 }
 
 module.exports = new DoctorService();

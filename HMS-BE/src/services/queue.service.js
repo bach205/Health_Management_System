@@ -182,6 +182,150 @@ class QueueService {
     return newQueue;
   }
 
+  static async createOrderAndAssignToDoctorQueue({
+    patient_id,
+    from_clinic_id,
+    to_clinic_id,
+    to_doctor_id,
+    reason = "",
+    note = "",
+    extra_cost = 0,
+    appointment_id,
+    priority = 2,
+  }) {
+
+    console.log(">>> createOrderAndAssignToDoctorQueue params:",
+      patient_id,
+      from_clinic_id,
+      to_clinic_id,
+      to_doctor_id,
+      reason,
+      note,
+      extra_cost,
+      appointment_id,
+      priority,
+    )
+
+    const appointment = await prisma.appointment.findUnique({
+      where: { id: appointment_id },
+    });
+
+    if (!appointment) {
+      throw new Error("Appointment không tồn tại.");
+    }
+
+
+    // 1. Tìm slot rảnh gần nhất của bác sĩ
+    const slot = await prisma.availableSlot.findFirst({
+      where: {
+        doctor_id: to_doctor_id,
+        clinic_id: to_clinic_id,
+        is_available: true,
+        slot_date: { gte: new Date() },
+      },
+      orderBy: [
+        { slot_date: "asc" },
+        { start_time: "asc" },
+      ],
+    });
+
+    console.log("first slot found:", slot);
+
+    if (!slot) {
+      throw new Error("Bác sĩ được chọn không có ca khám nào rảnh.");
+    }
+
+    // 2. Tạo đơn chuyển khám
+    const order = await prisma.examinationOrder.create({
+      data: {
+        doctor_id: to_doctor_id,
+        patient_id,
+        from_clinic_id,
+        to_clinic_id,
+        reason,
+        note,
+        extra_cost,
+        appointment_id,
+      },
+      include: {
+        doctor: true,
+        patient: true,
+        fromClinic: true,
+        toClinic: true,
+        appointment: true,
+      },
+    });
+
+    console.log("order created:", order);
+
+    // 3. Kiểm tra xem bệnh nhân đã có trong hàng đợi chưa
+    const existingQueue = await prisma.queue.findFirst({
+      where: {
+        patient_id,
+        clinic_id: to_clinic_id,
+        status: { in: ['waiting', 'in_progress'] },
+      },
+    });
+
+    if (existingQueue) {
+      throw new Error("Bệnh nhân đã có trong hàng đợi phòng khám này.");
+    }
+
+    console.log("slot found:", slot,);
+
+    const slotTimeStr = this.formatTimeToString(slot.start_time); // Ví dụ: "10:00:00"
+
+
+    // 4. Tạo queue mới bằng assignQueueNumber
+    const queue = await QueueService.assignQueueNumber({
+      appointment_id,
+      patient_id,
+      clinic_id: to_clinic_id,
+      slot_date: slot.slot_date,
+      slot_time: slotTimeStr,
+      registered_online: false,
+    });
+
+    // 4.1 Cập nhật thêm doctor và priority cho queue vừa tạo (tìm theo appointment_id)
+    const targetQueue = await prisma.queue.findFirst({
+      where: { appointment_id },
+    });
+
+    if (targetQueue) {
+      await prisma.queue.update({
+        where: { id: targetQueue.id },
+        data: {
+          status: "done",
+        },
+      });
+    }
+
+
+
+    console.log("queue created:", queue);
+
+    // 5. Emit socket thông báo cho FE
+    const io = getIO();
+    if (io) {
+      io.to(`clinic_${to_clinic_id}`).emit("queue:assigned", {
+        patient: queue.patient,
+        queue,
+        clinicId: to_clinic_id,
+      });
+    }
+
+    return {
+      order,
+      queue,
+      assignedDoctor: order.doctor,
+      slot,
+    };
+  }
+  static formatTimeToString(date) {
+    return date.toISOString().substring(11, 19); // lấy từ index 11 đến 19: HH:mm:ss
+  }
+
+
   /**
    * Cập nhật trạng thái queue
    * @param {number} queueId - ID queue
@@ -357,6 +501,8 @@ class QueueService {
    * @param {Object} params - { appointment_id, patient_id, clinic_id, slot_date, slot_time, registered_online }
    * @returns {Promise<Object>} Queue mới
    */
+
+
   static async assignQueueNumber({
     appointment_id,
     patient_id,
@@ -365,6 +511,7 @@ class QueueService {
     slot_time,
     registered_online = true // 1: online, 0: walk-in
   }) {
+
     const shift = this.getShiftTypeAndRange(slot_time);
     if (!shift) throw new Error("Giờ khám không thuộc ca nào!");
     const { type, min, max } = shift;
@@ -433,7 +580,7 @@ class QueueService {
     } catch (err) {
       console.error('Không thể gửi email thông báo số thứ tự:', err.message);
     }
-    
+
     return newQueue;
   }
 

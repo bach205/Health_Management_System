@@ -15,6 +15,7 @@ import {
   Stethoscope,
   MessageCircle,
   LetterText,
+  Wallet,
 } from "lucide-react";
 import type { JSX } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -215,6 +216,14 @@ const SIDEBAR_ITEMS = [
         icon: <ClipboardType className="w-4 h-4" />,
         href: "/user-book-appointments",
       },
+      
+      {
+        id: "nurse-manage-payments",
+        label: "Quản lý thanh toán",
+        icon: <Wallet className="w-4 h-4" />,
+        href: "/nurse-manage-payments",
+      },
+
     ],
   },
   {

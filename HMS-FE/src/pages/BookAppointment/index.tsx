@@ -8,6 +8,7 @@ import { getDoctorById } from "../../services/doctor.service";
 import dayjs from "dayjs";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import { specialtyOptions } from "../../constants/user.const";
+import FeedbackDoctorComments from "../../components/feedback/FeedbackDoctorComments";
 dayjs.extend(isSameOrAfter);
 
 const { Title, Text } = Typography;
@@ -314,6 +315,7 @@ const PatientBookAppointment: React.FC = () => {
       <Card title="Bác sĩ cùng chuyên khoa">
         <RelatedDoctors docId={docId} speciality={""} />
       </Card> */}
+      <FeedbackDoctorComments doctorId={docId} />
     </div>
   );
 };

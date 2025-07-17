@@ -7,7 +7,7 @@ import { getQueueStatus } from "../../../types/queue.type";
 import { useAuthStore } from "../../../store/authStore";
 import { useSocket } from "../../../hooks/socket/useSocket";
 import { updateQueueStatus } from "../../../services/queue.service";
-import { Button, Dropdown, Flex, Menu, message, Select, Space, Table, Tag, Tooltip, Typography } from "antd";
+import { Button, Dropdown, Flex, Menu, message, notification, Select, Space, Table, Tag, Tooltip, Typography } from "antd";
 import ModalPatientExaminationOrder from "./ModalPatientExaminationOrder";
 import DoctorExaminationOrderModal from "./DoctorExaminationOrderModal";
 import { RefreshCcw } from "lucide-react";
@@ -123,15 +123,20 @@ const QueueTable = () => {
         else reset();
     }, [selectedClinic]);
 
-    const handleFinishExam = (patient: any) => {
-        setSelectedPatient(patient);
+    const handleFinishExam = (record: any) => {
+        console.log("handleFinishExam", record);
+        setSelectedAppointmentId(record.appointment_id);
+        setSelectedPatient(record.patient);
         setShowRecordModal(true);
         console.log("selectedAppointmentId, selectedPatient", selectedAppointmentId, selectedPatient);
     };
     const handleAssignClinic = (record: any) => {
         setSelectedPatient(record.patient);
+        setSelectedAppointmentId(record.appointment_id);
         setShowDoctorExaminationOrderModal(true);
         // setShowResultModal(true);
+        console.log("handleAssignClinic", record);
+        console.log("selectedAppointmentId, selectedPatient", selectedAppointmentId, selectedPatient);
     };
 
     const handleViewExaminationOrder = (patient: any) => {
@@ -157,11 +162,13 @@ const QueueTable = () => {
     const columns: any = [
         {
             title: "STT",
-            dataIndex: "id",
+            dataIndex: "queue_number",
             key: "id",
             align: "center",
             width: 50,
-            render: (_: any, record: any, index: number) => index + 1,
+            render: (_: any, record: any, index: number) => 
+                <p className="text-primary font-bold">{record.queue_number}</p>
+            ,
         },
         {
             title: "Bệnh nhân",
@@ -235,7 +242,7 @@ const QueueTable = () => {
                                 <Button color="pink" key="viewExaminationOrder" onClick={() => handleViewExaminationOrder(record.patient)}>
                                     Xem lịch sử chuyển phòng
                                 </Button>
-                                <Button type="primary" key="finish" onClick={() => handleFinishExam(record.patient)}>
+                                <Button type="primary" key="finish" onClick={() => handleFinishExam(record)}>
                                     Khám xong
                                 </Button>
                                 <Button type="dashed" key="assign" onClick={() => handleAssignClinic(record)}>
@@ -342,7 +349,7 @@ const QueueTable = () => {
                 open={showDoctorExaminationOrderModal}
                 onClose={() => setShowDoctorExaminationOrderModal(false)}
                 patient_id={selectedPatient?.id}
-                    appointment_id={selectedAppointmentId ?? 0}
+                appointment_id={selectedAppointmentId ?? 0}
 
                 clinic_id={Number(selectedClinic)}
                 doctor_id={(Number)(currentDoctorId)}
@@ -361,7 +368,7 @@ const QueueTable = () => {
                 patient_id={selectedPatient?.id}
                 clinic_id={Number(selectedClinic)}
                 doctor_id={Number(currentDoctorId)}
-                appointment_id={Number(selectedAppointment)}
+                // appointment_id={Number(selectedAppointment)}
                 onSuccess={() => {
                     setShowRecordModal(false);
                     setSelectedPatient(null);

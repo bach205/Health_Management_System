@@ -36,7 +36,7 @@ const formatPrice = (value: number) =>
   });
 
 const AdminDashboard = () => {
-  const [date, setDate] = useState<DateModeKey>("today");
+  const [date, setDate] = useState<DateModeKey>("year");
   const [statistics, setStatistics] = useState({
     totalAppointments: 0,
     totalRevenue: 0,
@@ -136,10 +136,14 @@ const AdminDashboard = () => {
     },
     scales: {
       y: {
+        beginAtZero: true,
         ticks: {
+
           callback: (val: any) => formatPrice(val),
+          
         },
       },
+      
     },
   };
 

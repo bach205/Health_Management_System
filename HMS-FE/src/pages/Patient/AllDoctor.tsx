@@ -169,7 +169,7 @@ const AllDoctor: React.FC = () => {
                                                 </div>
                                             )}
                                             <p className="text-gray-900 text-lg font-medium">{user.full_name}</p>
-                                            <Rating rating={user.doctor?.rating || 0} />
+                                            <Rating rating={user.avg_rating || 0} />
                                             <Flex gap={10} align="center" className="mt-2! w-full">
                                                 <Stethoscope className="w-5 h-5" color="#646CFF" />
                                                 <p className="text-gray-600 text-md ">
