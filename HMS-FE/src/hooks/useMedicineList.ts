@@ -12,7 +12,7 @@ export const useMedicineList = (initialPagination?: Partial<IPagination>, sortBy
     const [isActive, setIsActive] = useState<string>("all");
     const [pagination, setPagination] = useState<IPagination>({
         total: 0,
-        pageSize: initialPagination?.pageSize || 10,
+        pageSize: initialPagination?.pageSize || 5,
         current: initialPagination?.current || 1,
     });
 

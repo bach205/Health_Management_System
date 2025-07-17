@@ -30,7 +30,7 @@ class ExaminationRecordService {
         const queue = await prisma.queue.findFirst({
             where: { patient_id, status: "in_progress" },
         });
-        if (!queue) throw new Error("Không có queue đang khám");
+        if (!queue) throw new Error("");
 
         await prisma.queue.update({
             where: { id: queue.id },

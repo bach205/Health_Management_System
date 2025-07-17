@@ -86,15 +86,17 @@ class AppointmentService {
    */
   async bookAppointmentByQR(data) {
     // 1. Kiểm tra slot còn trống không
+    console.log(data);
     let slot = await prisma.$queryRaw`
       SELECT * FROM available_slots
       WHERE doctor_id = ${data.doctor_id}
         AND clinic_id = ${data.clinic_id}
         AND slot_date = ${data.slot_date}
         AND start_time = ${data.start_time}
-        AND is_available = 1
+        
       LIMIT 1;
     `;
+    console.log(slot);
     slot = slot[0];
     if (!slot)
       throw new BadRequestError("Khung giờ này đã được đặt hoặc không tồn tại!");

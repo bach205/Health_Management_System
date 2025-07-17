@@ -5,7 +5,7 @@ import {
     FilterOutlined,
     ClearOutlined,
 } from "@ant-design/icons";
-import { Button, Flex, Input, Tooltip, Form, message, Select, DatePicker, Space, Card, Row, Col } from "antd";
+import { Button, Flex, Input, Tooltip, Form, message, Select, DatePicker, Space, Card, Row, Col, Dropdown, Menu } from "antd";
 import React, { useEffect, useState, useMemo } from "react";
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
@@ -14,7 +14,7 @@ import isBetween from "dayjs/plugin/isBetween";
 dayjs.extend(isBetween);
 
 import ScheduleTable from "./ScheduleTable";
-import { getPatientAppointmentsService, updateAppointmentService } from "../../services/appointment.service";
+import { getPatientAppointmentsService, updateAppointmentService, getAllAvailableSlotsService } from "../../services/appointment.service";
 import ModalUpdateAppointment from "./ModalUpdateAppointment";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
@@ -38,9 +38,17 @@ export default function AppointmentsPage() {
 
     // Filter states
     const [searchText, setSearchText] = useState("");
+    const [searchSubmitted, setSearchSubmitted] = useState("");
     const [statusFilter, setStatusFilter] = useState<string>("");
     const [dateRange, setDateRange] = useState<any>(null);
     const [showFilters, setShowFilters] = useState(false);
+    // Thêm filter bác sĩ và phòng khám
+    const [doctorFilter, setDoctorFilter] = useState<number | null>(null);
+    const [clinicFilter, setClinicFilter] = useState<number | null>(null);
+    const [doctorOptions, setDoctorOptions] = useState<{ value: number, label: string }[]>([]);
+    const [clinicOptions, setClinicOptions] = useState<{ value: number, label: string }[]>([]);
+    // Sắp xếp
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>("asc");
 
     const navigate = useNavigate();
     useEffect(() => {
@@ -57,6 +65,24 @@ export default function AppointmentsPage() {
         };
         fetchAppointments();
     }, [patientId, reload]);
+
+    useEffect(() => {
+        // Lấy danh sách bác sĩ và phòng khám từ slot
+        const fetchDoctorsAndClinics = async () => {
+            try {
+                const slots = await getAllAvailableSlotsService();
+                const slotArr: any[] = Array.isArray(slots.data) ? slots.data : [];
+                const doctors = Array.from(new Map(slotArr.map((slot: any) => [slot.doctor_id, { value: slot.doctor_id, label: slot.doctor_name }])).values());
+                setDoctorOptions(doctors as { value: number, label: string }[]);
+                const clinics = Array.from(new Map(slotArr.map((slot: any) => [slot.clinic_id, { value: slot.clinic_id, label: slot.clinic_name }])).values());
+                setClinicOptions(clinics as { value: number, label: string }[]);
+            } catch {
+                setDoctorOptions([]);
+                setClinicOptions([]);
+            }
+        };
+        fetchDoctorsAndClinics();
+    }, []);
 
     const handleViewAppointmentCancel = () => {
         setViewVisibleAppointmentModal(false);
@@ -96,9 +122,9 @@ export default function AppointmentsPage() {
         let filtered = appointments;
 
         // Search filter
-        if (searchText) {
+        if (searchSubmitted) {
             filtered = filtered.filter((appointment: any) => {
-                const searchLower = searchText.toLowerCase();
+                const searchLower = searchSubmitted.toLowerCase();
                 return (
                     (appointment.doctor_name?.toLowerCase() || '').includes(searchLower) ||
                     (appointment.clinic_name?.toLowerCase() || '').includes(searchLower) ||
@@ -130,15 +156,53 @@ export default function AppointmentsPage() {
                 }
             });
         }
+        // Lọc theo bác sĩ
+        if (doctorFilter) {
+            filtered = filtered.filter((appointment: any) =>
+                appointment.doctor_id === doctorFilter ||
+                appointment.doctor?._id === doctorFilter ||
+                appointment.doctor_id === String(doctorFilter)
+            );
+        }
+        // Lọc theo phòng khám
+        if (clinicFilter) {
+            filtered = filtered.filter((appointment: any) =>
+                appointment.clinic_id === clinicFilter ||
+                appointment.clinic?._id === clinicFilter ||
+                appointment.clinic_id === String(clinicFilter)
+            );
+        }
+
+        // Sắp xếp theo giờ dự kiến
+        filtered = filtered.slice().sort((a: any, b: any) => {
+            // Ưu tiên sort theo ngày, sau đó đến giờ
+            const dateA = a.formatted_date ? dayjs(a.formatted_date, ["DD/MM/YYYY", "YYYY-MM-DD"]) : null;
+            const dateB = b.formatted_date ? dayjs(b.formatted_date, ["DD/MM/YYYY", "YYYY-MM-DD"]) : null;
+            if (dateA && dateB && dateA.isValid() && dateB.isValid()) {
+                if (dateA.isBefore(dateB)) return sortOrder === 'asc' ? -1 : 1;
+                if (dateA.isAfter(dateB)) return sortOrder === 'asc' ? 1 : -1;
+            }
+            // Nếu ngày giống nhau, so sánh giờ
+            const timeA = a.formatted_time ? dayjs(a.formatted_time, ["HH:mm", "HH:mm:ss"]) : null;
+            const timeB = b.formatted_time ? dayjs(b.formatted_time, ["HH:mm", "HH:mm:ss"]) : null;
+            if (timeA && timeB && timeA.isValid() && timeB.isValid()) {
+                if (timeA.isBefore(timeB)) return sortOrder === 'asc' ? -1 : 1;
+                if (timeA.isAfter(timeB)) return sortOrder === 'asc' ? 1 : -1;
+            }
+            return 0;
+        });
 
         return filtered;
-    }, [appointments, searchText, statusFilter, dateRange]);
+    }, [appointments, searchSubmitted, statusFilter, dateRange, doctorFilter, clinicFilter, sortOrder]);
 
     // Clear all filters
     const clearFilters = () => {
         setSearchText("");
+        setSearchSubmitted("");
         setStatusFilter("");
         setDateRange(null);
+        setDoctorFilter(null);
+        setClinicFilter(null);
     };
 
     return (
@@ -152,12 +216,31 @@ export default function AppointmentsPage() {
                 <Row gutter={[16, 16]} align="middle">
                     <Col xs={24} sm={12} md={8} lg={6}>
                         <Input
-                            placeholder="Tìm kiếm theo bác sĩ, chuyên khoa..."
+                            placeholder="Tìm kiếm"
                             prefix={<SearchOutlined />}
                             value={searchText}
                             onChange={(e) => setSearchText(e.target.value)}
                             allowClear
                         />
+                    </Col>
+                    <Col>
+                        <Button
+                            type="primary"
+                            icon={<SearchOutlined />}
+                            onClick={() => setSearchSubmitted(searchText)}
+                            style={{ marginRight: 8 }}
+                        >
+                            Tìm kiếm
+                        </Button>
+                        <Button
+                            icon={<ReloadOutlined />}
+                            onClick={() => {
+                                setSearchText("");
+                                setSearchSubmitted("");
+                            }}
+                        >
+                            Reset
+                        </Button>
                     </Col>
                     <Col xs={24} sm={12} md={8} lg={6}>
                         <Button
@@ -167,7 +250,7 @@ export default function AppointmentsPage() {
                         >
                             Bộ lọc
                         </Button>
-                        {(searchText || statusFilter || dateRange) && (
+                        {(searchSubmitted || statusFilter || dateRange || doctorFilter || clinicFilter) && (
                             <Button
                                 type="text"
                                 icon={<ClearOutlined />}
@@ -178,9 +261,15 @@ export default function AppointmentsPage() {
                             </Button>
                         )}
                     </Col>
-                    <Button className="ml-auto" type="default" onClick={() => navigate("/queue")}>
-                        Xem hàng chờ
-                    </Button>
+                    <Col>
+                        <Button
+                            onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                            icon={<ReloadOutlined rotate={sortOrder === 'asc' ? 0 : 180} />}
+                        >
+                            Sắp xếp theo giờ {sortOrder === 'asc' ? '(Tăng dần)' : '(Giảm dần)'}
+                        </Button>
+                    </Col>
+                    <Button className="ml-auto" type="default" onClick={() => navigate("/queue")}>Xem hàng chờ</Button>
                 </Row>
 
                 {showFilters && (
@@ -210,12 +299,36 @@ export default function AppointmentsPage() {
                                 style={{ width: '100%' }}
                             />
                         </Col>
+                        <Col xs={24} sm={12} md={8} lg={6}>
+                            <Select
+                                placeholder="Lọc theo bác sĩ"
+                                value={doctorFilter}
+                                onChange={setDoctorFilter}
+                                allowClear
+                                style={{ width: '100%' }}
+                                options={doctorOptions}
+                                showSearch
+                                optionFilterProp="label"
+                            />
+                        </Col>
+                        <Col xs={24} sm={12} md={8} lg={6}>
+                            <Select
+                                placeholder="Lọc theo phòng khám"
+                                value={clinicFilter}
+                                onChange={setClinicFilter}
+                                allowClear
+                                style={{ width: '100%' }}
+                                options={clinicOptions}
+                                showSearch
+                                optionFilterProp="label"
+                            />
+                        </Col>
                     </Row>
                 )}
             </Card>
 
             {/* Results summary */}
-            {(searchText || statusFilter || dateRange) && (
+            {(searchSubmitted || statusFilter || dateRange) && (
                 <div className="mb-4 text-sm text-gray-600">
                     Hiển thị {filteredAppointments.length} kết quả
                     {appointments.length !== filteredAppointments.length && (

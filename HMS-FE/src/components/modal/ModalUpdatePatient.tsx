@@ -121,7 +121,6 @@ const ModalUpdatePatient = ({ role, isVisible, handleOk, handleCancel, form, use
           </Form.Item>
         ) : (
           <Form.Item name="identity_number" label="Số CMND"
-
             rules={[
               { pattern: new RegExp(/^\d{9}(\d{3})?$/), message: "Số CMND không hợp lệ!", whitespace: true }
             ]}

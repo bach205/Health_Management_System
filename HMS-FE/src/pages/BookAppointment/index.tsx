@@ -210,8 +210,8 @@ const PatientBookAppointment: React.FC = () => {
             const weekday = dateObj.toLocaleDateString('vi-VN', { weekday: 'long' });
             const dateStr = dateObj.toLocaleDateString('vi-VN');
             
-            if (dayjs(dateKey).isBefore(dayjs(), 'minute')) {
-              return null; // Nếu ngày khám đã qua hoặc là hiện tại, không hiển thị
+            if (dayjs(dateKey).isBefore(dayjs(), 'day')) {
+              return null; // Nếu ngày khám đã qua, không hiển thị
             }
 
             return (
