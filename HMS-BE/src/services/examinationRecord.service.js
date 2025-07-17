@@ -23,7 +23,8 @@ class ExaminationRecordService {
 
     // edited after removed examinationDetail service
     static async create(data) {
-        const { patient_id, clinic_id, doctor_id, appointment_id, result, note, prescription_items = [] } = data;
+        const { patient_id, clinic_id, doctor_id, quantity, appointment_id, result, note, prescription_items = [] } = data;
+        console.log(data)
         if (!result.trim()) throw new Error("Không được để trống kết quả khám");
 
 
@@ -54,7 +55,7 @@ class ExaminationRecordService {
                     connect: { user_id: doctor_id }
                 },
                 appointment: appointment_id ? { connect: { id: appointment_id } } : undefined,
-
+                quantity,
                 result,
                 note,
                 examined_at: new Date(),

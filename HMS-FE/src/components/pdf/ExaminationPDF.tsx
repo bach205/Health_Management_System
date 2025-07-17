@@ -90,12 +90,14 @@ const ExaminationPDF = ({ record }: { record: any }) => (
                         <Text style={styles.cell}>Tên thuốc</Text>
                         <Text style={styles.cell}>Liều lượng</Text>
                         <Text style={styles.cell}>Tần suất uống</Text>
+                        <Text style={styles.cell}>Số lượng</Text>
                     </View>
                     {record.prescriptionItems.map((item: any, i: number) => (
                         <View key={i} style={styles.tableRow}>
                             <Text style={styles.cell}>{item.medicine?.name || 'Không rõ'}</Text>
                             <Text style={styles.cell}>{item.dosage || '-'}</Text>
                             <Text style={styles.cell}>{item.frequency || '-'}</Text>
+                            <Text style={styles.cell}>{item.quantity || 1}</Text>
                         </View>
                     ))}
                 </View>

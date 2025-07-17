@@ -257,6 +257,7 @@ CREATE TABLE prescription_items (
     dosage VARCHAR(100) COMMENT 'Dosage',
     frequency VARCHAR(100) COMMENT 'Frequency per day',
     duration VARCHAR(100) COMMENT 'Duration of use',
+    quantity INT DEFAULT 1 COMMENT 'Quantity prescribed',
 
     FOREIGN KEY (record_id) REFERENCES examination_records(id) ON DELETE CASCADE,
     FOREIGN KEY (medicine_id) REFERENCES medicines(id) ON UPDATE RESTRICT,
@@ -581,15 +582,15 @@ VALUES
 -- (6, 'Atropin 1%', '1 giọt', '2 lần/ngày', '7 ngày', 'Nhỏ mắt');
 
 INSERT INTO prescription_items 
-(record_id, dosage, frequency, duration, note)
+(record_id, dosage, frequency, duration, note, quantity)
 VALUES
-(1, '1 viên', '3 lần/ngày', '7 ngày', 'Uống sau ăn'),
-(1, '1 viên', '4 lần/ngày', '5 ngày', 'Khi sốt trên 38.5 độ'),
-(2, '1 lọ', '2 lần/ngày', '5 ngày', 'Tiêm tĩnh mạch'),
-(3, '1 viên', '2 lần/ngày', '3 tháng', 'Uống sau ăn'),
-(4, '1 viên', '4 lần/ngày', '5 ngày', 'Khi sốt trên 38.5 độ'),
-(5, '1 viên', '1 lần/ngày', '7 ngày', 'Uống buổi tối'),
-(6, '1 giọt', '2 lần/ngày', '7 ngày', 'Nhỏ mắt');
+(1, '1 viên', '3 lần/ngày', '7 ngày', 'Uống sau ăn' ,   10),
+(1, '1 viên', '4 lần/ngày', '5 ngày', 'Khi sốt trên 38.5 độ', 5),
+(2, '1 lọ', '2 lần/ngày', '5 ngày', 'Tiêm tĩnh mạch' ,  10),
+(3, '1 viên', '2 lần/ngày', '3 tháng', 'Uống sau ăn',10),
+(4, '1 viên', '4 lần/ngày', '5 ngày', 'Khi sốt trên 38.5 độ',10),
+(5, '1 viên', '1 lần/ngày', '7 ngày', 'Uống buổi tối',10),
+(6, '1 giọt', '2 lần/ngày', '7 ngày', 'Nhỏ mắt',10  );
 
 
 -- Insert sample data into payments

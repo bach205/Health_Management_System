@@ -266,6 +266,7 @@ model PrescriptionItem {
   dosage      String?
   frequency   String?
   duration    String?
+  quantity    Int     @default(1) // Số lượng thuốc, mặc định là 1
 
   record    ExaminationRecord @relation(fields: [record_id], references: [id])
   medicine  Medicine?         @relation(fields: [medicine_id], references: [id], onUpdate: Restrict)
