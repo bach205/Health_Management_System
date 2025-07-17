@@ -184,6 +184,7 @@ const ScheduleTable = ({ data = [], setReload, loading = false, visible, selecte
     )
   }
 
+  console.log("selectedRecord", selectedRecord)
   const columns = [
     {
       title: "Ngày đặt",
