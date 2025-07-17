@@ -1111,6 +1111,46 @@ VALUES
 (25, 2, 8, 5.0, 'Khám cấp cứu nhanh chóng, xử lý tốt.', false),
 (26, 3, 9, 5.0, 'Rất hài lòng với cách tư vấn.', true);
 
+INSERT INTO appointments (patient_id, clinic_id, doctor_id, appointment_date, appointment_time, status, priority, reason, note)
+VALUES
+(8, 1, 2, '2025-07-01', '08:00:00', 'completed', 0, 'Khám tim định kỳ', 'Đã khám, kết quả tốt'),
+(9, 1, 2, '2025-07-02', '09:00:00', 'completed', 0, 'Tái khám sau điều trị', 'Ổn định'),
+(10, 1, 2, '2025-07-03', '10:00:00', 'completed', 0, 'Đau ngực nhẹ', 'Không phát hiện vấn đề nghiêm trọng'),
+(11, 1, 2, '2025-07-04', '08:30:00', 'completed', 0, 'Khám tim mạch lần đầu', 'Chỉ định xét nghiệm máu'),
+(12, 1, 2, '2025-07-05', '09:15:00', 'completed', 0, 'Mệt mỏi khi vận động', 'Khuyên theo dõi thêm'),
+(13, 1, 2, '2025-07-06', '10:45:00', 'completed', 0, 'Đau tức ngực', 'Chỉ định chụp CT'),
+(8, 1, 2, '2025-07-07', '08:00:00', 'completed', 0, 'Tái khám sau chụp CT', 'Kết quả bình thường'),
+(9, 1, 2, '2025-07-08', '09:00:00', 'completed', 0, 'Đo điện tim', 'Không có bất thường'),
+(10, 1, 2, '2025-07-09', '10:00:00', 'completed', 0, 'Khó thở khi ngủ', 'Có thể do căng thẳng'),
+(11, 1, 2, '2025-07-10', '11:00:00', 'completed', 0, 'Theo dõi cao huyết áp', 'Điều chỉnh thuốc'),
+(12, 1, 2, '2025-07-11', '08:30:00', 'completed', 0, 'Khám tim định kỳ', 'Không có vấn đề'),
+(13, 1, 2, '2025-07-12', '09:15:00', 'completed', 0, 'Đau ngực khi chạy bộ', 'Chỉ định xét nghiệm'),
+(8, 1, 2, '2025-07-13', '08:00:00', 'completed', 0, 'Kết quả xét nghiệm', 'Bình thường'),
+(9, 1, 2, '2025-07-14', '09:00:00', 'completed', 0, 'Kiểm tra nhịp tim', 'Ổn định'),
+(10, 1, 2, '2025-07-15', '10:00:00', 'completed', 0, 'Khám tim theo yêu cầu công ty', 'Không phát hiện bất thường');
+INSERT INTO doctor_ratings (appointment_id, doctor_id, patient_id, rating, comment) VALUES
+(1, 2, 8, 5, 'Bác sĩ rất tận tình, giải thích dễ hiểu'),
+(7, 2, 8, 4, 'Dịch vụ tốt, nhưng thời gian chờ hơi lâu'),
+(8, 2, 9, 5, 'Bác sĩ thân thiện và chuyên môn cao'),
+(9, 2, 10, 3, 'Ổn nhưng cần theo dõi thêm'),
+(11, 2, 11, 4, 'Tư vấn rõ ràng, cẩn thận'),
+(12, 2, 12, 5, 'Bác sĩ dễ gần và nhiệt tình'),
+(13, 2, 13, 5, 'Thăm khám kỹ lưỡng'),
+(26, 2, 8, 5, 'Cảm thấy yên tâm khi khám bác sĩ này'),
+(27, 2, 9, 4, 'Thái độ chuyên nghiệp'),
+(28, 2, 10, 5, 'Lắng nghe bệnh nhân và hướng dẫn kỹ'),
+(29, 2, 11, 4, 'Ổn định, chẩn đoán hợp lý'),
+(30, 2, 12, 5, 'Tư vấn thuốc rõ ràng'),
+(31, 2, 13, 4, 'Cảm ơn bác sĩ đã giúp đỡ'),
+(32, 2, 8, 5, 'Tái khám thấy tốt hơn nhiều'),
+(33, 2, 9, 5, 'Hẹn lần sau chắc chắn quay lại'),
+(34, 2, 10, 5, 'Không còn lo ngại về sức khỏe tim mạch'),
+(35, 2, 11, 4, 'Giải đáp mọi thắc mắc rõ ràng'),
+(36, 2, 12, 3, 'Bác sĩ ổn nhưng phòng khám hơi đông'),
+(37, 2, 13, 5, 'Cảm giác rất chuyên nghiệp và nhẹ nhàng'),
+(38, 2, 8, 5, 'Thật sự tin tưởng bác sĩ này');
+
+
 -- INSERT INTO blogs (title, content, image_url, published, category_id)
 -- VALUES 
 -- (
