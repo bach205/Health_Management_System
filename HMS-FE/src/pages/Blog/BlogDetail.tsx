@@ -4,6 +4,8 @@ import { Typography, Tag, Spin, message, Button, notification } from 'antd';
 import axios from 'axios';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import type { IBlog } from '../../types/index.type';
+import { getBlogById } from '../../services/blog.service';
+import { decodeHtml } from '../../utils/String2HTML';
 
 const { Title, Paragraph } = Typography;
 
@@ -35,8 +37,9 @@ const BlogDetail: React.FC = () => {
 
     const fetchBlog = async () => {
         try {
-            // const res = await axios.get(`/blog/${id}`);
-            // setBlog(res.data.metadata);
+            const res = await getBlogById(Number(id));
+            setBlog(res.data.metadata);
+
         } catch (err) {
             notification.error({ message: 'Không tìm thấy bài viết' });
             navigate('/blogs');
@@ -86,8 +89,7 @@ const BlogDetail: React.FC = () => {
             </Paragraph>
 
             <div
-                dangerouslySetInnerHTML={{ __html: "<p><img src=\"https://i.ibb.co/wjY3k55/d7181acee85b.jpg\" alt=\"263083816_283453180412472_6736880639792254542_n.jpg\" width=\"200\" height=\"267\"></p>" }}
-                style={{ fontSize: 16, lineHeight: 1.75 }}
+                dangerouslySetInnerHTML={{ __html: decodeHtml(blog.content) }} style={{ fontSize: 16, lineHeight: 1.75 }}
             />
         </div>
     );
