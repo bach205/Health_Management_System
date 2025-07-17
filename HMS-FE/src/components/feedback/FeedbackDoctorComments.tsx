@@ -124,8 +124,8 @@ const FeedbackDoctorComments: React.FC<FeedbackDoctorCommentsProps> = ({ doctorI
                                             <span style={{ fontSize: 12, color: '#888' }}>{new Date(item.created_at).toLocaleString()}</span>
                                         </div>
                                         <div style={{ margin: "8px 0 4px 0" }}>
-                                            <Rate disabled allowHalf value={item.rating} style={{ fontSize: 18, color: '#faad14' }} />
-                                            <span style={{ marginLeft: 8, color: '#faad14', fontWeight: 500 }}>{item.rating} / 5</span>
+                                            <Rate disabled value={Math.round(item.rating)} style={{ fontSize: 18, color: '#faad14' }} />
+                                            <span style={{ marginLeft: 8, color: '#faad14', fontWeight: 500 }}>{Math.round(item.rating)} / 5</span>
                                         </div>
                                         <Typography.Paragraph style={{ margin: 0, color: '#333', fontSize: 15 }}>
                                             {item.comment}
