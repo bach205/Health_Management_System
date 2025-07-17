@@ -110,7 +110,7 @@ const BlogDashboard = () => {
                                 {blog.title}
                             </Title>
                             <Paragraph type="secondary" style={{ fontSize: 13, minHeight: 60 }}>
-                                {truncate(blog.content)}
+                                {/* {truncate(blog.content)} */}
                             </Paragraph>
                             {blog.category?.name && <Tag color="blue">{blog.category.name}</Tag>}
                             <div style={{ marginTop: 8 }}>
