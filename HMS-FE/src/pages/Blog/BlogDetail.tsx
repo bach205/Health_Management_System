@@ -12,7 +12,7 @@ const { Title, Paragraph } = Typography;
 
 const BlogDetail: React.FC = () => {
     const { id } = useParams<{ id: string }>();
-    const [blog, setBlog] = useState<IBlog | null>(data);
+    const [blog, setBlog] = useState<IBlog | null>(null);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
