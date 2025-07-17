@@ -27,6 +27,14 @@ class DoctorController {
     }).send(res);
   }
 
+  getAllDoctorsWithAvgRating = async (req, res) => {
+    const result = await DoctorService.getAllDoctorsWithAvgRating(req.body);
+    return new OK({
+      message: "Lấy danh sách bác sĩ kèm rating thành công",
+      metadata: result,
+    }).send(res);
+  }
+
 
   updateDoctor = async (req, res) => {
     const result = await DoctorService.updateDoctor(req.body);
@@ -90,6 +98,24 @@ class DoctorController {
       metadata: result,
     }).send(res);
   }
+
+  createDoctorsFromCSV = async (req, res) => {
+    const result = await DoctorService.createDoctorsFromCSV(req.body);
+    return new OK({
+      message: "Tạo bác sĩ từ file CSV thành công",
+      metadata: result,
+    }).send(res);
+  }
+  getAvailableDoctorsWithNearestSlot = async (req, res) => {
+    const { clinicId } = req.params;
+    console.log("clinicId:", clinicId);
+    const result = await DoctorService.getAvailableDoctorsWithNearestSlot(clinicId);
+    return new OK({
+      message: "Lấy danh sách bác sĩ khả dụng với slot gần nhất thành công",
+      metadata: result,
+    }).send(res);
+  }
+
 }
 
 module.exports = new DoctorController();

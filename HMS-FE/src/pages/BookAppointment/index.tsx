@@ -8,7 +8,7 @@ import { getDoctorById } from "../../services/doctor.service";
 import dayjs from "dayjs";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import { specialtyOptions } from "../../constants/user.const";
-import { getDoctorAverageRating, getDoctorComments, createFeedback, updateFeedback, deleteFeedback } from '../../api/feedback';
+import FeedbackDoctorComments from "../../components/feedback/FeedbackDoctorComments";
 dayjs.extend(isSameOrAfter);
 
 const { Title, Text } = Typography;
@@ -44,8 +44,6 @@ const PatientBookAppointment: React.FC = () => {
   const [selectedClinic, setSelectedClinic] = useState<number | null>(null);
   const [success, setSuccess] = useState(false);
   const [doctor, setDoctor] = useState<any>(null);
-  const [rating, setRating] = useState<number | null>(null);
-  const [comments, setComments] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchSlots = async () => {
@@ -90,36 +88,6 @@ const PatientBookAppointment: React.FC = () => {
     };
     fetchDoctor();
   }, [docId]);
-
-  useEffect(() => {
-    if (docId) {
-      getDoctorAverageRating(Number(docId)).then(res => setRating(res?.average || null));
-      getDoctorComments(Number(docId)).then(res => setComments(res?.comments || []));
-    }
-  }, [docId]);
-
-  // Feedback handlers
-  const handleCreateFeedback = async (data: { content: string; rating: number }) => {
-    if (!docId) return;
-    await createFeedback({ doctorId: Number(docId), ...data });
-    // reload feedback
-    getDoctorAverageRating(Number(docId)).then(res => setRating(res?.average || null));
-    getDoctorComments(Number(docId)).then(res => setComments(res?.comments || []));
-  };
-  const handleEditFeedback = async (id: number, data: { content: string; rating: number }) => {
-    await updateFeedback(id, data);
-    if (docId) {
-      getDoctorAverageRating(Number(docId)).then(res => setRating(res?.average || null));
-      getDoctorComments(Number(docId)).then(res => setComments(res?.comments || []));
-    }
-  };
-  const handleDeleteFeedback = async (id: number) => {
-    await deleteFeedback(id);
-    if (docId) {
-      getDoctorAverageRating(Number(docId)).then(res => setRating(res?.average || null));
-      getDoctorComments(Number(docId)).then(res => setComments(res?.comments || []));
-    }
-  };
 
   const handleBookAppointment = async (values: any) => {
     if (selectedSlot) {
@@ -200,13 +168,10 @@ const PatientBookAppointment: React.FC = () => {
                 </Text>
               </Space>
               {doctor?.metadata?.doctor?.specialty && (
-                <Text type="secondary">Chuyên khoa: {doctor.metadata.doctor.specialty || "Không xác định"}</Text>
+                <Text type="secondary">Chuyên khoa: {specialtyOptions.find(item => item.value === doctor.metadata.doctor.specialty)?.label || "Không xác định"}</Text>
               )}
               {doctor?.metadata?.doctor?.bio && (
                 <Text type="secondary">Tiểu sử: {doctor.metadata.doctor.bio}</Text>
-              )}
-              {doctor?.metadata?.doctor?.price && (
-                <Text>Giá khám: {doctor.metadata.doctor.price} Đ</Text>
               )}
             </Space>
           </div>
@@ -245,6 +210,11 @@ const PatientBookAppointment: React.FC = () => {
             const dateObj = new Date(dateKey);
             const weekday = dateObj.toLocaleDateString('vi-VN', { weekday: 'long' });
             const dateStr = dateObj.toLocaleDateString('vi-VN');
+            
+            // if (dayjs(dateKey).isBefore(dayjs(), 'day')) {
+            //   return null; // Nếu ngày khám đã qua, không hiển thị
+            // }
+
             return (
               <div
                 key={dateKey}
@@ -345,6 +315,7 @@ const PatientBookAppointment: React.FC = () => {
       <Card title="Bác sĩ cùng chuyên khoa">
         <RelatedDoctors docId={docId} speciality={""} />
       </Card> */}
+      <FeedbackDoctorComments doctorId={Number(docId)} />
     </div>
   );
 };

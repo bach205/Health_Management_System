@@ -18,7 +18,7 @@ doctorRouter.post(
   "/create",
   authenticate,
   checkUserStatus(),
-   authorize("admin"),
+  authorize("admin"),
   // validate({ body: createDoctorSchema }),
   asyncHandler(doctorController.createDoctor),
   doctorController.createDoctor
@@ -110,6 +110,30 @@ doctorRouter.post(
   authorize("admin", "doctor", "nurse"),
   asyncHandler(doctorController.updateStaffInfo),
   doctorController.updateStaffInfo
+);
+
+doctorRouter.post(
+  "/create-doctors-from-csv",
+  authenticate,
+  checkUserStatus(),
+  authorize("admin"),
+  asyncHandler(doctorController.createDoctorsFromCSV),
+  doctorController.createDoctorsFromCSV
+);
+
+doctorRouter.get(
+  "/nearest-slot/:clinicId",
+  // authenticate,
+  // checkUserStatus(),
+  // authorize("admin", "doctor"),
+  asyncHandler(doctorController.getAvailableDoctorsWithNearestSlot),
+  doctorController.getAvailableDoctorsWithNearestSlot
+);
+
+doctorRouter.post(
+  "/all/with-rating",
+  asyncHandler(doctorController.getAllDoctorsWithAvgRating),
+  doctorController.getAllDoctorsWithAvgRating
 );
 
 // Ví dụ check authen bên trong router

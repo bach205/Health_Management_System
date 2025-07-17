@@ -9,7 +9,7 @@ class ExaminationOrderService {
      * @returns {Promise<Object>} Thông tin yêu cầu đã tạo
      */
     static async create(data) {
-        const { doctor_id, patient_id, from_clinic_id, to_clinic_id, total_cost } = data;
+        const { doctor_id, patient_id, from_clinic_id, to_clinic_id, extra_cost, appointment_id } = data;
 
         // 1. Tạo order chuyển phòng
         const order = await prisma.examinationOrder.create({
@@ -19,6 +19,7 @@ class ExaminationOrderService {
                 patient: true,
                 fromClinic: true,
                 toClinic: true,
+                appointment: true,
             }
         });
 
@@ -37,7 +38,7 @@ class ExaminationOrderService {
                     const bTime = new Date(b.nearestSlot.slot_date).getTime() + (b.nearestSlot.start_time ? new Date(`1970-01-01T${b.nearestSlot.start_time}`).getTime() : 0);
                     return aTime - bTime;
                 });
-                nextDoctor = doctorsWithSlot[0];
+                nextDoctor = doctorsWithSlot[0].doctor;
                 nearestSlot = doctorsWithSlot[0].nearestSlot;
             }
         }

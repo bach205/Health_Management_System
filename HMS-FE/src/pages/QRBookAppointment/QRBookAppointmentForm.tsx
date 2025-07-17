@@ -26,17 +26,16 @@ const QRBookAppointmentForm: React.FC = () => {
         // Sử dụng getAvailableSlots với object rỗng để lấy tất cả slot còn trống
         const response = await getAvailableSlots({});
         const slots = response.data || response.metadata || [];
+        console.log(slots)
         setAvailableSlots(slots);
         console.log('All slots:', slots);
         // Lấy danh sách bác sĩ và phòng khám từ slot
         const doctorMap = new Map();
-        const clinicMap = new Map();
         slots.forEach((slot: any) => {
           if (slot.doctor_id && slot.doctor_name) doctorMap.set(slot.doctor_id, { id: slot.doctor_id, name: slot.doctor_name });
-          if (slot.clinic_id && slot.clinic_name) clinicMap.set(slot.clinic_id, { id: slot.clinic_id, name: slot.clinic_name });
         });
         setDoctors(Array.from(doctorMap.values()));
-        setClinics(Array.from(clinicMap.values()));
+        // XÓA: setClinics(Array.from(clinicMap.values()));
       } catch (err) {
         message.error('Không thể tải dữ liệu slot');
       }
@@ -114,15 +113,19 @@ const QRBookAppointmentForm: React.FC = () => {
   }, [selectedClinic, selectedDoctor]);
 
   // Khi chọn ngày, lọc giờ khả dụng
-  const handleDateChange = (date: any) => {
-    const dateStr = dayjs(date).format('YYYY-MM-DD');
+  const handleDateSelect = (dateKey: string) => {
+    setSelectedDate(dateKey);
     const filtered = availableSlots.filter(
-      (slot: any) => slot.doctor_id === selectedDoctor && slot.clinic_id === selectedClinic && dayjs(slot.slot_date).format('YYYY-MM-DD') === dateStr && slot.is_available
+      (slot: any) =>
+        slot.doctor_id === selectedDoctor &&
+        slot.clinic_id === selectedClinic &&
+        dayjs(slot.slot_date).format('YYYY-MM-DD') === dateKey &&
+        slot.is_available
     );
     setAvailableTimes(filtered.map((slot: any) => ({ value: slot.start_time, label: slot.start_time })));
-    setSelectedDate(dateStr);
+    setSelectedDate(dateKey);
     setSelectedSlot(null);
-    form.setFieldsValue({ slot_date: dateStr, start_time: undefined });
+    form.setFieldsValue({ slot_date: dateKey, start_time: undefined });
   };
 
   // Khi chọn ngày từ UI (click), cập nhật state và form
@@ -171,7 +174,8 @@ const QRBookAppointmentForm: React.FC = () => {
       }
     } catch (error: any) {
       message.error(error?.response?.data?.message || 'Đặt lịch thất bại');
-    } finally {
+    }
+    finally {
       setLoading(false);
     }
   };

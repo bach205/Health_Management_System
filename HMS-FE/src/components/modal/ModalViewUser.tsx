@@ -1,4 +1,4 @@
-import { Avatar, DatePicker, Flex, Form, Image, Input, Modal, Select, type FormInstance } from "antd";
+import { Avatar, DatePicker, Flex, Form, Image, Input, InputNumber, Modal, Select, type FormInstance } from "antd";
 import { useState } from "react";
 import { specialtyOptions, TYPE_EMPLOYEE_STR } from "../../constants/user.const";
 import type { IUserBase } from "../../types/index.type";
@@ -110,16 +110,16 @@ const ModalViewUser = ({ role, isVisible, handleCancel, form, user }: IProps) =>
             <Form.Item
 
               label="Khoa"
-              name="specialty"
+              name="specialty_id"
               rules={[{ required: true, message: "Vui lòng chọn chuyên khoa!" }]}
             >
               <Select
                 style={{ width: 120 }}
-                value={user?.doctor?.specialty?.name}
+                value={user?.doctor?.specialty?.id}
                 onChange={(value) => setSpecialty(value)}
               >
                 {specialties.map((specialty) => (
-                  <Select.Option key={specialty.id} value={specialty.name}>
+                  <Select.Option key={specialty.id} value={specialty.id}>
                     <span className="text-black">{specialty.name}</span>
                   </Select.Option>
                 ))}
@@ -131,6 +131,12 @@ const ModalViewUser = ({ role, isVisible, handleCancel, form, user }: IProps) =>
               name="bio" label="Tiểu sử">
               <Input className="text-black!" placeholder="Tiểu sử bác sĩ" />
             </Form.Item>
+            <Form.Item
+              name="price" label="Giá khám">
+              <InputNumber className="text-black!" placeholder="Giá khám" min={0} />
+            </Form.Item>
+
+
             <Form.Item label="Đánh giá">
               <Rating rating={user?.doctor?.rating || 0} />
             </Form.Item>

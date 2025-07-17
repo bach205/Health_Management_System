@@ -7,7 +7,7 @@ export const createDoctor = (doctor: IDoctor) => {
 };
 
 export const getDoctors = async (searchOptions: any) => {
-    return instance.post(`${BASE_URL}`, searchOptions);
+    return instance.post(`${BASE_URL}/all/with-rating`, searchOptions);
 };
 
 export const updateDoctor = (doctor: IDoctor) => {
@@ -41,4 +41,13 @@ export const getDoctorAvailableSlotsByDate = (doctorId: number, date: string, cl
 
 export const updateDoctorProfile = (doctor: any) => {
     return instance.post(`${BASE_URL}/update-info`, doctor);
+};
+
+export const createDoctorsFromCSV = (data: any) => {
+    return instance.post(`${BASE_URL}/create-doctors-from-csv`, data);
+};
+
+export const getAvailableDoctors = async (clinicId: number) => {
+  const res = await instance.get(`${BASE_URL}/nearest-slot/${clinicId}`);
+  return res // hoặc tuỳ theo response của bạn
 };

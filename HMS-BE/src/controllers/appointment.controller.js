@@ -12,7 +12,6 @@ const {
 
 exports.bookAppointment = async (req, res, next) => {
   try {
-
     const { error } = bookAppointmentSchema.validate(req.body);
     if (error) {
       return res.status(400).json({

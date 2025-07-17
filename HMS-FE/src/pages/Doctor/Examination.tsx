@@ -245,8 +245,7 @@ const Examination = () => {
                         Lịch sử kết quả khám bệnh
                     </Typography.Title>
                     <Flex gap={20}>
-                        <Button
-                            type="primary"
+                        <Button type="primary"
                             onClick={() => setIsExaminationModalVisible(true)}
                         >
                             Kết quả khám bệnh

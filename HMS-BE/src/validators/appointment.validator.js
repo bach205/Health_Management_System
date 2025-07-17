@@ -1,5 +1,11 @@
 const Joi = require("joi");
 
+const todayStart = () => {
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  return now;
+};
+
 const bookAppointmentSchema = Joi.object({
   patient_id: Joi.number().integer().required().messages({
     'number.base': 'ID bệnh nhân phải là số',
@@ -13,9 +19,17 @@ const bookAppointmentSchema = Joi.object({
     'number.base': 'ID phòng khám phải là số',
     'any.required': 'ID phòng khám là bắt buộc'
   }),
-  slot_date: Joi.date().greater('now').required().messages({
+  slot_date: Joi.date().required().custom((value, helpers) => {
+    const today = todayStart();
+    const slot = new Date(value);
+    slot.setHours(0, 0, 0, 0);
+    if (slot < today) {
+      return helpers.error('date.min', { limit: today });
+    }
+    return value;
+  }).messages({
     'date.base': 'Ngày hẹn không hợp lệ',
-    'date.greater': 'Ngày hẹn phải lớn hơn ngày hiện tại',
+    'date.min': 'Ngày hẹn phải là hôm nay hoặc sau hôm nay',
     'any.required': 'Ngày hẹn là bắt buộc'
   }),
   start_time: Joi.string()
@@ -46,9 +60,17 @@ const nurseBookAppointmentSchema = Joi.object({
     'number.base': 'ID phòng khám phải là số',
     'any.required': 'ID phòng khám là bắt buộc'
   }),
-  appointment_date: Joi.date().greater('now').required().messages({
+  appointment_date: Joi.date().required().custom((value, helpers) => {
+    const today = todayStart();
+    const slot = new Date(value);
+    slot.setHours(0, 0, 0, 0);
+    if (slot < today) {
+      return helpers.error('date.min', { limit: today });
+    }
+    return value;
+  }).messages({
     'date.base': 'Ngày hẹn không hợp lệ',
-    'date.greater': 'Ngày hẹn phải lớn hơn ngày hiện tại',
+    'date.min': 'Ngày hẹn phải là hôm nay hoặc sau hôm nay',
     'any.required': 'Ngày hẹn là bắt buộc'
   }),
   appointment_time: Joi.string()
@@ -171,7 +193,7 @@ const bookAppointmentByQRSchema = Joi.object({
   doctor_id: Joi.number().integer().required(),
   clinic_id: Joi.number().integer().required(),
   slot_date: Joi.date().required(),
-  start_time: Joi.string().pattern(/^([0-1][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/).required(),
+  start_time: Joi.string().required(),
   reason: Joi.string().max(1000).allow("", null),
   note: Joi.string().max(1000).allow("", null)
 });

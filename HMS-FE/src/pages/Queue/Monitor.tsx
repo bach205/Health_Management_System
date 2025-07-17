@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Typography, Row, Col, Select, Spin, Table, Input, Tag, Button, Empty } from "antd";
+import { Typography, Row, Col, Select, Spin, Table, Input, Tag, Button, Empty, DatePicker } from "antd";
 import { getClinicService } from "../../services/clinic.service";
 import { getQueueClinic } from "../../services/queue.service";
 import dayjs from "dayjs";
 import type { IQueue } from "../../types/queue.type";
-import { SearchOutlined, ReloadOutlined } from "@ant-design/icons";
+import { SearchOutlined, ReloadOutlined, CalendarOutlined } from "@ant-design/icons";
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -53,6 +53,7 @@ const Monitor: React.FC = () => {
   const [doctor, setDoctor] = useState("");
   const [queueNumber, setQueueNumber] = useState("");
   const [search, setSearch] = useState("");
+  const [selectedDate, setSelectedDate] = useState(dayjs());
 
   // Fetch clinics
   useEffect(() => {
@@ -69,32 +70,45 @@ const Monitor: React.FC = () => {
   }, []);
 
   // Fetch queue data from API (status, paging)
-  const fetchQueue = async (clinicId: number, page = 1, pageSize = 10, status = "") => {
+  const fetchQueue = async (clinicId: number, page = 1, pageSize = 10, status = "", date = dayjs()) => {
     if (!clinicId) return;
     setLoading(true);
     try {
-      const res = await getQueueClinic(clinicId.toString(), { pageNumber: page, pageSize }, status || undefined);
-      setQueueData(res.metadata.queueClinic || []);
+      const res = await getQueueClinic(clinicId.toString(), {
+        pageNumber: page,
+        pageSize,
+      }, status || undefined);
+
+      // Filter by selected date on frontend
+      let filteredQueue = res.metadata.queueClinic || [];
+      if (date) {
+        filteredQueue = filteredQueue.filter((item: IQueue) => {
+          const itemDate = dayjs(item.slot_date);
+          return itemDate.isSame(date, 'day');
+        });
+      }
+
+      setQueueData(filteredQueue);
       setPagination({
         current: page,
         pageSize,
-        total: res.metadata.total || 0,
+        total: filteredQueue.length,
       });
     } finally {
       setLoading(false);
     }
   };
 
-  // Fetch queue when clinic, status, or page changes
+  // Fetch queue when clinic, status, page, or date changes
   useEffect(() => {
     if (selectedClinic) {
-      fetchQueue(selectedClinic, pagination.current, pagination.pageSize, status);
+      fetchQueue(selectedClinic, pagination.current, pagination.pageSize, status, selectedDate);
     } else {
       setQueueData([]);
       setPagination({ current: 1, pageSize: 10, total: 0 });
     }
     // eslint-disable-next-line
-  }, [selectedClinic, status, pagination.current, pagination.pageSize]);
+  }, [selectedClinic, status, pagination.current, pagination.pageSize, selectedDate]);
 
   // Lấy danh sách bác sĩ từ queueData
   const doctorOptions = useMemo(() => {
@@ -176,6 +190,7 @@ const Monitor: React.FC = () => {
     setDoctor("");
     setQueueNumber("");
     setSearch("");
+    setSelectedDate(dayjs());
   };
 
   return (
@@ -216,6 +231,15 @@ const Monitor: React.FC = () => {
                 <Option key={cli.id} value={cli.id}>{cli.name}</Option>
               ))}
             </Select>
+            <DatePicker
+              placeholder="Chọn ngày"
+              value={selectedDate}
+              onChange={(date) => setSelectedDate(date || dayjs())}
+              format="DD/MM/YYYY"
+              style={{ width: 140 }}
+              disabled={!selectedClinic}
+              suffixIcon={<CalendarOutlined />}
+            />
             <Select
               placeholder="Trạng thái"
               style={{ width: 140 }}

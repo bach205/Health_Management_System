@@ -7,7 +7,7 @@ import { getQueueStatus } from "../../../types/queue.type";
 import { useAuthStore } from "../../../store/authStore";
 import { useSocket } from "../../../hooks/socket/useSocket";
 import { updateQueueStatus } from "../../../services/queue.service";
-import { Button, Dropdown, Flex, Menu, message, Select, Space, Table, Tag, Tooltip, Typography } from "antd";
+import { Button, Dropdown, Flex, Menu, message, notification, Select, Space, Table, Tag, Tooltip, Typography } from "antd";
 import ModalPatientExaminationOrder from "./ModalPatientExaminationOrder";
 import DoctorExaminationOrderModal from "./DoctorExaminationOrderModal";
 import { RefreshCcw } from "lucide-react";
@@ -34,9 +34,12 @@ const QueueTable = () => {
     const [selectedPatient, setSelectedPatient] = useState<any>(null);
     const [clinics, setClinics] = useState<any[]>([]);
     const [selectedClinic, setSelectedClinic] = useState("");
+    const [selectedAppointment, SetSelectedAppointment] = useState(null)
     const { fetchQueue } = useQueue();
     const { user } = useAuthStore();
     const currentDoctorId = user?.id;
+    const [selectedAppointmentId, setSelectedAppointmentId] = useState<number | null>(null);
+
 
     const [statusFilter, setStatusFilter] = useState<string>("");
 
@@ -84,7 +87,7 @@ const QueueTable = () => {
             const appointmentDate = dayjs.utc(queue.appointment.appointment_date);
 
             // Kiểm tra xem giờ khám, ngày khám có đã qua hay không
-            if ( appointmentDate > dayjs() && appointmentTime.hour() > dayjs().hour() && appointmentTime.minute() > dayjs().minute()) {
+            if (appointmentDate > dayjs() && appointmentTime.hour() > dayjs().hour() && appointmentTime.minute() > dayjs().minute()) {
                 message.error("Chưa đến giờ khám");
                 return;
             }
@@ -120,15 +123,20 @@ const QueueTable = () => {
         else reset();
     }, [selectedClinic]);
 
-    const handleFinishExam = (patient: any) => {
-        setSelectedPatient(patient);
+    const handleFinishExam = (record: any) => {
+        console.log("handleFinishExam", record);
+        setSelectedAppointmentId(record.appointment_id);
+        setSelectedPatient(record.patient);
         setShowRecordModal(true);
+        console.log("selectedAppointmentId, selectedPatient", selectedAppointmentId, selectedPatient);
     };
-
-    const handleAssignClinic = (patient: any) => {
-        setSelectedPatient(patient);
+    const handleAssignClinic = (record: any) => {
+        setSelectedPatient(record.patient);
+        setSelectedAppointmentId(record.appointment_id);
         setShowDoctorExaminationOrderModal(true);
         // setShowResultModal(true);
+        console.log("handleAssignClinic", record);
+        console.log("selectedAppointmentId, selectedPatient", selectedAppointmentId, selectedPatient);
     };
 
     const handleViewExaminationOrder = (patient: any) => {
@@ -154,11 +162,13 @@ const QueueTable = () => {
     const columns: any = [
         {
             title: "STT",
-            dataIndex: "id",
+            dataIndex: "queue_number",
             key: "id",
             align: "center",
             width: 50,
-            render: (_: any, record: any, index: number) => index + 1,
+            render: (_: any, record: any, index: number) => 
+                <p className="text-primary font-bold">{record.queue_number}</p>
+            ,
         },
         {
             title: "Bệnh nhân",
@@ -204,6 +214,7 @@ const QueueTable = () => {
             ellipsis: true,
             width: 200,
             render: (_: any, record: any) => {
+                console.log(record)
                 return (
                     //  kiem tra tai khoan bac si co trung voi appointment ko
                     record?.appointment?.doctor?.id === currentDoctorId &&
@@ -231,10 +242,10 @@ const QueueTable = () => {
                                 <Button color="pink" key="viewExaminationOrder" onClick={() => handleViewExaminationOrder(record.patient)}>
                                     Xem lịch sử chuyển phòng
                                 </Button>
-                                <Button type="primary" key="finish" onClick={() => handleFinishExam(record.patient)}>
+                                <Button type="primary" key="finish" onClick={() => handleFinishExam(record)}>
                                     Khám xong
                                 </Button>
-                                <Button type="dashed" key="assign" onClick={() => handleAssignClinic(record.patient)}>
+                                <Button type="dashed" key="assign" onClick={() => handleAssignClinic(record)}>
                                     Chỉ định phòng tiếp
                                 </Button>
                             </>
@@ -293,7 +304,7 @@ const QueueTable = () => {
                                 </label>
                                 <Select style={{ minWidth: 200 }} value={statusFilter} onChange={handleFilter} placeholder="Chọn trạng thái">
                                     <Option key={"clinic.id"} value={""}>
-                                        Khám bệnh
+                                        Chờ khám và đang khám
                                     </Option>
 
                                     <Option value={"waiting"}>Chờ khám</Option>
@@ -338,6 +349,8 @@ const QueueTable = () => {
                 open={showDoctorExaminationOrderModal}
                 onClose={() => setShowDoctorExaminationOrderModal(false)}
                 patient_id={selectedPatient?.id}
+                appointment_id={selectedAppointmentId ?? 0}
+
                 clinic_id={Number(selectedClinic)}
                 doctor_id={(Number)(currentDoctorId)}
                 currentUserId={(Number)(user?.id)}
@@ -350,6 +363,7 @@ const QueueTable = () => {
             {/* viet ket qua kham + don thuoc */}
             <DoctorExaminationRecordModal
                 open={showRecordModal}
+                appointment_id={Number(selectedAppointmentId)}
                 onClose={() => setShowRecordModal(false)}
                 patient_id={selectedPatient?.id}
                 clinic_id={Number(selectedClinic)}

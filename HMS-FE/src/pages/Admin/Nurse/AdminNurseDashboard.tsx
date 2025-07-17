@@ -12,6 +12,7 @@ import type { IUserBase } from "../../../types/index.type";
 import { createNurse, updateNurse, banNurse, resetPassword, deleteNurse } from "../../../api/nurse.ts";
 import { getShiftService } from "../../../services/shift.service.ts";
 import { updatePassword } from "../../../services/doctor.service.ts";
+import ImportCSV from "../../../components/doctor/ImportCSV.tsx";
 
 const AdminNurseDashboard = () => {
   const [isCreateVisible, setIsCreateVisible] = useState<boolean>(false);
@@ -355,9 +356,12 @@ const AdminNurseDashboard = () => {
           </Button>
         </Flex>
 
-        <Button type="primary" icon={<CirclePlus size={16} />} onClick={() => setIsCreateVisible(true)} >
-          Thêm y tá
-        </Button>
+        <Space>
+          <ImportCSV role="nurse"></ImportCSV>
+          <Button type="primary" icon={<CirclePlus size={16} />} onClick={() => setIsCreateVisible(true)} >
+            Thêm y tá
+          </Button>
+        </Space>
       </Flex>
       <Flex gap={10} justify="space-between" style={{ marginBottom: 10 }}>
         <Form>

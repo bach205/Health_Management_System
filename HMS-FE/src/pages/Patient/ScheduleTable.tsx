@@ -29,6 +29,7 @@ import {
 } from "@ant-design/icons";
 
 import { cancelAppointmentService, deleteAppointmentService } from '../../services/appointment.service';
+import { useNavigate } from "react-router-dom";
 
 const style = {
   ".ant-table-thead .ant-table-cell": {
@@ -37,10 +38,11 @@ const style = {
 }
 
 const ScheduleTable = ({ data = [], setReload, loading = false, visible, selectedPatient, onEdit, onCancel, reload, isPage, }: any) => {
- // const [reload, setReload] = useState(false);
+  // const [reload, setReload] = useState(false);
   const [viewModalVisible, setViewModalVisible] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<any>(null);
 
+  const navigate = useNavigate();
   const handleEditAppointment = (record: any) => {
     onEdit(record);
   };
@@ -70,7 +72,7 @@ const ScheduleTable = ({ data = [], setReload, loading = false, visible, selecte
           await cancelAppointmentService({ id: record._id || record.id, reason });
           setReload(!reload);
           notification.success({ message: 'Huỷ lịch thành công' });
-       //   if (typeof reloadSchedule === 'function') reloadSchedule((r: any) => !r);
+          //   if (typeof reloadSchedule === 'function') reloadSchedule((r: any) => !r);
         },
         okText: 'Xác nhận',
         cancelText: 'Không',
@@ -80,30 +82,20 @@ const ScheduleTable = ({ data = [], setReload, loading = false, visible, selecte
     }
   };
 
-  const handleDeleteAppointment = async (record: any) => {
-    try {
-      Modal.confirm({
-        title: 'Xác nhận xoá lịch khám',
-        content: (
-          <>
-            <Typography.Text>Bạn có chắc muốn xoá lịch hẹn này?</Typography.Text>
-          </>
-        ),
-        onOk: async () => {
-          await deleteAppointmentService(record._id || record.id);
-          setReload(!reload);
-          notification.success({ message: 'Xoá lịch thành công' });
-        },
-        okText: 'Xác nhận',
-        cancelText: 'Không',
-      });
-    } catch (error) {
-      notification.error({ message: 'Xoá lịch không thành công' });
-    }
-  };
-
   const hasPermissionEdit = (record: any) => {
-    //Có thể chỉnh sửa nếu thời gian đặt cách thời gian hiện tại 2 tiếng
+    if (record.status === "completed") {
+      return (
+        <Tooltip title="Xem kết quả khám">
+          <Button
+            type="primary"
+            size="small"
+            onClick={() => navigate(`record/${record._id || record.id}`)}
+          >
+            Xem kết quả khám
+          </Button>
+        </Tooltip>
+      );
+    }
     return (
       <>
         <Tooltip title="Xem chi tiết">
@@ -115,43 +107,43 @@ const ScheduleTable = ({ data = [], setReload, loading = false, visible, selecte
             <InfoCircleOutlined />
           </Button>
         </Tooltip>
-        <Tooltip title="Chỉnh sửa lịch khám">
-          <Button
-            type="default"
-            size="small"
-            onClick={() => handleEditAppointment(record)}
-          >
-            <EditOutlined />
-          </Button>
-        </Tooltip>
-        <Popconfirm
-          icon={<DeleteOutlined style={{ color: "red" }} />}
-          title="Hủy lịch khám bệnh"
-          description={
-            <>
-              <Typography.Text>Xác nhận hủy lịch ngày: </Typography.Text>{" "}
-              <strong>
-                {record.date} - {record.time}?
-              </strong>
-            </>
-          }
-          onConfirm={() => handleCancelAppmt(record)}
-          okText="Xác nhận"
-          cancelText="Không"
-        >
-          <Tooltip title="Hủy lịch khám">
-            <Button type="default" danger size="small">
-              <CloseOutlined />
-            </Button>
-          </Tooltip>
-        </Popconfirm>
-        {record.status !== 'cancelled' && record.status !== 'completed' && (
-          <Tooltip title="Xoá lịch hẹn">
-            <Button type="default" danger size="small" onClick={() => handleDeleteAppointment(record)}>
-              <DeleteOutlined />
+        {/* Ẩn nút chỉnh sửa nếu trạng thái là 'confirmed' */}
+        {record.status !== 'confirmed' && (
+          <Tooltip title="Chỉnh sửa lịch khám">
+            <Button
+              type="default"
+              size="small"
+              onClick={() => handleEditAppointment(record)}
+            >
+              <EditOutlined />
             </Button>
           </Tooltip>
         )}
+        {/* Ẩn nút huỷ nếu trạng thái là 'confirmed' */}
+        {record.status !== 'confirmed' && (
+          <Popconfirm
+            icon={<DeleteOutlined style={{ color: "red" }} />}
+            title="Hủy lịch khám bệnh"
+            description={
+              <>
+                <Typography.Text>Xác nhận hủy lịch ngày: </Typography.Text>{" "}
+                <strong>
+                  {record.date} - {record.time}?
+                </strong>
+              </>
+            }
+            onConfirm={() => handleCancelAppmt(record)}
+            okText="Xác nhận"
+            cancelText="Không"
+          >
+            <Tooltip title="Hủy lịch khám">
+              <Button type="default" danger size="small">
+                <CloseOutlined />
+              </Button>
+            </Tooltip>
+          </Popconfirm>
+        )}
+        {/* Đã xoá nút xoá lịch hẹn */}
       </>
     )
   }
@@ -177,7 +169,7 @@ const ScheduleTable = ({ data = [], setReload, loading = false, visible, selecte
       key: "formatted_time",
       width: 110,
       align: "center" as const,
-      render: (time: any) => time ? time.slice(0,5) : "",
+      render: (time: any) => time ? time.slice(0, 5) : "",
     },
     {
       title: "Phòng khám",
@@ -187,7 +179,7 @@ const ScheduleTable = ({ data = [], setReload, loading = false, visible, selecte
       render: (text: any) => text,
     },
     {
-      title: "Bác sĩ",
+      title: "Bác sĩ đặt",
       dataIndex: "doctor_name",
       key: "doctor_name",
       width: 150,
@@ -235,7 +227,7 @@ const ScheduleTable = ({ data = [], setReload, loading = false, visible, selecte
           colorPrimaryHover: "#5f8aff",
           colorPrimaryActive: "#5f8aff",
         }
-          
+
       },
     }}>
       <Table
@@ -243,7 +235,7 @@ const ScheduleTable = ({ data = [], setReload, loading = false, visible, selecte
         loading={loading}
         columns={columns}
         rowKey={record => record._id || record.id}
-        pagination={{ pageSize: 10 }}
+        pagination={{  showSizeChanger: true, pageSizeOptions: ["1", "3", "5", "7", "9"] }}
       />
 
       {/* View Appointment Modal */}
@@ -274,7 +266,7 @@ const ScheduleTable = ({ data = [], setReload, loading = false, visible, selecte
             <Row gutter={[16, 16]}>
               <Col span={12}>
                 <div className="font-medium text-gray-700">Giờ khám:</div>
-                <div>{selectedRecord.formatted_time ? selectedRecord.formatted_time.slice(0,5) : "Chưa xác định"}</div>
+                <div>{selectedRecord.formatted_time ? selectedRecord.formatted_time.slice(0, 5) : "Chưa xác định"}</div>
               </Col>
               <Col span={12}>
                 <div className="font-medium text-gray-700">Trạng thái:</div>

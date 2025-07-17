@@ -35,3 +35,7 @@ export const resetPassword = async (id: string) => {
 export const deleteNurse = async (id: string) => {
     return await mainRequest.delete(`${BASE_URL}/delete/${id}`);
 };
+
+export const createNursesFromCSV = async (data: any[]) => {
+    return await mainRequest.post(`${BASE_URL}/create-nurses-from-csv`, data);
+};

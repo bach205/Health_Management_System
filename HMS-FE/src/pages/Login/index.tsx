@@ -26,6 +26,8 @@ const Login = () => {
     };
     const data = await auth.handleLogin(values);
     if (data === "patient") navigate("/");
+    if (data === "nurse") navigate("/sale-medicine");
+    if (data === "doctor") navigate("/doctor/queue");
     if (data === "admin") navigate("/admin");
   };
 

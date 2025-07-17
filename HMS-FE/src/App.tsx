@@ -46,6 +46,14 @@ import ForgetPage from "./pages/ForgetPage";
 import ChatPage from "./pages/Chat";
 import Monitor from "./pages/Queue/Monitor";
 import QRBookAppointment from "./pages/QRBookAppointment";
+import SaleMedicinePage from "./pages/SaleMedicinePage";
+import ExaminationResult from "./pages/Patient/ExaminationResult";
+import BlogDashboard from "./pages/Blog/BlogDashboard";
+import BlogDetail from "./pages/Blog/BlogDetail";
+import CreateBlog from "./pages/Admin/Blog/CreateBlog";
+import AdminBlogDashboard from "./pages/Admin/Blog/AdminBlogDashboard";
+import EditBlog from "./pages/Blog/BlogEdit";
+import PaymentList from "./pages/Payment/PaymentList";
 
 dayjs.extend(plugin);
 dayjs.updateLocale("en", {
@@ -70,7 +78,7 @@ function App() {
           <Route
             path={route.path}
             element={
-              <Authentication allowedRoles={route.allowedRoles || ["admin", "nurse", "doctor", "patient"]}>
+              <Authentication allowedRoles={route.allowedRoles || ["admin", "nurse", "doctor"]}>
                 <route.layout>{route.element}</route.layout>
               </Authentication>
             }
@@ -152,6 +160,16 @@ const PublicRoutes = [
     element: <QRBookAppointment />,
     layout: MainLayout,
   },
+  {
+    path: "/blogs",
+    element: <BlogDashboard />,
+    layout: MainLayout,
+  },
+  {
+    path: "/blogs/:blogId",
+    element: <BlogDetail />,
+    layout: MainLayout,
+  },
 ];
 
 interface PrivateRoute {
@@ -161,10 +179,15 @@ interface PrivateRoute {
   layout: React.ComponentType<{ children: React.ReactNode }>;
 }
 const PrivateRoutes: PrivateRoute[] = [
-
+  {
+    path: "/sale-medicine",
+    element: <SaleMedicinePage />,
+    layout: DashboardLayout,
+  },
   {
     path: "/admin/",
-    element: <Dashboard />,
+    element: <AdminDashboard />,
+    allowedRoles: ["admin"],
     layout: DashboardLayout,
   },
   {
@@ -181,10 +204,31 @@ const PrivateRoutes: PrivateRoute[] = [
     path: "/user-book-appointments",
     element: <NurseManageAppointment />,
     layout: DashboardLayout,
-  },
+  },  
   {
     path: "/admin/dashboard",
     element: <AdminDashboard />,
+    allowedRoles: ["admin"],
+    layout: DashboardLayout,
+  },
+  
+  {
+    path: "/admin/blogs",
+    element: <AdminBlogDashboard />,
+    allowedRoles: ["admin"],
+    layout: DashboardLayout,
+  },
+  
+  {
+    path: "/admin/blogs/create",
+    element: <CreateBlog />,
+    allowedRoles: ["admin"],
+    layout: DashboardLayout,
+  },
+  {
+    path: "/admin/blogs/update/:blogId",
+    element: <EditBlog />,
+    allowedRoles: ["admin"],
     layout: DashboardLayout,
   },
   {
@@ -213,12 +257,27 @@ const PrivateRoutes: PrivateRoute[] = [
     element: <ShiftManager />,
     layout: DashboardLayout,
   },
+  
+  {
+    path: "/nurse-manage-payments",
+    element: <PaymentList />,
+    layout: DashboardLayout,
+  },
+
   {
     path: "/my-appointments",
     element: <MyAppointment />,
     allowedRoles: ["patient"],
     layout: MainLayout,
   },
+
+  {
+    path: "/my-appointments/record/:appointmentId",
+    element: <ExaminationResult />,
+    allowedRoles: ["patient"],
+    layout: MainLayout,
+  },
+
   {
     path: "/queue",
     element: <Monitor />,

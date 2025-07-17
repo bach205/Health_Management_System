@@ -7,6 +7,12 @@ const { createFeedbackSchema } = require("../validators/feedBack.validator");
 
 const feedbackRouter = express.Router();
 
+// Get feedback by appointmentId
+feedbackRouter.get(
+    "/appointment/:appointmentId",
+    asyncHandler(feedbackController.getFeedbackByAppointmentId)
+);
+
 // Create feedback for doctor (Patient only)
 feedbackRouter.post(
     "/",
@@ -18,7 +24,7 @@ feedbackRouter.post(
 
 // Update feedback (Patient only)
 feedbackRouter.put(
-    "/:id",
+    "/appointment/:appointmentId",
     authenticate,
     authorize("patient"),
     asyncHandler(feedbackController.updateFeedback)
@@ -26,7 +32,7 @@ feedbackRouter.put(
 
 // Delete feedback (Patient only)
 feedbackRouter.delete(
-    "/:id",
+    "/appointment/:appointmentId",
     authenticate,
     authorize("patient"),
     asyncHandler(feedbackController.deleteFeedback)

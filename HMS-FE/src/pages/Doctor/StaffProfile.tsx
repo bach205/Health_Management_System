@@ -132,6 +132,7 @@ const StaffProfile = () => {
   }
   const handleCancelPassword = () => {
     setIsVisiblePassword(false);
+    formPassword.resetFields();
   };
   return (
     <div style={{ padding: "20px" }}>

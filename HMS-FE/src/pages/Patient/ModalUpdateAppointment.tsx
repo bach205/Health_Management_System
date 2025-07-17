@@ -1,9 +1,10 @@
 import { DatePicker, Form, Input, Modal, Select, type FormInstance } from "antd";
 import { useState, useEffect } from "react";
 import dayjs from "dayjs";
-import { getDoctorsInClinic } from "../../services/doctor.service";
-import { getWorkSchedulesService } from "../../services/workschedule.service";
+// import { getDoctors } from "../../services/doctor.service";
+// import { getWorkSchedulesService } from "../../services/workschedule.service";
 import { getAllAvailableSlotsService } from "../../services/appointment.service";
+// import { getClinics } from "../../services/clinic.service";
 
 interface IProps {
     isVisible: boolean;
@@ -16,104 +17,129 @@ interface IProps {
 
 const ModalUpdateAppointment = ({ role, isVisible, handleOk, handleCancel, form, selectedAppointment }: IProps) => {
     const [loading, setLoading] = useState(false);
+    const [allSlots, setAllSlots] = useState<any[]>([]);
     const [doctorOptions, setDoctorOptions] = useState<any[]>([]);
+    const [clinicOptions, setClinicOptions] = useState<any[]>([]);
     const [dateOptions, setDateOptions] = useState<any[]>([]);
     const [timeOptions, setTimeOptions] = useState<any[]>([]);
     const [selectedDoctor, setSelectedDoctor] = useState<number | null>(null);
+    const [selectedClinic, setSelectedClinic] = useState<number | null>(null);
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
-    // Fetch doctors in clinic on open
+    // Fetch all slots on open
     useEffect(() => {
-        const fetchDoctors = async () => {
-            if (!selectedAppointment?.clinic_id) return;
+        const fetchSlots = async () => {
             setLoading(true);
             try {
-                const res = await getDoctorsInClinic(selectedAppointment.clinic_id);
-                const doctors = (res.data?.metadata || res.data)?.map((d: any) => ({ value: d.id, label: d.full_name }));
-                setDoctorOptions(doctors);
+                const slots = await getAllAvailableSlotsService();
+                setAllSlots(slots.data);
+                // Group unique doctors
+                const doctors = Array.from(new Map(slots.data.map((slot: any) => [slot.doctor_id, { id: slot.doctor_id, name: slot.doctor_name }])).values());
+                setDoctorOptions(doctors.map((d: any) => ({ value: d.id, label: d.name })));
             } catch {
+                setAllSlots([]);
                 setDoctorOptions([]);
             } finally {
                 setLoading(false);
             }
         };
-        if (isVisible) fetchDoctors();
+        if (isVisible) fetchSlots();
         if (!isVisible) {
+            setAllSlots([]);
             setDoctorOptions([]);
+            setClinicOptions([]);
             setDateOptions([]);
             setTimeOptions([]);
             setSelectedDoctor(null);
+            setSelectedClinic(null);
             setSelectedDate(null);
             form.resetFields();
         }
-    }, [isVisible, selectedAppointment]);
+    }, [isVisible]);
 
-    // When doctor changes, fetch work schedule dates
-    const handleDoctorChange = async (doctorId: number) => {
+    // Khi chọn bác sĩ, lọc ra các phòng khám hợp lệ
+    const handleDoctorChange = (doctorId: number) => {
         setSelectedDoctor(doctorId);
+        setSelectedClinic(null);
+        setSelectedDate(null);
+        setTimeOptions([]);
+        setDateOptions([]);
+        form.setFieldsValue({ clinic_id: undefined, appointment_date: undefined, appointment_time: undefined });
+        const clinics = Array.from(new Map(allSlots.filter(slot => slot.doctor_id === doctorId).map(slot => [slot.clinic_id, { id: slot.clinic_id, name: slot.clinic_name }])).values());
+        setClinicOptions(clinics.map((c: any) => ({ value: c.id, label: c.name })));
+    };
+
+    // Khi chọn phòng khám, lọc ra các ngày hợp lệ
+    const handleClinicChange = (clinicId: number) => {
+        setSelectedClinic(clinicId);
         setSelectedDate(null);
         setTimeOptions([]);
         form.setFieldsValue({ appointment_date: undefined, appointment_time: undefined });
-        if (!doctorId || !selectedAppointment?.clinic_id) {
+        if (!selectedDoctor || !clinicId) {
             setDateOptions([]);
             return;
         }
-        setLoading(true);
-        try {
-            const res = await getWorkSchedulesService();
-            // Unique dates
-            const dates = Array.from(new Set((res.data || res).map((ws: any) => ws.work_date)));
-            setDateOptions(dates.map(date => ({ value: date, label: dayjs(date).format('DD/MM/YYYY') })));
-        } catch {
-            setDateOptions([]);
-        } finally {
-            setLoading(false);
-        }
+        // Lọc ngày từ slot
+        const dates = Array.from(new Set(allSlots.filter(slot => slot.doctor_id === selectedDoctor && slot.clinic_id === clinicId).map(slot => slot.slot_date)));
+        setDateOptions(dates.map(date => ({ value: date, label: dayjs(date).format('DD/MM/YYYY') })));
     };
 
-    // When date changes, fetch available slots
-    const handleDateChange = async (date: string) => {
+    // Khi chọn ngày, lọc ra các giờ hợp lệ
+    const handleDateChange = (date: string) => {
         setSelectedDate(date);
         setTimeOptions([]);
         form.setFieldsValue({ appointment_time: undefined });
-        if (!selectedDoctor || !selectedAppointment?.clinic_id || !date) {
+        if (!selectedDoctor || !selectedClinic || !date) {
             setTimeOptions([]);
             return;
         }
-        setLoading(true);
-        try {
-            const slots = await getAllAvailableSlotsService();
-            setTimeOptions(slots.map((slot: any) => ({ value: slot.start_time, label: slot.start_time.slice(0,5) })));
-        } catch {
-            setTimeOptions([]);
-        } finally {
-            setLoading(false);
-        }
+        // Lọc giờ từ slot
+        const times = allSlots.filter(slot => slot.doctor_id === selectedDoctor && slot.clinic_id === selectedClinic && slot.slot_date === date);
+        setTimeOptions(times.map((slot: any) => ({ value: slot.start_time, label: slot.start_time.slice(11,16) })));
     };
 
     // Set initial values when modal opens
     useEffect(() => {
         if (isVisible && selectedAppointment) {
+            // Set doctor and fetch clinics for that doctor
+            setSelectedDoctor(selectedAppointment.doctor_id);
+            // Filter clinics for the selected doctor
+            const clinics = Array.from(new Map(allSlots.filter(slot => slot.doctor_id === selectedAppointment.doctor_id).map(slot => [slot.clinic_id, { id: slot.clinic_id, name: slot.clinic_name }])).values());
+            setClinicOptions(clinics.map((c: any) => ({ value: c.id, label: c.name })));
+            setSelectedClinic(selectedAppointment.clinic_id);
+            // Filter dates for the selected doctor and clinic
+            const dates = Array.from(new Set(allSlots.filter(slot => slot.doctor_id === selectedAppointment.doctor_id && slot.clinic_id === selectedAppointment.clinic_id).map(slot => slot.slot_date)));
+            setDateOptions(dates.map(date => ({ value: date, label: dayjs(date).format('DD/MM/YYYY') })));
+            setSelectedDate(selectedAppointment.formatted_date);
+            // Filter times for the selected doctor, clinic, and date
+            const times = allSlots.filter(slot => slot.doctor_id === selectedAppointment.doctor_id && slot.clinic_id === selectedAppointment.clinic_id && slot.slot_date === selectedAppointment.formatted_date);
+            setTimeOptions(times.map((slot: any) => ({ value: slot.start_time, label: slot.start_time.slice(11,16) })));
+            // Set form fields
             form.setFieldsValue({
+                clinic_id: selectedAppointment.clinic_id,
                 doctor_id: selectedAppointment.doctor_id,
-                appointment_date: selectedAppointment.formatted_date || undefined,
-                appointment_time: selectedAppointment.formatted_time || undefined,
+                appointment_date: typeof selectedAppointment.formatted_date === 'string' ? selectedAppointment.formatted_date : undefined,
+                appointment_time: typeof selectedAppointment.formatted_time === 'string' ? selectedAppointment.formatted_time : undefined,
                 reason: selectedAppointment.reason || "",
                 note: selectedAppointment.note || "",
             });
-            setSelectedDoctor(selectedAppointment.doctor_id);
-            setSelectedDate(selectedAppointment.formatted_date);
         }
-    }, [isVisible, selectedAppointment, form]);
+    }, [isVisible, selectedAppointment, allSlots, form]);
+
+    // Nếu lý do là Tái khám thì disable form
+    const isTaiKham = selectedAppointment?.reason?.trim() === 'Tái khám';
 
     const handleSubmit = async () => {
+        console.log(clinicOptions);
         try {
             setLoading(true);
             const values = await form.validateFields();
+            
             const updateData = {
+                clinic_id: values.clinic_id,
                 doctor_id: values.doctor_id,
-                appointment_date: values.appointment_date,
-                appointment_time: values.appointment_time,
+                appointment_date: new Date(values.appointment_date),
+                appointment_time: new Date(values.appointment_time),
                 reason: values.reason || undefined,
                 note: values.note || undefined,
             };
@@ -137,14 +163,16 @@ const ModalUpdateAppointment = ({ role, isVisible, handleOk, handleCancel, form,
             centered
             confirmLoading={loading}
             width={600}
+            okButtonProps={{ disabled: isTaiKham }}
         >
             <Form
                 name="updateAppointmentForm"
                 form={form}
                 labelCol={{ span: 8 }}
                 wrapperCol={{ span: 16 }}
-                style={{ marginTop: 20 }}
+                style={{ marginTop: 20, opacity: isTaiKham ? 0.6 : 1, pointerEvents: isTaiKham ? 'none' : 'auto' }}
                 layout="vertical"
+                disabled={isTaiKham}
             >
                 <Form.Item
                     label="Bác sĩ"
@@ -158,6 +186,24 @@ const ModalUpdateAppointment = ({ role, isVisible, handleOk, handleCancel, form,
                         showSearch
                         optionFilterProp="label"
                         filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
+                        value={doctorOptions.find(opt => opt.value === form.getFieldValue('doctor_id')) ? form.getFieldValue('doctor_id') : undefined}
+                        optionLabelProp="label"
+                    />
+                </Form.Item>
+                <Form.Item
+                    label="Phòng khám"
+                    name="clinic_id"
+                    rules={[{ required: true, message: "Vui lòng chọn phòng khám!" }]}
+                >
+                    <Select
+                        placeholder="Chọn phòng khám"
+                        options={clinicOptions}
+                        onChange={(value) => handleClinicChange(Number(value))}
+                        showSearch
+                        optionFilterProp="label"
+                        filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
+                        value={clinicOptions.find(opt => opt.value === form.getFieldValue('clinic_id')) ? form.getFieldValue('clinic_id') : undefined}
+                        optionLabelProp="label"
                     />
                 </Form.Item>
                 <Form.Item
@@ -171,7 +217,7 @@ const ModalUpdateAppointment = ({ role, isVisible, handleOk, handleCancel, form,
                         onChange={(value) => handleDateChange(value as string)}
                         showSearch
                         optionFilterProp="label"
-                        disabled={!selectedDoctor}
+                        disabled={!selectedClinic}
                     />
                 </Form.Item>
                 <Form.Item
@@ -197,7 +243,7 @@ const ModalUpdateAppointment = ({ role, isVisible, handleOk, handleCancel, form,
                     <div className="bg-gray-50 p-4 rounded-lg mt-4">
                         <h4 className="font-medium text-gray-700 mb-3">Thông tin hiện tại:</h4>
                         <div className="space-y-2 text-sm">
-                            <div><span className="font-medium">Bác sĩ:</span> {selectedAppointment.doctor_name || "Chưa xác định"}</div>
+                            <div><span className="font-medium">Bác sĩ:</span> {selectedAppointment.doctor_id || "Chưa xác định"}</div>
                             <div><span className="font-medium">Chuyên khoa:</span> {selectedAppointment.clinic_name || "Chưa xác định"}</div>
                             <div><span className="font-medium">Trạng thái:</span> 
                                 {(() => {

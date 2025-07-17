@@ -74,7 +74,6 @@ model Patient {
   records           ExaminationRecord[]
   queues            Queue[]
   payments          Payment[]
-  balance           PaymentBalance?
   appointments      Appointment[]
 
   doctorRatings DoctorRating[]
@@ -181,12 +180,13 @@ model WorkSchedule {
 model ExaminationOrder {
   id             Int      @id @default(autoincrement())
   doctor_id      Int
+  appointment_id Int     // id cua appointment
   patient_id     Int
-  record_id      Int      // ExaminationRecord
   from_clinic_id Int
   to_clinic_id   Int
   reason         String?  @db.Text
-  total_cost     Decimal  @default(0.00)
+  extra_cost     Int
+  note           String?  @db.Text
   created_at     DateTime @default(now())
 
   doctor     User    @relation("DoctorExaminationOrder", fields: [doctor_id], references: [id])
@@ -194,7 +194,7 @@ model ExaminationOrder {
   fromClinic Clinic  @relation("FromClinic", fields: [from_clinic_id], references: [id])
   toClinic   Clinic  @relation("ToClinic", fields: [to_clinic_id], references: [id])
 
-  record     ExaminationRecord? @relation(fields: [record_id], references: [id])
+  appointment Appointment @relation(fields: [appointment_id], references: [id])
 
   @@map("examination_orders")
 }
@@ -204,6 +204,7 @@ model ExaminationRecord {
   id                 Int      @id @default(autoincrement())
   patient_id         Int
   clinic_id          Int
+  appointment_id     Int?     @unique  // 1 appointment chi co 1 examination record
   doctor_id          Int      // id cua doctor dam nhiem kham 
   result             String?  @db.Text      // add from removed ExaminationDetail 
   note               String?  @db.Text      // add from ExaminationDetail
@@ -211,11 +212,12 @@ model ExaminationRecord {
   created_at         DateTime @default(now())
   updated_at         DateTime @updatedAt
 
+  appointment Appointment? @relation("AppointmentToExaminationRecord", fields: [appointment_id], references: [id], onDelete: SetNull)
+ 
   patient       Patient @relation(fields: [patient_id], references: [id])
   clinic        Clinic  @relation(fields: [clinic_id], references: [id])
   doctor        Doctor    @relation(fields: [doctor_id], references: [user_id])
 
-  examinationOrder ExaminationOrder[]
   prescriptionItems PrescriptionItem[]
 
   invoiceItems  InvoiceItem[]
@@ -294,7 +296,7 @@ model Payment {
   method       PaymentMethod?
   payment_time DateTime       @default(now())
   note         String?        @db.Text
-  is_refund    Boolean        @default(false)
+  status       PaymentStatus  @default(pending)
 
   patient Patient            @relation(fields: [patient_id], references: [id])
   record  ExaminationRecord? @relation(fields: [record_id], references: [id])
@@ -308,16 +310,12 @@ enum PaymentMethod {
   bank_transfer
   e_wallet
 }
-
-model PaymentBalance {
-  patient_id Int      @id
-  balance    Decimal  @default(0.00)
-  updated_at DateTime @updatedAt
-
-  patient Patient @relation(fields: [patient_id], references: [id])
-
-  @@map("payment_balances")
+enum PaymentStatus {
+  pending   // 
+  paid      //
+  canceled  // 
 }
+
 
 model InvoiceItem {
   id          Int      @id @default(autoincrement())
@@ -363,8 +361,11 @@ model Appointment {
   clinic  Clinic  @relation(fields: [clinic_id], references: [id])
   doctor  User    @relation("DoctorAppointment", fields: [doctor_id], references: [id])
   queues  Queue[] // Một appointment có thể có nhiều queue
+  examinationRecord ExaminationRecord? @relation("AppointmentToExaminationRecord")
+
 
   doctorRatings DoctorRating[]
+  examinationOrder ExaminationOrder[]
 
   @@map("appointments")
 }
@@ -484,6 +485,7 @@ model BlogCategory {
   id    Int    @id @default(autoincrement())
   name  String @unique
   blogs Blog[]
+<<<<<<< HEAD
 }
 
 model BlogTag {
@@ -501,12 +503,31 @@ model Blog {
   summary     String?  @db.Text
   image_url   String?
   author_id   Int
+=======
+
+  @@map("blog_categories")
+}
+
+model Blog {
+  id          Int      @id @default(autoincrement())
+  title       String
+  content     String   @db.Text
+  image_url   String?
+>>>>>>> master
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
   published   Boolean  @default(false)
 
+<<<<<<< HEAD
   author      User     @relation(fields: [author_id], references: [id])
   category_id Int?
   category    BlogCategory? @relation(fields: [category_id], references: [id])
   tags        BlogTag[] @relation("BlogTags")
 }
+=======
+  category_id Int?
+  category    BlogCategory? @relation(fields: [category_id], references: [id])
+
+  @@map("blogs")
+}
+>>>>>>> master
