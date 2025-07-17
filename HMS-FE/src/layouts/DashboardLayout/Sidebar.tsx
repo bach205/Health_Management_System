@@ -230,7 +230,7 @@ const SIDEBAR_ITEMS = [
       
       {
         id: "nurse-manage-payments",
-        label: "Quản lý thanh toán",
+        label: "Quản lý hóa đơn",
         icon: <Wallet className="w-4 h-4" />,
         href: "/nurse-manage-payments",
       },

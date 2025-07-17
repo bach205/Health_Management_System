@@ -30,6 +30,7 @@ import {
 
 import { cancelAppointmentService, deleteAppointmentService } from '../../services/appointment.service';
 import { useNavigate } from "react-router-dom";
+import { getInvoiceDetail, getInvoiceList } from "../../services/payment.service";
 
 const style = {
   ".ant-table-thead .ant-table-cell": {
@@ -41,8 +42,30 @@ const ScheduleTable = ({ data = [], setReload, loading = false, visible, selecte
   // const [reload, setReload] = useState(false);
   const [viewModalVisible, setViewModalVisible] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<any>(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [invoiceItems, setInvoiceItems] = useState([]);
+  const [selectedInvoice, setSelectedInvoice] = useState<any>(null);
 
   const navigate = useNavigate();
+
+
+  const handleViewInvoice = async (record: any) => {
+    try {
+      const [detailRes, listRes] = await Promise.all([
+        getInvoiceDetail(record.id), // lấy danh sách dịch vụ
+        getInvoiceList(),            // lấy danh sách invoice tổng
+      ]);
+
+      const foundInvoice = listRes.data.find((i: any) => i.record_id === record.id);
+      setInvoiceItems(detailRes.data || []);
+      setSelectedInvoice(foundInvoice);
+      setModalVisible(true);
+    } catch (err) {
+      notification.error({ message: 'Không thể tải chi tiết hóa đơn' });
+    }
+  };
+
+
   const handleEditAppointment = (record: any) => {
     onEdit(record);
   };
@@ -106,6 +129,18 @@ const ScheduleTable = ({ data = [], setReload, loading = false, visible, selecte
 
   const hasPermissionEdit = (record: any) => {
     if (record.status === "completed") {
+      const invoice = selectedInvoiceList.find(i => i.record_id === record.id); // giả sử bạn truyền invoiceList từ parent hoặc fetch trước
+
+      if (invoice?.status === "pending") {
+        return (
+          <Tooltip title="Bạn cần thanh toán trước khi xem kết quả khám">
+            <Button type="primary" size="small" disabled>
+              Xem kết quả khám
+            </Button>
+          </Tooltip>
+        );
+      }
+
       return (
         <Tooltip title="Xem kết quả khám">
           <Button
@@ -118,6 +153,7 @@ const ScheduleTable = ({ data = [], setReload, loading = false, visible, selecte
         </Tooltip>
       );
     }
+
     return (
       <>
         <Tooltip title="Xem chi tiết">
@@ -219,7 +255,7 @@ const ScheduleTable = ({ data = [], setReload, loading = false, visible, selecte
         if (status === "pending") { color = "gold"; text = "Chờ xác nhận"; }
         else if (status === "confirmed") { color = "green"; text = "Đã xác nhận"; }
         else if (status === "cancelled") { color = "red"; text = "Đã hủy"; }
-        else if (status === "completed") { color = "blue"; text = "Đã hoàn thành"; }
+        else if (status === "completed") { color = "blue"; text = "Đã khám xong"; }
         return <Tag color={color}>{text}</Tag>;
       },
     },

@@ -27,10 +27,11 @@ class PaymentService {
 
         // 3.2. Thêm từng dịch vụ từ ExaminationOrder
         for (const order of orders) {
+            console.log("order", order)
             invoiceItemsData.push({
                 record_id: record.id,
                 description: `Chi phí dịch vụ từ phòng khám ${order.from_clinic_id} đến ${order.to_clinic_id}`,
-                amount: order.total_cost,
+                amount: order.extra_price,
             });
         }
 
@@ -75,8 +76,11 @@ class PaymentService {
     };
 
     updatePaymentStatus = async (id, status) => {
+        if (id == null || !status) {
+            throw new Error("ID và trạng thái không được để trống");
+        }
         const payment = await prisma.payment.update({
-            where: { id },
+            where: { id: Number(id) },
             data: { status },
         });
         return payment;

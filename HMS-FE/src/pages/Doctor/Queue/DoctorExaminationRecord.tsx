@@ -155,6 +155,7 @@ const DoctorExaminationRecordModal = ({
           medicine_id: med.id,
           note: med.note ?? null,
           dosage: med.dosage ?? null,
+          quantity: med.quantity ?? 0,
         }))
       });
 
@@ -190,13 +191,21 @@ const DoctorExaminationRecordModal = ({
 
   const handleAddMedicine = () => {
     if (selectedMedicine) {
-      const frequency = selectedMedicine.frequencyAmount && selectedMedicine.frequencyUnit
-        ? `${selectedMedicine.frequencyAmount} lần/${selectedMedicine.frequencyUnit}`
+
+      if (selectedMedicine.quantity && selectedMedicine.quantity <= 0) {
+        toast.error("Số lượng thuốc phải lớn hơn 0");
+        return;
+
+      }
+
+      const dosage = selectedMedicine.dosageAmount
+        ? `${selectedMedicine.dosageAmount} viên / bữa`
         : undefined;
 
-      const dosage = selectedMedicine.dosageAmount && selectedMedicine.dosageUnit
-        ? `${selectedMedicine.dosageAmount} ${selectedMedicine.dosageUnit}`
+      const frequency = selectedMedicine.frequencyAmount
+        ? `${selectedMedicine.frequencyAmount} lần / ngày`
         : undefined;
+
 
       const newItem = {
         id: selectedMedicine.id,
@@ -204,6 +213,7 @@ const DoctorExaminationRecordModal = ({
         dosage,
         frequency,
         note: selectedMedicine.note,
+        quantity: selectedMedicine.quantity || 1, // Sử dụng giá trị quantity từ selectedMedicine hoặc mặc định là 1
       };
 
       const index = medicinesAdded.findIndex((item) => item.id === selectedMedicine.id);
@@ -214,6 +224,7 @@ const DoctorExaminationRecordModal = ({
       newList.unshift(newItem);
 
       setMedicinesAdded(newList);
+  
       setSelectedMedicine(null);
       setIsCreate(true);
     }
@@ -246,6 +257,7 @@ const DoctorExaminationRecordModal = ({
   return (
     <Modal
       title="Tạo hồ sơ khám"
+      
       open={open}
       onCancel={() => {
         handleSetIsFollowUp(false)
@@ -264,7 +276,7 @@ const DoctorExaminationRecordModal = ({
       // okText="Lưu hồ sơ"
       // cancelText="Hủy"
       centered
-      width={700}
+      width={800}
       footer={[
         <Button key="cancel" onClick={onClose}>Hủy</Button>,
 
@@ -420,62 +432,64 @@ const DoctorExaminationRecordModal = ({
         {
           medicineVisible && (
             <>
-              <Form.Item label="Đơn thuốc" layout="horizontal">
-                <Select
-                  showSearch
-                  style={{ width: 200 }}
-                  placeholder="Chọn thuốc"
-                  options={optionMedicines}
-                  value={selectedMedicine?.id}
-                  onChange={(_, option: any) => {
-                    const med = medicines.find((m) => m.id === option.value);
-                    if (med) {
-                      setSelectedMedicine({
-                        ...med,
-                        dosage: "",
-                        frequency: "",
-                        note: "",
-                      });
-                      setIsCreate(true);
-                    }
-                  }}
-                  disabled={!isCreate || isFormDisabled} // <-- THÊM Ở ĐÂY
-                />
-              </Form.Item>
+              <Flex justify="space-between" align="center" className="mb-4">
+                <Form.Item label="Đơn thuốc" layout="horizontal" >
+                  <Select showSearch
+                    style={{ width: 200 }}
+                    placeholder="Chọn thuốc"
+                    options={optionMedicines}
+                    value={selectedMedicine?.id}
+                    onChange={(_, option: any) => {
+                      const med = medicines.find((m) => m.id === option.value);
+                      if (med) {
+                        setSelectedMedicine({
+                          ...med,
+                          dosage: "",
+                          frequency: "",
+                          note: "",
+                        });
+                        setIsCreate(true);
+                      }
+                    }}
+                    disabled={!isCreate || isFormDisabled} // <-- THÊM Ở ĐÂY
+                  />
+                </Form.Item>
+
+              </Flex>
 
               {
                 selectedMedicine && (
                   <>
+                    <Form.Item label="Số lượng" layout="horizontal" >
+                      <InputNumber
+                        defaultValue={selectedMedicine?.stock && selectedMedicine?.stock >= 1 ? 1 : 0}
+                        min={1}
+                        placeholder="Nhập số lượng"
+                        max={selectedMedicine?.stock || 1000}
+                        value={selectedMedicine?.quantity}
+                        onChange={(value) =>
+                          setSelectedMedicine({ ...selectedMedicine!, quantity: value || 1 })
+                        }
+                        style={{ width: '100%' }}
+                      />
+                    </Form.Item>
+
                     <Form.Item label="Liều dùng" layout="horizontal">
                       <Flex className="w-full" gap={4} style={{ flexWrap: 'wrap' }}>
                         <Flex gap={4} style={{ flex: 1 }}>
                           <InputNumber
                             style={{ width: '50%' }}
-
                             min={0}
-                            placeholder="Liều"
+                            placeholder="Số viên"
                             value={selectedMedicine?.dosageAmount}
                             onChange={(value) =>
                               setSelectedMedicine({ ...selectedMedicine!, dosageAmount: value || 1 })
                             }
                           />
-                          <Select
-                            style={{ width: '50%' }}
-
-                            placeholder="Đơn vị"
-                            options={["viên", "vỉ", "lọ", "giọt"].map((unit) => ({
-                              label: unit,
-                              value: unit,
-                            }))}
-                            value={selectedMedicine?.dosageUnit}
-                            onChange={(value) =>
-                              setSelectedMedicine({ ...selectedMedicine!, dosageUnit: value })
-                            }
-                          />
-
+                          <span style={{ alignSelf: 'center' }}>/ bữa</span>
                         </Flex>
-
                       </Flex>
+
 
                     </Form.Item>
                     <Form.Item label="Tần suất" layout="horizontal">
@@ -489,20 +503,10 @@ const DoctorExaminationRecordModal = ({
                           }
                           style={{ width: '50%' }}
                         />
-                        <Select
-                          placeholder="Khoảng thời gian"
-                          options={["ngày", "tuần", "tháng"].map((unit) => ({
-                            label: unit,
-                            value: unit,
-                          }))}
-                          value={selectedMedicine?.frequencyUnit}
-                          onChange={(value) =>
-                            setSelectedMedicine({ ...selectedMedicine!, frequencyUnit: value })
-                          }
-                          style={{ width: '50%' }}
-                        />
+                        <span style={{ alignSelf: 'center' }}> bữa / ngày</span>
                       </Flex>
                     </Form.Item>
+
                     <Form.Item label="Ghi chú" layout="horizontal">
 
                       {/* //ghi chú */}
@@ -532,6 +536,12 @@ const DoctorExaminationRecordModal = ({
                   { title: "Liều dùng", dataIndex: "dosage" },
                   { title: "Số lần/ngày", dataIndex: "frequency" },
                   {
+                    title: 'Số lượng',
+                    dataIndex: 'quantity',
+                    key: 'quantity',
+                    width: 100,
+                  },
+                  {
                     title: "Thao tác",
                     dataIndex: "actions",
                     width: 150,
@@ -542,9 +552,23 @@ const DoctorExaminationRecordModal = ({
                             size="small"
                             icon={<Edit className="w-4 h-4" />}
                             onClick={() => {
-                              setSelectedMedicine({ ...record });
+                              const [dosageAmountStr, dosageUnit] = record.dosage?.split(' ') || [];
+                              const dosageAmount = parseInt(dosageAmountStr);
+
+                              const [frequencyAmountStr] = record.frequency?.split(' ') || [];
+                              const frequencyAmount = parseInt(frequencyAmountStr);
+
+                              setSelectedMedicine({
+                                ...record,
+                                dosageAmount: isNaN(dosageAmount) ? undefined : dosageAmount,
+                                dosageUnit: dosageUnit || "viên",
+                                frequencyAmount: isNaN(frequencyAmount) ? undefined : frequencyAmount,
+                                frequencyUnit: "ngày", // vì bạn đang cố định "bữa / ngày"
+                              });
+
                               setIsCreate(false);
                             }}
+
                           />
                         </Tooltip>
                         <Popconfirm

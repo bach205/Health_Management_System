@@ -266,6 +266,7 @@ model PrescriptionItem {
   dosage      String?
   frequency   String?
   duration    String?
+  quantity    Int     @default(1) // Số lượng thuốc, mặc định là 1
 
   record    ExaminationRecord @relation(fields: [record_id], references: [id])
   medicine  Medicine?         @relation(fields: [medicine_id], references: [id], onUpdate: Restrict)
@@ -492,7 +493,6 @@ model Blog {
   id          Int      @id @default(autoincrement())
   title       String
   content     String   @db.Text
-  summary     String?  @db.Text
   image_url   String?
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt

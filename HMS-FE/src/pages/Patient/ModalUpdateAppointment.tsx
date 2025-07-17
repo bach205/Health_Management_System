@@ -206,7 +206,7 @@ const ModalUpdateAppointment = ({ role, isVisible, handleOk, handleCancel, form,
                                     if (selectedAppointment.status === "pending") { color = "gold"; text = "Chờ xác nhận"; }
                                     else if (selectedAppointment.status === "confirmed") { color = "green"; text = "Đã xác nhận"; }
                                     else if (selectedAppointment.status === "cancelled") { color = "red"; text = "Đã hủy"; }
-                                    else if (selectedAppointment.status === "completed") { color = "blue"; text = "Đã hoàn thành"; }
+                                    else if (selectedAppointment.status === "completed") { color = "blue"; text = "Khám xong"; }
                                     return <span className={`inline-block px-2 py-1 rounded text-xs bg-${color}-100 text-${color}-800`}>{text}</span>;
                                 })()}
                             </div>

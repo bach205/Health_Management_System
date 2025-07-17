@@ -29,6 +29,13 @@ paymentRouter.put(
     // authorize("admin"),
     asyncHandler(paymentController.updatePaymentStatus)
 );
+paymentRouter.patch(
+    "/update-status/:id",
+    // authenticate,
+    // authorize("admin"),
+    asyncHandler(paymentController.updatePaymentStatus)
+);
+
 
 // patientRouter.post(
 //     "/update-status",
