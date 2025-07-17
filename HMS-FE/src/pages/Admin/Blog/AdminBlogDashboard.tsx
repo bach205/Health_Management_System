@@ -166,18 +166,19 @@ const AdminBlogDashboard = () => {
                                 <EyeOutlined key="view" onClick={() => handleView(blog)} />,
                                 <EditOutlined key="edit" onClick={() => navigate(`/blog/${blog.id}`)} />,
                                 <Popconfirm
+                                    key="popconfirm-delete"
                                     title="Bạn chắc chắn xoá?"
                                     onConfirm={() => handleDelete(blog.id)}
                                     okText="Xoá"
                                     cancelText="Hủy"
                                 >
-                                    <DeleteOutlined key="delete" />
+                                    <DeleteOutlined />
                                 </Popconfirm>
                             ]}
                         >
                             <Title level={5}>{blog.title}</Title>
                             <Paragraph type="secondary" style={{ fontSize: 13, minHeight: 60 }}>
-                                {truncate(blog.content)}
+                                {/* {truncate(blog.content)} */}
                             </Paragraph>
                             {blog.category?.name && <Tag color="blue">{blog.category.name}</Tag>}
                         </Card>
