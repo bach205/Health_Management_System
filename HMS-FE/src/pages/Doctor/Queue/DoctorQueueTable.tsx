@@ -13,8 +13,6 @@ import DoctorExaminationOrderModal from "./DoctorExaminationOrderModal";
 import { RefreshCcw } from "lucide-react";
 import dayjs from "dayjs";
 import DoctorExaminationRecordModal from "./DoctorExaminationRecord";
-import { getPatientExaminationHistory } from "../../../services/examinationRecord.service";
-import ModalPatientExaminationHistory from "./ModalPatientExaminationHistory";
 
 const { Option } = Select;
 const { Text } = Typography;
@@ -41,7 +39,6 @@ const QueueTable = () => {
     const { user } = useAuthStore();
     const currentDoctorId = user?.id;
     const [selectedAppointmentId, setSelectedAppointmentId] = useState<number | null>(null);
-    const [showExaminationHistoryModal, setShowExaminationHistoryModal] = useState(false);
 
 
     const [statusFilter, setStatusFilter] = useState<string>("");
@@ -147,15 +144,6 @@ const QueueTable = () => {
         setShowModalPatientExaminationOrder(true);
     };
 
-    const handleViewExaminationHistory = async (patient: any) => {
-        try {
-            setSelectedPatient(patient);
-            setShowExaminationHistoryModal(true);
-        } catch (error: any) {
-            toast.error(error?.response?.data?.message || "Không thể tải lịch sử khám");
-        }
-    };
-
     const getQueueStatusColor = (status: string) => {
         switch (status) {
             case "waiting":
@@ -252,9 +240,6 @@ const QueueTable = () => {
                             <>
                                 <Button color="pink" key="viewExaminationOrder" onClick={() => handleViewExaminationOrder(record.patient)}>
                                     Xem lịch sử chuyển phòng
-                                </Button>
-                                <Button color="blue" key="viewExaminationHistory" onClick={() => handleViewExaminationHistory(record.patient)}>
-                                    Xem lịch sử khám
                                 </Button>
                                 <Button type="primary" key="finish" onClick={() => handleFinishExam(record)}>
                                     Khám xong
@@ -387,12 +372,6 @@ const QueueTable = () => {
                     setSelectedPatient(null);
                     fetchQueue(selectedClinic);
                 }}
-            />
-            {/* Modal hiển thị lịch sử khám */}
-            <ModalPatientExaminationHistory
-                open={showExaminationHistoryModal}
-                onClose={() => setShowExaminationHistoryModal(false)}
-                patient={selectedPatient}
             />
         </div>
     );
