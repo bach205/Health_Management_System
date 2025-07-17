@@ -160,6 +160,27 @@ class ExaminationRecordService {
             orderBy: { created_at: "desc" },
         });
     }
+
+    // Lấy lịch sử khám của bệnh nhân
+    static async getPatientExaminationHistory(patientId) {
+        return prisma.examinationRecord.findMany({
+            where: { patient_id: Number(patientId) },
+            include: {
+                clinic: true,
+                doctor: {
+                    include: {
+                        user: true,
+                    },
+                },
+                prescriptionItems: {
+                    include: {
+                        medicine: true,
+                    },
+                },
+            },
+            orderBy: { created_at: "desc" },
+        });
+    }
 }
 
 module.exports = ExaminationRecordService;

@@ -192,6 +192,12 @@ const SIDEBAR_ITEMS = [
         icon: <ClipboardType className="w-4 h-4" />,
         href: "/doctor/queue",
       },
+      {
+        id: "chat",
+        label: "Chat",
+        icon: <MessageCircle className="w-4 h-4" />,
+        href: "/chat",
+      },
     ],
   },
   {

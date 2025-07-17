@@ -7,7 +7,7 @@ import { getQueueStatus } from "../../../types/queue.type";
 import { useAuthStore } from "../../../store/authStore";
 import { useSocket } from "../../../hooks/socket/useSocket";
 import { updateQueueStatus } from "../../../services/queue.service";
-import { Button, Dropdown, Flex, Menu, message, notification, Select, Space, Table, Tag, Tooltip, Typography } from "antd";
+import { Button, Dropdown, Flex, Menu, message, notification, Select, Space, Table, Tag, Tooltip, Typography, Modal } from "antd";
 import ModalPatientExaminationOrder from "./ModalPatientExaminationOrder";
 import DoctorExaminationOrderModal from "./DoctorExaminationOrderModal";
 import { RefreshCcw } from "lucide-react";
@@ -216,8 +216,7 @@ const QueueTable = () => {
             render: (_: any, record: any) => {
                 console.log(record)
                 return (
-                    //  kiem tra tai khoan bac si co trung voi appointment ko
-                    record?.appointment?.doctor?.id === currentDoctorId &&
+                    // Cho phép bác sĩ hiện tại có thể bắt đầu khám, không chỉ bác sĩ được chỉ định trong appointment
                     <Space wrap size={'small'}>
                         {record.status === "waiting" && (
                             <>

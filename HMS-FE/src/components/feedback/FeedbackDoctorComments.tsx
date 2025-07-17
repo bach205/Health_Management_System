@@ -25,8 +25,8 @@ const LIMIT = 15;
 const DEFAULT_AVATAR = "https://png.pngtree.com/png-clipart/20250102/original/pngtree-user-avatar-placeholder-black-png-image_6796227.png";
 
 const sortOptions = [
-    { label: "Mới nhất", value: "newest" },
-    { label: "Cũ nhất", value: "oldest" },
+    { label: "Cũ nhất", value: "newest" },
+    { label: "Mới nhất", value: "oldest" },
 ];
 const starOptions = [
     { label: "Tất cả", value: undefined },
