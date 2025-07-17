@@ -201,7 +201,7 @@ const ScheduleTable = ({ data = [], setReload, loading = false, visible, selecte
       render: (text: any) => text,
     },
     {
-      title: "Bác sĩ",
+      title: "Bác sĩ đặt",
       dataIndex: "doctor_name",
       key: "doctor_name",
       width: 150,

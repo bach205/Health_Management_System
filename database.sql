@@ -269,35 +269,35 @@ CREATE TABLE prescription_items (
 -- Table for payments
 CREATE TABLE payments (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    patient_id INT NOT NULL COMMENT 'Payer',
-    record_id INT COMMENT 'Linked examination record',
-    amount DECIMAL(10,2) NOT NULL COMMENT 'Payment amount',
-    method ENUM('cash', 'card', 'bank_transfer', 'e_wallet') COMMENT 'Payment method',
-    payment_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT 'Payment timestamp',
-    note TEXT COMMENT 'Notes (e.g., installment, refund)',
-    is_refund BOOLEAN DEFAULT FALSE COMMENT 'Is a refund',
+    patient_id INT NOT NULL COMMENT 'Người thanh toán',
+    record_id INT NULL COMMENT 'Phiếu khám liên quan (nullable)',
+    amount DECIMAL(10,2) NOT NULL COMMENT 'Số tiền thanh toán',
+    method ENUM('cash', 'card', 'bank_transfer', 'e_wallet') DEFAULT NULL COMMENT 'Phương thức thanh toán',
+    payment_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT 'Thời điểm thanh toán',
+    note TEXT COMMENT 'Ghi chú (ví dụ: trả góp, hoàn tiền,...)',
+    status ENUM('pending', 'paid', 'canceled') DEFAULT 'pending' COMMENT 'Trạng thái thanh toán',
     FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
     FOREIGN KEY (record_id) REFERENCES examination_records(id) ON DELETE SET NULL
 );
 
+
 -- Table for payment balances
-CREATE TABLE payment_balances (
-    patient_id INT PRIMARY KEY COMMENT 'Primary key is patient ID',
-    balance DECIMAL(10,2) DEFAULT 0 COMMENT 'Balance (negative if owed)',
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE
-);
+-- CREATE TABLE payment_balances (
+--     patient_id INT PRIMARY KEY COMMENT 'Primary key is patient ID',
+--     balance DECIMAL(10,2) DEFAULT 0 COMMENT 'Balance (negative if owed)',
+--     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+--     FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE
+-- );
 
 -- Table for invoice items
 CREATE TABLE invoice_items (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    record_id INT NOT NULL COMMENT 'Linked examination record',
-    description TEXT COMMENT 'Fee description (consultation, test, medicine)',
-    amount DECIMAL(10,2) NOT NULL COMMENT 'Item cost',
+    record_id INT NOT NULL COMMENT 'Liên kết với phiếu khám',
+    description TEXT COMMENT 'Nội dung thu phí (khám, xét nghiệm, thuốc...)',
+    amount DECIMAL(10,2) NOT NULL COMMENT 'Số tiền mục đó',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (record_id) REFERENCES examination_records(id) ON DELETE CASCADE
 );
-
 
 
 
@@ -630,16 +630,16 @@ VALUES
 
 
 -- Insert sample data into payments
-INSERT INTO payments (patient_id, record_id, amount, method, payment_time, note, is_refund) VALUES
-(8, 1, 1500000.00, 'card', '2025-06-01 11:00:00', 'Thanh toán lần 1', FALSE),
-(9, 2, 2500000.00, 'cash', '2025-06-02 15:00:00', 'Thanh toán toàn bộ', FALSE),
-(10, 3, 800000.00, 'bank_transfer', '2025-06-03 10:00:00', 'Thanh toán lần 1', FALSE),
-(11, 4, 1200000.00, 'e_wallet', '2025-06-04 12:00:00', 'Thanh toán toàn bộ', FALSE),
-(12, 5, 500000.00, 'card', '2025-06-05 16:00:00', 'Thanh toán lần 1', FALSE),
-(13, 6, 300000.00, 'cash', '2025-06-06 10:00:00', 'Thanh toán toàn bộ', FALSE);
+INSERT INTO payments (patient_id, record_id, amount, method, payment_time, note, status) VALUES
+(8, 1, 1500000.00, 'card', '2025-06-01 11:00:00', 'Thanh toán lần 1', 'paid'),
+(9, 2, 2500000.00, 'cash', '2025-06-02 15:00:00', 'Thanh toán toàn bộ', 'paid'),
+(10, 3, 800000.00, 'bank_transfer', '2025-06-03 10:00:00', 'Thanh toán lần 1', 'paid'),
+(11, 4, 1200000.00, 'e_wallet', '2025-06-04 12:00:00', 'Thanh toán toàn bộ', 'paid'),
+(12, 5, 500000.00, 'card', '2025-06-05 16:00:00', 'Thanh toán lần 1', 'paid'),
+(13, 6, 300000.00, 'cash', '2025-06-06 10:00:00', 'Thanh toán toàn bộ', 'paid');
 
 -- Insert sample data into invoice_items
-INSERT INTO invoice_items (record_id, description, amount) VALUES
+IINSERT INTO invoice_items (record_id, description, amount) VALUES
 (1, 'Khám bệnh', 300000.00),
 (1, 'Chụp X-quang phổi', 500000.00),
 (1, 'Thuốc kháng sinh', 700000.00),
@@ -657,6 +657,7 @@ INSERT INTO invoice_items (record_id, description, amount) VALUES
 (5, 'Thuốc chống dị ứng', 100000.00),
 (6, 'Khám bệnh', 300000.00),
 (6, 'Đo thị lực', 0.00);
+
 
 -- Xóa dữ liệu cũ (nếu muốn làm sạch bảng)
 DELETE FROM available_slots;

@@ -162,11 +162,13 @@ const QueueTable = () => {
     const columns: any = [
         {
             title: "STT",
-            dataIndex: "id",
+            dataIndex: "queue_number",
             key: "id",
             align: "center",
             width: 50,
-            render: (_: any, record: any, index: number) => index + 1,
+            render: (_: any, record: any, index: number) => 
+                <p className="text-primary font-bold">{record.queue_number}</p>
+            ,
         },
         {
             title: "Bệnh nhân",

@@ -53,6 +53,7 @@ import BlogDetail from "./pages/Blog/BlogDetail";
 import CreateBlog from "./pages/Admin/Blog/CreateBlog";
 import AdminBlogDashboard from "./pages/Admin/Blog/AdminBlogDashboard";
 import EditBlog from "./pages/Blog/BlogEdit";
+import PaymentList from "./pages/Payment/PaymentList";
 
 dayjs.extend(plugin);
 dayjs.updateLocale("en", {
@@ -256,6 +257,13 @@ const PrivateRoutes: PrivateRoute[] = [
     element: <ShiftManager />,
     layout: DashboardLayout,
   },
+  
+  {
+    path: "/nurse-manage-payments",
+    element: <PaymentList />,
+    layout: DashboardLayout,
+  },
+
   {
     path: "/my-appointments",
     element: <MyAppointment />,

@@ -18,7 +18,7 @@ interface InvoiceRecord {
   status: 'pending' | 'paid' | 'canceled';
 }
 
-const InvoiceListPage: React.FC = () => {
+const PaymentList: React.FC = () => {
   const [data, setData] = useState<InvoiceRecord[]>([]);
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
@@ -134,4 +134,4 @@ const InvoiceListPage: React.FC = () => {
   );
 };
 
-export default InvoiceListPage;
+export default PaymentList;
