@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Button, Modal, Tag, Space, message, Typography, Tooltip } from 'antd';
+import { Table, Button, Modal, Tag, Space, message, Typography, Tooltip, Popconfirm } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { getInvoiceList, getInvoiceDetail, confirmPayment, updatePaymentStatus } from '../../services/payment.service';
+import { getPendingPayments, getInvoiceDetail, confirmPayment, updatePaymentStatus } from '../../services/payment.service';
 import UserListTitle from '../../components/ui/UserListTitle';
 import { X, XCircle } from 'lucide-react';
 
@@ -26,14 +26,20 @@ const PaymentList: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<InvoiceRecord | null>(null);
   const [invoiceItems, setInvoiceItems] = useState<InvoiceItem[]>([]);
+  const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'paid' | 'canceled'>('all');
+  const filteredData = data.filter((item) =>
+    filterStatus === 'all' ? true : item.status === filterStatus
+  );
 
   console.log(data)
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await getInvoiceList();
-      setData(res.data.metadata);
+      const res = await getPendingPayments();
+      console.log(res)
+      const payments = res.data?.metadata ?? [];
+      setData(payments);
     } catch (err) {
       message.error('Lỗi khi tải danh sách hóa đơn');
     } finally {
@@ -104,13 +110,27 @@ const PaymentList: React.FC = () => {
           <Button onClick={() => handleViewInvoice(record)}>Xem hóa đơn</Button>
           {record.status === 'pending' && (
             <>
-              <Button type="primary" onClick={() => handleUpdatePayment(record, 'paid')}>
-                Xác nhận thanh toán
-              </Button>
-              <Tooltip title="Hủy thanh toán">
-                <Button type="primary" danger onClick={() => handleUpdatePayment(record, 'canceled')}>
-                  <XCircle className="w-4 h-4" />
+              <Popconfirm
+                title="Xác nhận thanh toán?"
+                onConfirm={() => handleUpdatePayment(record, 'paid')}
+                okText="Xác nhận"
+                cancelText="Hủy"
+              >
+                <Button type="primary">
+                  Xác nhận thanh toán
                 </Button>
+              </Popconfirm>
+              <Tooltip title="Hủy thanh toán">
+                <Popconfirm
+                  title="Xác nhận hủy thanh toán?"
+                  onConfirm={() => handleUpdatePayment(record, 'canceled')}
+                  okText="Xác nhận"
+                  cancelText="Hủy"
+                >
+                  <Button type="primary" danger>
+                    <XCircle className="w-4 h-4" />
+                  </Button>
+                </Popconfirm>
               </Tooltip>
             </>
 

@@ -6,6 +6,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { ChevronLeft } from 'lucide-react';
 import { getBlogById, getBlogCategories, updateBlog } from '../../services/blog.service';
+import BlogDashboard from './BlogDashboard';
 
 const { Option } = Select;
 
@@ -15,6 +16,7 @@ const EditBlog: React.FC = () => {
   const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
+  const [editorInitialValue, setEditorInitialValue] = useState('');
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -27,12 +29,13 @@ const EditBlog: React.FC = () => {
         ]);
         setCategories(catRes.data.metadata || []);
         const blog = blogRes.data.metadata;
-
+        console.log(blog)
         form.setFieldsValue({
           title: blog.title,
           category_id: blog.category_id,
         });
         setThumbnailUrl(blog.image_url || null);
+        setEditorInitialValue(blog.content || '');
         editorRef.current?.setContent(blog.content || '');
       } catch (err) {
         message.error('Lỗi tải dữ liệu');
@@ -141,10 +144,11 @@ const EditBlog: React.FC = () => {
               init={{
                 height: 500,
                 plugins: 'image link code table lists',
+                initialValue: editorInitialValue,
                 toolbar:
                   'undo redo | formatselect | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | image link code',
                 menubar: false,
-                content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
+                content_style: 'body {font-family:Helvetica,Arial,sans-serif; font-size:14px }',
               }}
             />
           </Form.Item>

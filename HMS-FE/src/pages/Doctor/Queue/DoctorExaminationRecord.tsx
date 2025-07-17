@@ -43,7 +43,7 @@ const DoctorExaminationRecordModal = ({
   const [selectedClinic, setSelectedClinic] = useState<number | null>(null);
   const [isFollowUp, setIsFollowUp] = useState<boolean>(false);
 
-  console.log("slotsByDate",slotsByDate);
+  console.log("slotsByDate", slotsByDate);
   const [medicinesAdded, setMedicinesAdded] = useState<IMedicine[]>([]);
   const [isCreate, setIsCreate] = useState(true);
   const [medicineVisible, setMedicineVisible] = useState(false);
@@ -89,7 +89,7 @@ const DoctorExaminationRecordModal = ({
         available.forEach((slot: any) => {
           if (selectedClinic && slot.clinic_id !== selectedClinic) return;
           if (!groupedByDate[slot.slot_date]) groupedByDate[slot.slot_date] = [];
-         groupedByDate[slot.slot_date || {}].push(slot);
+          groupedByDate[slot.slot_date || {}].push(slot);
         });
 
         setSlotsByDate(groupedByDate);
@@ -176,7 +176,7 @@ const DoctorExaminationRecordModal = ({
       setIsFormDisabled(false);
       onClose();
       onSuccess?.();
-      PushANotification({ message: `Bạn đã nhận được kết quả khám bệnh từ bác sĩ`, userId: patient_id })
+      PushANotification({ message: `Bạn đã nhận được kết quả khám bệnh từ bác sĩ`, userId: patient_id, navigate_url: `/my-appointments/record/${appointment_id}` })
 
     } catch (err: any) {
       console.error("Error creating examination record:", err);
@@ -230,7 +230,7 @@ const DoctorExaminationRecordModal = ({
       newList.unshift(newItem);
 
       setMedicinesAdded(newList);
-  
+
       setSelectedMedicine(null);
       setIsCreate(true);
     }
@@ -262,7 +262,7 @@ const DoctorExaminationRecordModal = ({
   return (
     <Modal
       title="Tạo hồ sơ khám"
-      
+
       open={open}
       onCancel={() => {
         handleSetIsFollowUp(false)
