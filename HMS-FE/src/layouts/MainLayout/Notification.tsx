@@ -4,6 +4,7 @@ import { useNotificationSocket } from '../../hooks/socket/useNotification';
 import type { ListNotificationProps } from '../../types/notification.type';
 import type { NotificationItem } from '../../types/notification.type';
 import { deleteNotification } from '../../api/notification';
+import { useNavigate } from 'react-router-dom';
 
 const ListNotification = ({
     modalRef,
@@ -11,8 +12,9 @@ const ListNotification = ({
     notifications,
     setNotifications,
     loadMoreNotifications,
-    hasMore
-}: ListNotificationProps & { setNotifications: React.Dispatch<React.SetStateAction<NotificationItem[]>>, loadMoreNotifications: () => void, hasMore: boolean }) => {
+    hasMore,
+    navigate
+}: ListNotificationProps & { setNotifications: React.Dispatch<React.SetStateAction<NotificationItem[]>>, loadMoreNotifications: () => void, hasMore: boolean, navigate: (url: string) => void }) => {
     const listRef = useRef<HTMLUListElement>(null);
 
     // Gọi loadMore khi scroll tới cuối
@@ -51,7 +53,8 @@ const ListNotification = ({
                     notifications.map((item, index) => (
                         <li
                             key={index}
-                            className="flex items-center text-sm text-gray-700 bg-gray-50 p-2 rounded hover:bg-gray-100 transition"
+                            className="flex items-center text-sm text-gray-700 bg-gray-50 p-2 rounded hover:bg-gray-100 transition cursor-pointer"
+                            onClick={() => { if (item.navigate_url) navigate(item.navigate_url); }}
                         >
                             {!item.isSeen && (
                                 <span className="w-2 h-2 bg-blue-500 rounded-full mr-2 inline-block"></span>
@@ -60,7 +63,8 @@ const ListNotification = ({
                             <button
                                 className="ml-2 text-xs text-red-500 hover:text-red-700"
                                 title="Xóa thông báo"
-                                onClick={async () => {
+                                onClick={async (e) => {
+                                    e.stopPropagation();
                                     try {
                                         await deleteNotification(item.id);
                                         // Xóa khỏi danh sách local
@@ -88,6 +92,7 @@ export default function Notification() {
 
     const modalRef = useRef<HTMLDivElement>(null);
     const bellRef = useRef<HTMLButtonElement>(null);
+    const navigate = useNavigate();
 
     // Đóng modal khi click ra ngoài
     useEffect(() => {
@@ -134,6 +139,7 @@ export default function Notification() {
                     setNotifications={setNotifications}
                     loadMoreNotifications={loadMoreNotifications}
                     hasMore={hasMore}
+                    navigate={navigate}
                 />
             )}
         </div>
