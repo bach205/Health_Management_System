@@ -2,14 +2,27 @@ const { BadRequestError } = require("../core/error.response");
 const prisma = require("../config/prisma");
 
 class FeedbackService {
-    // Create feedback for doctor
+    // Lấy feedback theo appointment_id
+    async getFeedbackByAppointmentId(appointmentId) {
+        return prisma.doctorRating.findFirst({
+            where: { appointment_id: Number(appointmentId) },
+        });
+    }
+
+    // Create feedback for doctor (theo appointment_id)
     async createFeedback(user, data) {
         const { appointment_id, rating, comment, is_anonymous } = data;
-        // Validate input
         if (!appointment_id || typeof rating !== 'number') {
             throw new BadRequestError("Thiếu thông tin bắt buộc");
         }
-        // Get appointment
+        // Kiểm tra đã có feedback chưa
+        const existing = await prisma.doctorRating.findFirst({
+            where: { appointment_id: appointment_id },
+        });
+        if (existing) {
+            throw new BadRequestError("Bạn đã đánh giá lịch hẹn này rồi");
+        }
+        // Lấy appointment
         const appointment = await prisma.appointment.findUnique({
             where: { id: appointment_id },
             include: { patient: true }
@@ -17,22 +30,10 @@ class FeedbackService {
         if (!appointment) {
             throw new BadRequestError("Lịch hẹn không tồn tại");
         }
-        // Check patient is owner
         if (appointment.patient_id !== user.id) {
             throw new BadRequestError("Bạn không có quyền đánh giá lịch hẹn này");
         }
-        // Check if feedback already exists
-        const existing = await prisma.doctorRating.findFirst({
-            where: {
-                appointment_id: appointment_id,
-                patient_id: appointment.patient_id,
-                doctor_id: appointment.doctor_id
-            }
-        });
-        if (existing) {
-            throw new BadRequestError("Bạn đã đánh giá lịch hẹn này rồi");
-        }
-        // Create feedback
+        // Tạo feedback
         const feedback = await prisma.doctorRating.create({
             data: {
                 doctor_id: appointment.doctor_id,
@@ -46,22 +47,19 @@ class FeedbackService {
         return feedback;
     }
 
-    // Update feedback for doctor
-    async updateFeedback(user, feedbackId, data) {
-        // Tìm feedback
-        const feedback = await prisma.doctorRating.findUnique({
-            where: { id: Number(feedbackId) }
+    // Update feedback theo appointment_id
+    async updateFeedback(user, appointmentId, data) {
+        const feedback = await prisma.doctorRating.findFirst({
+            where: { appointment_id: Number(appointmentId) }
         });
         if (!feedback) {
             throw new BadRequestError("Feedback không tồn tại");
         }
-        // Chỉ cho phép bệnh nhân là chủ feedback sửa
         if (feedback.patient_id !== user.id) {
             throw new BadRequestError("Bạn không có quyền sửa feedback này");
         }
-        // Cập nhật
         const updated = await prisma.doctorRating.update({
-            where: { id: Number(feedbackId) },
+            where: { id: feedback.id },
             data: {
                 rating: data.rating,
                 comment: data.comment,
@@ -71,24 +69,21 @@ class FeedbackService {
         return updated;
     }
 
-    // Delete feedback for doctor
-    async deleteFeedback(user, feedbackId) {
-        // Tìm feedback
-        const feedback = await prisma.doctorRating.findUnique({
-            where: { id: Number(feedbackId) }
+    // Delete feedback theo appointment_id
+    async deleteFeedback(user, appointmentId) {
+        const feedback = await prisma.doctorRating.findFirst({
+            where: { appointment_id: Number(appointmentId) }
         });
         if (!feedback) {
             throw new BadRequestError("Feedback không tồn tại");
         }
-        // Chỉ cho phép bệnh nhân là chủ feedback xóa
         if (feedback.patient_id !== user.id) {
             throw new BadRequestError("Bạn không có quyền xóa feedback này");
         }
-        // Xóa
         await prisma.doctorRating.delete({
-            where: { id: Number(feedbackId) }
+            where: { id: feedback.id }
         });
-        return { id: feedbackId };
+        return { id: feedback.id };
     }
 
     // Get average rating for a doctor

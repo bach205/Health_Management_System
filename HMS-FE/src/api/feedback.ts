@@ -14,17 +14,22 @@ export const getDoctorComments = async (doctorId: number, limit = 15, offset = 0
     return res.data;
 };
 
-export const createFeedback = async (data: { doctorId: number; content: string; rating: number }) => {
-    const res = await mainRequest.post(BASE_URL, data);
+export const getFeedbackByAppointmentId = async (appointmentId: number) => {
+    const res = await mainRequest.get(`/api/v1/feedback/appointment/${appointmentId}`);
     return res.data;
 };
 
-export const updateFeedback = async (id: number, data: { content: string; rating: number }) => {
-    const res = await mainRequest.put(`${BASE_URL}/${id}`, data);
+export const createFeedback = async (data: { appointment_id: number; comment: string; rating: number }) => {
+    const res = await mainRequest.post(`/api/v1/feedback`, data);
     return res.data;
 };
 
-export const deleteFeedback = async (id: number) => {
-    const res = await mainRequest.delete(`${BASE_URL}/${id}`);
+export const updateFeedback = async (appointmentId: number, data: { comment: string; rating: number }) => {
+    const res = await mainRequest.put(`/api/v1/feedback/appointment/${appointmentId}`, data);
+    return res.data;
+};
+
+export const deleteFeedback = async (appointmentId: number) => {
+    const res = await mainRequest.delete(`/api/v1/feedback/appointment/${appointmentId}`);
     return res.data;
 }; 
