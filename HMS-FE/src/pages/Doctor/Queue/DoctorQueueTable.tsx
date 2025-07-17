@@ -7,7 +7,7 @@ import { getQueueStatus } from "../../../types/queue.type";
 import { useAuthStore } from "../../../store/authStore";
 import { useSocket } from "../../../hooks/socket/useSocket";
 import { updateQueueStatus } from "../../../services/queue.service";
-import { Button, Dropdown, Flex, Menu, message, notification, Select, Space, Table, Tag, Tooltip, Typography, Modal } from "antd";
+import { Button, Dropdown, Flex, Menu, message, notification, Select, Space, Table, Tag, Tooltip, Typography, Modal, DatePicker } from "antd";
 import ModalPatientExaminationOrder from "./ModalPatientExaminationOrder";
 import DoctorExaminationOrderModal from "./DoctorExaminationOrderModal";
 import { RefreshCcw } from "lucide-react";
@@ -42,6 +42,35 @@ const QueueTable = () => {
 
 
     const [statusFilter, setStatusFilter] = useState<string>("");
+    const [selectedDate, setSelectedDate] = useState<string | null>(null);
+
+    // Lọc queues theo ngày khám
+    const filteredQueues = (() => {
+        if (selectedDate) {
+            return queues.filter((q: any) =>
+                dayjs.utc(q.appointment?.appointment_date).format("YYYY-MM-DD") === selectedDate
+            );
+        } else {
+            // Nếu không chọn ngày, lấy ngày khám gần nhất hiện tại (>= hôm nay)
+            const today = dayjs().startOf('day');
+            // Lấy các ngày khám >= hôm nay
+            const futureDates = Array.from(new Set(
+                queues
+                    .filter((q: any) => dayjs.utc(q.appointment?.appointment_date).isSameOrAfter(today))
+                    .map((q: any) => dayjs.utc(q.appointment?.appointment_date).format("YYYY-MM-DD"))
+            ));
+            // Sắp xếp tăng dần
+            futureDates.sort();
+            const nearestDate = futureDates[0];
+            if (nearestDate) {
+                return queues.filter((q: any) =>
+                    dayjs.utc(q.appointment?.appointment_date).format("YYYY-MM-DD") === nearestDate
+                );
+            }
+            // Nếu không có ngày >= hôm nay, trả về tất cả queues
+            return queues;
+        }
+    })();
 
     // // Cập nhật xử lý socket cho queue:statusChanged
     useSocket(
@@ -288,6 +317,16 @@ const QueueTable = () => {
                             </Option>
                         ))}
                     </Select>
+                    {/* Filter ngày khám */}
+                    <DatePicker
+                        allowClear
+                        placeholder="Lọc theo ngày khám"
+                        format="YYYY-MM-DD"
+                        value={selectedDate ? dayjs(selectedDate) : null}
+                        onChange={d => setSelectedDate(d ? d.format("YYYY-MM-DD") : null)}
+                        style={{ minWidth: 160 }}
+                        disabled={queues.length === 0}
+                    />
                 </Flex>
                 {
                     selectedClinic && (
@@ -321,7 +360,7 @@ const QueueTable = () => {
             <Table
                 rowKey="id"
                 columns={columns}
-                dataSource={queues}
+                dataSource={filteredQueues}
                 pagination={{
                     current: pagination.pageNumber,
                     pageSize: pagination.pageSize,
