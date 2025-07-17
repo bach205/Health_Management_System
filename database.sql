@@ -561,31 +561,31 @@ INSERT INTO work_schedules (user_id, clinic_id, work_date, shift_id) VALUES
 (6, 8, '2025-07-21', 2),
 (6, 8, '2025-07-22', 2);
 
--- Insert sample data into examination_records
--- INSERT INTO examination_records 
--- (patient_id, symptoms, primary_doctor_id, final_diagnosis, created_by_user_id,
---  clinic_id, doctor_id, result, note, examined_at, status) 
--- VALUES
--- (8, 'Đau đầu, sốt cao 39 độ, ho nhiều', 2, 'Viêm phổi cấp', 2,
---  1, 2, 'Phổi có dấu hiệu viêm, cần chụp X-quang', 'Bệnh nhân cần nhập viện điều trị', '2025-06-01 09:30:00', 'done'),
+Insert sample data into examination_records
+INSERT INTO examination_records 
+(patient_id, symptoms, primary_doctor_id, final_diagnosis, created_by_user_id,
+ clinic_id, doctor_id, result, note, examined_at, status) 
+VALUES
+(8, 'Đau đầu, sốt cao 39 độ, ho nhiều', 2, 'Viêm phổi cấp', 2,
+ 1, 2, 'Phổi có dấu hiệu viêm, cần chụp X-quang', 'Bệnh nhân cần nhập viện điều trị', '2025-06-01 09:30:00', 'done'),
 
--- (8, null, null, null, null,
---  9, 2, 'X-quang phổi cho thấy viêm phổi thùy dưới', 'Cần điều trị kháng sinh', '2025-06-01 10:15:00', 'done'),
+(8, null, null, null, null,
+ 9, 2, 'X-quang phổi cho thấy viêm phổi thùy dưới', 'Cần điều trị kháng sinh', '2025-06-01 10:15:00', 'done'),
 
--- (9, 'Đau bụng dữ dội, buồn nôn', 3, 'Viêm ruột thừa cấp', 3,
---  2, 3, 'Đau vùng hố chậu phải, dấu hiệu McBurney dương tính', 'Cần phẫu thuật cấp cứu', '2025-06-02 14:00:00', 'done'),
+(9, 'Đau bụng dữ dội, buồn nôn', 3, 'Viêm ruột thừa cấp', 3,
+ 2, 3, 'Đau vùng hố chậu phải, dấu hiệu McBurney dương tính', 'Cần phẫu thuật cấp cứu', '2025-06-02 14:00:00', 'done'),
 
--- (10, 'Đau khớp gối, khó đi lại', 14, 'Thoái hóa khớp gối', 14,
---  3, 14, 'X-quang khớp gối cho thấy thoái hóa độ 2', 'Cần tập vật lý trị liệu', '2025-06-03 08:45:00', 'done'),
+(10, 'Đau khớp gối, khó đi lại', 14, 'Thoái hóa khớp gối', 14,
+ 3, 14, 'X-quang khớp gối cho thấy thoái hóa độ 2', 'Cần tập vật lý trị liệu', '2025-06-03 08:45:00', 'done'),
 
--- (11, 'Sốt phát ban, đau họng', 2, 'Sốt xuất huyết', 2,
---  4, 2, 'Xét nghiệm máu dương tính với sốt xuất huyết', 'Theo dõi tiểu cầu', '2025-06-04 11:20:00', 'done'),
+(11, 'Sốt phát ban, đau họng', 2, 'Sốt xuất huyết', 2,
+ 4, 2, 'Xét nghiệm máu dương tính với sốt xuất huyết', 'Theo dõi tiểu cầu', '2025-06-04 11:20:00', 'done'),
 
--- (12, 'Nổi mẩn đỏ toàn thân, ngứa', 3, 'Dị ứng thuốc', 3,
---  5, 3, 'Test dị ứng dương tính với penicillin', 'Tránh sử dụng nhóm thuốc beta-lactam', '2025-06-05 15:30:00', 'done'),
+(12, 'Nổi mẩn đỏ toàn thân, ngứa', 3, 'Dị ứng thuốc', 3,
+ 5, 3, 'Test dị ứng dương tính với penicillin', 'Tránh sử dụng nhóm thuốc beta-lactam', '2025-06-05 15:30:00', 'done'),
 
--- (13, 'Mờ mắt, nhức mắt', 14, 'Cận thị tiến triển', 14,
---  6, 14, 'Đo thị lực: 3/10, cần đeo kính -2.5', 'Tái khám sau 3 tháng', '2025-06-06 09:00:00', 'done');
+(13, 'Mờ mắt, nhức mắt', 14, 'Cận thị tiến triển', 14,
+ 6, 14, 'Đo thị lực: 3/10, cần đeo kính -2.5', 'Tái khám sau 3 tháng', '2025-06-06 09:00:00', 'done');
 
 INSERT INTO examination_records 
 (patient_id, clinic_id, doctor_id, appointment_id, result, note, examined_at)
