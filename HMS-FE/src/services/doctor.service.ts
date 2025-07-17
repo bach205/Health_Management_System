@@ -7,7 +7,7 @@ export const createDoctor = (doctor: IDoctor) => {
 };
 
 export const getDoctors = async (searchOptions: any) => {
-    return instance.post(`${BASE_URL}`, searchOptions);
+    return instance.post(`${BASE_URL}/all/with-rating`, searchOptions);
 };
 
 export const updateDoctor = (doctor: IDoctor) => {

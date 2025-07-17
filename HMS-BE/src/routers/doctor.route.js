@@ -18,7 +18,7 @@ doctorRouter.post(
   "/create",
   authenticate,
   checkUserStatus(),
-   authorize("admin"),
+  authorize("admin"),
   // validate({ body: createDoctorSchema }),
   asyncHandler(doctorController.createDoctor),
   doctorController.createDoctor
@@ -128,6 +128,12 @@ doctorRouter.get(
   // authorize("admin", "doctor"),
   asyncHandler(doctorController.getAvailableDoctorsWithNearestSlot),
   doctorController.getAvailableDoctorsWithNearestSlot
+);
+
+doctorRouter.post(
+  "/all/with-rating",
+  asyncHandler(doctorController.getAllDoctorsWithAvgRating),
+  doctorController.getAllDoctorsWithAvgRating
 );
 
 // Ví dụ check authen bên trong router

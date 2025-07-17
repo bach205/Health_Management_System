@@ -562,32 +562,6 @@ INSERT INTO work_schedules (user_id, clinic_id, work_date, shift_id) VALUES
 (6, 8, '2025-07-21', 2),
 (6, 8, '2025-07-22', 2);
 
--- Insert sample data into examination_records
--- INSERT INTO examination_records 
--- (patient_id, symptoms, primary_doctor_id, final_diagnosis, created_by_user_id,
---  clinic_id, doctor_id, result, note, examined_at, status) 
--- VALUES
--- (8, 'Đau đầu, sốt cao 39 độ, ho nhiều', 2, 'Viêm phổi cấp', 2,
---  1, 2, 'Phổi có dấu hiệu viêm, cần chụp X-quang', 'Bệnh nhân cần nhập viện điều trị', '2025-06-01 09:30:00', 'done'),
-
--- (8, null, null, null, null,
---  9, 2, 'X-quang phổi cho thấy viêm phổi thùy dưới', 'Cần điều trị kháng sinh', '2025-06-01 10:15:00', 'done'),
-
--- (9, 'Đau bụng dữ dội, buồn nôn', 3, 'Viêm ruột thừa cấp', 3,
---  2, 3, 'Đau vùng hố chậu phải, dấu hiệu McBurney dương tính', 'Cần phẫu thuật cấp cứu', '2025-06-02 14:00:00', 'done'),
-
--- (10, 'Đau khớp gối, khó đi lại', 14, 'Thoái hóa khớp gối', 14,
---  3, 14, 'X-quang khớp gối cho thấy thoái hóa độ 2', 'Cần tập vật lý trị liệu', '2025-06-03 08:45:00', 'done'),
-
--- (11, 'Sốt phát ban, đau họng', 2, 'Sốt xuất huyết', 2,
---  4, 2, 'Xét nghiệm máu dương tính với sốt xuất huyết', 'Theo dõi tiểu cầu', '2025-06-04 11:20:00', 'done'),
-
--- (12, 'Nổi mẩn đỏ toàn thân, ngứa', 3, 'Dị ứng thuốc', 3,
---  5, 3, 'Test dị ứng dương tính với penicillin', 'Tránh sử dụng nhóm thuốc beta-lactam', '2025-06-05 15:30:00', 'done'),
-
--- (13, 'Mờ mắt, nhức mắt', 14, 'Cận thị tiến triển', 14,
---  6, 14, 'Đo thị lực: 3/10, cần đeo kính -2.5', 'Tái khám sau 3 tháng', '2025-06-06 09:00:00', 'done');
-
 INSERT INTO examination_records 
 (patient_id, clinic_id, doctor_id, appointment_id, result, note, examined_at)
 VALUES
@@ -1094,45 +1068,94 @@ VALUES (
   2 -- Ví dụ ID của chuyên mục "Sức khỏe"
 );
 
-INSERT INTO blogs (title, content, image_url, published, category_id)
-VALUES 
-(
-  'Làm thế nào để đặt lịch khám trực tuyến tại bệnh viện?',
-  '<p>Ngày nay, việc <strong>đặt lịch khám trực tuyến</strong> đang trở thành xu hướng giúp bệnh nhân tiết kiệm thời gian và giảm tải cho bệnh viện.</p>
-  <h2>Các bước đặt lịch:</h2>
-  <ol>
-    <li>Truy cập <a href="https://benhvienabc.vn">website bệnh viện</a> hoặc ứng dụng trên điện thoại.</li>
-    <li>Chọn chuyên khoa và bác sĩ phù hợp.</li>
-    <li>Chọn ngày giờ khám và xác nhận thông tin cá nhân.</li>
-    <li>Nhận mã đặt lịch và đến khám đúng hẹn.</li>
-  </ol>
-  <p><img src="https://i.imgur.com/vmYuO3O.jpg" alt="Đặt lịch khám online" style="max-width:100%;border-radius:8px;"/></p>
-  <p>Hệ thống của bệnh viện cũng cho phép <strong>hủy lịch</strong> hoặc <strong>đổi giờ khám</strong> linh hoạt nếu bạn có việc bận.</p>
-  <blockquote>“Đặt lịch online giúp bệnh nhân chủ động và giảm thời gian chờ đợi.” – TS. Trần Thị B</blockquote>',
-  'https://i.imgur.com/vmYuO3O.jpg',
-  true,
-  7
-),
-(
-  'Chế độ ăn uống cho bệnh nhân tiểu đường: Những điều cần lưu ý',
-  '<p>Bệnh nhân tiểu đường cần có <strong>chế độ dinh dưỡng nghiêm ngặt</strong> để kiểm soát đường huyết. Dưới đây là những nguyên tắc cơ bản:</p>
-  <h2>1. Nên ăn gì?</h2>
-  <ul>
-    <li>Ngũ cốc nguyên hạt (gạo lứt, yến mạch)</li>
-    <li>Rau xanh và trái cây ít ngọt (bưởi, táo, lê)</li>
-    <li>Thịt nạc, cá, đậu phụ</li>
-    <li>Uống đủ nước, hạn chế nước ngọt</li>
-  </ul>
-  <h2>2. Tránh những thực phẩm sau:</h2>
-  <ul>
-    <li>Đồ chiên rán nhiều dầu</li>
-    <li>Bánh ngọt, nước ngọt, kẹo</li>
-    <li>Thức ăn nhanh, nhiều muối</li>
-  </ul>
-  <p><img src="https://i.imgur.com/4tsWJnW.jpg" alt="Ăn uống cho người tiểu đường" style="max-width:100%;border-radius:8px;"/></p>
-  <p><em>Hãy tuân thủ theo chỉ định bác sĩ dinh dưỡng để đảm bảo sức khỏe lâu dài.</em></p>',
-  'https://i.imgur.com/4tsWJnW.jpg',
-  true,
-  8
-);
+INSERT INTO doctor_ratings (appointment_id, doctor_id, patient_id, rating, comment, is_anonymous)
+VALUES
+(6, 14, 13, 5.0, 'Khám mắt rất tốt, bác sĩ tận tâm.', false),
+(22, 2, 11, 4.0, 'Bác sĩ rất nhẹ nhàng, hướng dẫn kỹ.', true),
+(23, 3, 12, 4.0, 'Khám kỹ nhưng hơi đông bệnh nhân.', false),
+(24, 14, 13, 5.0, 'Tư vấn phòng chống ung thư rất hữu ích.', false),
+(25, 2, 8, 5.0, 'Khám cấp cứu nhanh chóng, xử lý tốt.', false),
+(26, 3, 9, 5.0, 'Rất hài lòng với cách tư vấn.', true);
+
+INSERT INTO appointments (patient_id, clinic_id, doctor_id, appointment_date, appointment_time, status, priority, reason, note)
+VALUES
+(8, 1, 2, '2025-07-01', '08:00:00', 'completed', 0, 'Khám tim định kỳ', 'Đã khám, kết quả tốt'),
+(9, 1, 2, '2025-07-02', '09:00:00', 'completed', 0, 'Tái khám sau điều trị', 'Ổn định'),
+(10, 1, 2, '2025-07-03', '10:00:00', 'completed', 0, 'Đau ngực nhẹ', 'Không phát hiện vấn đề nghiêm trọng'),
+(11, 1, 2, '2025-07-04', '08:30:00', 'completed', 0, 'Khám tim mạch lần đầu', 'Chỉ định xét nghiệm máu'),
+(12, 1, 2, '2025-07-05', '09:15:00', 'completed', 0, 'Mệt mỏi khi vận động', 'Khuyên theo dõi thêm'),
+(13, 1, 2, '2025-07-06', '10:45:00', 'completed', 0, 'Đau tức ngực', 'Chỉ định chụp CT'),
+(8, 1, 2, '2025-07-07', '08:00:00', 'completed', 0, 'Tái khám sau chụp CT', 'Kết quả bình thường'),
+(9, 1, 2, '2025-07-08', '09:00:00', 'completed', 0, 'Đo điện tim', 'Không có bất thường'),
+(10, 1, 2, '2025-07-09', '10:00:00', 'completed', 0, 'Khó thở khi ngủ', 'Có thể do căng thẳng'),
+(11, 1, 2, '2025-07-10', '11:00:00', 'completed', 0, 'Theo dõi cao huyết áp', 'Điều chỉnh thuốc'),
+(12, 1, 2, '2025-07-11', '08:30:00', 'completed', 0, 'Khám tim định kỳ', 'Không có vấn đề'),
+(13, 1, 2, '2025-07-12', '09:15:00', 'completed', 0, 'Đau ngực khi chạy bộ', 'Chỉ định xét nghiệm'),
+(8, 1, 2, '2025-07-13', '08:00:00', 'completed', 0, 'Kết quả xét nghiệm', 'Bình thường'),
+(9, 1, 2, '2025-07-14', '09:00:00', 'completed', 0, 'Kiểm tra nhịp tim', 'Ổn định'),
+(10, 1, 2, '2025-07-15', '10:00:00', 'completed', 0, 'Khám tim theo yêu cầu công ty', 'Không phát hiện bất thường');
+INSERT INTO doctor_ratings (appointment_id, doctor_id, patient_id, rating, comment) VALUES
+(1, 2, 8, 5, 'Bác sĩ rất tận tình, giải thích dễ hiểu'),
+(7, 2, 8, 4, 'Dịch vụ tốt, nhưng thời gian chờ hơi lâu'),
+(8, 2, 9, 5, 'Bác sĩ thân thiện và chuyên môn cao'),
+(9, 2, 10, 3, 'Ổn nhưng cần theo dõi thêm'),
+(11, 2, 11, 4, 'Tư vấn rõ ràng, cẩn thận'),
+(12, 2, 12, 5, 'Bác sĩ dễ gần và nhiệt tình'),
+(13, 2, 13, 5, 'Thăm khám kỹ lưỡng'),
+(26, 2, 8, 5, 'Cảm thấy yên tâm khi khám bác sĩ này'),
+(27, 2, 9, 4, 'Thái độ chuyên nghiệp'),
+(28, 2, 10, 5, 'Lắng nghe bệnh nhân và hướng dẫn kỹ'),
+(29, 2, 11, 4, 'Ổn định, chẩn đoán hợp lý'),
+(30, 2, 12, 5, 'Tư vấn thuốc rõ ràng'),
+(31, 2, 13, 4, 'Cảm ơn bác sĩ đã giúp đỡ'),
+(32, 2, 8, 5, 'Tái khám thấy tốt hơn nhiều'),
+(33, 2, 9, 5, 'Hẹn lần sau chắc chắn quay lại'),
+(34, 2, 10, 5, 'Không còn lo ngại về sức khỏe tim mạch'),
+(35, 2, 11, 4, 'Giải đáp mọi thắc mắc rõ ràng'),
+(36, 2, 12, 3, 'Bác sĩ ổn nhưng phòng khám hơi đông'),
+(37, 2, 13, 5, 'Cảm giác rất chuyên nghiệp và nhẹ nhàng'),
+(38, 2, 8, 5, 'Thật sự tin tưởng bác sĩ này');
+
+
+-- INSERT INTO blogs (title, content, image_url, published, category_id)
+-- VALUES 
+-- (
+--   'Làm thế nào để đặt lịch khám trực tuyến tại bệnh viện?',
+--   '<p>Ngày nay, việc <strong>đặt lịch khám trực tuyến</strong> đang trở thành xu hướng giúp bệnh nhân tiết kiệm thời gian và giảm tải cho bệnh viện.</p>
+--   <h2>Các bước đặt lịch:</h2>
+--   <ol>
+--     <li>Truy cập <a href="https://benhvienabc.vn">website bệnh viện</a> hoặc ứng dụng trên điện thoại.</li>
+--     <li>Chọn chuyên khoa và bác sĩ phù hợp.</li>
+--     <li>Chọn ngày giờ khám và xác nhận thông tin cá nhân.</li>
+--     <li>Nhận mã đặt lịch và đến khám đúng hẹn.</li>
+--   </ol>
+--   <p><img src="https://i.imgur.com/vmYuO3O.jpg" alt="Đặt lịch khám online" style="max-width:100%;border-radius:8px;"/></p>
+--   <p>Hệ thống của bệnh viện cũng cho phép <strong>hủy lịch</strong> hoặc <strong>đổi giờ khám</strong> linh hoạt nếu bạn có việc bận.</p>
+--   <blockquote>“Đặt lịch online giúp bệnh nhân chủ động và giảm thời gian chờ đợi.” – TS. Trần Thị B</blockquote>',
+--   'https://i.imgur.com/vmYuO3O.jpg',
+--   true,
+--   7
+-- ),
+-- (
+--   'Chế độ ăn uống cho bệnh nhân tiểu đường: Những điều cần lưu ý',
+--   '<p>Bệnh nhân tiểu đường cần có <strong>chế độ dinh dưỡng nghiêm ngặt</strong> để kiểm soát đường huyết. Dưới đây là những nguyên tắc cơ bản:</p>
+--   <h2>1. Nên ăn gì?</h2>
+--   <ul>
+--     <li>Ngũ cốc nguyên hạt (gạo lứt, yến mạch)</li>
+--     <li>Rau xanh và trái cây ít ngọt (bưởi, táo, lê)</li>
+--     <li>Thịt nạc, cá, đậu phụ</li>
+--     <li>Uống đủ nước, hạn chế nước ngọt</li>
+--   </ul>
+--   <h2>2. Tránh những thực phẩm sau:</h2>
+--   <ul>
+--     <li>Đồ chiên rán nhiều dầu</li>
+--     <li>Bánh ngọt, nước ngọt, kẹo</li>
+--     <li>Thức ăn nhanh, nhiều muối</li>
+--   </ul>
+--   <p><img src="https://i.imgur.com/4tsWJnW.jpg" alt="Ăn uống cho người tiểu đường" style="max-width:100%;border-radius:8px;"/></p>
+--   <p><em>Hãy tuân thủ theo chỉ định bác sĩ dinh dưỡng để đảm bảo sức khỏe lâu dài.</em></p>',
+--   'https://i.imgur.com/4tsWJnW.jpg',
+--   true,
+--   8
+-- );
 
