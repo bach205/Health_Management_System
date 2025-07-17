@@ -19,3 +19,8 @@ export const confirmPayment = async (record_id: number) => {
 export const updatePaymentStatus = async (record_id: number, status: string) => {
   return instance.patch(`/api/v1/payment/update-status/${record_id}`, { status });
 };
+
+// Lấy danh sách payment đang pending
+export const getPendingPayments = async () => {
+  return instance.get('/api/v1/payment/pending');
+};

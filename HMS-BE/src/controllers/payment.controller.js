@@ -38,6 +38,14 @@ class PaymentController {
     }).send(res);
   };
 
+  getPendingPayments = async (req, res) => {
+    const payments = await paymentService.getPendingPayments();
+    return new OK({
+      message: "Lấy danh sách thanh toán đang chờ thành công",
+      metadata: payments,
+    }).send(res);
+  };
+
 }
 
 module.exports = new PaymentController();

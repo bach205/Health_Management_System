@@ -90,10 +90,10 @@ class ExaminationRecordService {
         }
 
         const io = getIO();
-        // io.to(`clinic_${queue.clinic_id}`).emit("queue:statusChanged", {
-        //     queue: { ...queue, status: "done" },
-        //     clinicId: queue.clinic_id,
-        // });
+        io.to(`clinic_${queue.clinic_id}`).emit("queue:statusChanged", {
+            queue: { ...queue, status: "done" },
+            clinicId: queue.clinic_id,
+        });
 
 
         return record
