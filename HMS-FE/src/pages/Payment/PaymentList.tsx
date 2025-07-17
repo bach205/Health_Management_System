@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Button, Modal, Tag, Space, message } from 'antd';
+import { Table, Button, Modal, Tag, Space, message, Typography, Tooltip, Popconfirm } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { getInvoiceList, getInvoiceDetail, confirmPayment } from '../../services/payment.service';
+import { getPendingPayments, getInvoiceDetail, confirmPayment, updatePaymentStatus } from '../../services/payment.service';
+import UserListTitle from '../../components/ui/UserListTitle';
+import { X, XCircle } from 'lucide-react';
 
 interface InvoiceItem {
   id: number;
@@ -24,12 +26,20 @@ const PaymentList: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<InvoiceRecord | null>(null);
   const [invoiceItems, setInvoiceItems] = useState<InvoiceItem[]>([]);
+  const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'paid' | 'canceled'>('all');
+  const filteredData = data.filter((item) =>
+    filterStatus === 'all' ? true : item.status === filterStatus
+  );
+
+  console.log(data)
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await getInvoiceList();
-      setData(res.data.metadata);
+      const res = await getPendingPayments();
+      console.log(res)
+      const payments = res.data?.metadata ?? [];
+      setData(payments);
     } catch (err) {
       message.error('Lỗi khi tải danh sách hóa đơn');
     } finally {
@@ -41,20 +51,20 @@ const PaymentList: React.FC = () => {
     setSelectedInvoice(record);
     try {
       const res = await getInvoiceDetail(record.record_id);
-      setInvoiceItems(res.data.metadata.items);
+      setInvoiceItems(res.data.metadata);
       setModalVisible(true);
     } catch (err) {
       message.error('Không lấy được chi tiết hóa đơn');
     }
   };
 
-  const handleConfirmPayment = async (record: InvoiceRecord) => {
+  const handleUpdatePayment = async (record: InvoiceRecord, status: 'paid' | 'canceled') => {
     try {
-      await confirmPayment(record.record_id);
-      message.success('Xác nhận thanh toán thành công');
+      await updatePaymentStatus(record.record_id, status);
+      message.success('Cập nhật trạng thái thanh toán thành công');
       fetchData();
     } catch (err) {
-      message.error('Không thể xác nhận thanh toán');
+      message.error('Không thể cập nhật trạng thái thanh toán');
     }
   };
 
@@ -70,6 +80,13 @@ const PaymentList: React.FC = () => {
     {
       title: 'Ngày khám',
       dataIndex: 'examined_at',
+      render: (val) => new Date(val).toLocaleDateString('vi-VN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
     },
     {
       title: 'Số dịch vụ',
@@ -92,9 +109,31 @@ const PaymentList: React.FC = () => {
         <Space>
           <Button onClick={() => handleViewInvoice(record)}>Xem hóa đơn</Button>
           {record.status === 'pending' && (
-            <Button type="primary" onClick={() => handleConfirmPayment(record)}>
-              Xác nhận thanh toán
-            </Button>
+            <>
+              <Popconfirm
+                title="Xác nhận thanh toán?"
+                onConfirm={() => handleUpdatePayment(record, 'paid')}
+                okText="Xác nhận"
+                cancelText="Hủy"
+              >
+                <Button type="primary">
+                  Xác nhận thanh toán
+                </Button>
+              </Popconfirm>
+              <Tooltip title="Hủy thanh toán">
+                <Popconfirm
+                  title="Xác nhận hủy thanh toán?"
+                  onConfirm={() => handleUpdatePayment(record, 'canceled')}
+                  okText="Xác nhận"
+                  cancelText="Hủy"
+                >
+                  <Button type="primary" danger>
+                    <XCircle className="w-4 h-4" />
+                  </Button>
+                </Popconfirm>
+              </Tooltip>
+            </>
+
           )}
         </Space>
       ),
@@ -103,6 +142,8 @@ const PaymentList: React.FC = () => {
 
   return (
     <>
+      <UserListTitle title="hóa đơn" />
+
       <Table
         columns={columns}
         dataSource={data}
@@ -129,6 +170,25 @@ const PaymentList: React.FC = () => {
             },
           ]}
         />
+        <div style={{ marginTop: 16 }}>
+          <p >
+            <strong>Tổng tiền:</strong> {selectedInvoice?.total_amount.toLocaleString()}đ
+
+          </p>
+          <br />
+          {
+            selectedInvoice?.total_amount && selectedInvoice?.total_amount > 0 &&
+            <>
+              <Typography.Title level={5} className='mt-2 text-center'>
+                Thanh toán qua mã QR dưới đây:
+              </Typography.Title>
+              <div className='flex justify-center mt-4'>
+                <img src={`https://qr.sepay.vn/img?acc=VQRQADITO0867&bank=MBBank&amount=${selectedInvoice?.total_amount}&des=Thanh%20Toan%20${selectedInvoice?.patient_name}`} alt="" />
+
+              </div>
+            </>
+          }
+        </div>
       </Modal>
     </>
   );

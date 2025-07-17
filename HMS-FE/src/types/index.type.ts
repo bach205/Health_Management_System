@@ -72,6 +72,8 @@ export interface IMedicine {
   dosageUnit?: string;
   frequencyAmount?: number;
   frequencyUnit?: string;
+  quantity?: number; // Số lượng thuốc
+  stock?: number; // Số lượng tồn kho
 }
 
 export type EmployeeType = keyof typeof TYPE_EMPLOYEE;

@@ -32,7 +32,7 @@ model User {
   appointments        Appointment[]        @relation("DoctorAppointment")
   availableSlots      AvailableSlot[]
   documents           Documents[]
-  blogs               Blog[]
+
 
   chatsSent                Chat[]                    @relation("ChatSendBy")
   chatsReceived            Chat[]                    @relation("ChatTo")
@@ -267,6 +267,7 @@ model PrescriptionItem {
   dosage      String?
   frequency   String?
   duration    String?
+  quantity    Int     @default(1) // Số lượng thuốc, mặc định là 1
 
   record    ExaminationRecord @relation(fields: [record_id], references: [id])
   medicine  Medicine?         @relation(fields: [medicine_id], references: [id], onUpdate: Restrict)
@@ -485,25 +486,6 @@ model BlogCategory {
   id    Int    @id @default(autoincrement())
   name  String @unique
   blogs Blog[]
-<<<<<<< HEAD
-}
-
-model BlogTag {
-  id    Int    @id @default(autoincrement())
-  name  String @unique
-  blogs Blog[] @relation("BlogTags")
-}
-
-// Cập nhật Blog để liên kết với category và tags
-model Blog {
-  id          Int      @id @default(autoincrement())
-  title       String
-  slug        String   @unique
-  content     String   @db.Text
-  summary     String?  @db.Text
-  image_url   String?
-  author_id   Int
-=======
 
   @@map("blog_categories")
 }
@@ -513,21 +495,12 @@ model Blog {
   title       String
   content     String   @db.Text
   image_url   String?
->>>>>>> master
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
   published   Boolean  @default(false)
 
-<<<<<<< HEAD
-  author      User     @relation(fields: [author_id], references: [id])
-  category_id Int?
-  category    BlogCategory? @relation(fields: [category_id], references: [id])
-  tags        BlogTag[] @relation("BlogTags")
-}
-=======
   category_id Int?
   category    BlogCategory? @relation(fields: [category_id], references: [id])
 
   @@map("blogs")
 }
->>>>>>> master

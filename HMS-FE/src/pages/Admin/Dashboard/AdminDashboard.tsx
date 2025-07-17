@@ -202,14 +202,14 @@ const AdminDashboard = () => {
       </Card>
 
       <Row gutter={[16, 16]} style={{ marginTop: 24 }}>
-        <Col xs={24} sm={24} md={12}>
+        {/* <Col xs={24} sm={24} md={12}>
           <Card
             title={`Biểu đồ doanh thu theo ngày trong tháng ${dayjs().month() + 1}`}
             style={{ height: 400 }}
           >
             <Line data={lineChartData} options={chartOptions} />
           </Card>
-        </Col>
+        </Col> */}
         <Col xs={24} sm={24} md={12}>
           <Card
             title={`Biểu đồ doanh thu theo tháng trong năm ${dayjs().year()}`}
