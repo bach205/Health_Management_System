@@ -20,6 +20,7 @@ class BlogService {
   // Lấy chi tiết 1 bài viết
   async getBlogById(id) {
     const blog = await prisma.blog.findUnique({ where: { id: Number(id) } });
+    console.log(blog)
     if (!blog) throw new BadRequestError('Không tìm thấy bài viết');
     return blog;
   }

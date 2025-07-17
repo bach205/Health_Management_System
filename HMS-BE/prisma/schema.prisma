@@ -492,7 +492,6 @@ model Blog {
   id          Int      @id @default(autoincrement())
   title       String
   content     String   @db.Text
-  summary     String?  @db.Text
   image_url   String?
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt

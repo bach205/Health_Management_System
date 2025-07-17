@@ -13,7 +13,7 @@ export const getBlogs = async (params: any) => {
 
 
 export const createBlog = async (blogData: any) => {
-    return instance.post(`${BASE_URL}/create`, blogData);
+    return instance.post(`${BASE_URL}/`, blogData);
 };
 
 export const deleteBlog = async (id: number) => {

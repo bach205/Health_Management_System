@@ -48,7 +48,10 @@ const AdminBlogDashboard = () => {
             }
 
             const res = await getBlogs(params);
-            const { blogs, total } = res.data.metadata;
+            console.log(res)
+            const blogs = res.data.metadata;
+            const total = blogs.length;
+            console.log(blogs)
             setBlogs(blogs);
             setTotalRows(total);
         } catch {
