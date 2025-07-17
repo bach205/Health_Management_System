@@ -30,12 +30,16 @@ class ExaminationRecordService {
         const queue = await prisma.queue.findFirst({
             where: { patient_id, status: "in_progress" },
         });
-        if (!queue) throw new Error("");
+        if (!queue) throw new Error("ERRROROROROROR");
 
+    try {
         await prisma.queue.update({
             where: { id: queue.id },
             data: { status: "done" },
         });
+    } catch (error) {
+        console.log(error);
+    }
 
 
         const record = await prisma.examinationRecord.create({
@@ -57,15 +61,26 @@ class ExaminationRecordService {
             },
         });
 
-        await prisma.appointment.update({
-            where: { id: appointment_id },
-            data: { status: "completed" },
-        });
+        console.log("record: ",record);
+
+        try {
+            await prisma.appointment.update({
+                where: { id: appointment_id },
+                data: { status: "completed" },
+            });
+        } catch (error) {
+            console.log(error);
+        }
 
         // Gọi tạo nhiều thuốc nếu có
+       try {
         if (prescription_items.length > 0) {
             await prescriptionItemService.createMany(record.id, prescription_items);
         }
+        
+       } catch (error) {
+        console.log(error);
+       }
         try {
             await paymentService.createInvoiceAndPaymentAfterExamination(record, appointment_id, doctor_id, patient_id);
         } catch (error) {
@@ -74,10 +89,10 @@ class ExaminationRecordService {
         }
 
         const io = getIO();
-        io.to(`clinic_${queue.clinic_id}`).emit("queue:statusChanged", {
-            queue: { ...queue, status: "done" },
-            clinicId: queue.clinic_id,
-        });
+        // io.to(`clinic_${queue.clinic_id}`).emit("queue:statusChanged", {
+        //     queue: { ...queue, status: "done" },
+        //     clinicId: queue.clinic_id,
+        // });
 
 
         return record

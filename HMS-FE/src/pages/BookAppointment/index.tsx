@@ -315,7 +315,7 @@ const PatientBookAppointment: React.FC = () => {
       <Card title="Bác sĩ cùng chuyên khoa">
         <RelatedDoctors docId={docId} speciality={""} />
       </Card> */}
-      <FeedbackDoctorComments doctorId={docId} />
+      <FeedbackDoctorComments doctorId={Number(docId)} />
     </div>
   );
 };

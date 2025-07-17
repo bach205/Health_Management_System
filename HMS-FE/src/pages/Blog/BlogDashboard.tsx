@@ -39,17 +39,18 @@ const BlogDashboard = () => {
                 params.category_id = categoryId;
             }
 
-            // const res = await getBlogs(params);
-            // setBlogs(res.data.metadata.data);
-            // setTotalRows(res.data.metadata.pagination.total);
+            const res = await getBlogs(params);
+            console.log(res.data.metadata)
+            setBlogs(res.data.metadata);
+            setTotalRows(res.data.metadata.length / 3);
         } catch (err) {
             message.error('Lỗi khi tải blog');
         }
     };
 
     useEffect(() => {
-        // fetchCategories();
-        // fetchBlogs(1);
+        fetchCategories();
+        fetchBlogs(1);
     }, []);
 
     const handleCategoryChange = (value?: number) => {

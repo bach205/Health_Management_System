@@ -89,7 +89,7 @@ const DoctorExaminationRecordModal = ({
         available.forEach((slot: any) => {
           if (selectedClinic && slot.clinic_id !== selectedClinic) return;
           if (!groupedByDate[slot.slot_date]) groupedByDate[slot.slot_date] = [];
-        //  groupedByDate[slot.slot_date].push(slot);
+         groupedByDate[slot.slot_date || {}].push(slot);
         });
 
         setSlotsByDate(groupedByDate);
@@ -247,7 +247,6 @@ const DoctorExaminationRecordModal = ({
     setMedicinesAdded(newList);
   };
 
-  console.log("selectec medicine", selectedMedicine);
 
   return (
     <Modal

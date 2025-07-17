@@ -273,13 +273,30 @@ const SaleMedicinePage: React.FC = () => {
               width={700}
             >
               {selectedPrescriptionRecord && (
-                <Table
-                  columns={prescriptionColumns}
-                  dataSource={selectedPrescriptionRecord.prescriptionItems}
-                  rowKey="id"
-                  size="small"
-                  pagination={false}
-                />
+                <>
+                  <Table
+                    columns={prescriptionColumns}
+                    dataSource={selectedPrescriptionRecord.prescriptionItems}
+                    rowKey="id"
+                    size="small"
+                    pagination={false}
+                  />
+                  {(() => {
+                    const totalAmount = (selectedPrescriptionRecord.prescriptionItems || []).reduce((sum, item) => sum + (typeof item.medicine?.price === 'number' ? item.medicine.price : Number(item.medicine?.price) || 0), 0);
+                    const qrUrl = `https://qr.sepay.vn/img?acc=VQRQADITO0867&bank=MBBank&amount=${totalAmount}&des=thanh toán thuốc`;
+                    return (
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 24 }}>
+                        <div style={{ marginBottom: 8, fontWeight: 500 }}>Quét mã QR để thanh toán</div>
+                        <img
+                          src={qrUrl}
+                          alt="QR thanh toán"
+                          style={{ width: 200, height: 200, objectFit: 'contain', border: '1px solid #eee', borderRadius: 8 }}
+                        />
+                        <div style={{ marginTop: 8, color: '#888' }}>Tổng tiền: {totalAmount.toLocaleString()} VND</div>
+                      </div>
+                    );
+                  })()}
+                </>
               )}
             </Modal>
           </div>
@@ -289,4 +306,4 @@ const SaleMedicinePage: React.FC = () => {
   );
 };
 
-export default SaleMedicinePage; 
+export default SaleMedicinePage;

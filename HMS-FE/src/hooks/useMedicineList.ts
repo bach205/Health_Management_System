@@ -27,9 +27,10 @@ export const useMedicineList = (initialPagination?: Partial<IPagination>, sortBy
                     limit: pagination.pageSize,
                     isActive,
                 };
-                console.log("searchOptions", searchOptions)
+                console.log(medicines)
+             //   console.log("searchOptions", searchOptions)
                 const res = await getMedicines(searchOptions);
-                console.log(res.data.metadata);
+               // console.log(res.data.metadata);
                 setMedicines(res.data.metadata.medicines);
                 setPagination((prev) => ({
                     ...prev,
