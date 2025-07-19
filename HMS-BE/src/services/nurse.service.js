@@ -464,8 +464,8 @@ class NurseService {
         );
 
         // Gửi email sau khi tạo thành công
-        nurses.forEach((nurse, index) => {
-            const rawPassword = preparedData[index].rawPassword;
+        data.forEach((nurse, index) => {
+            const rawPassword = data[index].rawPassword;
             sendStaffNewPasswordEmail(nurse.email, rawPassword);
         });
 

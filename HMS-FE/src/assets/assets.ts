@@ -64,32 +64,32 @@ export const specialityData = [
     {
         speciality: 'Nội tổng quát',
         image: General_physician,
-        link: 'Nội tổng quát'
+        link: 'Nội+tổng+quát'
     },
-    {
-        speciality: 'Sản phụ khoa',
-        image: Gynecologist,
-        link: 'Sản phụ khoa'
-    },
-    {
-        speciality: 'Chỉnh hình',
-        image: Dermatologist,
-        link: 'Chỉnh hình'
-    },
+    // {
+    //     speciality: 'Sản phụ khoa',
+    //     image: Gynecologist,
+    //     link: 'Sản+phụ+khoa'
+    // },
+    // {
+    //     speciality: 'Chỉnh hình',
+    //     image: Dermatologist,
+    //     link: 'Chỉnh+hình'
+    // },
     {
         speciality: 'Nhi khoa',
         image: Pediatricians,
-        link: 'Nhi khoa'
+        link: 'Nhi+khoa'
     },
     {
         speciality: 'Thần kinh học',
         image: Neurologist,
-        link: 'Thần kinh'
+        link: 'Thần+kinh'
     },
     {
         speciality: 'Tiêu hóa',
         image: Gastroenterologist,
-        link: 'Tiêu hóa'
+        link: 'Tiêu+hóa'
     },
 ]
 

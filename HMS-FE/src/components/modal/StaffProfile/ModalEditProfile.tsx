@@ -41,6 +41,7 @@ const ModalEditProfile = ({ isVisible, handleOk, handleCancel, form }: IProps) =
                 <Form.Item
                     label="Họ tên"
                     name="full_name"
+                    rules={[{ required: true, message: "Vui lòng nhập họ tên!", whitespace: true }]}
                 >
                     <Input placeholder={`Họ tên`} maxLength={25} />
                 </Form.Item>
@@ -48,6 +49,7 @@ const ModalEditProfile = ({ isVisible, handleOk, handleCancel, form }: IProps) =
                 <Form.Item
                     label="Email"
                     name="email"
+                    rules={[{ required: true, message: "Vui lòng nhập email!", whitespace: true }]}
                 >
                     <Input placeholder={`Email`} disabled />
                 </Form.Item>
@@ -56,7 +58,7 @@ const ModalEditProfile = ({ isVisible, handleOk, handleCancel, form }: IProps) =
                     label="Số điện thoại"
                     name="phone"
                     rules={[
-                        // { required: true, message: "Vui lòng nhập số điện thoại!" },
+                        { required: true, message: "Vui lòng nhập số điện thoại!", whitespace: true },
                         { pattern: new RegExp(/^\d{10}$/), message: "Số điện thoại không hợp lệ!" }
                     ]}
                 >
@@ -69,6 +71,7 @@ const ModalEditProfile = ({ isVisible, handleOk, handleCancel, form }: IProps) =
                     name="gender"
                     label="Giới tính"
                     initialValue="male"
+                    rules={[{ required: true, message: "Vui lòng chọn giới tính!" }]}
                 >
                     <Select style={{ width: 100 }} >
                         <Select.Option value="male"><span className="text-black">Nam</span></Select.Option>
@@ -77,11 +80,11 @@ const ModalEditProfile = ({ isVisible, handleOk, handleCancel, form }: IProps) =
                     </Select>
                 </Form.Item>
 
-                <Form.Item name="address" label="Địa chỉ" rules={[{ required: false, whitespace: true, message: "Địa chỉ không được có khoảng trắng thừa!" }]}>
+                <Form.Item name="address" label="Địa chỉ" rules={[{ required: true, whitespace: true, message: "Vui lòng nhập địa chỉ!" }]}>
                     <Input placeholder="Địa chỉ" maxLength={255} />
                 </Form.Item>
 
-                <Form.Item name="date_of_birth" label="Ngày sinh">
+                <Form.Item name="date_of_birth" label="Ngày sinh" rules={[{ required: true, message: "Vui lòng chọn ngày sinh!" }]}>
                     <DatePicker format="DD/MM/YYYY" placeholder="Ngày sinh" maxDate={dayjs()} />
                 </Form.Item>
 
@@ -89,6 +92,7 @@ const ModalEditProfile = ({ isVisible, handleOk, handleCancel, form }: IProps) =
                     name="identity_type"
                     label="Loại định danh"
                     initialValue="citizen"
+                    rules={[{ required: true, message: "Vui lòng chọn loại định danh!" }]}
                 >
                     <Select onChange={(value) => setIdentityType(value)} style={{ width: "100%" }}>
                         <Select.Option value="passport"><span className="text-black">Chứng minh nhân dân</span></Select.Option>
@@ -99,16 +103,17 @@ const ModalEditProfile = ({ isVisible, handleOk, handleCancel, form }: IProps) =
                 {identityType === "citizen" ? (
                     <Form.Item name="identity_number" label="Số CCCD"
                         rules={[
-                            { pattern: new RegExp(/^\d{12}$/), message: "Số CCCD không hợp lệ!",whitespace:true }
+                            { required: true, message: "Vui lòng nhập số CCCD!", whitespace: true },
+                            { pattern: new RegExp(/^\d{12}$/), message: "Số CCCD không hợp lệ!", whitespace: true }
                         ]}
                     >
                         <Input placeholder="Số CCCD" maxLength={12} />
                     </Form.Item>
                 ) : (
                     <Form.Item name="identity_number" label="Số CMND"
-                    
                         rules={[
-                            { pattern: new RegExp(/^\d{9}(\d{3})?$/), message: "Số CMND không hợp lệ!",whitespace:true }
+                            { required: true, message: "Vui lòng nhập số CMND!", whitespace: true },
+                            { pattern: new RegExp(/^\d{9}(\d{3})?$/), message: "Số CMND không hợp lệ!" }
                         ]}
                     >
                         <Input placeholder="Số CMND" maxLength={12} />

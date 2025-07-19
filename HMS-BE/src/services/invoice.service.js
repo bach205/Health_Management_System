@@ -43,6 +43,7 @@ class InvoiceService {
 
   // Lấy chi tiết invoice items của 1 record
   getInvoiceDetail = async (record_id) => {
+
     const items = await prisma.invoiceItem.findMany({
       where: { record_id: Number(record_id) },
       orderBy: { created_at: 'asc' },

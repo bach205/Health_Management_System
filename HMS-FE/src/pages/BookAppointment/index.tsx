@@ -173,6 +173,12 @@ const PatientBookAppointment: React.FC = () => {
               {doctor?.metadata?.doctor?.bio && (
                 <Text type="secondary">Tiểu sử: {doctor.metadata.doctor.bio}</Text>
               )}
+              
+              {doctor?.metadata?.doctor?.price && (
+                <Text type="secondary" ><b>Giá khám:</b> {doctor.metadata.doctor.price}đ</Text>
+
+              )}
+
             </Space>
           </div>
         </div>

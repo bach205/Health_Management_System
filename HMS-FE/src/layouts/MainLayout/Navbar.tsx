@@ -115,11 +115,19 @@ const Navbar: React.FC = () => {
             ) :
             // nurse
             userData?.role === "nurse" ? (
-              
               <Link to="/user-book-appointments">Trang làm việc</Link>
-            ) : userData?.role === "admin" && (
+            ) : userData?.role === "admin" ? (
               <Link to="/admin/dashboard">Trang quản lý</Link>
-            )}
+            ) : (
+              <button
+              onClick={() => navigate("/login")}
+              className="bg-[#5f6fff] text-white px-8 py-3 rounded-full font-light hidden md:block hover:cursor-pointer hover:bg-[#5f6fffd5] transition-all duration-300"
+            >
+              Đăng nhập
+            </button>
+            )
+
+          }
           </div>
         ) : (
           <button

@@ -1,10 +1,10 @@
-import { Button, DatePicker, Form, Input, InputNumber, Modal, Select, type FormInstance } from "antd";
+import { Button, DatePicker, Form, Input, Modal, Select, type FormInstance } from "antd";
 import { useEffect, useState } from "react";
-import { specialtyOptions, TYPE_EMPLOYEE_STR } from "../../constants/user.const";
-import type { IUserBase } from "../../types/index.type";
 import dayjs from "dayjs";
-import Uploader from "../../pages/Profile/Uploader";
-import { useSpecialtyList } from "../../hooks/useSpecialtyList";  
+import { TYPE_EMPLOYEE_STR } from "../../../constants/user.const";
+import Uploader from "../../../pages/Profile/Uploader";
+import type { IUserBase } from "../../../types/index.type";
+
 interface IProps {
   isVisible: boolean;
   handleOk: () => void;
@@ -16,16 +16,12 @@ interface IProps {
   setReload: (reload: boolean) => void;
 }
 
-
-const ModalUpdateDoctor = ({ role, isVisible, handleOk, handleCancel, form, user, reload, setReload }: IProps) => {
-  const [specialtyId, setSpecialtyId] = useState<number | null>(null);
+const ModalUpdatePatient = ({ role, isVisible, handleOk, handleCancel, form, user, reload, setReload }: IProps) => {
   const handleReload = () => {
     handleCancel();
     setReload(!reload);
   }
-  const { specialties, loading: specialtyLoading, reload: specialtyReload, handleTableChange: specialtyTableChange } = useSpecialtyList(undefined, true);
-  console.log("specialties", specialties)
-
+  const [identityType, setIdentityType] = useState<string>("citizen");
   return (
     <Modal
       open={isVisible}
@@ -85,32 +81,6 @@ const ModalUpdateDoctor = ({ role, isVisible, handleOk, handleCancel, form, user
           <Input placeholder={`Số điện thoại ${TYPE_EMPLOYEE_STR[role]}`} maxLength={20} />
         </Form.Item>
 
-        {role === "doctor" && (
-          <>
-            <Form.Item
-              label="Khoa"
-              name="specialty_id"
-            >
-              <Select
-                style={{ width: 120 }}
-                value={specialtyId}
-                onChange={(value) => setSpecialtyId(value)}
-                options={specialties.map((specialty) => ({
-                  label: specialty.name,
-                  value: specialty.id,
-                }))}
-              />
-            </Form.Item>
-            <Form.Item name="bio" label="Tiểu sử">
-              <Input.TextArea placeholder="Tiểu sử bác sĩ" />
-            </Form.Item>
-            <Form.Item name="price" label="Giá khám" rules={[{ required: true, message: "Vui lòng nhập giá khám!" }]}>
-              <InputNumber placeholder="Giá khám" min={0} />  
-              {/* <span className="ml-2">Đ</span> */}
-            </Form.Item>
-          </>
-        )}
-
         <Form.Item
           name="gender"
           label="Giới tính"
@@ -128,11 +98,39 @@ const ModalUpdateDoctor = ({ role, isVisible, handleOk, handleCancel, form, user
         </Form.Item>
 
         <Form.Item name="date_of_birth" label="Ngày sinh">
-          <DatePicker format="DD/MM/YYYY" placeholder="Ngày sinh" minDate={dayjs().subtract(100, "year") as any} maxDate={dayjs().subtract(18, "year") as any} />
+          <DatePicker format="DD/MM/YYYY" placeholder="Ngày sinh" maxDate={dayjs()} />
         </Form.Item>
+        <Form.Item
+          name="identity_type"
+          label="Loại định danh"
+          initialValue="citizen"
+        >
+          <Select onChange={(value) => setIdentityType(value)} style={{ width: "100%" }}>
+            <Select.Option value="passport"><span className="text-black">Chứng minh nhân dân</span></Select.Option>
+            <Select.Option value="citizen"><span className="text-black">Căn cước công dân</span></Select.Option>
+          </Select>
+        </Form.Item>
+
+        {identityType === "citizen" ? (
+          <Form.Item name="identity_number" label="Số CCCD"
+            rules={[
+              { pattern: new RegExp(/^\d{12}$/), message: "Số CCCD không hợp lệ!", whitespace: true }
+            ]}
+          >
+            <Input placeholder="Số CCCD" maxLength={12} />
+          </Form.Item>
+        ) : (
+          <Form.Item name="identity_number" label="Số CMND"
+            rules={[
+              { pattern: new RegExp(/^\d{9}(\d{3})?$/), message: "Số CMND không hợp lệ!", whitespace: true }
+            ]}
+          >
+            <Input placeholder="Số CMND" maxLength={12} />
+          </Form.Item>
+        )}
       </Form>
     </Modal>
   );
 };
 
-export default ModalUpdateDoctor;
+export default ModalUpdatePatient;

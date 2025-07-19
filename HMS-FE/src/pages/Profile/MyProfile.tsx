@@ -1,9 +1,9 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Form, message, notification, Upload } from "antd";
-import ModalEditProfile from "../../components/modal/ModalEditProfile";
+import ModalEditProfile from "../../components/modal/StaffProfile/ModalEditProfile";
 import dayjs from "dayjs";
 import { getProfile, updatePassword, updateProfile } from "../../services/patient.service";
-import ModalEditPassword from "../../components/modal/ModalEditPassword";
+import ModalEditPassword from "../../components/modal/StaffProfile/ModalEditPassword";
 import Uploader from "./Uploader";
 import ProfileContext from "../../context/ProfileContext";
 
@@ -18,10 +18,10 @@ const MyProfile: React.FC = () => {
   const fetchProfile = async () => {
     try {
       const res = await getProfile()
-      console.log("profile:",res)
+      console.log("profile:", res)
       if (res.data.success) {
         // setUserData(res.data.user)
-  
+
         setProfile(res.data.user)
       }
     } catch (error) {
@@ -60,7 +60,7 @@ const MyProfile: React.FC = () => {
     } catch (error: any) {
       if (error?.response?.data?.errors) {
         notification.error({ message: error.response.data.errors[0] });
-      }else if (error?.response?.data?.message) {
+      } else if (error?.response?.data?.message) {
         notification.error({ message: error.response.data.message });
       }
       else if (error?.errorFields?.length > 0) {
@@ -126,12 +126,12 @@ const MyProfile: React.FC = () => {
     formPassword.resetFields();
     setIsVisiblePassword(false);
   }
-    return (
+  return (
     <div className="max-w-lg flex mx-auto flex-col gap-2 text-sm">
       <Uploader reload={reload} setReload={setReload} user={profile} reloadUser={reloadUser} setReloadUser={setReloadUser} />
       {/* <img className="w-36 rounded" src={assets.profile_pic} alt="profile" /> */}
 
-      <p className="font-medium text-3xl text-neutral-800 mt-4">  
+      <p className="font-medium text-3xl text-neutral-800 mt-4">
         {profile.full_name || "Không có tên"}
       </p>
 
@@ -161,7 +161,7 @@ const MyProfile: React.FC = () => {
           <p className="font-medium">Ngày sinh:</p>
           <p className="text-gray-400">{profile?.date_of_birth ? dayjs(profile?.date_of_birth).format("DD/MM/YYYY") : "Không có ngày sinh"}</p>
           <p className="font-medium">Số CMND:</p>
-            <p className="text-gray-400">{profile?.patient?.identity_number || "Không có số CMND"}</p>
+          <p className="text-gray-400">{profile?.patient?.identity_number || "Không có số CMND"}</p>
         </div>
       </div>
       <div className="flex justify-between">
@@ -173,15 +173,15 @@ const MyProfile: React.FC = () => {
             Cập nhật thông tin
           </button>
         </div>
-        { profile.sso_provider === "local" && (
+        {profile.sso_provider === "local" && (
           <div className="mt-10">
             <button
               className="border cursor-pointer border-gray-500 px-8 py-2 rounded-full hover:bg-gray-500 hover:text-white transition-all"
-            onClick={() => handleUpdatePassword()}
-          >
-            Thay đổi mật khẩu
-          </button>
-        </div>
+              onClick={() => handleUpdatePassword()}
+            >
+              Thay đổi mật khẩu
+            </button>
+          </div>
         )}
       </div>
       <ModalEditProfile isVisible={isVisibleProfile} handleOk={handleOkProfile} handleCancel={handleCancelProfile} form={formProfile} />

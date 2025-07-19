@@ -106,7 +106,7 @@ class PaymentService {
                 },
             },
         });
-        // console.log(payments)
+        console.log(payments)
 
         const data = payments.map(p => ({
             id: p.id, // This is payment id
@@ -118,7 +118,7 @@ class PaymentService {
             status: p.status,
             payment_time: p.payment_time,
         }));
-        console.log(">>>>>>>> data", data)
+        console.log(">>>>>>>>data", data)
         return data
     };
 

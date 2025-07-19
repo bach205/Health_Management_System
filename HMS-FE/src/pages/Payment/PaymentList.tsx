@@ -12,6 +12,7 @@ interface InvoiceItem {
 }
 
 interface InvoiceRecord {
+  id: number;
   record_id: number;
   patient_name: string;
   examined_at: string;
@@ -60,7 +61,7 @@ const PaymentList: React.FC = () => {
 
   const handleUpdatePayment = async (record: InvoiceRecord, status: 'paid' | 'canceled') => {
     try {
-      await updatePaymentStatus(record.record_id, status);
+      await updatePaymentStatus(record.id, status);
       message.success('Cập nhật trạng thái thanh toán thành công');
       fetchData();
     } catch (err) {
@@ -147,7 +148,7 @@ const PaymentList: React.FC = () => {
       <Table
         columns={columns}
         dataSource={data}
-        rowKey="record_id"
+        rowKey="id"
         loading={loading}
       />
 

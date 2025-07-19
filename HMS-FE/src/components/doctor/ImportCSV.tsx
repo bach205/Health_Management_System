@@ -1,18 +1,21 @@
 import React, { useState } from 'react';
 import { Upload, Modal, Button, message, notification } from 'antd';
 import { InboxOutlined } from '@ant-design/icons';
-import type { UploadFile } from 'antd';
 import Papa from 'papaparse';
 import { createDoctorsFromCSV } from '../../services/doctor.service';
 import { createNursesFromCSV } from '../../api/nurse';
+import { FileSpreadsheet } from 'lucide-react';
 
 const { Dragger } = Upload;
 
 interface IProps {
     role: string,
+
+    reload: boolean
+    setReload: (reload: boolean) => void
 }
 
-const CSVImportModal = ({ role }: IProps) => {
+const CSVImportModal = ({ role, reload, setReload }: IProps) => {
     const [visible, setVisible] = useState(false);
     const [fileList, setFileList] = useState<any[]>([]);
     const [csvData, setCsvData] = useState<any[]>([]);
@@ -40,6 +43,7 @@ const CSVImportModal = ({ role }: IProps) => {
                     return;
                 }
                 message.success("Import CSV thành công!");
+                setReload(!reload);
                 closeModal();
             } catch (error: any) {
                 console.log(error);
@@ -106,7 +110,7 @@ const CSVImportModal = ({ role }: IProps) => {
     return (
         <>
             <Button type="default" onClick={showModal}>
-                Import CSV
+            <FileSpreadsheet className='w-4 h-4' />Tạo nhanh với CSV
             </Button>
 
             <Modal
@@ -137,11 +141,11 @@ const CSVImportModal = ({ role }: IProps) => {
                     <p className="ant-upload-hint">Chỉ chấp nhận file có định dạng .csv</p>
                 </Dragger>
 
-                {csvData.length > 0 && (
+                {/* {csvData.length > 0 && (
                     <pre style={{ marginTop: 20, maxHeight: 300, overflowY: 'auto', background: '#f6f6f6', padding: 10 }}>
                         {JSON.stringify(csvData, null, 2)}
                     </pre>
-                )}
+                )} */}
             </Modal>
         </>
     );
