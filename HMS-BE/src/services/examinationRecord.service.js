@@ -100,7 +100,7 @@ class ExaminationRecordService {
     }
 
     static async getByAppointmentId(appointmentId) {
-        if (!appointmentId) throw new Error("Appointment ID is required");
+        if (!appointmentId) throw new Error("Appointment ID phải tồn tại");
 
         const record = await prisma.examinationRecord.findFirst({
             where: { appointment_id: Number(appointmentId) },
@@ -121,6 +121,7 @@ class ExaminationRecordService {
                         medicine: true,
                     },
                 },
+                payments: true,
             }
 
         });
@@ -156,6 +157,27 @@ class ExaminationRecordService {
             include: {
                 patient: true,
                 primaryDoctor: true,
+            },
+            orderBy: { created_at: "desc" },
+        });
+    }
+
+    // Lấy lịch sử khám của bệnh nhân
+    static async getPatientExaminationHistory(patientId) {
+        return prisma.examinationRecord.findMany({
+            where: { patient_id: Number(patientId) },
+            include: {
+                clinic: true,
+                doctor: {
+                    include: {
+                        user: true,
+                    },
+                },
+                prescriptionItems: {
+                    include: {
+                        medicine: true,
+                    },
+                },
             },
             orderBy: { created_at: "desc" },
         });

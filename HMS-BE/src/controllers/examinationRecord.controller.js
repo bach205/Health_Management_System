@@ -28,6 +28,12 @@ class ExaminationRecordController {
         const records = await examinationRecordService.getAll(req.query);
         return new OK({ message: "Lấy danh sách hồ sơ khám thành công", metadata: records }).send(res);
     }
+
+    static async getPatientExaminationHistory(req, res) {
+        const { patientId } = req.params;
+        const records = await examinationRecordService.getPatientExaminationHistory(patientId);
+        return new OK({ message: "Lấy lịch sử khám của bệnh nhân thành công", metadata: records }).send(res);
+    }
 }
 
 module.exports = ExaminationRecordController; 

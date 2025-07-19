@@ -1,7 +1,7 @@
 import type { TYPE_EMPLOYEE } from "../constants/user.const";
 export interface IPagination {
   total: number;
-  pageSize: number;
+  pageSize: number | undefined;
   current: number;
 }
 

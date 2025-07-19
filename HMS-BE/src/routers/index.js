@@ -56,8 +56,6 @@ router.use("/payment", paymentRouter);
 router.use("/invoice", invoiceRouter);
 
 
-
 router.use("/blog", blogRouter);
 router.use("/blog-category", blogCategoryRouter);
-router.use("/blog-tag", blogTagRouter);
 module.exports = router;

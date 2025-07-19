@@ -17,7 +17,9 @@ const Login = () => {
   const handlePasswordChange = (e: any) => {
     setPassword(e.target.value);
   };
-
+  const handleWindowOpenLocation = (sub_link:string) => {
+    window.location.href=`http://localhost:5173/${sub_link}`;
+  };
   const onSubmitHandler = async (e: React.FormEvent) => {
     e.preventDefault();
     const values = {
@@ -25,10 +27,11 @@ const Login = () => {
       password: password.trim(),
     };
     const data = await auth.handleLogin(values);
-    if (data === "patient") navigate("/");
-    if (data === "nurse") navigate("/sale-medicine");
-    if (data === "doctor") navigate("/doctor/queue");
-    if (data === "admin") navigate("/admin");
+    if (data === "patient") handleWindowOpenLocation("");
+    if (data === "nurse") handleWindowOpenLocation("sale-medicine");
+    if (data === "doctor") handleWindowOpenLocation("doctor/queue");
+    if (data === "admin") handleWindowOpenLocation("admin");
+
   };
 
   const onGoogleSubmitHandler = async (data: object) => {

@@ -33,6 +33,7 @@ model User {
   availableSlots      AvailableSlot[]
   documents           Documents[]
 
+
   chatsSent                Chat[]                    @relation("ChatSendBy")
   chatsReceived            Chat[]                    @relation("ChatTo")
   conversationParticipants ConversationParticipant[]

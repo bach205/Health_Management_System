@@ -7,10 +7,10 @@ import { getQueueStatus } from "../../../types/queue.type";
 import { useAuthStore } from "../../../store/authStore";
 import { useSocket } from "../../../hooks/socket/useSocket";
 import { updateQueueStatus } from "../../../services/queue.service";
-import { Button, Dropdown, Flex, Menu, message, notification, Select, Space, Table, Tag, Tooltip, Typography } from "antd";
+import { Button, Dropdown, Flex, Menu, message, notification, Select, Space, Table, Tag, Tooltip, Typography, Modal } from "antd";
 import ModalPatientExaminationOrder from "./ModalPatientExaminationOrder";
 import DoctorExaminationOrderModal from "./DoctorExaminationOrderModal";
-import { RefreshCcw } from "lucide-react";
+import { ArrowBigRight, ClipboardCheck, FileClock, LogOut, RefreshCcw, Stethoscope } from "lucide-react";
 import dayjs from "dayjs";
 import DoctorExaminationRecordModal from "./DoctorExaminationRecord";
 
@@ -166,7 +166,7 @@ const QueueTable = () => {
             key: "id",
             align: "center",
             width: 50,
-            render: (_: any, record: any, index: number) => 
+            render: (_: any, record: any, index: number) =>
                 <p className="text-primary font-bold">{record.queue_number}</p>
             ,
         },
@@ -204,7 +204,7 @@ const QueueTable = () => {
             title: "Trạng thái",
             dataIndex: "status",
             key: "status",
-            width: 150,
+            width: 100,
             render: (status: string) => <Tag color={getQueueStatusColor(status)}>{getQueueStatus(status)}</Tag>,
         },
         {
@@ -212,47 +212,66 @@ const QueueTable = () => {
             key: "action",
             fixed: "right",
             ellipsis: true,
-            width: 200,
+            width: 250,
             render: (_: any, record: any) => {
-                console.log(record)
+                console.log(record);
                 return (
-                    //  kiem tra tai khoan bac si co trung voi appointment ko
-                    record?.appointment?.doctor?.id === currentDoctorId &&
                     <Space wrap size={'small'}>
                         {record.status === "waiting" && (
                             <>
-                                <Button
-                                    key="start"
-                                    onClick={() => handleStatusUpdate(record.id, "in_progress")}
-                                    type="primary"
-                                >
-                                    Bắt đầu khám
-                                </Button>
-                                <Button
-                                    key="skip"
-                                    onClick={() => handleStatusUpdate(record.id, "skipped")}
-                                    danger
-                                >
-                                    Bỏ qua
-                                </Button>
+                                <Tooltip title="Bắt đầu khám">
+                                    <Button
+                                        key="start"
+                                        onClick={() => handleStatusUpdate(record.id, "in_progress")}
+                                        type="primary"
+                                    >
+                                        <Stethoscope className="w-4 h-4" /> Bắt đầu
+                                    </Button>
+                                </Tooltip>
+                                <Tooltip title="Bỏ qua bệnh nhân">
+                                    <Button
+                                        key="skip"
+                                        onClick={() => handleStatusUpdate(record.id, "skipped")}
+                                        danger
+                                    >
+                                        <LogOut className="w-4 h-4" />
+                                    </Button>
+                                </Tooltip>
                             </>
                         )}
                         {record.status === "in_progress" && (
                             <>
-                                <Button color="pink" key="viewExaminationOrder" onClick={() => handleViewExaminationOrder(record.patient)}>
-                                    Xem lịch sử chuyển phòng
-                                </Button>
-                                <Button type="primary" key="finish" onClick={() => handleFinishExam(record)}>
-                                    Khám xong
-                                </Button>
-                                <Button type="dashed" key="assign" onClick={() => handleAssignClinic(record)}>
-                                    Chỉ định phòng tiếp
-                                </Button>
+                                <Tooltip title="Hoàn thành khám">
+                                    <Button
+                                        type="primary"
+                                        key="finish"
+                                        onClick={() => handleFinishExam(record)}
+                                    >
+                                        <ClipboardCheck className="w-4 h-4" /> Khám xong
+                                    </Button>
+                                </Tooltip>
+                                <Tooltip title="Xem lịch sử chuyển phòng">
+                                    <Button
+                                        key="viewExaminationOrder"
+                                        onClick={() => handleViewExaminationOrder(record.patient)}
+                                    >
+                                        <FileClock className="w-4 h-4" />
+                                    </Button>
+                                </Tooltip>
+                                <Tooltip title="Chỉ định đến phòng tiếp theo">
+                                    <Button
+                                        type="dashed"
+                                        key="assign"
+                                        onClick={() => handleAssignClinic(record)}
+                                    >
+                                        <ArrowBigRight className="w-5 h-5" />
+                                    </Button>
+                                </Tooltip>
                             </>
                         )}
                     </Space>
                 );
-            },
+            }
         },
     ];
 

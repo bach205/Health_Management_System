@@ -4,6 +4,8 @@ import { useNotificationSocket } from '../../hooks/socket/useNotification';
 import type { ListNotificationProps } from '../../types/notification.type';
 import type { NotificationItem } from '../../types/notification.type';
 import { deleteNotification } from '../../api/notification';
+import { useNavigate } from 'react-router-dom';
+import { MoreVertical } from 'lucide-react';
 
 const ListNotification = ({
     modalRef,
@@ -11,9 +13,11 @@ const ListNotification = ({
     notifications,
     setNotifications,
     loadMoreNotifications,
-    hasMore
-}: ListNotificationProps & { setNotifications: React.Dispatch<React.SetStateAction<NotificationItem[]>>, loadMoreNotifications: () => void, hasMore: boolean }) => {
+    hasMore,
+    navigate
+}: ListNotificationProps & { setNotifications: React.Dispatch<React.SetStateAction<NotificationItem[]>>, loadMoreNotifications: () => void, hasMore: boolean, navigate: (url: string) => void }) => {
     const listRef = useRef<HTMLUListElement>(null);
+    const [openMenuIdx, setOpenMenuIdx] = useState<number | null>(null);
 
     // Gọi loadMore khi scroll tới cuối
     const handleScroll = (e: React.UIEvent<HTMLUListElement>) => {
@@ -51,27 +55,51 @@ const ListNotification = ({
                     notifications.map((item, index) => (
                         <li
                             key={index}
-                            className="flex items-center text-sm text-gray-700 bg-gray-50 p-2 rounded hover:bg-gray-100 transition"
+                            className="flex items-center text-sm text-gray-700 bg-gray-50 p-2 rounded hover:bg-gray-100 transition cursor-pointer relative"
+                            onClick={() => { if (item.navigate_url) navigate(item.navigate_url); }}
                         >
                             {!item.isSeen && (
                                 <span className="w-2 h-2 bg-blue-500 rounded-full mr-2 inline-block"></span>
                             )}
-                            <span className="flex-1">{item.message}</span>
-                            <button
-                                className="ml-2 text-xs text-red-500 hover:text-red-700"
-                                title="Xóa thông báo"
-                                onClick={async () => {
-                                    try {
-                                        await deleteNotification(item.id);
-                                        // Xóa khỏi danh sách local
-                                        setNotifications((prev) => prev.filter(n => n.id !== item.id));
-                                    } catch (err) {
-                                        alert('Xóa thông báo thất bại!');
-                                    }
-                                }}
-                            >
-                                Xóa
-                            </button>
+                            <span className="flex-1">
+                                {item.message}
+                                {item.created_at && (
+                                    <div className="text-xs text-gray-400 mt-1">
+                                        {new Date(item.created_at).toLocaleString('vi-VN', { hour12: false })}
+                                    </div>
+                                )}
+                            </span>
+                            <div className="relative ml-2">
+                                <button
+                                    className="p-1 rounded hover:bg-gray-200"
+                                    onClick={e => {
+                                        e.stopPropagation();
+                                        setOpenMenuIdx(openMenuIdx === index ? null : index);
+                                    }}
+                                    aria-label="Tùy chọn thông báo"
+                                >
+                                    <MoreVertical className="w-4 h-4" />
+                                </button>
+                                {openMenuIdx === index && (
+                                    <div className="absolute right-0 top-6 bg-white border rounded shadow z-10 min-w-[80px]">
+                                        <button
+                                            className="block w-full text-left px-3 py-1 text-xs text-red-500 hover:bg-gray-100"
+                                            onClick={async (e) => {
+                                                e.stopPropagation();
+                                                try {
+                                                    await deleteNotification(item.id);
+                                                    setNotifications((prev) => prev.filter(n => n.id !== item.id));
+                                                    setOpenMenuIdx(null);
+                                                } catch (err) {
+                                                    alert('Xóa thông báo thất bại!');
+                                                }
+                                            }}
+                                        >
+                                            Xóa
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
                         </li>
                     ))
                 )}
@@ -88,6 +116,7 @@ export default function Notification() {
 
     const modalRef = useRef<HTMLDivElement>(null);
     const bellRef = useRef<HTMLButtonElement>(null);
+    const navigate = useNavigate();
 
     // Đóng modal khi click ra ngoài
     useEffect(() => {
@@ -134,6 +163,7 @@ export default function Notification() {
                     setNotifications={setNotifications}
                     loadMoreNotifications={loadMoreNotifications}
                     hasMore={hasMore}
+                    navigate={navigate}
                 />
             )}
         </div>

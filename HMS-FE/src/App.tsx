@@ -48,6 +48,7 @@ import Monitor from "./pages/Queue/Monitor";
 import QRBookAppointment from "./pages/QRBookAppointment";
 import SaleMedicinePage from "./pages/SaleMedicinePage";
 import ExaminationResult from "./pages/Patient/ExaminationResult";
+import ExaminationHistory from "./pages/Patient/ExaminationHistory";
 import BlogDashboard from "./pages/Blog/BlogDashboard";
 import BlogDetail from "./pages/Blog/BlogDetail";
 import CreateBlog from "./pages/Admin/Blog/CreateBlog";
@@ -259,7 +260,7 @@ const PrivateRoutes: PrivateRoute[] = [
   },
 
   {
-    path: "/nurse-manage-payments",
+    path: "/manage-payments",
     element: <PaymentList />,
     layout: DashboardLayout,
   },
@@ -274,6 +275,13 @@ const PrivateRoutes: PrivateRoute[] = [
   {
     path: "/my-appointments/record/:appointmentId",
     element: <ExaminationResult />,
+    allowedRoles: ["patient"],
+    layout: MainLayout,
+  },
+
+  {
+    path: "/examination-history",
+    element: <ExaminationHistory />,
     allowedRoles: ["patient"],
     layout: MainLayout,
   },

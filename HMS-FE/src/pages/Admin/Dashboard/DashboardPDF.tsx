@@ -98,19 +98,31 @@ const DashboardPDF = ({ statistics, topDoctors, periodLabel, revenueYearData, pe
             </View>
 
             <View style={styles.section}>
-                <Text style={{ ...styles.label, marginBottom: 6 }}>Thống kê chi tiết:</Text>
+                <Text style={{ ...styles.label, marginBottom: 6 }}>Thống kê lượt khám:</Text>
                 <Text>Số lượt khám trực tiếp: {statistics.totalExamination} ca</Text>
-                <Text>Số lượt khám từ xa: {statistics.totalAppointments} ca</Text>
-                <Text>Số lượt hủy: {statistics.totalCancel} ca</Text>
-                <Text>Bệnh nhân dưới 20 tuổi: {statistics.totalPatientUnder20} người</Text>
+                <Text>Số lượt đặt lịch khám: {statistics.totalAppointments} ca</Text>
+                <Text>Số lượt hủy lịch: {statistics.totalCancel} ca</Text>
+                {/* <Text>Bệnh nhân dưới 20 tuổi: {statistics.totalPatientUnder20} người</Text>
                 <Text>Bệnh nhân từ 20 đến 40 tuổi: {statistics.totalPatient2040} người</Text>
-                <Text>Bệnh nhân từ 40 tuổi trở lên: {statistics.totalPatient40} người</Text>
+                <Text>Bệnh nhân từ 40 tuổi trở lên: {statistics.totalPatient40} người</Text> */}
             </View>
             <View style={styles.section}>
-                <Text style={{ ...styles.label, marginBottom: 6 }}>Lượt đặt lịch theo thứ trong tuần:</Text>
-                {statistics.totalAppointmentsInWeek.map((count, index) => (
-                    <Text key={index}>Thứ {index === 0 ? 'Chủ nhật' : index}: {count} lượt</Text>
-                ))}
+                <Text style={{ ...styles.label, marginBottom: 6 }}>Tổng lượt đặt lịch theo thứ trong tuần:</Text>
+
+                <View style={styles.tableHeader}>
+                    <Text style={{ ...styles.cell, textAlign: 'center' }}>Thứ</Text>
+
+                    {['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'].map((day, idx) => (
+                        <Text key={idx} style={{ ...styles.cell, textAlign: 'center' }}>{day}</Text>
+                    ))}
+                </View>
+
+                <View style={styles.tableRow}>
+                    <Text style={{ ...styles.cell, textAlign: 'center' }}>Lượt</Text>
+                    {statistics.totalAppointmentsInWeek.map((count, index) => (
+                        <Text key={index} style={{ ...styles.cell, textAlign: 'center' }}>{count}</Text>
+                    ))}
+                </View>
             </View>
 
         </Page>

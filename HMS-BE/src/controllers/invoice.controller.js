@@ -12,6 +12,15 @@ class InvoiceController {
     const data = await InvoiceService.getInvoiceDetail(record_id);
     return new OK({ message: "Lấy chi tiết hóa đơn thành công", metadata: data }).send(res);
   };
+
+  getInvoiceByAppointmentId = async (req, res) => {
+    const { id } = req.params;
+    const result = await InvoiceService.getInvoiceByAppointmentId(id);
+    return new OK({
+      message: "Lấy hóa đơn thành công",
+      metadata: result,
+    }).send(res);
+  };
 }
 
 module.exports = new InvoiceController();
