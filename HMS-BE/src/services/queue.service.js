@@ -183,28 +183,28 @@ class QueueService {
   }
 
   static async createOrderAndAssignToDoctorQueue({
-    patient_id,
-    from_clinic_id,
-    to_clinic_id,
-    to_doctor_id,
-    reason = "",
-    note = "",
-    extra_cost = 0,
-    appointment_id,
-    priority = 2,
+    patient_id, // bệnh nhân
+    from_clinic_id, // chuyển từ phòng khám này
+    to_clinic_id, // sang phòng khám khác
+    to_doctor_id, // bác sĩ ở phòng khám mới
+    reason = "", // lý do chuyển phòng
+    note = "", // ghi chú
+    extra_cost = 0, // chi phí chuyển phòng
+    appointment_id, // lịch hẹn khám
+    priority = 2, // ưu tiên chuyển phòng
   }) {
 
-    // console.log(">>> createOrderAndAssignToDoctorQueue params:",
-    //   patient_id,
-    //   from_clinic_id,
-    //   to_clinic_id,
-    //   to_doctor_id,
-    //   reason,
-    //   note,
-    //   extra_cost,
-    //   appointment_id,
-    //   priority,
-    // )
+    console.log(">>> createOrderAndAssignToDoctorQueue params:",
+      patient_id,
+      from_clinic_id,
+      to_clinic_id,
+      to_doctor_id,
+      reason,
+      note,
+      extra_cost,
+      appointment_id,
+      priority,
+    )
 
     const appointment = await prisma.appointment.findUnique({
       where: { id: appointment_id },

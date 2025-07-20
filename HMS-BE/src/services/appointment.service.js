@@ -54,7 +54,7 @@ class AppointmentService {
       INSERT INTO appointments (
         patient_id, doctor_id, clinic_id, appointment_date, appointment_time, reason, note, status, priority, created_at, updated_at
       ) VALUES (
-        ${data.patient_id}, ${data.doctor_id}, ${data.clinic_id}, ${data.slot_date}, ${data.start_time}, ${data.reason}, ${data.note}, 'pending', 0, NOW(), NOW()
+        ${data.patient_id}, ${data.doctor_id}, ${data.clinic_id}, ${data.slot_date}, ${data.start_time}, ${data.reason}, ${data.note}, 'pending', 1, NOW(), NOW()
       )
     `;
     // Lấy appointment vừa tạo (raw query)
