@@ -530,18 +530,16 @@ INSERT INTO examination_records
 (patient_id, clinic_id, doctor_id, appointment_id, result, note, examined_at)
 VALUES
 (8, 1, 2, 1, 'Phổi có dấu hiệu viêm, cần chụp X-quang', 'Bệnh nhân cần nhập viện điều trị', '2025-06-01 09:30:00'),
-
 (8, 9, 2, 2, 'X-quang phổi cho thấy viêm phổi thùy dưới', 'Cần điều trị kháng sinh', '2025-06-01 10:15:00'),
-
 (9, 2, 3, 3, 'Đau vùng hố chậu phải, dấu hiệu McBurney dương tính', 'Cần phẫu thuật cấp cứu', '2025-06-02 14:00:00'),
-
 (10, 3, 14, 4, 'X-quang khớp gối cho thấy thoái hóa độ 2', 'Cần tập vật lý trị liệu', '2025-06-03 08:45:00'),
-
 (11, 4, 2, 5, 'Xét nghiệm máu dương tính với sốt xuất huyết', 'Theo dõi tiểu cầu', '2025-06-04 11:20:00'),
-
 (12, 5, 3, 6, 'Test dị ứng dương tính với penicillin', 'Tránh sử dụng nhóm thuốc beta-lactam', '2025-06-05 15:30:00'),
-
 (13, 6, 14, 7, 'Đo thị lực: 3/10, cần đeo kính -2.5', 'Tái khám sau 3 tháng', '2025-06-06 09:00:00');
+(8, 7, 5, 8, 'Nội soi tai mũi họng phát hiện viêm xoang nhẹ', 'Kê đơn thuốc điều trị 7 ngày', '2025-06-08 13:50:00'),
+(9, 8, 3, 9, 'Chụp CT phát hiện tụ máu dưới màng cứng nhỏ', 'Theo dõi tại nhà, tái khám sau 1 tuần', '2025-06-09 09:30:00'),
+(10, 1, 2, 10, 'Xét nghiệm nước tiểu cho thấy nhiễm trùng nhẹ', 'Uống kháng sinh 5 ngày', '2025-06-10 12:00:00'),
+(11, 2, 14, 11, 'Siêu âm tuyến giáp phát hiện nhân nhỏ', 'Theo dõi định kỳ mỗi 6 tháng', '2025-06-11 10:40:00');
 
 INSERT INTO examination_orders 
 (doctor_id, patient_id, appointment_id, from_clinic_id, to_clinic_id, reason,note, extra_cost)
@@ -600,27 +598,37 @@ INSERT INTO payments (patient_id, record_id, amount, method, payment_time, note,
 (10, 3, 800000.00, 'bank_transfer', '2025-06-03 10:00:00', 'Thanh toán lần 1', 'paid'),
 (11, 4, 1200000.00, 'e_wallet', '2025-06-04 12:00:00', 'Thanh toán toàn bộ', 'paid'),
 (12, 5, 500000.00, 'card', '2025-06-05 16:00:00', 'Thanh toán lần 1', 'paid'),
-(13, 6, 300000.00, 'cash', '2025-06-06 10:00:00', 'Thanh toán toàn bộ', 'paid');
+(8, 6, 300000.00, 'cash', '2025-06-06 10:00:00', 'Thanh toán toàn bộ', 'paid'),
+(9, 7, 1000000.00, 'cash', '2025-06-07 09:00:00', 'Thanh toán toàn bộ', 'paid'),
+(10, 8, 950000.00, 'card', '2025-06-08 14:30:00', 'Thanh toán lần 1', 'paid'),
+(11, 9, 2200000.00, 'bank_transfer', '2025-06-09 10:45:00', 'Thanh toán toàn bộ', 'paid'),
+(11, 10, 1100000.00, 'e_wallet', '2025-06-10 13:15:00', 'Thanh toán lần 1', 'paid'),
+(11, 11, 1300000.00, 'cash', '2025-06-11 11:50:00', 'Thanh toán toàn bộ', 'paid');
 
 -- Insert sample data into invoice_items
 INSERT INTO invoice_items (record_id, description, amount) VALUES
 (1, 'Khám bệnh', 300000.00),
 (1, 'Chụp X-quang phổi', 500000.00),
-(1, 'Thuốc kháng sinh', 700000.00),
 (2, 'Khám bệnh', 300000.00),
 (2, 'Phẫu thuật ruột thừa', 2000000.00),
-(2, 'Thuốc kháng sinh', 200000.00),
 (3, 'Khám bệnh', 300000.00),
 (3, 'Chụp X-quang khớp', 400000.00),
-(3, 'Thuốc điều trị', 100000.00),
 (4, 'Khám bệnh', 300000.00),
 (4, 'Xét nghiệm máu', 400000.00),
-(4, 'Thuốc hạ sốt', 500000.00),
 (5, 'Khám bệnh', 300000.00),
 (5, 'Test dị ứng', 100000.00),
-(5, 'Thuốc chống dị ứng', 100000.00),
 (6, 'Khám bệnh', 300000.00),
-(6, 'Đo thị lực', 0.00);
+(6, 'Đo thị lực', 0.00),
+(7, 'Khám bệnh', 300000.00),
+(7, 'Siêu âm bụng', 700000.00),
+(8, 'Khám bệnh', 300000.00),
+(8, 'Nội soi tai mũi họng', 650000.00),
+(9, 'Khám bệnh', 300000.00),
+(9, 'Chụp CT sọ não', 1900000.00),
+(10, 'Khám bệnh', 300000.00),
+(10, 'Xét nghiệm nước tiểu', 800000.00),
+(11, 'Khám bệnh', 300000.00),
+(11, 'Siêu âm tuyến giáp', 1000000.00);
 
 
 -- Xóa dữ liệu cũ (nếu muốn làm sạch bảng)

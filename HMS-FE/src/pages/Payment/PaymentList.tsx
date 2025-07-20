@@ -32,7 +32,7 @@ const PaymentList: React.FC = () => {
   const [status, setStatus] = useState<string>('all');
   const [sort, setSort] = useState<string>('newest');
   const [searchName, setSearchName] = useState<string>('');
-  const [pagination, setPagination] = useState({ current: 1, pageSize: 10 });
+  const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 });
 
   const fetchData = async (page = 1, pageSize = 10, name = searchName, status = 'all', sort = 'newest') => {
     setLoading(true);
@@ -44,9 +44,9 @@ const PaymentList: React.FC = () => {
         name: name || undefined,
         sort: sort === 'newest' ? 'desc' : 'asc',
       });
-      // console.log(res)
+      console.log(res)
       setData(res.data.metadata.payments);
-      setPagination({ current: res.data.metadata.currentPage, pageSize });
+      setPagination({ current: res.data.metadata.currentPage, pageSize, total: res.data.metadata.totalCount });
     } catch (err) {
       message.error('Lỗi khi tải danh sách hóa đơn');
     } finally {
@@ -234,6 +234,7 @@ const PaymentList: React.FC = () => {
         pagination={{
           current: pagination.current,
           pageSize: pagination.pageSize,
+          total: pagination.total,
           showSizeChanger: false,
           onChange: (page, pageSize) => {
             fetchData(page, pageSize);
@@ -252,7 +253,7 @@ const PaymentList: React.FC = () => {
         <Table
           dataSource={invoiceItems}
           rowKey="id"
-          pagination={false}
+          pagination={pagination}
           loading={loading}
           columns={[
             { title: 'Mô tả', dataIndex: 'description' },
