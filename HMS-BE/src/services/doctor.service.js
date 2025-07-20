@@ -460,8 +460,6 @@ class DoctorService {
             },
         });
         
-        console.log("All slots found:", allSlots.length);
-        
         // Lọc slot hợp lệ (trong tương lai hoặc hôm nay nhưng chưa qua giờ)
         const validSlots = allSlots.filter(slot => {
             const slotDate = new Date(slot.slot_date);
@@ -480,23 +478,35 @@ class DoctorService {
             return false;
         });
         
-        console.log("Valid slots found:", validSlots.length);
-        
         // Group theo doctor_id để lấy slot gần nhất cho mỗi bác sĩ
         const doctorMap = new Map();
 
         for (const slot of validSlots) {
             const docId = slot.doctor_id;
+            
             if (!doctorMap.has(docId)) {
                 doctorMap.set(docId, {
                     doctor: slot.doctor,
                     nearestSlot: slot,
                 });
+            } else {
+                // Nếu đã có slot cho doctor này, kiểm tra xem slot mới có sớm hơn không
+                const existingSlot = doctorMap.get(docId).nearestSlot;
+                const existingDate = new Date(existingSlot.slot_date);
+                const newDate = new Date(slot.slot_date);
+                
+                if (newDate < existingDate || 
+                    (newDate.getTime() === existingDate.getTime() && 
+                     slot.start_time < existingSlot.start_time)) {
+                    doctorMap.set(docId, {
+                        doctor: slot.doctor,
+                        nearestSlot: slot,
+                    });
+                }
             }
         }
         
         const data = Array.from(doctorMap.values());
-        console.log("Available doctors with valid slots:", data.length);
         return data;
     };
 
