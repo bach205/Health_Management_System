@@ -284,6 +284,7 @@ class AuthController {
   
   async updatePatientInfo(req, res) {  
     try {
+      // console.log(req.body)
       const { userId, updateData } = req.body;
       console.log(updateData)
       const result = await patientService.updatePatient(userId, updateData);

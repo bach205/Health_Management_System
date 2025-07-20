@@ -191,26 +191,20 @@ class PatientService {
             }
         }
         */
-        const updatePatientData = {
-            full_name,
-            date_of_birth: date_of_birth ? new Date(date_of_birth) : null,
-            gender,
-            phone,
-            address,
-        }
-        if (avatar) {
-            updatePatientData.avatar = avatar;
-        }
 
         const updatedPatient = await prisma.user.update({
             where: {
                 id: existingPatient.id
             },
             data: {
-                ...updatePatientData,
+                full_name,
+                date_of_birth: date_of_birth ? new Date(date_of_birth) : null,
+                gender,
+                phone,
+                address,
                 patient: {
                     update: {
-                        where: { id: existingPatient.id },
+                        where: { id: userId },
                         data: { identity_number }
                     }
                 }
@@ -219,7 +213,7 @@ class PatientService {
                 patient: true
             }
         });
-        console.log("updatedPatient: ", updatedPatient);
+     console.log("updatedPatient: ", updatedPatient);
         return updatedPatient;
     }
 
