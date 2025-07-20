@@ -89,7 +89,6 @@ const ModalUpdatePatient = ({ role, isVisible, handleOk, handleCancel, form, use
           <Select style={{ width: 100 }}>
             <Select.Option value="male"><span className="text-black">Nam</span></Select.Option>
             <Select.Option value="female"><span className="text-black">Nữ</span></Select.Option>
-            <Select.Option value="other"><span className="text-black">Khác</span></Select.Option>
           </Select>
         </Form.Item>
 

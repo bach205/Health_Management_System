@@ -178,7 +178,6 @@ const ModalCreateDoctor = ({ role, isVisible, handleOk, handleCancel, form }: IP
           <Select style={{ width: 100 }}>
             <Select.Option value="male"><span className="text-black">Nam</span></Select.Option>
             <Select.Option value="female"><span className="text-black">Nữ</span></Select.Option>
-            <Select.Option value="other"><span className="text-black">Khác</span></Select.Option>
           </Select>
         </Form.Item>
 
@@ -188,7 +187,7 @@ const ModalCreateDoctor = ({ role, isVisible, handleOk, handleCancel, form }: IP
               label="Khoa"
               initialValue=""
               name="specialty_id"
-            // rules={[{ required: true, message: "Vui lòng chọn chuyên khoa!" }]}
+            rules={[{ required: true, message: "Vui lòng chọn chuyên khoa!" }]}
             >
               <Select
                 style={{ width: 120 }}

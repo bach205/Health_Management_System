@@ -191,12 +191,14 @@ const AdminDoctorDashboard = () => {
       // if (!record.date_of_birth) {
       //   record.date_of_birth = dayjs().subtract(18, "year").toString();
       // }
+      console.log(record)
       setCurrentUser(record);
       formUpdate.setFieldsValue({
         ...record,
         date_of_birth: record.date_of_birth ? dayjs(record.date_of_birth) : null,
         bio: record.doctor?.bio,
-        specialty: record.doctor?.specialty?.id,
+        price: record.doctor?.price || 0,
+        specialty_id: record.doctor?.specialty?.id,
       });
       setIsUpdateVisible(true);
     } catch (error) {
@@ -222,13 +224,16 @@ const AdminDoctorDashboard = () => {
 
   const handleCreateCancel = () => {
     setIsCreateVisible(false);
+    formCreate.resetFields();
   };
 
   const handleUpdateCancel = () => {
     setIsUpdateVisible(false);
+    formUpdate.resetFields();
   };
   const handleViewCancel = () => {
     setIsViewVisible(false);
+    formView.resetFields();
   };
 
 

@@ -44,7 +44,7 @@ const QueueTable = () => {
     const [statusFilter, setStatusFilter] = useState<string>("");
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
-    // Lọc queues theo ngày khám
+    // Lọc queues theo ngày khám    
     const filteredQueues = (() => {
         if (selectedDate) {
             return queues.filter((q: any) =>
@@ -223,10 +223,10 @@ const QueueTable = () => {
 
         {
             title: "Ngày khám",
-            dataIndex: ["appointment"],
-            key: "appointment",
+            dataIndex: "slot_date",
+            key: "slot_date",
             width: 100,
-            render: (appointment: any) => <Tag>{dayjs.utc(appointment?.appointment_date).format("DD/MM/YYYY")}</Tag>,
+            render: (slot_date: any) => <Tag>{dayjs.utc(slot_date).format("DD/MM/YYYY")}</Tag>,
         },
 
         {

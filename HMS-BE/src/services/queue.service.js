@@ -198,17 +198,7 @@ class QueueService {
     priority = 2, // ưu tiên chuyển phòng
   }) {
 
-    console.log(">>> createOrderAndAssignToDoctorQueue params:",
-      patient_id,
-      from_clinic_id,
-      to_clinic_id,
-      to_doctor_id,
-      reason,
-      note,
-      extra_cost,
-      appointment_id,
-      priority,
-    )
+
 
     const appointment = await prisma.appointment.findUnique({
       where: { id: appointment_id },
@@ -227,9 +217,7 @@ class QueueService {
     const appointmentTime = appointment.appointment_time.toTimeString().slice(0, 8);
     const currentTime = now.toTimeString().slice(0, 8);
     
-    console.log(">>> Appointment date:", appointmentDate.toISOString().split('T')[0]);
-    console.log(">>> Appointment time:", appointmentTime);
-    console.log(">>> Current time:", currentTime);
+
     
     let slot = null;
     
@@ -254,10 +242,7 @@ class QueueService {
     
     if (validSameDaySlots.length > 0) {
       slot = validSameDaySlots[0];
-      console.log(">>> Found slot on same day:", slot.slot_date.toISOString().split('T')[0], slot.start_time.toTimeString().slice(0, 8));
     } else {
-      console.log(">>> No available slots on same day, looking for future dates...");
-      
       // Ưu tiên 2: Tìm slot trong tương lai (ngày khác)
       slot = await prisma.availableSlot.findFirst({
         where: {
@@ -271,15 +256,7 @@ class QueueService {
           { start_time: "asc" },
         ],
       });
-      
-      if (slot) {
-        console.log(">>> Found slot on future date:", slot.slot_date.toISOString().split('T')[0], slot.start_time.toTimeString().slice(0, 8));
-      }
     }
-
-    console.log(">>> Slot found:", slot);
-    console.log(">>> Current time:", now.toISOString());
-    console.log(">>> Current time (HH:mm:ss):", currentTime);
     
     if (!slot) {
       throw new Error("Bác sĩ được chọn không có ca khám nào rảnh sau thời gian appointment hiện tại.");
