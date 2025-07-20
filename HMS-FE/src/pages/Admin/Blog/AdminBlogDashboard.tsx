@@ -20,8 +20,6 @@ import { useNavigate } from 'react-router-dom';
 import ModalViewBlog from '../../../components/modal/ModalViewBlog';
 import { deleteBlog, getBlogCategories, getBlogs } from '../../../services/blog.service';
 import type { IBlog, IBlogCategory } from '../../../types/index.type';
-import { RotateCcw, Search } from 'lucide-react';
-import ModalViewBlog from '../../../components/modal/ModalViewBlog';
 import type { ITag } from '../../../types/index.type';
 import { getAllTags } from '../../../api/tag';
 
