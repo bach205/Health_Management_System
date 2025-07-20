@@ -404,21 +404,41 @@ const DoctorExaminationRecordModal = ({
                 <Form.Item label="Chọn giờ tái khám">
                   <div className="flex gap-2 flex-wrap">
                     {(slotsByDate[selectedDate] || []).map(slot => {
-                      const start = dayjs(slot.start_time).format("HH:mm");
-                      const end = dayjs(slot.end_time).format("HH:mm");
+                      const startDate = new Date(slot.start_time);
+                      const endDate = new Date(slot.end_time);
+
+                      const start =
+                        startDate.getUTCHours().toString().padStart(2, '0') +
+                        ':' +
+                        startDate.getUTCMinutes().toString().padStart(2, '0');
+
+                      const end =
+                        endDate.getUTCHours().toString().padStart(2, '0') +
+                        ':' +
+                        endDate.getUTCMinutes().toString().padStart(2, '0');
+
+                      const isAvailable = slot.is_available;
+
                       return (
                         <Button
                           key={slot.id}
                           type={selectedSlotId === slot.id ? "primary" : "default"}
-                          onClick={() => setSelectedSlotId(slot.id)}
+                          onClick={() => isAvailable && setSelectedSlotId(slot.id)}
+                          className={`rounded-full group ${!isAvailable ? 'cursor-not-allowed' : ''}`}
+                          disabled={!isAvailable}
+                          title={!isAvailable ? 'Đã được đặt' : ''}
                         >
-                          {start} ~ {end}
+                          <span>{start} ~ {end}</span>
+                          {!isAvailable && (
+                            <span className="invisible group-hover:visible text-xs text-gray-500 ml-1">Đã đặt</span>
+                          )}
                         </Button>
                       );
                     })}
                   </div>
                 </Form.Item>
               )}
+
             </>
           )
         }

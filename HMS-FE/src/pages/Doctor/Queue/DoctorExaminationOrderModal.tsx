@@ -84,14 +84,18 @@ const ExaminationOrderModal = ({
 
   const handleFinish = async (values: any) => {
     try {
-      console.log("values", values)
+      // console.log("values", values)
       setLoading(true);
       if (values.to_clinic_id && !values.to_doctor_id) {
         message.error("Vui lòng chọn bác sĩ");
         return;
       }
-
-      // return
+      console.log("values", values)
+      console.log("patient_id", patient_id)
+      console.log("clinic_id", clinic_id)
+      console.log("doctor_id", doctor_id)
+      console.log("appointment_id", appointment_id)
+      return
 
       await mainRequest.post("/api/v1/queue/assign-clinic", {
         ...values,

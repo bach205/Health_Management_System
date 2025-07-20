@@ -253,7 +253,7 @@ const PaymentList: React.FC = () => {
         <Table
           dataSource={invoiceItems}
           rowKey="id"
-          pagination={pagination}
+          pagination={false}
           loading={loading}
           columns={[
             { title: 'Mô tả', dataIndex: 'description' },
