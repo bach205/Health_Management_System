@@ -167,12 +167,16 @@ class QueueController {
     }
   }
 
-  static async assignClinic(req, res) {
-    const result = await QueueService.createOrderAndAssignToDoctorQueue(req.body);
-    return new OK({
-      message: "Chuyển phòng và thêm vào hàng đợi thành công",
-      metadata: result
-    }).send(res)
+  static async assignClinic(req, res, next) {
+    try {
+      const result = await QueueService.createOrderAndAssignToDoctorQueue(req.body);
+      return new OK({
+        message: "Chuyển phòng và thêm vào hàng đợi thành công",
+        metadata: result
+      }).send(res);
+    } catch (error) {
+      next(error);
+    }
   }
 
 }

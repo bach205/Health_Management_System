@@ -432,16 +432,19 @@ class DoctorService {
         if (!clinicId) {
             throw new BadRequestError("Clinic ID không được để trống");
         }
-        const slots = await prisma.availableSlot.findMany({
+        
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const currentTime = now.toTimeString().slice(0, 8);
+        
+        // Tìm tất cả slot rảnh
+        const allSlots = await prisma.availableSlot.findMany({
             where: {
                 clinic_id: Number(clinicId),
                 is_available: true,
                 doctor: {
                     role: 'doctor', // Chỉ lấy slot của bác sĩ
                 },
-                // slot_date: {
-                //     gte: new Date(), // Chỉ lấy từ hôm nay trở đi
-                // },
             },
             orderBy: [
                 { slot_date: 'asc' },
@@ -453,14 +456,36 @@ class DoctorService {
                         id: true,
                         full_name: true,
                     }
-                }, // lấy từ bảng Doctor
+                },
             },
         });
-        console.log("doctor", slots)
+        
+        console.log("All slots found:", allSlots.length);
+        
+        // Lọc slot hợp lệ (trong tương lai hoặc hôm nay nhưng chưa qua giờ)
+        const validSlots = allSlots.filter(slot => {
+            const slotDate = new Date(slot.slot_date);
+            const slotTime = slot.start_time.toTimeString().slice(0, 8);
+            
+            // Slot trong tương lai
+            if (slotDate > today) {
+                return true;
+            }
+            
+            // Slot hôm nay nhưng chưa qua giờ
+            if (slotDate.getTime() === today.getTime() && slotTime > currentTime) {
+                return true;
+            }
+            
+            return false;
+        });
+        
+        console.log("Valid slots found:", validSlots.length);
+        
         // Group theo doctor_id để lấy slot gần nhất cho mỗi bác sĩ
         const doctorMap = new Map();
 
-        for (const slot of slots) {
+        for (const slot of validSlots) {
             const docId = slot.doctor_id;
             if (!doctorMap.has(docId)) {
                 doctorMap.set(docId, {
@@ -469,8 +494,9 @@ class DoctorService {
                 });
             }
         }
-        const data = Array.from(doctorMap.values())
-        console.log(data)
+        
+        const data = Array.from(doctorMap.values());
+        console.log("Available doctors with valid slots:", data.length);
         return data;
     };
 
