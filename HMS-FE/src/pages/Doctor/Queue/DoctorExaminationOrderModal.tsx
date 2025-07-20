@@ -60,10 +60,8 @@ const ExaminationOrderModal = ({
       const fetchClinicVolumeAndDoctors = async () => {
         try {
           const res = await getClinicService();
-          console.log(res)
 
           const resDoctors = await getAvailableDoctors(Number(to_clinic_id));
-          console.log(resDoctors.data.metadata)
 
           const doctors = resDoctors.data.metadata;
           
@@ -84,7 +82,6 @@ const ExaminationOrderModal = ({
 
   const handleFinish = async (values: any) => {
     try {
-      console.log("values", values)
       setLoading(true);
       
       // Kiểm tra xem có chọn phòng khám không
