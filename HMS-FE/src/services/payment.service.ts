@@ -9,6 +9,10 @@ export const getInvoiceList = async () => {
 export const getInvoiceDetail = async (record_id: number) => {
   return instance.get(`/api/v1/invoice/${record_id}`);
 };
+export const getInvoiceDetailByAppointmentId = async (appointment_id: number) => {
+  return instance.get(`/api/v1/invoice/appointment/${appointment_id}`);
+};
+
 
 // Xác nhận thanh toán cho một hóa đơn
 export const confirmPayment = async (record_id: number) => {
@@ -23,4 +27,8 @@ export const updatePaymentStatus = async (record_id: number, status: string) => 
 // Lấy danh sách payment đang pending
 export const getPendingPayments = async () => {
   return instance.get('/api/v1/payment/pending');
+};
+
+export const getAllPayments = async (params: any) => {
+  return instance.get('/api/v1/payment', { params });
 };

@@ -53,6 +53,7 @@ router.use('/sepay', sepayRouter);
 router.use('/feedback', feedbackRouter);
 router.use("/statistics", statisticsRouter);
 router.use("/payment", paymentRouter);
+router.use("/invoice", invoiceRouter);
 
 
 router.use("/blog", blogRouter);

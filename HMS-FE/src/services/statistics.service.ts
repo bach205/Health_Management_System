@@ -25,3 +25,8 @@ export const getRevenuePerMonthInYear = async (year: number) => {
         params: { year },
     });
 };
+
+export const getTotalStatistics = async () => {
+    return instance.get(`${BASE_URL}/total-statistics`);
+};
+

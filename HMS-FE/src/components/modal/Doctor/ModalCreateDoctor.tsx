@@ -1,13 +1,13 @@
 import { DatePicker, Form, Input, Modal, Select, Checkbox, type FormInstance, type UploadFile, message, Upload, Image, InputNumber } from "antd";
 import { useEffect, useState } from "react";
-import { specialtyOptions, TYPE_EMPLOYEE_STR } from "../../constants/user.const";
-import type { IUserBase } from "../../types/index.type";
+import { specialtyOptions, TYPE_EMPLOYEE_STR } from "../../../constants/user.const";
+import type { IUserBase } from "../../../types/index.type";
 import dayjs from "dayjs";
 import imageCompression from "browser-image-compression";
 import { PlusOutlined } from "@ant-design/icons";
-import { useSpecialtyList } from "../../hooks/useSpecialtyList";
+import { useSpecialtyList } from "../../../hooks/useSpecialtyList";
 import { toast } from "react-toastify";
-// import dayjs from "dayjs";
+import { getBase64 } from "../../../utils";
 
 interface IProps {
   isVisible: boolean;
@@ -17,13 +17,6 @@ interface IProps {
   role: IUserBase["role"];
 }
 
-const getBase64 = (file: File): Promise<string> =>
-  new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = (error) => reject(error);
-  });
 const ModalCreateDoctor = ({ role, isVisible, handleOk, handleCancel, form }: IProps) => {
 
   const [specialtyId, setSpecialtyId] = useState<number | null>(null);
@@ -35,7 +28,6 @@ const ModalCreateDoctor = ({ role, isVisible, handleOk, handleCancel, form }: IP
       confirm_password: "",
     });
   }, [showPasswordFields]);
-  const [identityType, setIdentityType] = useState("citizen");
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [previewImage, setPreviewImage] = useState('');
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -86,14 +78,14 @@ const ModalCreateDoctor = ({ role, isVisible, handleOk, handleCancel, form }: IP
   };
 
   const uploadButton = (
-    <div>
+    <div className="flex items-center justify-center flex-col gap-2">
       <PlusOutlined />
-      <div style={{ marginTop: 8 }}>Chọn ảnh</div>
+      <div className="mx-auto">Chọn ảnh</div>
     </div>
   );
   const { specialties, loading: specialtyLoading, reload: specialtyReload, handleTableChange: specialtyTableChange } = useSpecialtyList(undefined, true);
 
- 
+
   return (
     <Modal
       open={isVisible}

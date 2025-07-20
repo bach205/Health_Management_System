@@ -38,6 +38,14 @@ class StatisticsController {
       metadata: result,
     }).send(res);
   };
+
+  getTotalStatistics = async (req, res) => {
+    const result = await statisticsService.getTotalStatistics();
+    return new OK({
+      message: "Lấy tổng thống kê thành công",
+      metadata: result,
+    }).send(res);
+  };
 }
 
 module.exports = new StatisticsController();

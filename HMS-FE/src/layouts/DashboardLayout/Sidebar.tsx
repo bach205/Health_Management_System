@@ -45,7 +45,7 @@ const Sidebar = ({ isCollapsed, role }: { isCollapsed: boolean, role: string }) 
         } h-screen bg-white flex-col p-5 overflow-y-auto transition-all duration-300 hidden sm:flex`}
     >
       <div className="flex items-center justify-between mb-8 top-0 bg-white z-10">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
           <Hospital className="w-8 h-8 text-indigo-500" />
           {!isCollapsed && (
             <span className="text-xl font-semibold text-indigo-600">
@@ -179,6 +179,13 @@ const SIDEBAR_ITEMS = [
         icon: <LetterText className="w-4 h-4" />,
         href: "/admin/blogs",
       },
+           
+      {
+        id: "manage-payments",
+        label: "Quản lý hóa đơn",
+        icon: <Wallet className="w-4 h-4" />,
+        href: "/manage-payments",
+      },
     ],
   },
 
@@ -224,10 +231,10 @@ const SIDEBAR_ITEMS = [
       },
       
       {
-        id: "nurse-manage-payments",
+        id: "manage-payments",
         label: "Quản lý hóa đơn",
         icon: <Wallet className="w-4 h-4" />,
-        href: "/nurse-manage-payments",
+        href: "/manage-payments",
       },
 
     ],

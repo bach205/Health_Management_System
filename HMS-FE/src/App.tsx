@@ -260,7 +260,7 @@ const PrivateRoutes: PrivateRoute[] = [
   },
 
   {
-    path: "/nurse-manage-payments",
+    path: "/manage-payments",
     element: <PaymentList />,
     layout: DashboardLayout,
   },

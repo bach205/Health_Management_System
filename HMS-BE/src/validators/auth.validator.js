@@ -147,6 +147,7 @@ const updateDoctorSchema = Joi.object({
   date_of_birth: Joi.date().optional().allow(null, ""),
   address: Joi.string().optional().allow(null, ""),
   specialty_id: Joi.number().optional().allow(null, ""),
+  avatar: Joi.string().optional().allow(null, ""),
   bio: Joi.string().optional().allow(null, ""),
 });
 

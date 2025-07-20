@@ -7,7 +7,7 @@ let hasJoinedRoom = false;
 
 export const getSocket = (userId: string) => {
     if (!socket) {
-        socket = io(SOCKET_URL, {
+        socket = io(SOCKET_URL, { // kết nối đến server socket
             withCredentials: true,
             transports: ["websocket"],
             auth: {

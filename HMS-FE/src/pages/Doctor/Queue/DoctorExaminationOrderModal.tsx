@@ -63,9 +63,13 @@ const ExaminationOrderModal = ({
           console.log(res)
 
           const resDoctors = await getAvailableDoctors(Number(to_clinic_id));
-          console.log(resDoctors.data)
+          console.log(resDoctors.data.metadata)
+
           const doctors = resDoctors.data.metadata;
-          setAvailableDoctors(doctors || []);
+          // filter doctor không phải là doctor đang làm việc ở phòng khám hiện tại
+          const filteredDoctors = doctors.filter((doctor: any) => doctor.doctor.id != doctor_id);
+          console.log(filteredDoctors)
+          setAvailableDoctors(filteredDoctors || []);
           console.log(doctors);
         } catch (error) {
           console.error("Lỗi khi lấy thông tin phòng khám hoặc bác sĩ:", error);
@@ -80,12 +84,14 @@ const ExaminationOrderModal = ({
 
   const handleFinish = async (values: any) => {
     try {
-      console.log(values)
+      console.log("values", values)
       setLoading(true);
       if (values.to_clinic_id && !values.to_doctor_id) {
         message.error("Vui lòng chọn bác sĩ");
         return;
       }
+
+      // return
 
       await mainRequest.post("/api/v1/queue/assign-clinic", {
         ...values,
@@ -93,22 +99,13 @@ const ExaminationOrderModal = ({
         clinic_id: clinic_id,
         doctor_id: doctor_id,
         from_clinic_id: clinic_id,
+        
         appointment_id: appointment_id,
         reason: values.reason || "",
         note: values.note || "",
         extra_cost: isShowOtherPrice ? values.extra_cost || 0 : 0,
 
-        priority: 2, // Chuyển phòng khám
-        // created_by_user_id: currentUserId,
-        // examined_at: new Date().toISOString(),
-        // ...(values.to_clinic_id
-        //   ? {
-        //     to_clinic_id: Number(values.to_clinic_id),
-        //     to_doctor_id: Number(values.to_doctor_id),
-        //     total_cost: values.total_cost || 0,
-        //     ...slotInfo,
-        //   }
-        //   : {}),
+        priority: 2,
       });
 
       onSuccess?.();
@@ -125,9 +122,10 @@ const ExaminationOrderModal = ({
   const handleChangeClinic = (value: any) => {
     form.setFieldsValue({
       to_clinic_id: value,
+      to_doctor_id: null
     });
   };
-  console.log("availableDoctors", availableDoctors);
+  console.log("selected", selectedDoctorId);
 
 
   return (
@@ -166,7 +164,7 @@ const ExaminationOrderModal = ({
           </Form.Item>
         }
 
-        
+
         <Form.Item label="Ghi chú" name="note" >
           <Input.TextArea placeholder="Nhập ghi chú" />
         </Form.Item>
@@ -185,27 +183,6 @@ const ExaminationOrderModal = ({
 
           </Select>
         </Form.Item>
-
-        {/* {clinicSelected && (
-          <div className="mb-2 text-sm">
-            Số lượng bệnh nhân:
-            <span className={`text-white ml-2 px-2 py-1 rounded 
-            ${clinicVolume > 10
-                ? "bg-red-500"
-                : clinicVolume < 8 && clinicVolume > 5
-                  ? "bg-yellow-500"
-                  : "bg-green-500"
-              }`}
-            >
-              {clinicVolume > 10
-                ? "Đông"
-                : clinicVolume < 8 && clinicVolume > 5
-                  ? "Vừa phải"
-                  : "Ít"
-              }
-            </span>
-          </div>
-        )} */}
         {clinicSelected && (
           <>
             {availableDoctors.length > 0 ? (
@@ -222,7 +199,7 @@ const ExaminationOrderModal = ({
                     setSelectedDoctorId(value);
                   }}
                 >
-                  {availableDoctors.map((row : any) => (
+                  {availableDoctors.map((row: any) => (
                     <Option key={row.doctor.id} value={row.doctor.id} >
                       {row.doctor.full_name}
                     </Option>
