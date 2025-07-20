@@ -55,6 +55,7 @@ import CreateBlog from "./pages/Admin/Blog/CreateBlog";
 import AdminBlogDashboard from "./pages/Admin/Blog/AdminBlogDashboard";
 import EditBlog from "./pages/Blog/BlogEdit";
 import PaymentList from "./pages/Payment/PaymentList";
+import BlogCategoryManager from "./components/blog/BlogCategoryManager";
 
 dayjs.extend(plugin);
 dayjs.updateLocale("en", {
@@ -365,6 +366,12 @@ const PrivateRoutes: PrivateRoute[] = [
     element: <EditBlog />,
     layout: DashboardLayout,
     allowedRoles: ["admin", "doctor", "nurse", "patient"],
+  },
+  {
+    path: "/admin/blog-categories",
+    element: <BlogCategoryManager />,
+    allowedRoles: ["admin"],
+    layout: DashboardLayout,
   },
 
 

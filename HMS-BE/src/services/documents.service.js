@@ -13,6 +13,7 @@ class DocumentsService {
         });
     }
     async createDocument(file, user_id) {
+        console.log(file)
         const form = new FormData();
         form.append("file", file.buffer, file.originalname);
         form.append("user_id", user_id);

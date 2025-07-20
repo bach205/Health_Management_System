@@ -5,7 +5,21 @@ class BlogCategoryService {
   async createCategory(data) {
     return prisma.blogCategory.create({ data });
   }
-  async getCategories() {
+  async getCategoriesPagination({ page = 1, pageSize = 8, order = 'asc' } = {}) {
+    const skip = (Number(page) - 1) * Number(pageSize);
+    const take = Number(pageSize);
+    const orderBy = { name: order === 'desc' ? 'desc' : 'asc' };
+    const [data, total] = await Promise.all([
+      prisma.blogCategory.findMany({
+        orderBy,
+        skip,
+        take,
+      }),
+      prisma.blogCategory.count(),
+    ]);
+    return { data, total, page: Number(page), pageSize: Number(pageSize) };
+  }
+  async getAllCategories() {
     return prisma.blogCategory.findMany({ orderBy: { name: 'asc' } });
   }
   async getCategoryById(id) {

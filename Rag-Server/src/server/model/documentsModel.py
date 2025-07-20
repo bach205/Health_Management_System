@@ -16,7 +16,7 @@ async def save_documents_to_database(file,file_location,user_id):
     conn.close()
     return inserted_id
 
-async def save_chunks_into_chroma(chunks):
+def save_chunks_into_chroma(chunks):
     documents = [doc.page_content for doc in chunks]  # chỉ lấy nội dung văn bản
     metadatas = [doc.metadata for doc in chunks]      # lấy metadata tương ứng (nếu dùng)
     chunks_ids = [str(uuid.uuid4()) for _ in chunks]

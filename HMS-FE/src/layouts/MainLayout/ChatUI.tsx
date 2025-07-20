@@ -30,7 +30,7 @@ const ChatUI = () => {
             if (newText === "") {
                 newText = " ";
             }
-            if (event.data === "<DONE>") {
+            if (event.data === "<END>") {
                 handleEsClose();
                 es.close();
             } else {

@@ -179,7 +179,13 @@ const SIDEBAR_ITEMS = [
         icon: <LetterText className="w-4 h-4" />,
         href: "/admin/blogs",
       },
-           
+      {
+        id: "blog-categories",
+        label: "Quản lý danh mục blog",
+        icon: <LetterText className="w-4 h-4" />,
+        href: "/admin/blog-categories",
+      },
+
       {
         id: "manage-payments",
         label: "Quản lý hóa đơn",
@@ -229,7 +235,7 @@ const SIDEBAR_ITEMS = [
         icon: <ClipboardType className="w-4 h-4" />,
         href: "/user-book-appointments",
       },
-      
+
       {
         id: "manage-payments",
         label: "Quản lý hóa đơn",
