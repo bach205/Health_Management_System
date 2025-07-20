@@ -151,19 +151,19 @@ class PatientService {
         return newPatient;
     }
 
-    async updatePatient(userId, updateData) {
-        const { email, full_name, date_of_birth, gender, phone, address, identity_number } = updateData;
+    async updatePatient(updateData) {
+        const { id, email, full_name, date_of_birth, gender, phone, address, identity_number, avatar } = updateData;
         // Check if patient exists
 
         console.log(email, full_name, date_of_birth, gender, phone, address, identity_number)
         const existingPatient = await prisma.user.findUnique({
             where: {
-                id: parseInt(userId),
+                id: parseInt(id),
                 role: "patient"
             }
         });
-        
-       // console.log("existingPatient: ", existingPatient);
+
+        // console.log("existingPatient: ", existingPatient);
         if (!existingPatient) {
             throw new BadRequestError("Bệnh nhân không tồn tại");
         }
@@ -190,20 +190,26 @@ class PatientService {
             }
         }
         */
+        const updatePatientData = {
+            full_name,
+            date_of_birth: date_of_birth ? new Date(date_of_birth) : null,
+            gender,
+            phone,
+            address,
+        }
+        if (avatar) {
+            updatePatientData.avatar = avatar;
+        }
 
         const updatedPatient = await prisma.user.update({
             where: {
                 id: existingPatient.id
             },
             data: {
-                full_name,
-                date_of_birth: date_of_birth ? new Date(date_of_birth) : null,
-                gender,
-                phone,
-                address,
+                ...updatePatientData,
                 patient: {
                     update: {
-                        where: { id: userId },
+                        where: { id: existingPatient.id },
                         data: { identity_number }
                     }
                 }
@@ -212,7 +218,7 @@ class PatientService {
                 patient: true
             }
         });
-     console.log("updatedPatient: ", updatedPatient);
+        console.log("updatedPatient: ", updatedPatient);
         return updatedPatient;
     }
 
