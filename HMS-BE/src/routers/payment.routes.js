@@ -43,6 +43,20 @@ paymentRouter.patch(
     asyncHandler(paymentController.updatePaymentStatus)
 );
 
+paymentRouter.put(
+    "/update-payment-medicine-status/:id",
+    // authenticate,
+    // authorize("admin"),
+    asyncHandler(paymentController.updatePaymentMedicineStatus)
+);
+
+paymentRouter.get(
+    "/payment-record/:id",
+    // authenticate,
+    // authorize("admin"),
+    asyncHandler(paymentController.getPaymentByRecordId)
+);
+
 paymentRouter.get(
     "/appointment/:id",
     // authenticate,

@@ -34,7 +34,6 @@ class StatisticsService {
                 }
             },
         })
-        console.log(doctors)
 
         const result = doctors.map(doc => ({
             id: doc.id,
@@ -111,7 +110,7 @@ class StatisticsService {
                 },
             },
         });
-
+        
         const resultMap = new Map();
 
         for (const p of payments) {
@@ -144,7 +143,7 @@ class StatisticsService {
                 },
             },
         });
-
+        console.log("payment", payments)
         const resultMap = new Map();
 
         for (const p of payments) {

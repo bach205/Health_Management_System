@@ -1,9 +1,10 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Input, Button, Card, Descriptions, Table, Typography, message, Space, Select, DatePicker, Modal } from "antd";
 import { getUserDataByIdentity } from "../api/salemedicine";
 import type { Patient, User, Record } from '../types/patient.type';
 import dayjs from "dayjs";
 import { EyeOutlined, SearchOutlined, ReloadOutlined } from '@ant-design/icons';
+import { getPaymentByRecordId, updatePaymentMedicineStatus, updatePaymentStatus } from '../services/payment.service';
 const { Title } = Typography;
 const { Option } = Select;
 
@@ -28,6 +29,19 @@ const SaleMedicinePage: React.FC = () => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(5);
   const [selectedPrescriptionRecord, setSelectedPrescriptionRecord] = useState<Record | null>(null);
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
+
+
+  useEffect(() => {
+    const fetch = async () => {
+      if(selectedPrescriptionRecord) {
+        const data = await getPaymentByRecordId(selectedPrescriptionRecord.id);
+        if(data.data.metadata.status === 'paid') setPaymentSuccess(true)
+        else setPaymentSuccess(false);
+      }
+    }
+    fetch();
+  },[selectedPrescriptionRecord])
 
   const handleSearch = async () => {
     if (!identityNumber) {
@@ -37,7 +51,8 @@ const SaleMedicinePage: React.FC = () => {
     setLoading(true);
     try {
       const res = await getUserDataByIdentity(identityNumber);
-      setPatient(res.data.metadata.patient);
+      console.log(res.data.metadata.patient)
+      setPatient(res.data.metadata.patient);  
       setPage(1);
       setDoctorFilter(undefined);
       setClinicFilter(undefined);
@@ -158,6 +173,12 @@ const SaleMedicinePage: React.FC = () => {
       key: "dosage",
     },
     {
+      title: "Số lượng",
+      dataIndex: "quantity",
+      key: "quantity",
+      render: (quantity: any) => quantity || 1,
+    },
+    {
       title: "Ghi chú",
       dataIndex: "note",
       key: "note",
@@ -268,7 +289,10 @@ const SaleMedicinePage: React.FC = () => {
             <Modal
               open={!!selectedPrescriptionRecord}
               title={selectedPrescriptionRecord ? `Thuốc đã kê cho record #${selectedPrescriptionRecord.id}` : ''}
-              onCancel={() => setSelectedPrescriptionRecord(null)}
+              onCancel={() => {
+                setSelectedPrescriptionRecord(null);
+                setPaymentSuccess(false);
+              }}
               footer={null}
               width={700}
             >
@@ -282,7 +306,7 @@ const SaleMedicinePage: React.FC = () => {
                     pagination={false}
                   />
                   {(() => {
-                    const totalAmount = (selectedPrescriptionRecord.prescriptionItems || []).reduce((sum, item) => sum + (typeof item.medicine?.price === 'number' ? item.medicine.price : Number(item.medicine?.price) || 0), 0);
+                    const totalAmount = (selectedPrescriptionRecord.prescriptionItems || []).reduce((sum, item) => sum + ((typeof item.medicine?.price === 'number' ? item.medicine.price : Number(item.medicine?.price) || 0) * (item.quantity || 1)), 0);
                     const qrUrl = `https://qr.sepay.vn/img?acc=VQRQADITO0867&bank=MBBank&amount=${totalAmount}&des=thanh toán thuốc`;
                     return (
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 24 }}>
@@ -293,6 +317,30 @@ const SaleMedicinePage: React.FC = () => {
                           style={{ width: 200, height: 200, objectFit: 'contain', border: '1px solid #eee', borderRadius: 8 }}
                         />
                         <div style={{ marginTop: 8, color: '#888' }}>Tổng tiền: {totalAmount.toLocaleString()} VND</div>
+                       {!paymentSuccess ? (
+                         <Button
+                           type="primary"
+                           style={{ marginTop: 16 }}
+                           onClick={async () => {
+                             if (selectedPrescriptionRecord) {
+                               try {
+                                 await updatePaymentMedicineStatus(selectedPrescriptionRecord.id, 'paid');                        
+                                 setPaymentSuccess(true);
+                                 message.success("Xác nhận thanh toán thành công!");
+                               } catch (err) {
+                                 message.error("Lỗi khi cập nhật trạng thái thanh toán!");
+                               }
+                             }
+                           }}
+                           block
+                         >
+                           Xác nhận thanh toán
+                         </Button>
+                       ) : (
+                         <div style={{ color: 'green', marginTop: 16, fontWeight: 500 }}>
+                           Đã thanh toán thành công!
+                         </div>
+                       )}
                       </div>
                     );
                   })()}

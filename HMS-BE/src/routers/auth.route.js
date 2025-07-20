@@ -37,8 +37,8 @@ authRouter.put(
   authenticate,
   authorize("patient"),
   checkUserStatus(),
-  asyncHandler(AuthController.updatePatientInfo),
-  PatientService.updatePatient
+  asyncHandler(AuthController.updatePatientFullInfo),
+  AuthController.updatePatientFullInfo
 );
 
 authRouter.post(

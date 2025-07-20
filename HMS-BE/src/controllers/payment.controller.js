@@ -29,6 +29,27 @@ class PaymentController {
       metadata: result,
     }).send(res);
   };
+  updatePaymentMedicineStatus = async (req, res) => {
+    const { id } = req.params;
+    const { status } = req.body;
+
+
+    const result = await paymentService.updatePaymentMedicineStatus(id, status);
+    return new OK({
+      message: "Cập nhật trạng thái thanh toán thành công",
+      metadata: result,
+    }).send(res);
+  };
+
+  getPaymentByRecordId = async (req, res) => {
+    const { id } = req.params;
+
+    const result = await paymentService.getPaymentByRecordId(id);
+    return new OK({
+      message: "Lấy status của payment thành công",
+      metadata: result,
+    }).send(res);
+  };
 
 
 

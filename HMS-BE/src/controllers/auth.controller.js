@@ -285,7 +285,7 @@ class AuthController {
   async updatePatientInfo(req, res) {  
     try {
       const { userId, updateData } = req.body;
-
+      console.log(updateData)
       const result = await patientService.updatePatient(userId, updateData);
       return new OK({
         message: "Cập nhật thông tin người dùng thành công",

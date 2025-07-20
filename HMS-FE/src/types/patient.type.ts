@@ -16,6 +16,7 @@ export interface PrescriptionItem {
   frequency: string | null;
   duration: string | null;
   medicine: Medicine;
+  quantity?: number; // Số lượng thuốc
 }
 
 // Lịch sử khám bệnh

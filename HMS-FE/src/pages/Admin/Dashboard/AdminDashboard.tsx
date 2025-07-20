@@ -67,7 +67,6 @@ const AdminDashboard = () => {
       const doctorRes = await getTopDoctors();
       const yearRes = await getRevenuePerMonthInYear(dayjs().year());
       const totalRes = await getTotalStatistics();
-
       setPeriodStatistics(statRes.data.metadata);
       setTopDoctors(doctorRes.data.metadata);
       setRevenueYearData(yearRes.data.metadata);
