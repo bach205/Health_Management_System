@@ -66,11 +66,11 @@ const ExaminationOrderModal = ({
           console.log(resDoctors.data.metadata)
 
           const doctors = resDoctors.data.metadata;
+          
           // filter doctor không phải là doctor đang làm việc ở phòng khám hiện tại
           const filteredDoctors = doctors.filter((doctor: any) => doctor.doctor.id != doctor_id);
-          console.log(filteredDoctors)
+          
           setAvailableDoctors(filteredDoctors || []);
-          console.log(doctors);
         } catch (error) {
           console.error("Lỗi khi lấy thông tin phòng khám hoặc bác sĩ:", error);
           setAvailableDoctors([]);
@@ -140,7 +140,8 @@ const ExaminationOrderModal = ({
       to_doctor_id: null
     });
   };
-  console.log("selected", selectedDoctorId);
+  
+
 
 
   return (
@@ -198,6 +199,8 @@ const ExaminationOrderModal = ({
         </Form.Item>
         {clinicSelected && (
           <>
+
+            
             {availableDoctors.length > 0 ? (
               <Form.Item
                 label="Bác sĩ tiếp nhận"
