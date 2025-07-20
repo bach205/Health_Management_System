@@ -5,3 +5,7 @@ export const searchStaff = async (query: string): Promise<IUser[]> => {
     const res = await mainRequest.get(`${BASE_URL}/user/search-staff`, { params: { query } });
     return res.data.data;
 }; 
+export const getAllUsers = async () => {
+    const res = await mainRequest.get("/user"); // sửa path tùy backend bạn
+    return res.data;
+};

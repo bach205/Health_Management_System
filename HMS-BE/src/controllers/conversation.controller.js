@@ -12,7 +12,9 @@ class ConversationController {
             if (!participantIds || participantIds.length === 0) {
                 return res.status(400).json({ message: "Cần ít nhất 1 participant" });
             }
-
+            if (type === 'group' && participantIds.length < 3) {
+                return res.status(400).json({ message: "Cần ít nhất 3 người để tạo nhóm chat" });
+            }
             // Đảm bảo user hiện tại có trong danh sách participants
             if (!participantIds.includes(userId)) {
                 participantIds.push(userId);

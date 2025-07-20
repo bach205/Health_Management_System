@@ -16,27 +16,18 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, onEdit, onDelete }) 
     const [isEditing, setIsEditing] = React.useState(false);
     const [editText, setEditText] = React.useState(message.text);
     const [showConfirm, setShowConfirm] = React.useState(false);
-    const [showMenu, setShowMenu] = React.useState(false);
     const [blobUrl, setBlobUrl] = React.useState<string | null>(null);
     const [isLoadingBlob, setIsLoadingBlob] = React.useState(false);
 
-    // Load blob URL khi message là file/image
     React.useEffect(() => {
         if (fileStreamService.isFileMessage(message) && message.file_url) {
             setIsLoadingBlob(true);
             fileStreamService.getBlobUrl(message.file_url)
-                .then(url => {
-                    setBlobUrl(url);
-                })
-                .catch(error => {
-                    console.error('Error loading blob URL:', error);
-                })
-                .finally(() => {
-                    setIsLoadingBlob(false);
-                });
+                .then(url => setBlobUrl(url))
+                .catch(error => console.error('Error loading blob URL:', error))
+                .finally(() => setIsLoadingBlob(false));
         }
 
-        // Cleanup khi component unmount
         return () => {
             if (blobUrl) {
                 fileStreamService.revokeBlobUrl(message.file_url!);
@@ -51,23 +42,15 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, onEdit, onDelete }) 
         setIsEditing(false);
     };
 
-    const handleDelete = () => {
-        setShowConfirm(true);
-    };
-
     const confirmDelete = () => {
         onDelete(message.id);
         setShowConfirm(false);
     };
 
-    // Mở file/ảnh trong window mới hoặc tải file
     const openFileInNewWindow = () => {
-        if (blobUrl) {
-            window.open(blobUrl, '_blank');
-        }
+        if (blobUrl) window.open(blobUrl, '_blank');
     };
 
-    // Thay thế: Tải file về máy khi click vào file (chỉ cho message_type === 'file')
     const openFileDownload = () => {
         if (blobUrl) {
             const a = document.createElement('a');
@@ -78,9 +61,6 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, onEdit, onDelete }) 
             document.body.removeChild(a);
         }
     };
-
-    // Kiểm tra xem message có thể edit không (chỉ text message)
-    const canEdit = message.message_type === 'text';
 
     const renderMessageContent = () => {
         switch (message.message_type) {
@@ -119,7 +99,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, onEdit, onDelete }) 
                 return (
                     <div className="flex items-center space-x-2 p-3 bg-blue-50 rounded-lg">
                         <div className="flex-1 flex items-center space-x-2 cursor-pointer hover:bg-blue-100 transition-colors rounded p-1"
-                            onClick={openFileDownload} // Đổi từ openFileInNewWindow sang openFileDownload
+                            onClick={openFileDownload}
                             title="Click để tải xuống file">
                             <div className="flex-shrink-0">
                                 <svg className="w-8 h-8 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
@@ -147,18 +127,8 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, onEdit, onDelete }) 
                                     onKeyPress={(e) => e.key === 'Enter' && handleEdit()}
                                     autoFocus
                                 />
-                                <button
-                                    onClick={handleEdit}
-                                    className="px-2 py-1 text-xs bg-green-500 text-white rounded hover:bg-green-600"
-                                >
-                                    ✓
-                                </button>
-                                <button
-                                    onClick={() => setIsEditing(false)}
-                                    className="px-2 py-1 text-xs bg-gray-500 text-white rounded hover:bg-gray-600"
-                                >
-                                    ✕
-                                </button>
+                                <button onClick={handleEdit} className="px-2 py-1 text-xs bg-green-500 text-white rounded hover:bg-green-600">✓</button>
+                                <button onClick={() => setIsEditing(false)} className="px-2 py-1 text-xs bg-gray-500 text-white rounded hover:bg-gray-600">✕</button>
                             </div>
                         ) : (
                             <p className="whitespace-pre-wrap">{message.text}</p>
@@ -170,82 +140,55 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, onEdit, onDelete }) 
 
     return (
         <div className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'} mb-4`}>
-            <div className={`flex ${isOwnMessage ? 'flex-row-reverse' : 'flex-row'} items-end space-x-2 max-w-xs lg:max-w-md`}>
-                {/* Avatar */}
-                <div className="flex-shrink-0">
-                    <img
-                        src={message.sendBy.avatar || '/images/avatar-default.png'}
-                        alt={message.sendBy.full_name}
-                        className="w-8 h-8 rounded-full"
-                    />
+            <div className={`flex flex-col ${isOwnMessage ? 'items-end' : 'items-start'} max-w-xs lg:max-w-md`}>
+                {/* Message Content */}
+                <div className={`rounded-lg ${isOwnMessage ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-900'}`}>
+                    {renderMessageContent()}
                 </div>
 
-                {/* Message Content */}
-                <div className={`flex flex-col ${isOwnMessage ? 'items-end' : 'items-start'}`}>
-                    <div className={`rounded-lg ${isOwnMessage
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-gray-100 text-gray-900'
-                        }`}>
-                        {renderMessageContent()}
-                    </div>
+                {/* Sender Name */}
+                <div className="mt-1 text-xs text-gray-500">
+                    {isOwnMessage ? '(Bạn)' : message.sendBy.full_name}
+                </div>
 
-                    {/* Message Info */}
-                    <div className={`flex items-center space-x-2 mt-1 text-xs text-gray-500 ${isOwnMessage ? 'flex-row-reverse' : 'flex-row'
-                        }`}>
-                        <span>{dayjs(message.created_at).format('HH:mm')}</span>
-                        {message.is_read && isOwnMessage && (
-                            <span className="text-blue-500">✓✓</span>
-                        )}
-                    </div>
-
-                    {/* Action Buttons */}
-                    {isOwnMessage && !isEditing && (
-                        <div className="flex items-center space-x-1 mt-1">
-                            {message.message_type === 'text' && (
-                                <button
-                                    onClick={() => setIsEditing(true)}
-                                    className="text-xs text-gray-500 hover:text-gray-700"
-                                >
-                                    Sửa
-                                </button>
-                            )}
-                            <button
-                                onClick={handleDelete}
-                                className="text-xs text-red-500 hover:text-red-700"
-                            >
-                                Xóa
-                            </button>
-                        </div>
+                {/* Message Info */}
+                <div className="flex items-center space-x-2 mt-1 text-xs text-gray-400">
+                    <span>{dayjs(message.created_at).format('HH:mm')}</span>
+                    {message.is_read && isOwnMessage && (
+                        <span className="text-blue-500">✓✓</span>
                     )}
                 </div>
+
+                {/* Action Buttons */}
+                {isOwnMessage && !isEditing && (
+                    <div className="flex items-center space-x-1 mt-1">
+                        {message.message_type === 'text' && (
+                            <button onClick={() => setIsEditing(true)} className="text-xs text-gray-500 hover:text-gray-700">
+                                Sửa
+                            </button>
+                        )}
+                        <button onClick={() => setShowConfirm(true)} className="text-xs text-red-500 hover:text-red-700">
+                            Xóa
+                        </button>
+                    </div>
+                )}
             </div>
-            {/* Modal xác nhận xóa */}
-            {
-                showConfirm && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(0,0,0,0.8)]">
-                        <div className="bg-white rounded-lg shadow-lg p-6 w-80">
-                            <h3 className="text-lg font-semibold mb-2">Xác nhận xóa</h3>
-                            <p className="mb-4">Bạn có chắc chắn muốn xóa tin nhắn này không?</p>
-                            <div className="flex justify-end space-x-2">
-                                <button
-                                    onClick={() => setShowConfirm(false)}
-                                    className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300"
-                                >
-                                    Hủy
-                                </button>
-                                <button
-                                    onClick={confirmDelete}
-                                    className="px-3 py-1 rounded bg-red-500 text-white hover:bg-red-600"
-                                >
-                                    Xóa
-                                </button>
-                            </div>
+
+            {/* Confirm Delete Modal */}
+            {showConfirm && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(0,0,0,0.8)]">
+                    <div className="bg-white rounded-lg shadow-lg p-6 w-80">
+                        <h3 className="text-lg font-semibold mb-2">Xác nhận xóa</h3>
+                        <p className="mb-4">Bạn có chắc chắn muốn xóa tin nhắn này không?</p>
+                        <div className="flex justify-end space-x-2">
+                            <button onClick={() => setShowConfirm(false)} className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300">Hủy</button>
+                            <button onClick={confirmDelete} className="px-3 py-1 rounded bg-red-500 text-white hover:bg-red-600">Xóa</button>
                         </div>
                     </div>
-                )
-            }
-        </div >
+                </div>
+            )}
+        </div>
     );
 };
 
-export default ChatMessage; 
+export default ChatMessage;

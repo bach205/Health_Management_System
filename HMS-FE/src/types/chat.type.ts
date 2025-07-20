@@ -16,6 +16,7 @@ export interface IMessage {
 }
 
 export interface IConversation {
+    type: 'direct' | 'group';
     id: number;
     name?: string;
     last_message_at: string;
