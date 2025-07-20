@@ -23,6 +23,13 @@ paymentRouter.get(
     asyncHandler(paymentController.getAllPayments)
 );
 
+paymentRouter.get(
+    "/",
+    // authenticate,
+    // authorize("admin"),
+    asyncHandler(paymentController.getAllPayments)
+);
+
 paymentRouter.put(
     "/update-payment-status/:id",
     // authenticate,
@@ -36,13 +43,27 @@ paymentRouter.patch(
     asyncHandler(paymentController.updatePaymentStatus)
 );
 
+paymentRouter.get(
+    "/appointment/:id",
+    // authenticate,
+    // authorize("admin"),
+    asyncHandler(paymentController.getInvoiceByAppointmentId)
+);
 
 paymentRouter.get(
-  "/pending",
-  // authenticate,
-  // authorize("admin"),
-  asyncHandler(paymentController.getPendingPayments)
+    "/pending",
+    // authenticate,
+    // authorize("admin"),
+    asyncHandler(paymentController.getPendingPayments)
 );
+
+// routes/payment.routes.ts
+paymentRouter.post(
+    "/webhook",
+    asyncHandler(paymentController.webhook)
+);
+
+
 
 
 // patientRouter.post(

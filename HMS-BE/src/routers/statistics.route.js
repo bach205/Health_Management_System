@@ -45,4 +45,12 @@ statisticsRouter.get(
   statisticsController.getRevenuePerMonthInYear
 );
 
+statisticsRouter.get(
+  "/total-statistics",
+  // authenticate,
+  // checkUserStatus(),
+  authorize("admin"),
+  asyncHandler(statisticsController.getTotalStatistics),
+  statisticsController.getTotalStatistics
+);
 module.exports = statisticsRouter;

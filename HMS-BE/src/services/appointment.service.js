@@ -54,7 +54,7 @@ class AppointmentService {
       INSERT INTO appointments (
         patient_id, doctor_id, clinic_id, appointment_date, appointment_time, reason, note, status, priority, created_at, updated_at
       ) VALUES (
-        ${data.patient_id}, ${data.doctor_id}, ${data.clinic_id}, ${data.slot_date}, ${data.start_time}, ${data.reason}, ${data.note}, 'pending', 0, NOW(), NOW()
+        ${data.patient_id}, ${data.doctor_id}, ${data.clinic_id}, ${data.slot_date}, ${data.start_time}, ${data.reason}, ${data.note}, 'pending', 1, NOW(), NOW()
       )
     `;
     // Lấy appointment vừa tạo (raw query)
@@ -254,10 +254,14 @@ class AppointmentService {
         DATE_FORMAT(a.appointment_date, '%Y-%m-%d') as formatted_date,
         TIME_FORMAT(a.appointment_time, '%H:%i:%s') as formatted_time,
         d.full_name as doctor_name,
-        c.name as clinic_name
+        c.name as clinic_name,
+        e.id as examination_id,
+        p.status as payment_status
       FROM appointments a
       LEFT JOIN users d ON a.doctor_id = d.id
       LEFT JOIN clinics c ON a.clinic_id = c.id
+      LEFT JOIN examination_records e ON a.id = e.appointment_id
+      LEFT JOIN payments p ON e.id = p.record_id
       WHERE a.patient_id = ${patient_id}
       ORDER BY a.appointment_date DESC, a.appointment_time DESC
     `;

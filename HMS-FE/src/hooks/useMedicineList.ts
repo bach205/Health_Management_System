@@ -12,7 +12,7 @@ export const useMedicineList = (initialPagination?: Partial<IPagination>, sortBy
     const [isActive, setIsActive] = useState<string>("all");
     const [pagination, setPagination] = useState<IPagination>({
         total: 0,
-        pageSize: initialPagination?.pageSize || 5,
+        pageSize: initialPagination?.pageSize || undefined as number | undefined,
         current: initialPagination?.current || 1,
     });
 
@@ -23,11 +23,11 @@ export const useMedicineList = (initialPagination?: Partial<IPagination>, sortBy
                 const searchOptions = {
                     searchKey: keyword,
                     sortBy: sort,
-                    skip: (pagination.current - 1) * pagination.pageSize,
+                    skip: (pagination.current - 1) * pagination.pageSize ,
                     limit: pagination.pageSize,
                     isActive,
                 };
-                console.log(medicines)
+                // console.log(medicines)`
              //   console.log("searchOptions", searchOptions)
                 const res = await getMedicines(searchOptions);
                // console.log(res.data.metadata);

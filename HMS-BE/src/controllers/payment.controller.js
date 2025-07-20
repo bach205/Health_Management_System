@@ -1,3 +1,4 @@
+const { getIO } = require("../config/socket");
 const { CREATED, OK } = require("../core/success.response");
 const paymentService = require("../services/payment.service");
 
@@ -29,6 +30,9 @@ class PaymentController {
     }).send(res);
   };
 
+
+
+
   getPaymentById = async (req, res) => {
     const { id } = req.params;
     const result = await paymentService.getPaymentById(id);
@@ -45,6 +49,29 @@ class PaymentController {
       metadata: payments,
     }).send(res);
   };
+
+  webhook = async (req, res) => {
+    try {
+      const {
+        subAccount,
+        transactionDate,
+        transferAmount,
+        description,
+        referenceCode,
+      } = req.body;
+  
+      const invoice = await paymentService.webhook(req.body);
+      // Trích xuất thông tin từ description
+     
+      console.log("Đã xác nhận thanh toán cho invoice", invoice.id);
+      return res.status(200).json({ message: "Payment confirmed" });
+  
+    } catch (error) {
+      console.error("Webhook error:", error);
+      return res.status(500).json({ message: "Internal error" });
+    }
+  };
+  
 
 }
 

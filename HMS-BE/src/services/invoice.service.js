@@ -43,6 +43,7 @@ class InvoiceService {
 
   // Lấy chi tiết invoice items của 1 record
   getInvoiceDetail = async (record_id) => {
+
     const items = await prisma.invoiceItem.findMany({
       where: { record_id: Number(record_id) },
       orderBy: { created_at: 'asc' },
@@ -54,6 +55,25 @@ class InvoiceService {
       amount: Number(i.amount),
     }));
   };
+
+  // Lấy hóa đơn theo id lịch hẹn
+  getInvoiceByAppointmentId = async (id) => {
+    if (!id) throw new Error("Appointment ID phải tồn tại");
+
+    // Lấy appointment_id từ lịch hẹn
+    const invoice = await prisma.examinationRecord.findFirst({
+      where: { appointment_id: Number(id) },
+      include: {
+        invoiceItems: true,
+        patient: {
+          include: {
+            user: true,
+          },
+        },
+      },
+    });
+    return invoice;
+  }
 }
 
 module.exports = new InvoiceService();

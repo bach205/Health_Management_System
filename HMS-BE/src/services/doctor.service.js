@@ -286,16 +286,22 @@ class DoctorService {
             }
 
             // Update user + doctor
+
+            const updatedUser = {
+                full_name: value.full_name,
+                email: value.email,
+                phone: value.phone?.trim() || "",
+                gender: value.gender,
+                date_of_birth: value.date_of_birth,
+                address: value.address?.trim() || "",
+            }
+            if (value.avatar) {
+                updatedUser.avatar = value.avatar;
+            }
             const doctor = await prisma.user.update({
                 where: { id: value.id },
                 data: {
-                    full_name: value.full_name,
-                    email: value.email,
-                    phone: value.phone?.trim() || "",
-                    gender: value.gender,
-                    date_of_birth: value.date_of_birth,
-                    address: value.address?.trim() || "",
-                    // avatar: value.avatar || null,
+                    ...updatedUser,
                     doctor: {
                         upsert: {
                             update: {
@@ -442,7 +448,7 @@ class DoctorService {
                 { start_time: 'asc' },
             ],
             include: {
-                doctor : {
+                doctor: {
                     select: {
                         id: true,
                         full_name: true,
@@ -450,7 +456,7 @@ class DoctorService {
                 }, // lấy từ bảng Doctor
             },
         });
-        console.log("doctor",slots)
+        console.log("doctor", slots)
         // Group theo doctor_id để lấy slot gần nhất cho mỗi bác sĩ
         const doctorMap = new Map();
 
@@ -500,16 +506,21 @@ class DoctorService {
             throw new BadRequestError("Giá không hợp lệ");
         }
 
+        const updatedUser = {
+            full_name: updateData.full_name?.trim(),
+            address: updateData.address?.trim(),
+            phone: updateData.phone?.trim(),
+            gender: updateData.gender,
+            date_of_birth: updateData.date_of_birth,
+        }
+        if (updateData.avatar) {
+            updatedUser.avatar = updateData.avatar;
+        }
+
         const result = await prisma.$transaction(async (prisma) => {
             const updatedUser = await prisma.user.update({
                 where: { id: updateData.id },
-                data: {
-                    full_name: updateData.full_name?.trim(),
-                    address: updateData.address?.trim(),
-                    phone: updateData.phone?.trim(),
-                    gender: updateData.gender,
-                    date_of_birth: updateData.date_of_birth,
-                },
+                data: updatedUser,
             });
 
             const updatedDoctor = await prisma.doctor.update({
@@ -578,12 +589,17 @@ class DoctorService {
                 gender: row.gender,
                 date_of_birth: row.date_of_birth,
                 address: row.address?.trim() || '',
-                avatar: row.avatar,
                 password: row.password?.trim(),
                 specialty_id: row.specialty_id || null,
                 price: parseInt(row.price, 10),
                 bio: row.bio?.trim() || '',
             };
+
+
+
+            if (row.avatar && row.avatar !== null && row.avatar !== "NULL" && row.avatar !== undefined) {
+                doctorData.avatar = row.avatar
+            }
 
             // Tự tạo password nếu chưa có
             if (!doctorData.password) {
@@ -650,8 +666,9 @@ class DoctorService {
             )
         );
 
-        result.forEach((doctor, index) => {
-            const rawPassword = preparedData[index].rawPassword;
+        // Send email
+        data.forEach((doctor, index) => {
+            const rawPassword = data[index].password;
             sendStaffNewPasswordEmail(doctor.email, rawPassword);
         });
 

@@ -8,8 +8,8 @@ import { sortOptions } from "../../../constants/user.const";
 import type { IPatient } from "../../../types/index.type";
 import UserListTitle from "../../../components/ui/UserListTitle";
 import { createPatient, updatePatient, updatePassword, updateStatus, updatePatientPassword } from "../../../services/patient.service";
-import ModalCreatePatient from "../../../components/modal/ModalCreatePatient";
-import ModalUpdatePatient from "../../../components/modal/ModalUpdatePatient";
+import ModalCreatePatient from "../../../components/modal/Patient/ModalCreatePatient";
+import ModalUpdatePatient from "../../../components/modal/Patient/ModalUpdatePatient";
 const AdminPatientDashboard = () => {
     const [isCreateVisible, setIsCreateVisible] = useState<boolean>(false);
     const [isViewVisible, setIsViewVisible] = useState<boolean>(false);

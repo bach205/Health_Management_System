@@ -41,7 +41,7 @@ class QueueService {
         status: status,
       },
     });
-    console.log(queueClinicdata)
+    // console.log(queueClinicdata)
 
     // 2. Lấy danh sách queue theo thứ tự ưu tiên:
     // - Ưu tiên theo priority của appointment (cao xuống thấp)
@@ -72,7 +72,7 @@ class QueueService {
         },
       },
     });
-    console.log(queueClinic);
+    // console.log(queueClinic);
 
     // 3. Tính toán thông tin phân trang
     const total = await prisma.queue.count({
@@ -183,15 +183,15 @@ class QueueService {
   }
 
   static async createOrderAndAssignToDoctorQueue({
-    patient_id,
-    from_clinic_id,
-    to_clinic_id,
-    to_doctor_id,
-    reason = "",
-    note = "",
-    extra_cost = 0,
-    appointment_id,
-    priority = 2,
+    patient_id, // bệnh nhân
+    from_clinic_id, // chuyển từ phòng khám này
+    to_clinic_id, // sang phòng khám khác
+    to_doctor_id, // bác sĩ ở phòng khám mới
+    reason = "", // lý do chuyển phòng
+    note = "", // ghi chú
+    extra_cost = 0, // chi phí chuyển phòng
+    appointment_id, // lịch hẹn khám
+    priority = 2, // ưu tiên chuyển phòng
   }) {
 
     console.log(">>> createOrderAndAssignToDoctorQueue params:",
@@ -229,8 +229,8 @@ class QueueService {
       ],
     });
 
-    console.log("first slot found:", slot);
-
+    // console.log("first slot found:", slot);
+// 
     if (!slot) {
       throw new Error("Bác sĩ được chọn không có ca khám nào rảnh.");
     }
@@ -256,7 +256,7 @@ class QueueService {
       },
     });
 
-    console.log("order created:", order);
+    // console.log("order created:", order);
 
     // 3. Kiểm tra xem bệnh nhân đã có trong hàng đợi chưa
     const existingQueue = await prisma.queue.findFirst({
@@ -266,12 +266,12 @@ class QueueService {
         status: { in: ['waiting', 'in_progress'] },
       },
     });
-    console.log(existingQueue)
+    // console.log(existingQueue)
     if (existingQueue) {
       throw new Error("Bệnh nhân đã có trong hàng đợi phòng khám này.");
     }
 
-    console.log("slot found:", slot,);
+    // console.log("slot found:", slot,);
 
     const slotTimeStr = this.formatTimeToString(slot.start_time); // Ví dụ: "10:00:00"
 
@@ -302,7 +302,7 @@ class QueueService {
 
 
 
-    console.log("queue created:", queue);
+    // console.log("queue created:", queue);
 
     // 5. Emit socket thông báo cho FE
     const io = getIO();

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Table, Tag, Space, Flex, Button, Form, Input, Select, notification, Tooltip, Popconfirm, Avatar, Upload, } from "antd";
+import { Table, Tag, Space, Flex, Button, Form, Input, Select, notification, Tooltip, Popconfirm, Avatar, } from "antd";
 import { Ban, CirclePlus, Eye, RefreshCcw, RotateCcw, Search, User, UserRoundPen } from "lucide-react";
 
 import dayjs from "dayjs";
@@ -9,11 +9,9 @@ import { specialtyOptions, TYPE_EMPLOYEE_STR, sortOptions } from "../../../const
 import type { IDoctor } from "../../../types/index.type";
 import UserListTitle from "../../../components/ui/UserListTitle";
 import { createDoctor, updateDoctor, updatePassword, updateStatus } from "../../../services/doctor.service";
-import ModalCreateDoctor from "../../../components/modal/ModalCreateDoctor";
-import ModalUpdateDoctor from "../../../components/modal/ModalUpdateDoctor";
+import ModalCreateDoctor from "../../../components/modal/Doctor/ModalCreateDoctor";
+import ModalUpdateDoctor from "../../../components/modal/Doctor/ModalUpdateDoctor";
 import { useSpecialtyList } from "../../../hooks/useSpecialtyList";
-import { toast } from "react-toastify";
-import Papa from "papaparse";
 import ImportCSV from "../../../components/doctor/ImportCSV";
 
 const AdminDoctorDashboard = () => {
@@ -22,7 +20,7 @@ const AdminDoctorDashboard = () => {
   const [isViewVisible, setIsViewVisible] = useState<boolean>(false);
   const [currentUser, setCurrentUser] = useState<IDoctor | null>(null);
   const filterOptions = [{ value: "all", label: "Tất cả" }, ...specialtyOptions]
-  console.log("currentUser", currentUser)
+  // console.log("currentUser", currentUser)
   const [formCreate] = Form.useForm();
   const [formUpdate] = Form.useForm();
   const [formView] = Form.useForm();
@@ -161,7 +159,9 @@ const AdminDoctorDashboard = () => {
     try {
       const res = await updateStatus(record.id, !record.is_active);
       console.log(res)
-      notification.success({ message: "Khóa tài khoản thành công" });
+      notification.success({
+        message: record.is_active ? "Khóa tài khoản thành công" : "Mở khóa tài khoản thành công"
+      });
       setReload(!reload);
     } catch (error) {
       console.log(error);
@@ -275,6 +275,9 @@ const AdminDoctorDashboard = () => {
         return;
       }
       // gọi API cập nhật
+
+
+
       const updatedDoctor = {
         ...values,
         id: currentUser.id,
@@ -285,6 +288,11 @@ const AdminDoctorDashboard = () => {
         bio: values.bio?.trim(),
         address: values.address?.trim(),
       };
+
+      if (values.avatar) {
+        updatedDoctor.avatar = values.avatar;
+      }
+
       await updateDoctor(updatedDoctor);
       setReload(!reload);
       notification.success({ message: "Cập nhật tài khoản thành công" });
@@ -343,11 +351,7 @@ const AdminDoctorDashboard = () => {
         </Flex>
 
         <Space>
-          {/* <Button type="default" icon={<CirclePlus size={16} />} onClick={() => setIsCreateVisible(true)} >
-            Import CSV
-          </Button> */}
-
-          <ImportCSV role="doctor"></ImportCSV>
+          <ImportCSV role="doctor" reload={reload} setReload={setReload}></ImportCSV>
           <Button type="primary" icon={<CirclePlus size={16} />} onClick={() => setIsCreateVisible(true)} >
             Thêm bác sĩ
           </Button>
@@ -356,7 +360,7 @@ const AdminDoctorDashboard = () => {
       <Flex gap={10} justify="space-between" style={{ marginBottom: 10 }}>
         <Form>
           <Flex gap={10}>
-            <Form.Item label="Lọc theo khoa" style={{ width: '500px' }} name="specialty" valuePropName="specialty" >
+            <Form.Item label="Lọc theo khoa" style={{ width: '350px' }} name="specialty" valuePropName="specialty" >
               <Select
                 mode="multiple"
                 defaultValue={['']}
@@ -406,7 +410,10 @@ const AdminDoctorDashboard = () => {
         loading={loading}
         columns={columns}
         dataSource={users}
-        pagination={pagination}
+        pagination={{
+          ...pagination,
+          showSizeChanger: false
+        }}
         onChange={(e: any) => { handleTableChange(e) }}
         scroll={{ x: 1000, y: 500 }}
       />

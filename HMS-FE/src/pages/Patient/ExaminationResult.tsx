@@ -86,11 +86,17 @@ const ExaminationResult = () => {
     if (!record) {
         return (
             <>
-                <Text type="danger">Không tìm thấy kết quả khám</Text>
+                <div className="text-center text-xl text-red-500">Không tìm thấy kết quả khám</div>
                 <div style={{ maxWidth: 900, margin: "0 auto" }} >
                     <FeedbackActionButtons appointmentId={appointmentId} />
                 </div>;
             </>
+        )
+    }
+    console.log(record)
+    if (record.payments[0]?.status === "pending") {
+        return (
+            <div className="text-center text-xl text-red-500">Bạn cần thanh toán trước khi xem kết quả khám</div>
         )
     }
     return (
@@ -135,11 +141,9 @@ const ExaminationResult = () => {
                     <Descriptions.Item label="Kết quả khám">
                         <div style={{ whiteSpace: "pre-line" }}>{record.result}</div>
                     </Descriptions.Item>
-                    {record.note && (
-                        <Descriptions.Item label="Ghi chú thêm">
-                            <div style={{ whiteSpace: "pre-line" }}>{record.note}</div>
-                        </Descriptions.Item>
-                    )}
+                    <Descriptions.Item label="Ghi chú">
+                        <div style={{ whiteSpace: "pre-line" }}>{record.note}</div>
+                    </Descriptions.Item>
                 </Descriptions>
 
                 {record.prescriptionItems?.length > 0 && (

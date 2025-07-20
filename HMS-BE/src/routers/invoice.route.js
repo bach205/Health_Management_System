@@ -8,5 +8,6 @@ const invoiceRouter = express.Router();
 
 invoiceRouter.get("/", asyncHandler(invoiceController.getInvoiceList));
 invoiceRouter.get("/:record_id", asyncHandler(invoiceController.getInvoiceDetail));
+invoiceRouter.get("/appointment/:id", asyncHandler(invoiceController.getInvoiceByAppointmentId));
 
 module.exports = invoiceRouter;

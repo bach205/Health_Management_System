@@ -31,6 +31,7 @@ import {
 import { cancelAppointmentService, deleteAppointmentService } from '../../services/appointment.service';
 import { useNavigate } from "react-router-dom";
 import { getInvoiceDetail, getInvoiceList } from "../../services/payment.service";
+import ViewPayment from "./ViewPayment";
 
 const style = {
   ".ant-table-thead .ant-table-cell": {
@@ -45,6 +46,9 @@ const ScheduleTable = ({ data = [], setReload, loading = false, visible, selecte
   const [modalVisible, setModalVisible] = useState(false);
   const [invoiceItems, setInvoiceItems] = useState([]);
   const [selectedInvoice, setSelectedInvoice] = useState<any>(null);
+
+  const [viewPaymentModalVisible, setViewPaymentModalVisible] = useState(false);
+  const [selectedPaymentRecord, setSelectedPaymentRecord] = useState<any>(null);  
 
   const navigate = useNavigate();
 
@@ -80,6 +84,16 @@ const ScheduleTable = ({ data = [], setReload, loading = false, visible, selecte
     setSelectedRecord(null);
   };
 
+  const handleViewPayment = (record: any) => {
+    setSelectedPaymentRecord(record);
+    setViewPaymentModalVisible(true);
+  }
+
+  const handleViewPaymentModalCancel = () => {
+    setViewPaymentModalVisible(false);
+    setSelectedPaymentRecord(null);
+  }
+
   const handleCancelAppmt = async (record: any) => {
     try {
       let reason = '';
@@ -109,15 +123,22 @@ const ScheduleTable = ({ data = [], setReload, loading = false, visible, selecte
     if (record.status === "completed") {
       // // const invoice = selectedInvoiceList.find(i => i.record_id === record.id); // giả sử bạn truyền invoiceList từ parent hoặc fetch trước
 
-      // if (invoice?.status === "pending") {
-      //   return (
-      //     <Tooltip title="Bạn cần thanh toán trước khi xem kết quả khám">
-      //       <Button type="primary" size="small" disabled>
-      //         Xem kết quả khám
-      //       </Button>
-      //     </Tooltip>
-      //   );
-      // }
+      if (record?.payment_status === "pending") {
+        return (
+          <>
+          <Tooltip title="Xem hóa đơn">
+            <Button type="primary" size="small" onClick={() => handleViewPayment(record)}>
+              Xem hóa đơn
+            </Button>
+          </Tooltip>
+            <Tooltip title="Bạn cần thanh toán trước khi xem kết quả khám">
+              <Button type="primary" size="small" disabled>
+                Xem kết quả khám
+            </Button>
+          </Tooltip>
+          </>
+        );
+      }
 
       return (
         <Tooltip title="Xem kết quả khám">
@@ -352,6 +373,11 @@ const ScheduleTable = ({ data = [], setReload, loading = false, visible, selecte
           </div>
         )}
       </Modal>
+      <ViewPayment
+        record={selectedPaymentRecord}
+        modalVisible={viewPaymentModalVisible}
+        setModalVisible={handleViewPaymentModalCancel}
+      />
     </ConfigProvider>
   )
 

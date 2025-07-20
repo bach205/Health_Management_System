@@ -357,7 +357,7 @@ const AdminNurseDashboard = () => {
         </Flex>
 
         <Space>
-          <ImportCSV role="nurse"></ImportCSV>
+          <ImportCSV role="nurse" reload={reload} setReload={setReload}></ImportCSV>
           <Button type="primary" icon={<CirclePlus size={16} />} onClick={() => setIsCreateVisible(true)} >
             Thêm y tá
           </Button>

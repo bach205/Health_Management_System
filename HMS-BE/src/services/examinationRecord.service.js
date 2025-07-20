@@ -100,7 +100,7 @@ class ExaminationRecordService {
     }
 
     static async getByAppointmentId(appointmentId) {
-        if (!appointmentId) throw new Error("Appointment ID is required");
+        if (!appointmentId) throw new Error("Appointment ID phải tồn tại");
 
         const record = await prisma.examinationRecord.findFirst({
             where: { appointment_id: Number(appointmentId) },
@@ -121,6 +121,7 @@ class ExaminationRecordService {
                         medicine: true,
                     },
                 },
+                payments: true,
             }
 
         });

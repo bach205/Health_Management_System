@@ -1,7 +1,7 @@
 import { Flex, Input, DatePicker, Select, Button, Typography, Form, notification } from "antd";
 import { useState, useEffect } from "react";
 import { getProfile, updatePassword, updateProfile, updateStaffInfo } from "../../services/patient.service";
-import ModalEditPassword from "../../components/modal/ModalEditPassword";
+import ModalEditPassword from "../../components/modal/StaffProfile/ModalEditPassword";
 import dayjs from "dayjs";
 import Uploader from "../Profile/Uploader";
 

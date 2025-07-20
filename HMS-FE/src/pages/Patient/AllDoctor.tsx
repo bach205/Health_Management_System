@@ -191,6 +191,9 @@ const AllDoctor: React.FC = () => {
                                 current={pagination.current}
                                 total={pagination.total}
                                 pageSize={8}
+
+                                showSizeChanger={false}
+
                                 onChange={(page, pageSize) =>
                                     setPagination({ ...pagination, current: page, pageSize: pageSize })
                                 }

@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Button, Modal, Tag, Space, message, Typography, Tooltip, Popconfirm } from 'antd';
+import { Table, Button, Modal, Tag, Space, message, Typography, Tooltip, Popconfirm, Input, Select, Spin } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { getPendingPayments, getInvoiceDetail, confirmPayment, updatePaymentStatus } from '../../services/payment.service';
+import { getPendingPayments, getInvoiceDetail, confirmPayment, updatePaymentStatus, getAllPayments } from '../../services/payment.service';
 import UserListTitle from '../../components/ui/UserListTitle';
-import { X, XCircle } from 'lucide-react';
+import { BanknoteArrowUp, Eye, ReceiptText, RefreshCcw, X, XCircle } from 'lucide-react';
+import { useSocket } from '../../hooks/socket/useSocket';
 
 interface InvoiceItem {
   id: number;
@@ -12,6 +13,7 @@ interface InvoiceItem {
 }
 
 interface InvoiceRecord {
+  id: number;
   record_id: number;
   patient_name: string;
   examined_at: string;
@@ -26,20 +28,25 @@ const PaymentList: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<InvoiceRecord | null>(null);
   const [invoiceItems, setInvoiceItems] = useState<InvoiceItem[]>([]);
-  const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'paid' | 'canceled'>('all');
-  const filteredData = data.filter((item) =>
-    filterStatus === 'all' ? true : item.status === filterStatus
-  );
 
-  console.log(data)
+  const [status, setStatus] = useState<string>('all');
+  const [sort, setSort] = useState<string>('newest');
+  const [searchName, setSearchName] = useState<string>('');
+  const [pagination, setPagination] = useState({ current: 1, pageSize: 10 });
 
-  const fetchData = async () => {
+  const fetchData = async (page = 1, pageSize = 10, name = searchName, status = 'all', sort = 'newest') => {
     setLoading(true);
     try {
-      const res = await getPendingPayments();
-      console.log(res)
-      const payments = res.data?.metadata ?? [];
-      setData(payments);
+      const res = await getAllPayments({
+        page,
+        limit: pageSize,
+        status: status === 'all' ? undefined : status,
+        name: name || undefined,
+        sort: sort === 'newest' ? 'desc' : 'asc',
+      });
+      // console.log(res)
+      setData(res.data.metadata.payments);
+      setPagination({ current: res.data.metadata.currentPage, pageSize });
     } catch (err) {
       message.error('Lỗi khi tải danh sách hóa đơn');
     } finally {
@@ -51,6 +58,7 @@ const PaymentList: React.FC = () => {
     setSelectedInvoice(record);
     try {
       const res = await getInvoiceDetail(record.record_id);
+      // console.log(res)
       setInvoiceItems(res.data.metadata);
       setModalVisible(true);
     } catch (err) {
@@ -60,13 +68,22 @@ const PaymentList: React.FC = () => {
 
   const handleUpdatePayment = async (record: InvoiceRecord, status: 'paid' | 'canceled') => {
     try {
-      await updatePaymentStatus(record.record_id, status);
+      await updatePaymentStatus(record.id, status);
       message.success('Cập nhật trạng thái thanh toán thành công');
       fetchData();
     } catch (err) {
       message.error('Không thể cập nhật trạng thái thanh toán');
     }
   };
+
+  // patient mở phòng payment, socket sẽ gửi event payment:statusChanged đến client
+  // useSocket(
+  //   `payment`,
+  //   "payment:statusChanged",
+  //   (data: any) => {
+  //     fetchData();
+  //   }
+  // );
 
   useEffect(() => {
     fetchData();
@@ -84,8 +101,8 @@ const PaymentList: React.FC = () => {
         year: 'numeric',
         month: '2-digit',
         day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
+        // hour: '2-digit',
+        // minute: '2-digit',
       }),
     },
     {
@@ -100,28 +117,42 @@ const PaymentList: React.FC = () => {
     {
       title: 'Trạng thái',
       dataIndex: 'status',
+      width: 150,
       render: (status) =>
         status === 'paid' ? <Tag color="green">Đã thanh toán</Tag> : status === 'canceled' ? <Tag color="red">Đã hủy</Tag> : <Tag color="orange">Chưa thanh toán</Tag>,
     },
     {
       title: 'Hành động',
+      width: 250,
       render: (_, record) => (
         <Space>
-          <Button onClick={() => handleViewInvoice(record)}>Xem hóa đơn</Button>
+          <Tooltip title="Xem hóa đơn">
+            <Button onClick={() => {
+              handleViewInvoice(record)
+            }}>
+              <ReceiptText className="w-4 h-4" />
+            </Button>
+          </Tooltip>
+
           {record.status === 'pending' && (
             <>
               <Popconfirm
+                placement="bottom"
                 title="Xác nhận thanh toán?"
                 onConfirm={() => handleUpdatePayment(record, 'paid')}
                 okText="Xác nhận"
                 cancelText="Hủy"
               >
-                <Button type="primary">
-                  Xác nhận thanh toán
-                </Button>
+                <Tooltip title="Xác nhận thanh toán">
+                  <Button type="primary">
+                    <BanknoteArrowUp className="w-4 h-4" />
+                    Xác nhận
+                  </Button>
+                </Tooltip>
               </Popconfirm>
               <Tooltip title="Hủy thanh toán">
                 <Popconfirm
+                  placement="bottom"
                   title="Xác nhận hủy thanh toán?"
                   onConfirm={() => handleUpdatePayment(record, 'canceled')}
                   okText="Xác nhận"
@@ -140,27 +171,89 @@ const PaymentList: React.FC = () => {
     },
   ];
 
+  const handleResetFilter = () => {
+    setSearchName('');
+    setStatus('all');
+    setSort('newest');
+    fetchData(1, 10, '', 'all', 'newest');
+  }
+
   return (
     <>
       <UserListTitle title="hóa đơn" />
 
+      <Space style={{ marginBottom: 16 }}>
+      <Tooltip title="Hủy lọc">
+            <Button onClick={() => handleResetFilter()}>
+              <RefreshCcw size={17.5} />
+            </Button>
+          </Tooltip>
+        <Input.Search
+          placeholder="Tìm theo tên bệnh nhân"
+          allowClear
+          
+          onSearch={(val) => {
+            setSearchName(val);
+            fetchData(1, 10, val);
+          }}
+        />
+
+        <Select
+          value={status}
+          onChange={(val) => {
+            setStatus(val);
+            fetchData(1, 10, searchName, val);
+          }}
+          style={{ width: 160 }}
+        >
+          <Select.Option value="all">Tất cả trạng thái</Select.Option>
+          <Select.Option value="pending">Chưa thanh toán</Select.Option>
+          <Select.Option value="paid">Đã thanh toán</Select.Option>
+          <Select.Option value="canceled">Đã hủy</Select.Option>
+        </Select>
+        <Select
+          value={sort}
+          onChange={(val) => {
+            setSort(val);
+            fetchData(1, 10, searchName, status, val);
+          }}  
+          style={{ width: 160 }}
+        >
+          <Select.Option value="newest">Mới nhất</Select.Option>
+          <Select.Option value="oldest">Cũ nhất</Select.Option>
+        </Select>
+
+      </Space>
+
+
       <Table
         columns={columns}
         dataSource={data}
-        rowKey="record_id"
+        rowKey="id"
         loading={loading}
+        pagination={{
+          current: pagination.current,
+          pageSize: pagination.pageSize,
+          showSizeChanger: false,
+          onChange: (page, pageSize) => {
+            fetchData(page, pageSize);
+          }
+        }}
       />
+
 
       <Modal
         title={`Chi tiết hóa đơn - ${selectedInvoice?.patient_name}`}
         open={modalVisible}
         onCancel={() => setModalVisible(false)}
+        centered
         footer={null}
       >
         <Table
           dataSource={invoiceItems}
           rowKey="id"
           pagination={false}
+          loading={loading}
           columns={[
             { title: 'Mô tả', dataIndex: 'description' },
             {
@@ -178,12 +271,14 @@ const PaymentList: React.FC = () => {
           <br />
           {
             selectedInvoice?.total_amount && selectedInvoice?.total_amount > 0 &&
+            selectedInvoice?.status === 'pending' &&
             <>
               <Typography.Title level={5} className='mt-2 text-center'>
                 Thanh toán qua mã QR dưới đây:
               </Typography.Title>
-              <div className='flex justify-center mt-4'>
-                <img src={`https://qr.sepay.vn/img?acc=VQRQADITO0867&bank=MBBank&amount=${selectedInvoice?.total_amount}&des=Thanh%20Toan%20${selectedInvoice?.patient_name}`} alt="" />
+              <div className='flex flex-col justify-center mt-4 w-[300px] h-[300px] mx-auto'>
+                <img
+                  src={`https://qr.sepay.vn/img?acc=VQRQADITO0867&bank=MBBank&amount=${selectedInvoice?.total_amount}&des=Thanh%20Toan%20${selectedInvoice?.patient_name}`} alt="" />
 
               </div>
             </>

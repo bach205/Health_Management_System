@@ -1,7 +1,7 @@
 import { DatePicker, Form, Input, Modal, Select, Checkbox, type FormInstance, type UploadFile, message, Upload, Image } from "antd";
 import { useState } from "react";
-import { TYPE_EMPLOYEE_STR } from "../../constants/user.const";
-import type { IUserBase } from "../../types/index.type";
+import { TYPE_EMPLOYEE_STR } from "../../../constants/user.const";
+import type { IUserBase } from "../../../types/index.type";
 import dayjs from "dayjs";
 import imageCompression from "browser-image-compression";
 import { PlusOutlined } from "@ant-design/icons";
@@ -73,9 +73,9 @@ const ModalCreatePatient = ({ role, isVisible, handleOk, handleCancel, form }: I
   };
 
   const uploadButton = (
-    <div>
+    <div className="flex items-center justify-center flex-col gap-2">
       <PlusOutlined />
-      <div style={{ marginTop: 8 }}>Chọn ảnh</div>
+      <div className="mx-auto">Chọn ảnh</div>
     </div>
   );
 
