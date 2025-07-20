@@ -2,6 +2,11 @@ const prisma = require("../config/prisma");
 const { getIO } = require("../config/socket.js");
 const ExaminationRecordService = require("./examinationRecord.service");
 const { sendPatientQueueNumberEmail } = require("../utils/staff.email");
+const dayjs = require('dayjs');
+const utc = require('dayjs/plugin/utc');
+const timezone = require('dayjs/plugin/timezone');
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 class QueueService {
   /**
@@ -212,59 +217,50 @@ class QueueService {
     // 1. Tìm slot rảnh gần nhất của bác sĩ với logic ưu tiên:
     // - Slot phải > now (sau thời gian hiện tại)
     // - Gần nhất với lịch đang khám (appointment hiện tại)
-    const now = new Date();
-    const appointmentDate = new Date(appointment.appointment_date);
-    const appointmentTime = appointment.appointment_time.toTimeString().slice(0, 8);
-    const currentTime = now.toTimeString().slice(0, 8);
-    
-    let slot = null;
-    
-    // Tìm tất cả slot rảnh của bác sĩ trong tương lai
+    const now = dayjs().tz('Asia/Ho_Chi_Minh');
+    const appointmentDate = dayjs(appointment.appointment_date).tz('Asia/Ho_Chi_Minh');
+
+    // Tìm tất cả slot rảnh của bác sĩ trong tương lai (theo giờ VN)
     const allAvailableSlots = await prisma.availableSlot.findMany({
       where: {
         doctor_id: to_doctor_id,
         clinic_id: to_clinic_id,
         is_available: true,
-        OR: [
-          // Slot trong tương lai (ngày khác)
-          {
-            slot_date: { gt: now }
-          },
-          // Slot hôm nay nhưng sau thời gian hiện tại
-          {
-            slot_date: {
-              equals: new Date(now.getFullYear(), now.getMonth(), now.getDate())
-            },
-            start_time: { gt: now }
-          }
-        ]
       },
       orderBy: [
         { slot_date: "asc" },
         { start_time: "asc" },
       ],
     });
-    
-    if (allAvailableSlots.length > 0) {
-      // Tìm slot gần nhất với appointment hiện tại
-      let closestSlot = allAvailableSlots[0];
-      let minTimeDiff = Math.abs(new Date(closestSlot.slot_date).getTime() - appointmentDate.getTime());
-      
-      for (const availableSlot of allAvailableSlots) {
-        const slotDateTime = new Date(availableSlot.slot_date);
-        const timeDiff = Math.abs(slotDateTime.getTime() - appointmentDate.getTime());
-        
-        if (timeDiff < minTimeDiff) {
-          minTimeDiff = timeDiff;
-          closestSlot = availableSlot;
-        }
-      }
-      
-      slot = closestSlot;
-    }
-    
-    if (!slot) {
+
+    // Lọc slot > now (theo giờ VN)
+    const validSlots = allAvailableSlots.filter(slot => {
+      const slotDateTime = dayjs(slot.slot_date).tz('Asia/Ho_Chi_Minh');
+      return slotDateTime.isAfter(now);
+    });
+
+    if (validSlots.length === 0) {
       throw new Error("Bác sĩ được chọn không có ca khám nào rảnh sau thời gian hiện tại.");
+    }
+
+    // Tìm slot gần nhất với appointment hiện tại
+    let closestSlot = validSlots[0];
+    let minTimeDiff = Math.abs(dayjs(closestSlot.slot_date).tz('Asia/Ho_Chi_Minh').diff(appointmentDate));
+    for (const slot of validSlots) {
+      const slotDateTime = dayjs(slot.slot_date).tz('Asia/Ho_Chi_Minh');
+      const timeDiff = Math.abs(slotDateTime.diff(appointmentDate));
+      if (timeDiff < minTimeDiff) {
+        minTimeDiff = timeDiff;
+        closestSlot = slot;
+      }
+    }
+    const slot = closestSlot;
+
+    // Convert slot_date, slot_time về Asia/Ho_Chi_Minh
+    const slotDateVN = dayjs(slot.slot_date).tz('Asia/Ho_Chi_Minh').format('YYYY-MM-DD');
+    let slotTimeVN = slot.start_time;
+    if (slot.start_time instanceof Date) {
+      slotTimeVN = dayjs(slot.start_time).tz('Asia/Ho_Chi_Minh').format('HH:mm:ss');
     }
 
     // 2. Tạo đơn chuyển khám
@@ -305,17 +301,14 @@ class QueueService {
 
     // console.log("slot found:", slot,);
 
-    const slotTimeStr = this.formatTimeToString(slot.start_time); // Ví dụ: "10:00:00"
-
-
     // 4. Tạo appointment mới cho bác sĩ mới
     const newAppointment = await prisma.appointment.create({
       data: {
         patient_id: patient_id,
         doctor_id: to_doctor_id,
         clinic_id: to_clinic_id,
-        appointment_date: slot.slot_date,
-        appointment_time: slot.start_time,
+        appointment_date: slotDateVN,
+        appointment_time: slotTimeVN,
         status: "confirmed",
         priority: priority,
         reason: reason,
@@ -333,8 +326,8 @@ class QueueService {
       appointment_id: newAppointment.id, // Sử dụng appointment mới
       patient_id,
       clinic_id: to_clinic_id,
-      slot_date: slot.slot_date,
-      slot_time: slotTimeStr,
+      slot_date: slotDateVN,
+      slot_time: slotTimeVN,
       registered_online: false,
     });
 
@@ -539,15 +532,21 @@ class QueueService {
    * @param {string} time - Chuỗi giờ dạng 'HH:mm:ss'
    * @returns {{type: string, min: number, max: number} | null}
    */
-  static getShiftTypeAndRange(time) {
-    if (time >= "08:00:00" && time < "12:00:00") {
-      return { type: "morning", min: 1, max: 100 };
+  static getShiftTypeAndRange(timeStr) {
+    if (!timeStr || typeof timeStr !== 'string') return null;
+    const t = timeStr.trim();
+    console.log('🔎 [DEBUG] getShiftTypeAndRange nhận timeStr:', t);
+    // Ca sáng: 06:00:00 - 11:59:59
+    if (t >= '06:00:00' && t < '12:00:00') {
+      return { type: 'morning', min: 1, max: 99 };
     }
-    if (time >= "13:00:00" && time < "17:00:00") {
-      return { type: "afternoon", min: 101, max: 200 };
+    // Ca chiều: 12:00:00 - 17:59:59
+    if (t >= '12:00:00' && t < '18:00:00') {
+      return { type: 'afternoon', min: 100, max: 199 };
     }
-    if (time >= "18:00:00" && time < "22:00:00") {
-      return { type: "night", min: 201, max: 300 };
+    // Ca tối: 18:00:00 - 22:00:00
+    if (t >= '18:00:00' && t <= '22:00:00') {
+      return { type: 'night', min: 200, max: 299 };
     }
     return null;
   }
@@ -565,78 +564,129 @@ class QueueService {
     clinic_id,
     slot_date,
     slot_time,
-    registered_online = true // 1: online, 0: walk-in
+    registered_online = true
   }) {
-
-    const shift = this.getShiftTypeAndRange(slot_time);
-    if (!shift) throw new Error("Giờ khám không thuộc ca nào!");
-    const { type, min, max } = shift;
-
-    // Lấy số lớn nhất đã cấp trong ca này, ngày này, phòng khám này
-    const lastQueue = await prisma.queue.findFirst({
-      where: {
-        clinic_id,
-        shift_type: type,
-        slot_date,
-      },
-      orderBy: { queue_number: "desc" }
+    // ====== LOG DEBUG ======
+    console.log('🔍 [DEBUG] assignQueueNumber được gọi với params:', {
+      appointment_id,
+      patient_id,
+      clinic_id,
+      slot_date,
+      slot_time,
+      registered_online
     });
-    const nextStt = lastQueue ? lastQueue.queue_number + 1 : min;
-    if (nextStt > max) throw new Error("Đã hết chỗ trong ca này!");
+    // ====== END LOG ======
 
-    // Tạo queue mới
-    const newQueue = await prisma.queue.create({
-      data: {
-        appointment_id,
-        patient_id,
-        clinic_id,
-        status: "waiting",
-        registered_online,
-        queue_number: nextStt,
-        shift_type: type,
-        slot_date,
-        created_at: new Date(),
-      },
-      include: {
-        patient: {
-          include: {
-            user: true
-          }
-        },
-        appointment: appointment_id ? {
-          include: {
-            doctor: true,
-            clinic: true
-          }
-        } : false,
-        clinic: true
-      }
-    });
-
-    // Gửi email thông báo số thứ tự cho bệnh nhân
-    try {
-      if (newQueue.patient?.user?.email) {
-        // Đảm bảo slot_time được format đúng cho email
-        const emailTime = typeof slot_time === 'string' ? slot_time :
-          (slot_time instanceof Date ?
-            `${slot_time.getHours().toString().padStart(2, '0')}:${slot_time.getMinutes().toString().padStart(2, '0')}:${slot_time.getSeconds().toString().padStart(2, '0')}` :
-            '08:00:00');
-
-        await sendPatientQueueNumberEmail(
-          newQueue.patient.user.email,
-          newQueue.patient.user.full_name || "Bệnh nhân",
-          newQueue.queue_number,
-          newQueue.shift_type,
-          newQueue.slot_date instanceof Date ? newQueue.slot_date.toISOString().slice(0, 10) : newQueue.slot_date,
-          emailTime,
-          newQueue.appointment?.doctor?.full_name || "Bác sĩ chưa xác định",
-          newQueue.clinic?.name || "Phòng khám"
-        );
-      }
-    } catch (err) {
-      console.error('Không thể gửi email thông báo số thứ tự:', err.message);
+    // Xử lý slot_date và slot_time để tránh lỗi date parsing
+    let slotDateVN = '';
+    let slotTimeVN = '';
+    
+    // Xử lý slot_date
+    if (typeof slot_date === 'string') {
+      slotDateVN = slot_date.trim();
+    } else if (slot_date instanceof Date) {
+      slotDateVN = slot_date.toISOString().split('T')[0]; // Lấy YYYY-MM-DD
+    } else {
+      throw new Error('slot_date không hợp lệ');
+    }
+    
+    // Xử lý slot_time
+    if (typeof slot_time === 'string') {
+      slotTimeVN = slot_time.trim();
+    } else if (slot_time instanceof Date) {
+      slotTimeVN = slot_time.toTimeString().slice(0, 8); // Lấy HH:mm:ss
+    } else {
+      throw new Error('slot_time không hợp lệ');
+    }
+    
+    // Đảm bảo slot_time có đủ 3 phần
+    if (/^\d{2}:\d{2}$/.test(slotTimeVN)) {
+      slotTimeVN += ':00';
     }
 
+    const shift = this.getShiftTypeAndRange(slotTimeVN);
+    if (!shift) throw new Error(`Giờ khám không thuộc ca nào! slot_time: ${slotTimeVN}`);
+    const { type, min, max } = shift;
+
+    // Dùng queryRaw để lấy số thứ tự lớn nhất
+    const rawResult = await prisma.$queryRaw`
+      SELECT queue_number FROM queues
+      WHERE clinic_id = ${clinic_id}
+        AND shift_type = ${type}
+        AND DATE(slot_date) = ${slotDateVN}
+      ORDER BY queue_number DESC
+      LIMIT 1
+    `;
+    const lastQueueNumber = Array.isArray(rawResult) && rawResult.length > 0 ? rawResult[0].queue_number : null;
+    const nextStt = lastQueueNumber ? lastQueueNumber + 1 : min;
+    if (nextStt > max) throw new Error('Đã hết chỗ trong ca này!');
+
+    // Tạo queue mới bằng raw query để tránh lỗi date parsing
+    const insertResult = await prisma.$executeRaw`
+      INSERT INTO queues (
+        appointment_id, patient_id, clinic_id, status, registered_online, 
+        queue_number, shift_type, slot_date, created_at
+      ) VALUES (
+        ${appointment_id}, ${patient_id}, ${clinic_id}, 'waiting', ${registered_online},
+        ${nextStt}, ${type}, ${slotDateVN}, NOW()
+      )
+    `;
+    
+    // Lấy queue vừa tạo bằng raw query
+    const [newQueue] = await prisma.$queryRaw`
+      SELECT 
+        q.*,
+        u.full_name as patient_name,
+        u.email as patient_email,
+        c.name as clinic_name,
+        d.full_name as doctor_name
+      FROM queues q
+      LEFT JOIN users u ON q.patient_id = u.id
+      LEFT JOIN clinics c ON q.clinic_id = c.id
+      LEFT JOIN appointments a ON q.appointment_id = a.id
+      LEFT JOIN users d ON a.doctor_id = d.id
+      WHERE q.patient_id = ${patient_id}
+        AND q.clinic_id = ${clinic_id}
+        AND q.queue_number = ${nextStt}
+        AND q.shift_type = ${type}
+        AND DATE(q.slot_date) = ${slotDateVN}
+      ORDER BY q.id DESC
+      LIMIT 1
+    `;
+
+    // ====== LOG DEBUG ======
+    console.log('✅ [DEBUG] Queue được tạo thành công:', {
+      id: newQueue.id,
+      queue_number: newQueue.queue_number,
+      shift_type: newQueue.shift_type,
+      patient_email: newQueue.patient_email,
+      patient_name: newQueue.patient_name
+    });
+    // ====== END LOG ======
+
+    // Gửi email nếu có email
+    try {
+      if (newQueue.patient_email) {
+        console.log('📧 [DEBUG] Bắt đầu gửi email cho:', newQueue.patient_email);
+        const emailTime = slotTimeVN;
+        const emailDate = slotDateVN;
+        await sendPatientQueueNumberEmail(
+          newQueue.patient_email,
+          newQueue.patient_name || 'Bệnh nhân',
+          newQueue.queue_number,
+          newQueue.shift_type,
+          emailDate,
+          emailTime,
+          newQueue.doctor_name || 'Bác sĩ chưa xác định',
+          newQueue.clinic_name || 'Phòng khám'
+        );
+        console.log('✅ [DEBUG] Email đã được gửi thành công!');
+      } else {
+        console.log('⚠️ [DEBUG] Không có email để gửi cho bệnh nhân');
+      }
+    } catch (err) {
+      console.error('❌ [DEBUG] Lỗi khi gửi email:', err.message);
+    }
     return newQueue;
   }
 
