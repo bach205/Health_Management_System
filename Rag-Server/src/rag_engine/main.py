@@ -32,7 +32,8 @@ async def call_chatbot(question,retrieval_docs):
   print(tokenizer.decode(outputs[0], skip_special_tokens=True))
 
 
-async def stream_chatbot(question:str,retrieval_docs:List[str],queue: asyncio.Queue):
+async def stream_chatbot(question:str,retrieval_docs:List[str],queue: asyncio.Queue,is_stop:bool):
+    print(retrieval_docs)
     print("start streaming")
     retrival_question =  get_messages_format(retrieval_docs,question)
     prompt = tokenizer.apply_chat_template(
@@ -56,6 +57,8 @@ async def stream_chatbot(question:str,retrieval_docs:List[str],queue: asyncio.Qu
             )
         past_key_values = outputs.past_key_values
         for _ in range(1024):  # max_new_tokens
+            if(is_stop):
+                await queue.put("<END>")
             await asyncio.sleep(0.05)   # Giả lập thời gian xử lý, nhuong quyen cho task khac
             outputs = model(
                 input_ids=generated[:, -1:],
