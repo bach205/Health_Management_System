@@ -366,6 +366,7 @@ const PrivateRoutes: PrivateRoute[] = [
     layout: DashboardLayout,
     allowedRoles: ["admin", "doctor", "nurse", "patient"],
   },
+  
 
 
 

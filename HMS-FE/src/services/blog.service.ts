@@ -10,7 +10,9 @@ export const getBlogs = async (params: any) => {
     return instance.get(`${BASE_URL}`, { params });
 };
 
-
+export const getBlogTags = async () => {
+  return instance.get("api/v1/blog-tag");
+};
 
 export const createBlog = async (blogData: any) => {
     return instance.post(`${BASE_URL}/`, blogData);

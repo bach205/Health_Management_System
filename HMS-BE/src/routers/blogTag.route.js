@@ -10,5 +10,6 @@ blogTagRouter.get('/:id', asyncHandler(blogTagController.getById));
 blogTagRouter.post('/', authenticate, authorize('admin', 'author'), asyncHandler(blogTagController.create));
 blogTagRouter.put('/:id', authenticate, authorize('admin', 'author'), asyncHandler(blogTagController.update));
 blogTagRouter.delete('/:id', authenticate, authorize('admin'), asyncHandler(blogTagController.delete));
+blogTagRouter.post('/assign-tags', authenticate, authorize('admin', 'author'), asyncHandler(blogTagController.addTagsToBlog));
 
 module.exports = blogTagRouter; 

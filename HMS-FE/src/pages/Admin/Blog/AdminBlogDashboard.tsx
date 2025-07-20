@@ -11,7 +11,8 @@ import { deleteBlog, getBlogCategories, getBlogs } from '../../../services/blog.
 import type { IBlog, IBlogCategory } from '../../../types/index.type';
 import { RotateCcw, Search } from 'lucide-react';
 import ModalViewBlog from '../../../components/modal/ModalViewBlog';
-
+import type { ITag } from '../../../types/index.type';
+import { getAllTags } from '../../../api/tag';
 const { Title, Paragraph } = Typography;
 const { Option } = Select;
 const PAGE_LIMIT = 8;
@@ -26,7 +27,8 @@ const AdminBlogDashboard = () => {
     const [loading, setLoading] = useState(false);
     const [isViewVisible, setIsViewVisible] = useState(false);
     const [currentBlog, setCurrentBlog] = useState<IBlog | null>(null);
-
+    const [selectedTag, setSelectedTag] = useState<number | undefined>(undefined);
+    const [tags, setTags] = useState<ITag[]>([]);
     const navigate = useNavigate();
 
     const fetchCategories = async () => {
@@ -37,6 +39,15 @@ const AdminBlogDashboard = () => {
             message.error('Lỗi khi tải danh mục');
         }
     };
+    const fetchTags = async () => {
+        try {
+            const res = await getAllTags();
+            setTags(res.data.metadata || []);
+        } catch {
+            message.error('Lỗi khi tải tag');
+        }
+    };
+
 
     const fetchBlogs = async () => {
         try {
@@ -45,6 +56,7 @@ const AdminBlogDashboard = () => {
                 page,
                 pageSize: PAGE_LIMIT,
                 keyword,
+                tag_id: selectedTag, // Assuming selectedTag is defined in your state
             };
             if (selectedCategory) {
                 params.category_id = selectedCategory;
@@ -53,10 +65,11 @@ const AdminBlogDashboard = () => {
             const res = await getBlogs(params);
             console.log(res)
             const blogs = res.data.metadata;
-            const total = blogs.length;
+            setBlogs(blogs);
+            setTotalRows(blogs.length);
             console.log(blogs)
             setBlogs(blogs);
-            setTotalRows(total);
+            //setTotalRows(total);
         } catch {
             message.error('Lỗi khi tải bài viết');
         } finally {
@@ -85,8 +98,9 @@ const AdminBlogDashboard = () => {
 
     useEffect(() => {
         fetchCategories();
+        fetchTags();
         fetchBlogs();
-    }, [page, selectedCategory]);
+    }, [page, selectedCategory, selectedTag, keyword]);
 
     const handleSearch = () => {
         setPage(1);
@@ -134,6 +148,17 @@ const AdminBlogDashboard = () => {
 
                 </Flex>
                 <Select
+                    placeholder="Chọn tag"
+                    allowClear
+                    style={{ width: 200 }}
+                    value={selectedTag}
+                    onChange={(value) => setSelectedTag(value)}
+                >
+                    {tags.map((tag) => (
+                        <Option key={tag.id} value={tag.id}>{tag.name}</Option>
+                    ))}
+                </Select>
+                <Select
                     placeholder="Chọn danh mục"
                     allowClear
                     style={{ width: 200 }}
@@ -149,7 +174,7 @@ const AdminBlogDashboard = () => {
             </Flex>
 
             <Row gutter={[24, 24]}>
-                {blogs.map((blog) => (
+                {Array.isArray(blogs) && blogs.map((blog) => (
                     <Col xs={24} sm={12} md={8} lg={6} key={blog.id}>
                         <Card
                             hoverable
@@ -180,6 +205,12 @@ const AdminBlogDashboard = () => {
                             <Paragraph type="secondary" style={{ fontSize: 13, minHeight: 60 }}>
                                 {/* {truncate(blog.content)} */}
                             </Paragraph>
+                            <div style={{ marginTop: 8 }}>
+                                {blog.tags?.map((tag: any) => (
+                                    <Tag color="green" key={tag.id}>{tag.name}</Tag>
+                                ))}
+                            </div>
+
                             {blog.category?.name && <Tag color="blue">{blog.category.name}</Tag>}
                         </Card>
                     </Col>
@@ -206,3 +237,5 @@ const AdminBlogDashboard = () => {
 };
 
 export default AdminBlogDashboard;
+
+

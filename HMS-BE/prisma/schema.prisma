@@ -502,5 +502,16 @@ model Blog {
   category_id Int?
   category    BlogCategory? @relation(fields: [category_id], references: [id])
 
+  tags Tag[] @relation("BlogTags")
+
   @@map("blogs")
+}
+
+model Tag {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+
+  blogs Blog[] @relation("BlogTags")
+
+  @@map("tags")
 }
