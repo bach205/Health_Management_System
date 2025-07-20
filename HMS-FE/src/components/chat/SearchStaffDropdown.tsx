@@ -5,16 +5,40 @@ import { useAuthStore } from '../../store/authStore';
 import type { IUser } from '../../types/chat.type';
 
 interface Props {
-    onSelectConversation: (conversation: any) => void;
+    onSelectUser?: (user: IUser) => void; // optional
+    selectedUserIds?: string[];           // optional
+    onSelectConversation?: (conversation: any) => void;
+    onUserSelect?: (user: IUser) => void;
 }
 
-const SearchStaffDropdown: React.FC<Props> = ({ onSelectConversation }) => {
+const SearchStaffDropdown: React.FC<Props> = ({
+    onSelectUser,
+    selectedUserIds = [],
+    onSelectConversation,
+    onUserSelect
+}) => {
     const { user } = useAuthStore();
     const [query, setQuery] = useState('');
     const [results, setResults] = useState<IUser[]>([]);
     const [loading, setLoading] = useState(false);
     const [showDropdown, setShowDropdown] = useState(false);
     const timeoutRef = useRef<any>(null);
+
+    const handleSelect = async (staff: IUser) => {
+        setShowDropdown(false);
+        setQuery('');
+        setResults([]);
+
+        if (onUserSelect) {
+            onUserSelect(staff);
+            return;
+        }
+
+        if (!user || !onSelectConversation) return;
+
+        const conversation = await findOrCreateDirectConversation(Number(user.id), staff.id);
+        onSelectConversation(conversation);
+    };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
@@ -37,18 +61,6 @@ const SearchStaffDropdown: React.FC<Props> = ({ onSelectConversation }) => {
                 setLoading(false);
             }
         }, 300);
-    };
-
-    const handleSelect = async (staff: IUser) => {
-        setShowDropdown(false);
-        setQuery('');
-        setResults([]);
-        console.log(staff)
-        if (!user) return;
-        // Kiểm tra/tạo conversation 1-1
-        const conversation = await findOrCreateDirectConversation(Number(user.id), staff.id);
-        console.log(conversation)
-        onSelectConversation(conversation);
     };
 
     return (
@@ -78,25 +90,30 @@ const SearchStaffDropdown: React.FC<Props> = ({ onSelectConversation }) => {
 
             {showDropdown && results.length > 0 && (
                 <ul className="absolute z-10 w-full bg-white border rounded shadow max-h-60 overflow-y-auto">
-                    {results.map((staff) => {
-                        return (
-                            <li
-                                key={staff.id}
-                                className="flex items-center px-3 py-2 cursor-pointer hover:bg-blue-100"
-                                onMouseDown={() => { handleSelect(staff) }}
-                            >
-                                <img src={staff.avatar || '/images/avatar-default.png'} alt={staff.full_name} className="w-8 h-8 rounded-full mr-2" />
-                                <div>
-                                    <div className="font-medium">{staff.full_name}</div>
-                                    <div className="text-xs text-gray-500">{staff.email}{'role' in staff ? ` (${(staff as any).role})` : ''}</div>
+                    {results.map((staff) => (
+                        <li
+                            key={staff.id}
+                            className="flex items-center px-3 py-2 cursor-pointer hover:bg-blue-100"
+                            onMouseDown={() => handleSelect(staff)}
+                        >
+                            <img
+                                src={staff.avatar || '/images/avatar-default.png'}
+                                alt={staff.full_name}
+                                className="w-8 h-8 rounded-full mr-2"
+                            />
+                            <div>
+                                <div className="font-medium">{staff.full_name}</div>
+                                <div className="text-xs text-gray-500">
+                                    {staff.email}
+                                    {'role' in staff ? ` (${(staff as any).role})` : ''}
                                 </div>
-                            </li>
-                        )
-                    })}
+                            </div>
+                        </li>
+                    ))}
                 </ul>
             )}
         </div>
     );
 };
 
-export default SearchStaffDropdown; 
+export default SearchStaffDropdown;

@@ -433,14 +433,14 @@ model Chat {
   file_name      String?   @db.VarChar(255)
   file_type      String?   @db.VarChar(255)
   message_type   MessageType @default(text) // text, image, file, audio, video
-  toId           Int
+  toId           Int?
   sendById       Int
   conversationId Int
   is_read        Boolean   @default(false)
   created_at     DateTime? @default(now())
   updated_at     DateTime? @default(now()) @updatedAt
 
-  to           User         @relation("ChatTo", fields: [toId], references: [id], onDelete: Cascade)
+  to           User?         @relation("ChatTo", fields: [toId], references: [id], onDelete: Cascade)
   sendBy       User         @relation("ChatSendBy", fields: [sendById], references: [id], onDelete: Cascade)
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 

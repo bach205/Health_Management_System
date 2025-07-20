@@ -84,26 +84,61 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
     }
 
     const otherUser = getOtherParticipant();
+    const getParticipantsExceptSelf = () =>
+        conversation.participants
+            .filter(p => p.userId !== Number(user?.id))
+            .map(p => p.user);
 
     return (
         <div className="flex-1 flex flex-col bg-white  min-h-[100%]">
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-gray-200">
                 <div className="flex items-center space-x-3">
-                    <img
-                        src={otherUser?.avatar || '/images/avatar-default.png'}
-                        alt={otherUser?.full_name}
-                        className="w-10 h-10 rounded-full"
-                    />
-                    <div>
-                        <h3 className="text-lg font-medium text-gray-900">
-                            {otherUser?.full_name}
-                        </h3>
-                        <p className="text-sm text-gray-500">
-                            {otherUser?.email}
-                        </p>
-                    </div>
+                    {conversation.type === 'group' ? (
+                        <>
+                            <div className="flex -space-x-2">
+                                {getParticipantsExceptSelf().slice(0, 3).map(u => (
+                                    <img
+                                        key={u.id}
+                                        src={u.avatar || '/images/avatar-default.png'}
+                                        alt={u.full_name}
+                                        className="w-8 h-8 rounded-full border-2 border-white"
+                                    />
+                                ))}
+                                {getParticipantsExceptSelf().length > 3 && (
+                                    <span className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-xs font-bold border-2 border-white">
+                                        +{getParticipantsExceptSelf().length - 3}
+                                    </span>
+                                )}
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-medium text-gray-900">
+                                    {conversation.name || 'Nhóm chat'}
+                                </h3>
+                                <p className="text-sm text-gray-500">
+                                    {getParticipantsExceptSelf().map(u => u.full_name).join(', ')}
+                                </p>
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <img
+                                src={otherUser?.avatar || '/images/avatar-default.png'}
+                                alt={otherUser?.full_name}
+                                className="w-10 h-10 rounded-full"
+                            />
+                            <div>
+                                <h3 className="text-lg font-medium text-gray-900">
+                                    {otherUser?.full_name}
+                                </h3>
+                                <p className="text-sm text-gray-500">
+                                    {otherUser?.email}
+                                </p>
+                            </div>
+                        </>
+                    )}
                 </div>
+
 
                 {/* Search Messages */}
                 <div className="flex items-center space-x-2">
@@ -178,7 +213,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
             <MessageInput
                 onSendMessage={onSendMessage}
                 conversationId={conversation.id}
-                toId={otherUser?.id || 0}
+                toId={conversation.type === 'direct' ? otherUser?.id : undefined}
                 disabled={isLoading}
             />
         </div>

@@ -21,6 +21,15 @@ const ConversationList: React.FC<ConversationListProps> = ({
         return conversation.participants.find(p => p.userId !== Number(user?.id))?.user;
     };
 
+    const getConversationDisplayName = (conversation: IConversation) => {
+        if (conversation.type === 'group') {
+            return conversation.name || 'Nhóm không tên';
+        }
+
+        const otherUser = getOtherParticipant(conversation);
+        return otherUser?.full_name || 'Người lạ';
+    };
+
     const getLastMessageText = (conversation: IConversation) => {
 
         if (!conversation.last_message_at) return '';
@@ -77,18 +86,39 @@ const ConversationList: React.FC<ConversationListProps> = ({
                                     <div className="flex items-center space-x-3">
                                         {/* Avatar */}
                                         <div className="flex-shrink-0">
-                                            <img
-                                                src={otherUser?.avatar || '/images/avatar-default.png'}
-                                                alt={otherUser?.full_name}
-                                                className="w-12 h-12 rounded-full"
-                                            />
+                                            {conversation.type === 'group' ? (
+                                                <div className="flex -space-x-2">
+                                                    {conversation.participants
+                                                        .filter(p => p.userId !== Number(user?.id))
+                                                        .slice(0, 3)
+                                                        .map((p, idx) => (
+                                                            <img
+                                                                key={idx}
+                                                                src={p.user.avatar || '/images/avatar-default.png'}
+                                                                alt={p.user.full_name}
+                                                                className="w-8 h-8 rounded-full border-2 border-white"
+                                                            />
+                                                        ))}
+                                                    {conversation.participants.filter(p => p.userId !== Number(user?.id)).length > 3 && (
+                                                        <span className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-xs font-bold border-2 border-white">
+                                                            +{conversation.participants.filter(p => p.userId !== Number(user?.id)).length - 3}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            ) : (
+                                                <img
+                                                    src={otherUser?.avatar || '/images/avatar-default.png'}
+                                                    alt={otherUser?.full_name}
+                                                    className="w-12 h-12 rounded-full"
+                                                />
+                                            )}
                                         </div>
 
                                         {/* Content */}
                                         <div className="flex flex-col flex-1 min-w-0 gap-2">
                                             <div className="flex items-center justify-between">
                                                 <h3 className="text-sm font-medium text-gray-900 truncate">
-                                                    {otherUser?.full_name}
+                                                    {getConversationDisplayName(conversation)}
                                                 </h3>
 
                                             </div>
