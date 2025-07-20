@@ -373,7 +373,4 @@ const PrivateRoutes: PrivateRoute[] = [
     allowedRoles: ["admin"],
     layout: DashboardLayout,
   },
-
-
-
 ];

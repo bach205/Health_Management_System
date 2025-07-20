@@ -22,6 +22,13 @@ class BlogTagController {
     const result = await BlogTagService.deleteTag(req.params.id);
     return new OK({ message: 'Xóa tag thành công', metadata: result }).send(res);
   }
+
+  // Gán tag cho bài viết
+  async addTagsToBlog(req, res) {
+    const { blogId, tagIds } = req.body;
+    const result = await BlogTagService.addTagsToBlog(blogId, tagIds);
+    return new OK({ message: 'Gán tag cho blog thành công', metadata: result }).send(res);
+  }
 }
 
 module.exports = new BlogTagController(); 
