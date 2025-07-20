@@ -94,7 +94,7 @@ const ModalViewUser = ({ role, isVisible, handleCancel, form, user }: IProps) =>
           <Select style={{ width: 100 }}>
             <Select.Option value="male"><span className="text-black">Nam</span></Select.Option>
             <Select.Option value="female"><span className="text-black">Nữ</span></Select.Option>
-            <Select.Option value="other"><span className="text-black">Khác</span></Select.Option>
+            {/* <Select.Option value="other"><span className="text-black">Khác</span></Select.Option> */}
           </Select>
         </Form.Item>
         {
@@ -137,9 +137,9 @@ const ModalViewUser = ({ role, isVisible, handleCancel, form, user }: IProps) =>
             </Form.Item>
 
 
-            <Form.Item label="Đánh giá">
+            {/* <Form.Item label="Đánh giá">
               <Rating rating={user?.doctor?.rating || 0} />
-            </Form.Item>
+            </Form.Item> */}
           </>
         )}
 

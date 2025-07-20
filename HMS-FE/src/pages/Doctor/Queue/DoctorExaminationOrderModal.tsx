@@ -84,7 +84,7 @@ const ExaminationOrderModal = ({
 
   const handleFinish = async (values: any) => {
     try {
-      console.log("values", values)
+      // console.log("values", values)
       setLoading(true);
       
       // Kiểm tra xem có chọn phòng khám không

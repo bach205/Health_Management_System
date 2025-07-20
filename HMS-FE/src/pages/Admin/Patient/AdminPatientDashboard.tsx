@@ -241,6 +241,7 @@ const AdminPatientDashboard = () => {
                 notification.error({ message: "Không tìm thấy thông tin bệnh nhân" });
                 return;
             }
+            console.log(values)
             // gọi API cập nhật
             const updatedPatient = {
                 ...values,
@@ -251,6 +252,10 @@ const AdminPatientDashboard = () => {
                 identity_number: values.identity_number?.trim(),
                 address: values.address?.trim(),
             };
+
+            if (values.avatar) {
+                updatedPatient.avatar = values.avatar;
+            }
             await updatePatient(updatedPatient);
             setReload(!reload);
             notification.success({ message: "Cập nhật tài khoản thành công" });
