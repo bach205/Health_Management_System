@@ -142,7 +142,7 @@ const CreateBlog: React.FC = () => {
 
                     <Form.Item label="Danh mục bài viết" name="category_id" rules={[{ required: false, message: 'Chọn danh mục' }]}>
                         <Select placeholder="Chọn danh mục">
-                            {categories.map((cat) => (
+                            {categories?.map((cat) => (
                                 <Option key={cat.id} value={cat.id}>
                                     {cat.name}
                                 </Option>
@@ -160,6 +160,7 @@ const CreateBlog: React.FC = () => {
                                     setThumbnailUrl(url);
                                     message.success('Tải ảnh thành công!');
                                 } catch (err) {
+                                    console.log("err:", err)
                                     message.error('Tải ảnh thất bại');
                                 }
                                 return false;

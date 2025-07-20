@@ -27,7 +27,9 @@ class PatientController {
     }
 
     updatePatient = async (req, res) => {
-        const result = await PatientService.updatePatient(req.body);
+        // console.log(req.body)
+        const { userId, patient } = req.body;
+        const result = await PatientService.updatePatient(userId, patient);
         return new OK({
             message: "Patient updated successfully",
             metadata: result,

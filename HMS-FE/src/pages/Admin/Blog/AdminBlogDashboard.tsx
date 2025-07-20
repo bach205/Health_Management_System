@@ -1,18 +1,30 @@
-import React, { useEffect, useState } from 'react';
+import { DeleteOutlined, EditOutlined, EyeOutlined, PlusOutlined } from '@ant-design/icons';
 import {
-    Row, Col, Card, Typography, Tag, Select, Pagination,
-    message, Input, Button, Space, Popconfirm,
+    Button,
+    Card,
+    Col,
+    Flex,
+    Input,
+    Pagination,
+    Popconfirm,
+    Row,
+    Select,
+    Tag,
     Tooltip,
-    Flex
+    Typography,
+    message
 } from 'antd';
-import { SearchOutlined, ArrowRightOutlined, PlusOutlined, EditOutlined, DeleteOutlined, EyeOutlined } from '@ant-design/icons';
+import { RotateCcw, Search } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import ModalViewBlog from '../../../components/modal/ModalViewBlog';
 import { deleteBlog, getBlogCategories, getBlogs } from '../../../services/blog.service';
 import type { IBlog, IBlogCategory } from '../../../types/index.type';
 import { RotateCcw, Search } from 'lucide-react';
 import ModalViewBlog from '../../../components/modal/ModalViewBlog';
 import type { ITag } from '../../../types/index.type';
 import { getAllTags } from '../../../api/tag';
+
 const { Title, Paragraph } = Typography;
 const { Option } = Select;
 const PAGE_LIMIT = 8;
