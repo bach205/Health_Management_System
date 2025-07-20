@@ -2,21 +2,47 @@ const prisma = require("../config/prisma");
 
 class ChatService {
     // Gửi tin nhắn mới
+    // Gửi tin nhắn mới
     async sendMessage(data) {
-        const { text, file_url, file_name, file_type, message_type, toId, sendById, conversationId } = data;
+        const {
+            text,
+            file_url,
+            file_name,
+            file_type,
+            message_type,
+            toId,
+            sendById,
+            conversationId
+        } = data;
 
-        // Tạo tin nhắn
+        // lấy loại conversation
+        const conversation = await prisma.conversation.findUnique({
+            where: { id: conversationId },
+            select: { type: true }
+        });
+
+        // chuẩn bị dữ liệu gửi
+        const chatData = {
+            text,
+            file_url,
+            file_name,
+            file_type,
+            message_type: message_type || 'text',
+            sendById,
+            conversationId
+        };
+
+        if (conversation.type === 'direct') {
+            if (!toId) throw new Error("toId is required for direct message");
+            chatData.toId = toId;
+        } else {
+            // group: để toId là sendById để tránh null lỗi Prisma
+            chatData.toId = sendById;
+        }
+
+        // tạo tin nhắn
         const chat = await prisma.chat.create({
-            data: {
-                text,
-                file_url,
-                file_name,
-                file_type,
-                message_type: message_type || 'text',
-                toId,
-                sendById,
-                conversationId
-            },
+            data: chatData,
             include: {
                 sendBy: {
                     select: {
@@ -37,7 +63,7 @@ class ChatService {
             }
         });
 
-        // Cập nhật thời gian tin nhắn cuối của conversation
+        // cập nhật last_message_at
         await prisma.conversation.update({
             where: {
                 id: conversationId
@@ -50,10 +76,14 @@ class ChatService {
         return chat;
     }
 
+
     // Lấy tin nhắn theo conversation
     async getMessagesByConversationId(conversationId, userId, page = 1, limit = 50) {
         const skip = (page - 1) * limit;
-
+        const conversation = await prisma.conversation.findUnique({
+            where: { id: parseInt(conversationId) },
+            select: { type: true }
+        });
         const messages = await prisma.chat.findMany({
             where: {
                 conversationId: parseInt(conversationId)
@@ -84,16 +114,28 @@ class ChatService {
         });
 
         // Đánh dấu tin nhắn đã đọc cho user hiện tại
-        await prisma.chat.updateMany({
-            where: {
-                conversationId: parseInt(conversationId),
-                toId: userId,
-                is_read: false
-            },
-            data: {
-                is_read: true
-            }
-        });
+        if (conversation.type === 'direct') {
+            await prisma.chat.updateMany({
+                where: {
+                    conversationId: parseInt(conversationId),
+                    toId: userId,
+                    is_read: false
+                },
+                data: {
+                    is_read: true
+                }
+            });
+        } else {
+            await prisma.chat.updateMany({
+                where: {
+                    conversationId: parseInt(conversationId),
+                    is_read: false
+                },
+                data: {
+                    is_read: true
+                }
+            });
+        }
 
         return messages.reverse(); // Trả về theo thứ tự thời gian tăng dần
     }
@@ -166,16 +208,34 @@ class ChatService {
 
     // Đánh dấu tất cả tin nhắn trong conversation đã đọc
     async markConversationAsRead(conversationId, userId) {
-        await prisma.chat.updateMany({
-            where: {
-                conversationId: parseInt(conversationId),
-                toId: userId,
-                is_read: false
-            },
-            data: {
-                is_read: true
-            }
+        const conversation = await prisma.conversation.findUnique({
+            where: { id: parseInt(conversationId) },
+            select: { type: true }
         });
+
+        if (conversation.type === 'direct') {
+            await prisma.chat.updateMany({
+                where: {
+                    conversationId: parseInt(conversationId),
+                    toId: userId,
+                    is_read: false
+                },
+                data: {
+                    is_read: true
+                }
+            });
+        } else {
+            await prisma.chat.updateMany({
+                where: {
+                    conversationId: parseInt(conversationId),
+                    is_read: false
+                },
+                data: {
+                    is_read: true
+                }
+            });
+        }
+
 
         return { message: "All messages marked as read" };
     }

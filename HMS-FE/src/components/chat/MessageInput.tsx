@@ -4,7 +4,7 @@ import type { ISendMessageData } from '../../types/chat.type';
 interface MessageInputProps {
     onSendMessage: (data: ISendMessageData) => void;
     conversationId: number;
-    toId: number;
+    toId?: number;
     disabled?: boolean;
 }
 
@@ -45,7 +45,6 @@ const MessageInput: React.FC<MessageInputProps> = ({
         if (message.trim()) {
             const messageData: ISendMessageData = {
                 text: message.trim(),
-                toId,
                 conversationId,
                 message_type: 'text'
             };
@@ -59,7 +58,6 @@ const MessageInput: React.FC<MessageInputProps> = ({
                     file_url: pf.meta.file_url,
                     file_name: pf.meta.file_name,
                     file_type: pf.meta.file_type,
-                    toId,
                     conversationId,
                     message_type: pf.meta.file_type.startsWith('image/') ? 'image' : 'file'
                 };

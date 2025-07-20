@@ -23,13 +23,20 @@ class ChatController {
                 return res.status(403).json({ message: "Không có quyền truy cập conversation này" });
             }
 
+            // xử lý toId theo loại conversation
+            let finalToId = toId;
+            if (conversation.type === 'group') {
+                // set dummy toId cho hợp lệ (ví dụ chính người gửi)
+                finalToId = sendById;
+            }
+
             const message = await ChatService.sendMessage({
                 text,
                 file_url,
                 file_name,
                 file_type,
                 message_type,
-                toId,
+                toId: finalToId,
                 sendById,
                 conversationId
             });
@@ -149,6 +156,33 @@ class ChatController {
             res.status(500).json({ message: error.message || "Lỗi xóa tin nhắn" });
         }
     }
+    // Tạo nhóm chat mới
+async createGroupChat(req, res) {
+    try {
+        const { name, memberIds } = req.body;
+        const creatorId = req.user.id;
+
+        if (!name || !Array.isArray(memberIds) || memberIds.length === 0) {
+            return res.status(400).json({ message: "Thiếu thông tin tên nhóm hoặc thành viên" });
+        }
+
+        // Đảm bảo người tạo có trong danh sách
+        if (!memberIds.includes(creatorId)) {
+            memberIds.push(creatorId);
+        }
+
+        const groupConversation = await ConversationService.createGroupConversation({
+            name,
+            memberIds,
+            createdBy: creatorId
+        });
+
+        res.status(201).json(groupConversation);
+    } catch (error) {
+        console.error("Lỗi tạo nhóm chat:", error);
+        res.status(500).json({ message: error.message || "Lỗi tạo nhóm chat" });
+    }
+}
 
     // Lấy số tin nhắn chưa đọc theo conversation
     async getUnreadCountByConversation(req, res) {
