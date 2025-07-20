@@ -86,12 +86,24 @@ const ExaminationOrderModal = ({
     try {
       console.log("values", values)
       setLoading(true);
-      if (values.to_clinic_id && !values.to_doctor_id) {
-        message.error("Vui lòng chọn bác sĩ");
+      
+      // Kiểm tra xem có chọn phòng khám không
+      if (!values.to_clinic_id) {
+        message.error("Vui lòng chọn phòng khám tiếp theo");
         return;
       }
-
-      // return
+      
+      // Kiểm tra xem có bác sĩ rảnh không
+      if (availableDoctors.length === 0) {
+        message.error("Không có bác sĩ nào rảnh trong phòng khám này. Vui lòng chọn phòng khám khác.");
+        return;
+      }
+      
+      // Kiểm tra xem có chọn bác sĩ không
+      if (!values.to_doctor_id) {
+        message.error("Vui lòng chọn bác sĩ tiếp nhận");
+        return;
+      }
 
       await mainRequest.post("/api/v1/queue/assign-clinic", {
         ...values,
@@ -108,10 +120,13 @@ const ExaminationOrderModal = ({
         priority: 2,
       });
 
+      message.success("Chuyển phòng khám thành công!");
       onSuccess?.();
       handleClose();
     } catch (err: any) {
-      message.error(err?.response?.data?.message || "Có lỗi xảy ra!");
+      console.error("Error assigning clinic:", err);
+      const errorMessage = err?.response?.data?.message || "Có lỗi xảy ra khi chuyển phòng khám!";
+      message.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -179,8 +194,6 @@ const ExaminationOrderModal = ({
                   {c.name}
                 </Option>
               ))}
-            <Option value={""}>-</Option>
-
           </Select>
         </Form.Item>
         {clinicSelected && (
@@ -201,14 +214,19 @@ const ExaminationOrderModal = ({
                 >
                   {availableDoctors.map((row: any) => (
                     <Option key={row.doctor.id} value={row.doctor.id} >
-                      {row.doctor.full_name}
+                      {row.doctor.full_name} - {row.nearestSlot?.slot_date ? new Date(row.nearestSlot.slot_date).toLocaleDateString('vi-VN') : 'N/A'} {row.nearestSlot?.start_time ? new Date(row.nearestSlot.start_time).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : 'N/A'}
                     </Option>
                   ))}
                 </Select>
               </Form.Item>
             )
               :
-              <p>Không có bác sĩ nào rảnh</p>
+              <div style={{ padding: '12px', backgroundColor: '#fff2e8', border: '1px solid #ffbb96', borderRadius: '6px', color: '#d46b08' }}>
+                <p style={{ margin: 0, fontWeight: 'bold' }}>⚠️ Không có bác sĩ nào rảnh</p>
+                <p style={{ margin: '4px 0 0 0', fontSize: '12px' }}>
+                  Tất cả bác sĩ trong phòng khám này đều không có slot khám rảnh trong tương lai.
+                </p>
+              </div>
             }
           </>
         )}
