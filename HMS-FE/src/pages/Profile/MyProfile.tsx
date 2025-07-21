@@ -50,8 +50,8 @@ const MyProfile: React.FC = () => {
       }
       // console.log(value);
       setIsVisibleProfile(false);
-      console.log(updateData)
-      const res = await updateProfile({ userId: profile.id, updateData, });
+      //console.log(updateData)
+      const res = await updateProfile({ userId: profile.id, updateData });
       console.log("res", res)
       notification.success({ message: "Cập nhật thông tin thành công" });
       setReload(!reload);

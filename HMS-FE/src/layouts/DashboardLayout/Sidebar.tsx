@@ -242,7 +242,12 @@ const SIDEBAR_ITEMS = [
         icon: <Wallet className="w-4 h-4" />,
         href: "/manage-payments",
       },
-
+      {
+        id: "chat",
+        label: "Chat",
+        icon: <MessageCircle className="w-4 h-4" />,
+        href: "/chat",
+      },
     ],
   },
   {

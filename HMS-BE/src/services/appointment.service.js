@@ -276,6 +276,8 @@ class AppointmentService {
    */
   //chạy thành công
   async confirmAppointment({ appointment_id }) {
+    console.log('🔍 [DEBUG] confirmAppointment được gọi với appointment_id:', appointment_id);
+    
     const appointment = await prisma.appointment.update({
       where: { id: parseInt(appointment_id) },
       data: { status: "confirmed" },
@@ -285,22 +287,50 @@ class AppointmentService {
         clinic: true,
       }
     });
+    
+    console.log('✅ [DEBUG] Appointment đã được cập nhật thành confirmed:', {
+      id: appointment.id,
+      patient_id: appointment.patient_id,
+      clinic_id: appointment.clinic_id,
+      appointment_date: appointment.appointment_date,
+      appointment_time: appointment.appointment_time,
+      patient_email: appointment.patient?.email
+    });
+    
     // ====== GỌI CẤP SỐ THỨ TỰ CHO QUEUE ======
     try {
+      console.log('🔄 [DEBUG] Bắt đầu gọi assignQueueNumber...');
+      
+      // Xử lý appointment_time để lấy đúng giờ từ Date object
+      let slotTimeStr = '';
+      if (typeof appointment.appointment_time === 'string') {
+        slotTimeStr = appointment.appointment_time;
+      } else if (appointment.appointment_time instanceof Date) {
+        // Lấy giờ từ Date object mà không bị lệch múi giờ
+        const hours = appointment.appointment_time.getUTCHours().toString().padStart(2, '0');
+        const minutes = appointment.appointment_time.getUTCMinutes().toString().padStart(2, '0');
+        const seconds = appointment.appointment_time.getUTCSeconds().toString().padStart(2, '0');
+        slotTimeStr = `${hours}:${minutes}:${seconds}`;
+      }
+      
+      console.log('🕐 [DEBUG] slotTimeStr được xử lý:', slotTimeStr);
+      
       await QueueService.assignQueueNumber({
         appointment_id: appointment.id,
         patient_id: appointment.patient_id,
         clinic_id: appointment.clinic_id,
         slot_date: appointment.appointment_date,
-        slot_time: (typeof appointment.appointment_time === 'string') ? appointment.appointment_time : appointment.appointment_time.toTimeString().slice(0,8),
+        slot_time: slotTimeStr,
         registered_online: true // 1: online, 0: walk-in
       });
+      console.log('✅ [DEBUG] assignQueueNumber đã được gọi thành công!');
     } catch (err) {
-      console.error('Không thể cấp số thứ tự cho queue:', err.message);
+      console.error('❌ [DEBUG] Lỗi khi gọi assignQueueNumber:', err.message);
     }
     // ====== GỬI MAIL XÁC NHẬN LỊCH HẸN ======
     try {
       if (appointment.patient && appointment.patient.email) {
+        console.log('📧 [DEBUG] Bắt đầu gửi email xác nhận lịch hẹn cho:', appointment.patient.email);
         await sendPatientAppointmentConfirmationEmail(
           appointment.patient.email,
           appointment.patient.full_name || "Bệnh nhân",
@@ -309,9 +339,12 @@ class AppointmentService {
           appointment.doctor && appointment.doctor.full_name ? appointment.doctor.full_name : "",
           appointment.clinic && appointment.clinic.name ? appointment.clinic.name : ""
         );
+        console.log('✅ [DEBUG] Email xác nhận lịch hẹn đã được gửi thành công!');
+      } else {
+        console.log('⚠️ [DEBUG] Không có email để gửi xác nhận lịch hẹn');
       }
     } catch (err) {
-      console.error('Không thể gửi mail xác nhận lịch hẹn:', err.message);
+      console.error('❌ [DEBUG] Lỗi khi gửi mail xác nhận lịch hẹn:', err.message);
     }
     // ====== END ======
     return appointment;

@@ -428,22 +428,21 @@ class DoctorService {
         return doctors;
     }
 
-    getAvailableDoctorsWithNearestSlot = async (clinicId) => {
+    getAvailableDoctorsWithNearestSlot = async (clinicId, afterDate, afterTime) => {
         if (!clinicId) {
             throw new BadRequestError("Clinic ID không được để trống");
         }
-        
         const now = new Date();
         const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
         const currentTime = now.toTimeString().slice(0, 8);
-        
-        // Tìm tất cả slot rảnh
+
+        // Tìm tất cả slot rảnh trong clinic cụ thể
         const allSlots = await prisma.availableSlot.findMany({
             where: {
                 clinic_id: Number(clinicId),
                 is_available: true,
                 doctor: {
-                    role: 'doctor', // Chỉ lấy slot của bác sĩ
+                    role: 'doctor',
                 },
             },
             orderBy: [
@@ -457,55 +456,56 @@ class DoctorService {
                         full_name: true,
                     }
                 },
+                clinic: {
+                    select: {
+                        id: true,
+                        name: true,
+                    }
+                },
             },
         });
-        
-        // Lọc slot hợp lệ (trong tương lai hoặc hôm nay nhưng chưa qua giờ)
+
+        // Lọc slot hợp lệ (sau thời gian tham chiếu)
         const validSlots = allSlots.filter(slot => {
             const slotDate = new Date(slot.slot_date);
-            const slotTime = slot.start_time.toTimeString().slice(0, 8);
-            
-            // Slot trong tương lai
-            if (slotDate > today) {
-                return true;
+            const slotTime = slot.start_time instanceof Date ? slot.start_time.toTimeString().slice(0, 8) : slot.start_time;
+            if (afterDate && afterTime) {
+                // Slot sau ngày hoặc cùng ngày nhưng sau giờ
+                if (slotDate > new Date(afterDate)) return true;
+                if (slotDate.toISOString().slice(0,10) === afterDate && slotTime > afterTime) return true;
+                return false;
+            } else {
+                // Mặc định: slot trong tương lai hoặc hôm nay nhưng chưa qua giờ hiện tại
+                if (slotDate > today) return true;
+                if (slotDate.getTime() === today.getTime() && slotTime > currentTime) return true;
+                return false;
             }
-            
-            // Slot hôm nay nhưng chưa qua giờ
-            if (slotDate.getTime() === today.getTime() && slotTime > currentTime) {
-                return true;
-            }
-            
-            return false;
         });
-        
+
         // Group theo doctor_id để lấy slot gần nhất cho mỗi bác sĩ
         const doctorMap = new Map();
-
         for (const slot of validSlots) {
             const docId = slot.doctor_id;
-            
             if (!doctorMap.has(docId)) {
                 doctorMap.set(docId, {
                     doctor: slot.doctor,
                     nearestSlot: slot,
+                    clinic: slot.clinic,
                 });
             } else {
-                // Nếu đã có slot cho doctor này, kiểm tra xem slot mới có sớm hơn không
                 const existingSlot = doctorMap.get(docId).nearestSlot;
                 const existingDate = new Date(existingSlot.slot_date);
                 const newDate = new Date(slot.slot_date);
-                
-                if (newDate < existingDate || 
-                    (newDate.getTime() === existingDate.getTime() && 
-                     slot.start_time < existingSlot.start_time)) {
+                if (newDate < existingDate ||
+                    (newDate.getTime() === existingDate.getTime() && slot.start_time < existingSlot.start_time)) {
                     doctorMap.set(docId, {
                         doctor: slot.doctor,
                         nearestSlot: slot,
+                        clinic: slot.clinic,
                     });
                 }
             }
         }
-        
         const data = Array.from(doctorMap.values());
         return data;
     };
