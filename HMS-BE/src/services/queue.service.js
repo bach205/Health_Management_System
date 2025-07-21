@@ -375,7 +375,12 @@ class QueueService {
       });
     }
 
-
+    await prisma.appointment.update({
+      where: { id: appointment_id },
+      data: {
+        status: "completed",
+      },
+    });
 
     // console.log("queue created:", queue);
 
