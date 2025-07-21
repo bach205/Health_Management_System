@@ -507,6 +507,7 @@ class DoctorService {
             }
         }
         const data = Array.from(doctorMap.values());
+        console.log("data", data)
         return data;
     };
 
