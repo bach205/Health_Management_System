@@ -25,9 +25,9 @@ queueRouter.get("/clinic/:clinicId",
 // Cập nhật trạng thái queue
 queueRouter.patch(
   "/:queueId/status",
-  authenticate,
-  checkUserStatus(),
-  authorize("admin", "doctor", "nurse"),
+  // authenticate,
+  // checkUserStatus(),
+  // authorize("admin", "doctor", "nurse"),
   asyncHandler(QueueController.updateQueueStatus)
 );
 

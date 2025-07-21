@@ -182,6 +182,9 @@ class QueueService {
     return newQueue;
   }
 
+  static timeToSeconds(date) {
+    return date.getHours() * 3600 + date.getMinutes() * 60 + date.getSeconds();
+  }
   /**
    * Tạo đơn chuyển khám và gán bệnh nhân vào hàng đợi của bác sĩ mới
    * Logic: Chỉ lấy slot rảnh trong tương lai (ngày mai trở đi hoặc hôm nay nhưng giờ chưa qua)
@@ -235,9 +238,13 @@ class QueueService {
     });
     
     // Lọc slot cùng ngày có thời gian sau appointment (xử lý ở application level)
+  
+    
+    const appointmentTimeSec = this.timeToSeconds(new Date(`1970-01-01T${appointmentTime}Z`));
+    
     const validSameDaySlots = sameDaySlots.filter(slot => {
-      const slotTime = slot.start_time.toTimeString().slice(0, 8);
-      return slotTime > appointmentTime;
+      const slotTimeSec = this.timeToSeconds(new Date(slot.start_time));
+      return slotTimeSec > appointmentTimeSec;
     });
     
     if (validSameDaySlots.length > 0) {

@@ -35,6 +35,7 @@ export default function AppointmentsPage() {
     const [loading, setLoading] = useState(false);
     const [form] = Form.useForm();
     const patientId = localStorage.getItem("user");
+    const [searchSubmitted, setSearchSubmitted] = useState<string>(""   );
 
     // Filter states
     const [searchText, setSearchText] = useState("");
