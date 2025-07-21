@@ -141,19 +141,18 @@ const NurseBookAppointment: React.FC = () => {
   // Update available times when date is selected
   const handleDateChange = (date: dayjs.Dayjs | null) => {
     if (!selectedClinic || !date) return;
-
-    const selectedDate = dayjs(date).format('YYYY-MM-DD');
+    const selectedDate = dayjs.utc(date).format('YYYY-MM-DD');
     const times = availableSlots
       .filter(slot =>
         slot.doctor_id === selectedDoctor &&
         slot.clinic_id === selectedClinic &&
-        dayjs(slot.slot_date).format('YYYY-MM-DD') === selectedDate
+        dayjs.utc(slot.slot_date).format('YYYY-MM-DD') === selectedDate
       )
       .map(slot => ({
         value: dayjs.utc(slot.start_time).format('HH:mm:ss'),
         label: `${dayjs.utc(slot.start_time).format('HH:mm')} - ${dayjs.utc(slot.end_time).format('HH:mm')}`
       }));
-   // console.log(times);
+    // console.log(times);
     setAvailableTimes(times);
 
     // Reset time field

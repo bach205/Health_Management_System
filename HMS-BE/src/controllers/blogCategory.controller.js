@@ -7,8 +7,13 @@ class BlogCategoryController {
     return new CREATED({ message: 'Tạo category thành công', metadata: result }).send(res);
   }
   async getAll(req, res) {
-    const result = await BlogCategoryService.getCategories();
+    const { page = 1, pageSize = 8, order = 'asc' } = req.query;
+    const result = await BlogCategoryService.getCategoriesPagination({ page, pageSize, order });
     return new OK({ message: 'Lấy danh sách category thành công', metadata: result }).send(res);
+  }
+  async getAllNoPaging(req, res) {
+    const result = await BlogCategoryService.getAllCategories();
+    return new OK({ message: 'Lấy tất cả category thành công', metadata: result }).send(res);
   }
   async getById(req, res) {
     const result = await BlogCategoryService.getCategoryById(req.params.id);

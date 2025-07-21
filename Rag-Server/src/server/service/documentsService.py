@@ -27,19 +27,19 @@ async def save_documents(file,user_id):
         inserted_id = await save_documents_to_database(file,file_location,user_id)
 
 
-        asyncio.create_task(index_documents(file_location, inserted_id))
+        asyncio.create_task(asyncio.to_thread(index_documents, file_location, inserted_id))
     except Exception as e:
         print(e)
         raise Exception(e)
     return file
 
-async def load_docx_to_text(path):
+def load_docx_to_text(path):
 
     doc = Document(path)
     text = "\n".join([para.text for para in doc.paragraphs])
     return [text]
 
-async def load_docx_to_documents(path: str, doc_id=None):
+def load_docx_to_documents(path: str, doc_id=None):
     doc = Document(path)
     text = "\n".join([p.text for p in doc.paragraphs if p.text.strip() != ""])
     metadata = {
@@ -49,9 +49,9 @@ async def load_docx_to_documents(path: str, doc_id=None):
         metadata["doc_id"] = doc_id
     return [LangchainDocument(page_content=text, metadata=metadata)]
 
-async def chunk_texts(texts):
+def chunk_texts(texts):
     splitter = RecursiveCharacterTextSplitter(
-        chunk_size=500,
+        chunk_size=300,
         chunk_overlap=100
     )
     chunks = []
@@ -59,9 +59,9 @@ async def chunk_texts(texts):
         chunks.extend(splitter.split_text(text))
     return chunks
 
-async def chunk_docs(docs):
+def chunk_docs(docs):
     splitter = RecursiveCharacterTextSplitter(
-        chunk_size=500,
+        chunk_size=300,
         chunk_overlap=100
     )
     chunks = []
@@ -69,10 +69,11 @@ async def chunk_docs(docs):
     return chunks
 
 #load documents and chunk them into chunks and save them into chroma
-async def index_documents(path:str, doc_id=None):
-    docs = await load_docx_to_documents(path, doc_id)
-    chunks = await chunk_docs(docs)
-    await save_chunks_into_chroma(chunks)
+def index_documents(path:str, doc_id=None):
+    docs = load_docx_to_documents(path, doc_id)
+    chunks = chunk_docs(docs)
+    save_chunks_into_chroma(chunks)
+    print("Done")
 
 async def delete_documents(id: int):
     try:

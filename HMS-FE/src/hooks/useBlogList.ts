@@ -10,6 +10,7 @@ export const useBlogList = (initialPagination?: any, initialPublished?: string) 
   const [reload, setReload] = useState<boolean>(false);
   const [published, setPublished] = useState<string>(initialPublished || "all");
   const [categoryId, setCategoryId] = useState<number | null>(null);
+  const [tagId, setTagId] = useState<number | null>(null);
   const [pagination, setPagination] = useState({
     total: 0,
     pageSize: initialPagination?.pageSize || 10,
@@ -28,10 +29,10 @@ export const useBlogList = (initialPagination?: any, initialPublished?: string) 
         if (published !== "all") params.published = published;
         if (categoryId) params.category_id = categoryId;
         if (keyword) params.keyword = keyword;
-
+        if (tagId) params.tag_id = tagId;
         const res = await getBlogs(params);
         const data = res.data.metadata;
-
+        console.log("Blog structure:", blogs[0]); 
         setBlogs(data.blogs);
         setPagination((prev) => ({ ...prev, total: data.total }));
       } catch (error: any) {
@@ -42,7 +43,7 @@ export const useBlogList = (initialPagination?: any, initialPublished?: string) 
     };
 
     fetchBlogs();
-  }, [pagination.current, pagination.pageSize, reload, published, categoryId]);
+  }, [pagination.current, pagination.pageSize, reload, published, categoryId, tagId, keyword]);
 
   const handleTableChange = (pagination: any) => {
     setPagination(pagination);
@@ -57,6 +58,8 @@ export const useBlogList = (initialPagination?: any, initialPublished?: string) 
     setPublished,
     categoryId,
     setCategoryId,
+    tagId,             
+    setTagId, 
     pagination,
     setPagination,
     reload,

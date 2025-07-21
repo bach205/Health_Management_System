@@ -1132,3 +1132,16 @@ INSERT INTO doctor_ratings (appointment_id, doctor_id, patient_id, rating, comme
 --   8
 -- );
 
+CREATE TABLE tags (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL UNIQUE
+);
+
+
+CREATE TABLE _BlogTags (
+    A INT NOT NULL, -- blog_id
+    B INT NOT NULL, -- tag_id
+    PRIMARY KEY (A, B),
+    CONSTRAINT fk_blog FOREIGN KEY (A) REFERENCES blogs(id) ON DELETE CASCADE,
+    CONSTRAINT fk_tag FOREIGN KEY (B) REFERENCES tags(id) ON DELETE CASCADE
+);

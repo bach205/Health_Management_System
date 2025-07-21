@@ -29,6 +29,9 @@ const blogCategoryRouter = require("./blogCategory.route");
 const blogTagRouter = require("./blogTag.route");
 const invoiceRouter = require("./invoice.route");
 
+
+
+
 router.use("/nurse", nurseRouter);
 router.use("/doctor", doctorRouter);
 router.use("/patient", patientRouter);
@@ -58,4 +61,6 @@ router.use("/invoice", invoiceRouter);
 
 router.use("/blog", blogRouter);
 router.use("/blog-category", blogCategoryRouter);
+
+router.use("/blog-tag", blogTagRouter); // ✅ mount router tag ở đây
 module.exports = router;
