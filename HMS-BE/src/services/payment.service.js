@@ -4,6 +4,7 @@ class PaymentService {
 
   async createInvoiceAndPaymentAfterExamination(record, appointment_id, doctor_id, patient_id) {
     // 1. Lấy giá bác sĩ
+    console.log("record", record, "appointment_id", appointment_id, "doctor_id", doctor_id, "patient_id", patient_id)
     try {
       const doctor = await prisma.doctor.findUnique({
         where: { user_id: doctor_id },
@@ -25,19 +26,19 @@ class PaymentService {
         description: "Phí khám bác sĩ",
         amount: doctorPrice,
       });
-      const fromClinic = await prisma.clinic.findUnique({
-        where: { id: orders[0].from_clinic_id },
-      });
-      const toClinic = await prisma.clinic.findUnique({
-        where: { id: orders[0].to_clinic_id },
-      });
+      // const fromClinic = await prisma.clinic.findUnique({
+      //   where: { id: orders[0].from_clinic_id },
+      // });
+      // const toClinic = await prisma.clinic.findUnique({
+      //   where: { id: orders[0].to_clinic_id },
+      // });
 
       // 3.2. Thêm từng dịch vụ từ ExaminationOrder
       for (const order of orders) {
         console.log("order", order)
         invoiceItemsData.push({
           record_id: record.id,
-          description: `Chi phí dịch vụ từ phòng khám ${fromClinic.name} đến ${toClinic.name}`,
+          description: `Chi phí dịch vụ từ phòng khám ${order.from_clinic_id} đến ${order.to_clinic_id}`,
           amount: order.extra_cost,
         });
       }

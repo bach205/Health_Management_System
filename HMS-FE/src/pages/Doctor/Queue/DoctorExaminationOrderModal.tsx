@@ -63,7 +63,7 @@ const ExaminationOrderModal = ({
           console.log(res)
 
           const resDoctors = await getAvailableDoctors(Number(to_clinic_id));
-          console.log(resDoctors.data.data)
+          console.log(resDoctors)
 
           const doctors = resDoctors.data.data;
           

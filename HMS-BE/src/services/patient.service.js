@@ -285,16 +285,17 @@ class PatientService {
             },
             include: {
                 patient: true,
-                examination_records: {
-                    include: {
-                        examination_details: true,
-                        prescriptions: {
-                            include: {
-                                prescription_items: true
-                            }
-                        }
-                    }
-                }
+                // examination_records: {
+                //     include: {
+                //         examination_details: true,
+                //         prescriptions: {
+                //             include: {
+                //                 prescription_items: true
+                //             }
+                //         }
+                //     }
+                // }
+                
             }
         });
         if (!patient) {
