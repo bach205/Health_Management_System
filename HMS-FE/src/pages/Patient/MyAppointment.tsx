@@ -35,7 +35,7 @@ export default function AppointmentsPage() {
     const [loading, setLoading] = useState(false);
     const [form] = Form.useForm();
     const patientId = localStorage.getItem("user");
-    const [searchSubmitted, setSearchSubmitted] = useState<string>(""   );
+    const [searchSubmitted, setSearchSubmitted] = useState<string>("");
 
     // Filter states
     const [searchText, setSearchText] = useState("");
@@ -48,7 +48,7 @@ export default function AppointmentsPage() {
     const [doctorOptions, setDoctorOptions] = useState<{ value: number, label: string }[]>([]);
     const [clinicOptions, setClinicOptions] = useState<{ value: number, label: string }[]>([]);
     // Sắp xếp
-    const [searchSubmitted, setSearchSubmitted] = useState(false);
+   // const [searchSubmitted, setSearchSubmitted] = useState(false);
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>("asc");
 
     const navigate = useNavigate();

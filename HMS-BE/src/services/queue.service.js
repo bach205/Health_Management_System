@@ -235,7 +235,7 @@ class QueueService {
         { start_time: "asc" },
       ],
     }); 
-    console.log("all : ",allAvailableSlots)
+ //   console.log("all : ",allAvailableSlots)
     // Lọc slot > now (theo giờ VN)
     const validSlots = allAvailableSlots.filter(slot => {
       const slotDateTime = dayjs(slot.slot_date).tz('Asia/Ho_Chi_Minh');
