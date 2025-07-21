@@ -171,14 +171,41 @@ class QueueController {
 
   static async assignClinic(req, res, next) {
     try {
-      console.log('=== ASSIGN CLINIC DEBUG ===');
-      console.log('Request body:', req.body);
-      console.log('to_doctor_id:', req.body.to_doctor_id);
-      console.log('to_clinic_id:', req.body.to_clinic_id);
-      console.log('patient_id:', req.body.patient_id);
-      console.log('appointment_id:', req.body.appointment_id);
-      
-      const result = await QueueService.createOrderAndAssignToDoctorQueue(req.body);
+      // Chuẩn hóa payload: nếu frontend gửi doctor_id thì chuyển thành to_doctor_id
+      let {
+        to_doctor_id,
+        doctor_id,
+        to_clinic_id,
+        from_clinic_id,
+        patient_id,
+        appointment_id,
+        reason = "",
+        note = "",
+        extra_cost = 0,
+        priority = 2,
+      } = req.body;
+      // Nếu không có to_doctor_id mà có doctor_id thì dùng doctor_id
+      if (!to_doctor_id && doctor_id) {
+        to_doctor_id = doctor_id;
+      }
+      // Validate các trường bắt buộc
+      if (!to_doctor_id || !to_clinic_id || !from_clinic_id || !patient_id || !appointment_id) {
+        return res.status(400).json({
+          success: false,
+          message: "Thiếu thông tin chuyển phòng khám (bác sĩ, phòng khám, bệnh nhân, lịch hẹn)!"
+        });
+      }
+      const result = await QueueService.createOrderAndAssignToDoctorQueue({
+        patient_id,
+        from_clinic_id,
+        to_clinic_id,
+        to_doctor_id,
+        reason,
+        note,
+        extra_cost,
+        appointment_id,
+        priority,
+      });
       return new OK({
         message: "Chuyển phòng và thêm vào hàng đợi thành công",
         metadata: result

@@ -40,7 +40,7 @@ exports.getAvailableSlots = async (req, res, next) => {
     //     message: error.details[0].message
     //   });
     // }
-
+    console.log(req.query)
     const slots = await appointmentService.getAvailableSlots(req.query);
     res.status(200).json({
       success: true,

@@ -986,13 +986,13 @@ CREATE TABLE blogs (
 );
 
 -- Blog <-> Tag many-to-many
--- CREATE TABLE _BlogTags (
---     A INT NOT NULL, -- blog_id
---     B INT NOT NULL, -- tag_id
---     PRIMARY KEY (A, B),
---     FOREIGN KEY (A) REFERENCES blogs(id) ON DELETE CASCADE,
---     FOREIGN KEY (B) REFERENCES blog_tags(id) ON DELETE CASCADE
--- );
+CREATE TABLE _BlogTags (
+    A INT NOT NULL, -- blog_id
+    B INT NOT NULL, -- tag_id
+    PRIMARY KEY (A, B),
+    FOREIGN KEY (A) REFERENCES blogs(id) ON DELETE CASCADE,
+    FOREIGN KEY (B) REFERENCES blog_tags(id) ON DELETE CASCADE
+);
 INSERT INTO blog_categories (name) VALUES 
 ('Sức khỏe cộng đồng'),
 ('Dịch vụ bệnh viện'),
