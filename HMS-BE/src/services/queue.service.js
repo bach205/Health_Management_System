@@ -187,6 +187,9 @@ class QueueService {
     return newQueue;
   }
 
+  static timeToSeconds(date) {
+    return date.getHours() * 3600 + date.getMinutes() * 60 + date.getSeconds();
+  }
   /**
    * Tạo đơn chuyển khám và gán bệnh nhân vào hàng đợi của bác sĩ mới
    * Logic: Chỉ lấy slot rảnh trong tương lai (ngày mai trở đi hoặc hôm nay nhưng giờ chưa qua)
@@ -238,9 +241,33 @@ class QueueService {
       const slotDateTime = dayjs(slot.slot_date).tz('Asia/Ho_Chi_Minh');
       return slotDateTime.isAfter(now);
     });
-
-    if (validSlots.length === 0) {
-      throw new Error("Bác sĩ được chọn không có ca khám nào rảnh sau thời gian hiện tại.");
+    
+    // Lọc slot cùng ngày có thời gian sau appointment (xử lý ở application level)
+  
+    
+    const appointmentTimeSec = this.timeToSeconds(new Date(`1970-01-01T${appointmentTime}Z`));
+    
+    const validSameDaySlots = sameDaySlots.filter(slot => {
+      const slotTimeSec = this.timeToSeconds(new Date(slot.start_time));
+      return slotTimeSec > appointmentTimeSec;
+    });
+    
+    if (validSameDaySlots.length > 0) {
+      slot = validSameDaySlots[0];
+    } else {
+      // Ưu tiên 2: Tìm slot trong tương lai (ngày khác)
+      slot = await prisma.availableSlot.findFirst({
+        where: {
+          doctor_id: to_doctor_id,
+          clinic_id: to_clinic_id,
+          is_available: true,
+          slot_date: { gt: appointmentDate } // Sau ngày appointment
+        },
+        orderBy: [
+          { slot_date: "asc" },
+          { start_time: "asc" },
+        ],
+      });
     }
 
     // Tìm slot gần nhất với appointment hiện tại
