@@ -86,13 +86,13 @@ class AppointmentService {
    */
   async bookAppointmentByQR(data) {
     // 1. Kiểm tra slot còn trống không
-    console.log(data.start_time);
+    //console.log(data.start_time);
     let slot = await prisma.$queryRaw`
       SELECT * FROM available_slots
       WHERE doctor_id = ${data.doctor_id}
         AND clinic_id = ${data.clinic_id}
         AND slot_date = ${data.slot_date}
-        AND start_time = ${data.start_time.slice(11,19)}
+        AND start_time = ${data.start_time}
         AND is_available = 1
       LIMIT 1;
     `;
@@ -148,7 +148,7 @@ class AppointmentService {
       where: {
         patient_id: data.patient_id,
         appointment_date: new Date(data.slot_date),
-        appointment_time: data.start_time,
+        appointment_time: new Date(`1970-01-01T${data.start_time}`),
         status: { in: ["pending", "confirmed"] },
       },
     });
@@ -162,7 +162,7 @@ class AppointmentService {
         doctor_id: data.doctor_id,
         clinic_id: data.clinic_id,
         appointment_date: new Date(data.slot_date),
-        appointment_time: data.start_time,
+        appointment_time: new Date(`1970-01-01T${data.start_time}`),
         reason: data.reason,
         note: data.note,
         status: "pending",

@@ -60,16 +60,16 @@ const ExaminationOrderModal = ({
       const fetchClinicVolumeAndDoctors = async () => {
         try {
           const res = await getClinicService();
-
+          console.log(res)
 
           const resDoctors = await getAvailableDoctors(Number(to_clinic_id));
-   
+          console.log(resDoctors.data.data)
 
           const doctors = resDoctors.data.data;
           
           // filter doctor không phải là doctor đang làm việc ở phòng khám hiện tại
           const filteredDoctors = doctors.filter((doctor: any) => doctor.doctor.id != doctor_id);
-
+          
           setAvailableDoctors(filteredDoctors || []);
         } catch (error) {
           console.error("Lỗi khi lấy thông tin phòng khám hoặc bác sĩ:", error);

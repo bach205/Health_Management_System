@@ -207,16 +207,18 @@ class QueueService {
     appointment_id, // lịch hẹn khám
     priority = 2, // ưu tiên chuyển phòng
   }) {
-    // Validate đầu vào
-    if (!patient_id || !from_clinic_id || !to_clinic_id || !to_doctor_id || !appointment_id) {
-      throw new Error("Thiếu thông tin chuyển phòng khám (bác sĩ, phòng khám, bệnh nhân, lịch hẹn)!");
-    }
+
+
+
     const appointment = await prisma.appointment.findUnique({
       where: { id: appointment_id },
     });
+
     if (!appointment) {
       throw new Error("Appointment không tồn tại.");
     }
+
+
     // 1. Tìm slot rảnh gần nhất của bác sĩ với logic ưu tiên:
     // - Ưu tiên 1: Cùng ngày với appointment hiện tại, sau thời gian chuyển đổi
     // - Ưu tiên 2: Ngày khác trong tương lai
@@ -246,13 +248,13 @@ class QueueService {
     const appointmentTimeSec = this.timeToSeconds(new Date(`1970-01-01T${appointmentTime}Z`));
 
     const validSameDaySlots = sameDaySlots.filter(slot => {
-      const slotTimeSec = this.timeToSeconds(new Date(`1970-01-01T${slot.start_time}Z`));
-      console.log(slotTimeSec)
+      const slotTimeSec = this.timeToSeconds(new Date(slot.start_time));
       return slotTimeSec > appointmentTimeSec;
     });
+
     if (validSameDaySlots.length > 0) {
       slot = validSameDaySlots[0];
-    } else if (validSlots.length > 0) {
+    } else {
       // Ưu tiên 2: Tìm slot trong tương lai (ngày khác)
       slot = await prisma.availableSlot.findFirst({
         where: {
@@ -271,6 +273,7 @@ class QueueService {
     if (!slot) {
       throw new Error("Bác sĩ được chọn không có ca khám nào rảnh sau thời gian appointment hiện tại.");
     }
+
     // 2. Tạo đơn chuyển khám
     const order = await prisma.examinationOrder.create({
       data: {
@@ -291,6 +294,9 @@ class QueueService {
         appointment: true,
       },
     });
+
+    // console.log("order created:", order);
+
     // 3. Kiểm tra xem bệnh nhân đã có trong hàng đợi chưa
     const existingQueue = await prisma.queue.findFirst({
       where: {
@@ -299,6 +305,7 @@ class QueueService {
         status: { in: ['waiting', 'in_progress'] },
       },
     });
+    // console.log(existingQueue)
     if (existingQueue) {
       throw new Error("Bệnh nhân đã có trong hàng đợi phòng khám này.");
     }
