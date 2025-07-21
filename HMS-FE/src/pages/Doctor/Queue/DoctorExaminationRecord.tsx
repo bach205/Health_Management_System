@@ -379,7 +379,7 @@ const DoctorExaminationRecordModal = ({
                       const weekday = dayjs(date).locale('vi').format("dddd");
                       const dateStr = dayjs(date).format("DD/MM/YYYY");
                       // Kiểm tra nếu ngày khám <= hôm nay thì bỏ qua
-                      // if (dayjs(date).isBefore(dayjs(), 'minute')) {
+                      // if (dayjs(date).isBefore(dayjs(), 'day')) {
                       //   return null; // Nếu ngày khám là quá khứ thì bỏ qua
                       // }
                       return (
@@ -406,7 +406,7 @@ const DoctorExaminationRecordModal = ({
                     {(slotsByDate[selectedDate] || []).map(slot => {
                       const startDate = new Date(slot.start_time);
                       const endDate = new Date(slot.end_time);
-
+                      console.log(startDate, endDate)
                       const start =
                         startDate.getUTCHours().toString().padStart(2, '0') +
                         ':' +
@@ -418,6 +418,11 @@ const DoctorExaminationRecordModal = ({
                         endDate.getUTCMinutes().toString().padStart(2, '0');
 
                       const isAvailable = slot.is_available;
+
+                      // Kiểm tra nếu giờ kết thúc <= lúc hiện tại thì bỏ qua
+                      if (dayjs().get("hour") > endDate.getUTCHours()) {
+                        return null; // Nếu ngày khám là quá khứ thì bỏ qua
+                      }
 
                       return (
                         <Button

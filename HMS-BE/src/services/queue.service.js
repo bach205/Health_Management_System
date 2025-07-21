@@ -194,6 +194,8 @@ class QueueService {
    * Tạo đơn chuyển khám và gán bệnh nhân vào hàng đợi của bác sĩ mới
    * Logic: Chỉ lấy slot rảnh trong tương lai (ngày mai trở đi hoặc hôm nay nhưng giờ chưa qua)
    */
+
+
   static async createOrderAndAssignToDoctorQueue({
     patient_id, // bệnh nhân
     from_clinic_id, // chuyển từ phòng khám này
@@ -216,66 +218,58 @@ class QueueService {
       throw new Error("Appointment không tồn tại.");
     }
     // 1. Tìm slot rảnh gần nhất của bác sĩ với logic ưu tiên:
-    // - Slot phải > now (sau thời gian hiện tại)
-    // - Gần nhất với lịch đang khám (appointment hiện tại)
-    const now = dayjs().tz('Asia/Ho_Chi_Minh');
-    const appointmentDate = dayjs(appointment.appointment_date).tz('Asia/Ho_Chi_Minh');
-    // Tìm tất cả slot rảnh của bác sĩ trong tương lai (theo giờ VN)
-    const allAvailableSlots = await prisma.availableSlot.findMany({
+    // - Ưu tiên 1: Cùng ngày với appointment hiện tại, sau thời gian chuyển đổi
+    // - Ưu tiên 2: Ngày khác trong tương lai
+    const now = new Date();
+    const appointmentDate = new Date(appointment.appointment_date);
+    const appointmentTime = appointment.appointment_time.toTimeString().slice(0, 8);
+    const currentTime = now.toTimeString().slice(0, 8);
+
+
+
+    let slot = null;
+
+    // Ưu tiên 1: Tìm slot cùng ngày với appointment, sau thời gian appointment
+    const sameDaySlots = await prisma.availableSlot.findMany({
       where: {
         doctor_id: to_doctor_id,
         clinic_id: to_clinic_id,
         is_available: true,
+        slot_date: appointmentDate
       },
       orderBy: [
-        { slot_date: "asc" },
         { start_time: "asc" },
       ],
     });
-    // Lọc slot > now (theo giờ VN)
-    const validSlots = allAvailableSlots.filter(slot => {
-      const slotDateTime = dayjs(slot.slot_date + 'T' + slot.start_time).tz('Asia/Ho_Chi_Minh');
-      return slotDateTime.isAfter(now);
-    });
+
     // Lọc slot cùng ngày có thời gian sau appointment (xử lý ở application level)
-    let sameDaySlots = allAvailableSlots.filter(slot => {
-      return dayjs(slot.slot_date).isSame(appointmentDate, 'day');
-    });
-    const appointmentTimeSec = this.timeToSeconds(new Date(`1970-01-01T${appointment.appointment_time || appointment.appointmentTime}Z`));
-    console.log(appointmentTimeSec);
+    const appointmentTimeSec = this.timeToSeconds(new Date(`1970-01-01T${appointmentTime}Z`));
+
     const validSameDaySlots = sameDaySlots.filter(slot => {
       const slotTimeSec = this.timeToSeconds(new Date(`1970-01-01T${slot.start_time}Z`));
       console.log(slotTimeSec)
       return slotTimeSec > appointmentTimeSec;
     });
- 
-    let slot = null;
     if (validSameDaySlots.length > 0) {
       slot = validSameDaySlots[0];
     } else if (validSlots.length > 0) {
       // Ưu tiên 2: Tìm slot trong tương lai (ngày khác)
-      // Tìm slot gần nhất với appointment hiện tại
-      let closestSlot = validSlots[0];
-      let minTimeDiff = Math.abs(dayjs(closestSlot.slot_date + 'T' + closestSlot.start_time).tz('Asia/Ho_Chi_Minh').diff(appointmentDate));
-      for (const s of validSlots) {
-        const slotDateTime = dayjs(s.slot_date + 'T' + s.start_time).tz('Asia/Ho_Chi_Minh');
-        const timeDiff = Math.abs(slotDateTime.diff(appointmentDate));
-        if (timeDiff < minTimeDiff) {
-          minTimeDiff = timeDiff;
-          closestSlot = s;
-        }
-      }
-      slot = closestSlot;
+      slot = await prisma.availableSlot.findFirst({
+        where: {
+          doctor_id: to_doctor_id,
+          clinic_id: to_clinic_id,
+          is_available: true,
+          slot_date: { gt: appointmentDate } // Sau ngày appointment
+        },
+        orderBy: [
+          { slot_date: "asc" },
+          { start_time: "asc" },
+        ],
+      });
     }
-    console.log(slot);
+
     if (!slot) {
-      throw new Error("Không tìm được slot phù hợp cho bác sĩ ở phòng khám mới!");
-    }
-    // Convert slot_date, slot_time về Asia/Ho_Chi_Minh
-    const slotDateVN = dayjs(slot.slot_date).tz('Asia/Ho_Chi_Minh').format('YYYY-MM-DD');
-    let slotTimeVN = slot.start_time;
-    if (slot.start_time instanceof Date) {
-      slotTimeVN = dayjs(slot.start_time).tz('Asia/Ho_Chi_Minh').format('HH:mm:ss');
+      throw new Error("Bác sĩ được chọn không có ca khám nào rảnh sau thời gian appointment hiện tại.");
     }
     // 2. Tạo đơn chuyển khám
     const order = await prisma.examinationOrder.create({
@@ -308,72 +302,38 @@ class QueueService {
     if (existingQueue) {
       throw new Error("Bệnh nhân đã có trong hàng đợi phòng khám này.");
     }
-    // 4. Tạo appointment mới cho bác sĩ mới
-    const newAppointment = await prisma.appointment.create({
-      data: {
-        patient_id: patient_id,
-        doctor_id: to_doctor_id,
-        clinic_id: to_clinic_id,
-        appointment_date: slotDateVN,
-        appointment_time: slotTimeVN,
-        status: "confirmed",
-        priority: priority,
-        reason: reason,
-        note: note,
-      },
-      include: {
-        doctor: true,
-        clinic: true,
-        patient: true,
-      },
-    });
-    // 5. Tạo queue mới với appointment mới
+
+    // console.log("slot found:", slot,);
+
+    const slotTimeStr = this.formatTimeToString(slot.start_time); // Ví dụ: "10:00:00"
+
+
+    // 4. Tạo queue mới bằng assignQueueNumber
     const queue = await QueueService.assignQueueNumber({
-      appointment_id: newAppointment.id, // Sử dụng appointment mới
+      appointment_id,
       patient_id,
       clinic_id: to_clinic_id,
-      slot_date: slotDateVN,
-      slot_time: slotTimeVN,
+      slot_date: slot.slot_date,
+      slot_time: slotTimeStr,
       registered_online: false,
     });
-    // 6. Cập nhật trạng thái queue cũ thành done
-    const oldQueue = await prisma.queue.findFirst({
-      where: { 
-        appointment_id: appointment_id,
-        status: { in: ['waiting', 'in_progress'] }
-      },
+
+    // 4.1 Cập nhật thêm doctor và priority cho queue vừa tạo (tìm theo appointment_id)
+    const targetQueue = await prisma.queue.findFirst({
+      where: { appointment_id },
     });
-    if (oldQueue) {
+
+    if (targetQueue) {
       await prisma.queue.update({
-        where: { id: oldQueue.id },
+        where: { id: targetQueue.id },
         data: {
           status: "done",
         },
       });
     }
-    await prisma.appointment.update({
-      where: { id: appointment_id },
-      data: {
-        status: "completed",
-      },
-    });
-    // 5. Emit socket thông báo cho FE
-    const io = getIO();
-    if (io) {
-      io.to(`clinic_${to_clinic_id}`).emit("queue:assigned", {
-        patient: queue.patient,
-        queue,
-        clinicId: to_clinic_id,
-      });
-    }
-    return {
-      order,
-      queue,
-      assignedDoctor: order.doctor,
-      slot,
-      newAppointment,
-    };
   }
+
+
   static formatTimeToString(date) {
     return date.toISOString().substring(11, 19); // lấy từ index 11 đến 19: HH:mm:ss
   }
@@ -574,7 +534,7 @@ class QueueService {
     // ====== LOG DEBUG ======
     console.log('🔍 [DEBUG] assignQueueNumber được gọi với params:', {
       appointment_id,
-      patient_id,
+      patient_id, 
       clinic_id,
       slot_date,
       slot_time,
@@ -585,7 +545,7 @@ class QueueService {
     // Xử lý slot_date và slot_time để tránh lỗi date parsing
     let slotDateVN = '';
     let slotTimeVN = '';
-    
+
     // Xử lý slot_date
     if (typeof slot_date === 'string') {
       slotDateVN = slot_date.trim();
@@ -594,7 +554,7 @@ class QueueService {
     } else {
       throw new Error('slot_date không hợp lệ');
     }
-    
+
     // Xử lý slot_time
     if (typeof slot_time === 'string') {
       slotTimeVN = slot_time.trim();
@@ -603,7 +563,7 @@ class QueueService {
     } else {
       throw new Error('slot_time không hợp lệ');
     }
-    
+
     // Đảm bảo slot_time có đủ 3 phần
     if (/^\d{2}:\d{2}$/.test(slotTimeVN)) {
       slotTimeVN += ':00';
@@ -636,7 +596,7 @@ class QueueService {
         ${nextStt}, ${type}, ${slotDateVN}, NOW()
       )
     `;
-    
+
     // Lấy queue vừa tạo bằng raw query
     const [newQueue] = await prisma.$queryRaw`
       SELECT 
