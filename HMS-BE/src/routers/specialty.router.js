@@ -49,8 +49,8 @@ specialtyRouter.post(
 // DELETE chuyên khoa (admin)
 specialtyRouter.delete(
   "/delete/:id",
-  authorize("admin"),
   authenticate,
+  authorize("admin"),
   checkUserStatus(),
   asyncHandler(specialtyController.deleteSpecialty)
 );

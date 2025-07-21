@@ -90,21 +90,28 @@ exports.getPatientAppointments = async (req, res, next) => {
 
 exports.confirmAppointment = async (req, res, next) => {
   try {
+    console.log('🔍 [DEBUG] Controller confirmAppointment nhận request:', req.body);
+    
     const { error } = confirmAppointmentSchema.validate(req.body);
     if (error) {
+      console.log('❌ [DEBUG] Validation error:', error.details[0].message);
       return res.status(400).json({
         success: false,
         message: error.details[0].message
       });
     }
 
+    console.log('✅ [DEBUG] Validation passed, gọi appointmentService.confirmAppointment...');
     const result = await appointmentService.confirmAppointment(req.body);
+    
+    console.log('✅ [DEBUG] confirmAppointment service hoàn thành, trả về response');
     res.status(200).json({
       success: true,
       message: "Xác nhận lịch hẹn thành công",
       data: result
     });
   } catch (error) {
+    console.error('❌ [DEBUG] Error trong controller confirmAppointment:', error.message);
     next(error);
   }
 };

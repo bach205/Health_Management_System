@@ -53,6 +53,8 @@ class QueueController {
     try {
       const { queueId } = req.params;
       const { status } = req.body;
+
+      console.log(queueId, status);
       const queue = await QueueService.updateQueueStatus(queueId, status);
       return new OK({
         message: "Cập nhật trạng thái queue thành công",
@@ -169,6 +171,13 @@ class QueueController {
 
   static async assignClinic(req, res, next) {
     try {
+      console.log('=== ASSIGN CLINIC DEBUG ===');
+      console.log('Request body:', req.body);
+      console.log('to_doctor_id:', req.body.to_doctor_id);
+      console.log('to_clinic_id:', req.body.to_clinic_id);
+      console.log('patient_id:', req.body.patient_id);
+      console.log('appointment_id:', req.body.appointment_id);
+      
       const result = await QueueService.createOrderAndAssignToDoctorQueue(req.body);
       return new OK({
         message: "Chuyển phòng và thêm vào hàng đợi thành công",

@@ -19,6 +19,15 @@ export const confirmPayment = async (record_id: number) => {
   return instance.patch(`/api/v1/payment/update-status/${record_id}`);
 };
 
+export const getPaymentByRecordId = async (record_id: number) => {
+  return instance.get(`/api/v1/payment/payment-record/${record_id}`);
+};
+
+
+
+export const updatePaymentMedicineStatus = async (record_id: number, status: string) => {
+  return instance.put(`/api/v1/payment/update-payment-medicine-status/${record_id}`, { status });
+};
 
 export const updatePaymentStatus = async (record_id: number, status: string) => {
   return instance.patch(`/api/v1/payment/update-status/${record_id}`, { status });

@@ -106,15 +106,16 @@ class DoctorController {
       metadata: result,
     }).send(res);
   }
-  getAvailableDoctorsWithNearestSlot = async (req, res) => {
-    const { clinicId } = req.params;
-    console.log("clinicId:", clinicId);
-    const result = await DoctorService.getAvailableDoctorsWithNearestSlot(clinicId);
-    return new OK({
-      message: "Lấy danh sách bác sĩ khả dụng với slot gần nhất thành công",
-      metadata: result,
-    }).send(res);
-  }
+  getAvailableDoctorsWithNearestSlot = async (req, res, next) => {
+    try {
+      const { clinicId } = req.params;
+      const { after_date, after_time } = req.query;
+      const doctors = await DoctorService.getAvailableDoctorsWithNearestSlot(clinicId, after_date, after_time);
+      res.status(200).json({ success: true, message: "Lấy danh sách bác sĩ rảnh và slot gần nhất thành công", data: doctors });
+    } catch (error) {
+      next(error);
+    }
+  };
 
 }
 

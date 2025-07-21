@@ -153,10 +153,41 @@ class PaymentService {
     if (id == null || !status) {
       throw new Error("ID và trạng thái không được để trống");
     }
+    console.log(id, status)
     const payment = await prisma.payment.update({
       where: { id: Number(id) },
       data: { status },
     });
+    return payment;
+  }
+
+  updatePaymentMedicineStatus = async (id, status) => {
+    if (id == null || !status) {
+      throw new Error("ID và trạng thái không được để trống");
+    }
+  
+    const paymentData = await prisma.payment.findFirst({
+      where: { record_id: Number(id) }
+    });
+  //  console.log(paymentData)
+    if (!paymentData) throw new Error("Không tìm thấy payment");  
+    console.log(paymentData)
+    const payment = await prisma.payment.update({
+      where: { id: paymentData.id },
+      data: { 
+        status : status,
+        method:"bank_transfer",
+        note : "thank toán tiền thuốc chữa trị"
+      }
+    });
+    
+    return payment;
+  }
+
+  getPaymentByRecordId = async (id) => {
+    const payment = await prisma.payment.findFirst({
+      where:{record_id : Number(id)}
+    })
     return payment;
   }
 
@@ -200,7 +231,7 @@ class PaymentService {
       description,
       referenceCode,
     } = data;
-    console.log("data", data)
+    //console.log("data", data)
     const match = description.match(/Thanh Toan (.+?)(\.|$)/i);
     const patientName = match ? match[1].trim() : null;
 

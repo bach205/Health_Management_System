@@ -209,11 +209,16 @@ class ExaminationDetailService {
   }
 
 
-  static async getDoctorAvailableSlots(doctorId) {
+  static async getDoctorAvailableSlots(doctorId, slotDate) {
+    const where = {
+      doctor_id: +doctorId,
+      is_available: true
+    };
+    if (slotDate) {
+      where.slot_date = slotDate;
+    }
     return prisma.availableSlot.findMany({
-      where: {
-        doctor_id: +doctorId,
-      },
+      where,
       include: {
         doctor: {
           select: {
@@ -228,6 +233,10 @@ class ExaminationDetailService {
           },
         },
       },
+      orderBy: [
+        { slot_date: 'asc' },
+        { start_time: 'asc' }
+      ]
     });
   }
 }
