@@ -164,7 +164,7 @@ class PatientService {
             }
         });
 
-        console.log("existingPatient: ", existingPatient);
+      //  console.log("existingPatient: ", existingPatient);
         if (!existingPatient) {
             throw new BadRequestError("Bệnh nhân không tồn tại");
         }
