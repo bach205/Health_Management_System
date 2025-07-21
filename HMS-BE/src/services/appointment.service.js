@@ -106,6 +106,8 @@ class AppointmentService {
       where: { phone: data.phone },
       include: { patient: true }
     });
+
+    console.log(">>>>> patient ", patient)
     if (!patient) {
       // Tạo user và patient mới
       const hashedPassword = await bcrypt.hash(
@@ -124,7 +126,7 @@ class AppointmentService {
             is_active: true,
             gender: data.gender,
             address: data.address,
-            date_of_birth: data.date_of_birth,
+            date_of_birth: new Date(data.date_of_birth),
             email: `${data.phone}@gmail.com`,
           },
         });
@@ -154,7 +156,7 @@ class AppointmentService {
     });
     if (exist)
       throw new BadRequestError("Bệnh nhân đã có lịch hẹn vào khung giờ này!");
-
+    console.log("patient", patient)
     // 4. Tạo lịch hẹn
     const appointment = await prisma.appointment.create({
       data: {
@@ -188,7 +190,7 @@ class AppointmentService {
         patient_id: appointment.patient_id,
         clinic_id: appointment.clinic_id,
         slot_date: appointment.appointment_date,
-        slot_time: (typeof appointment.appointment_time === 'string') ? appointment.appointment_time : appointment.appointment_time.toTimeString().slice(0,8),
+        slot_time: (typeof appointment.appointment_time === 'string') ? appointment.appointment_time : appointment.appointment_time.toTimeString().slice(0, 8),
         registered_online: false // Đặt lịch offline
       });
       queue_number = queue?.queue_number || null;
@@ -277,7 +279,7 @@ class AppointmentService {
   //chạy thành công
   async confirmAppointment({ appointment_id }) {
     console.log('🔍 [DEBUG] confirmAppointment được gọi với appointment_id:', appointment_id);
-    
+
     const appointment = await prisma.appointment.update({
       where: { id: parseInt(appointment_id) },
       data: { status: "confirmed" },
@@ -287,7 +289,7 @@ class AppointmentService {
         clinic: true,
       }
     });
-    
+
     console.log('✅ [DEBUG] Appointment đã được cập nhật thành confirmed:', {
       id: appointment.id,
       patient_id: appointment.patient_id,
@@ -296,11 +298,11 @@ class AppointmentService {
       appointment_time: appointment.appointment_time,
       patient_email: appointment.patient?.email
     });
-    
+
     // ====== GỌI CẤP SỐ THỨ TỰ CHO QUEUE ======
     try {
       console.log('🔄 [DEBUG] Bắt đầu gọi assignQueueNumber...');
-      
+
       // Xử lý appointment_time để lấy đúng giờ từ Date object
       let slotTimeStr = '';
       if (typeof appointment.appointment_time === 'string') {
@@ -312,9 +314,9 @@ class AppointmentService {
         const seconds = appointment.appointment_time.getUTCSeconds().toString().padStart(2, '0');
         slotTimeStr = `${hours}:${minutes}:${seconds}`;
       }
-      
+
       console.log('🕐 [DEBUG] slotTimeStr được xử lý:', slotTimeStr);
-      
+
       await QueueService.assignQueueNumber({
         appointment_id: appointment.id,
         patient_id: appointment.patient_id,
@@ -334,8 +336,8 @@ class AppointmentService {
         await sendPatientAppointmentConfirmationEmail(
           appointment.patient.email,
           appointment.patient.full_name || "Bệnh nhân",
-          appointment.appointment_date instanceof Date ? appointment.appointment_date.toISOString().slice(0,10) : appointment.appointment_date,
-          (typeof appointment.appointment_time === 'string') ? appointment.appointment_time : appointment.appointment_time.toTimeString().slice(0,8),
+          appointment.appointment_date instanceof Date ? appointment.appointment_date.toISOString().slice(0, 10) : appointment.appointment_date,
+          (typeof appointment.appointment_time === 'string') ? appointment.appointment_time : appointment.appointment_time.toTimeString().slice(0, 8),
           appointment.doctor && appointment.doctor.full_name ? appointment.doctor.full_name : "",
           appointment.clinic && appointment.clinic.name ? appointment.clinic.name : ""
         );
@@ -475,7 +477,7 @@ class AppointmentService {
         // Tạo user
         const user = await prisma.user.create({
           data: {
-            full_name :data.patientName,
+            full_name: data.patientName,
             email: data.email,
             password: hashedPassword,
             phone: data.phoneNumber || null,
