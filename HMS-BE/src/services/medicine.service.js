@@ -149,10 +149,18 @@ class MedicineService {
   // Xoá thuốc
   async deleteMedicine(id) {
     try {
+      // Check for references in prescription items
+      const count = await prisma.prescriptionItem.count({
+        where: { medicine_id: id }
+      });
+      console.log(count)
+      if (count > 0) {
+        throw new BadRequestError("Không thể xoá thuốc vì đang được sử dụng trong đơn thuốc.");
+      }
+
       const medicine = await prisma.medicine.findUnique({ where: { id } });
       if (!medicine) throw new BadRequestError("Không tìm thấy thuốc");
-
-      await prisma.medicine.delete({ where: { id } });
+      await prisma.medicine.delete({ where: { id: Number(medicine.id) } });
       return { success: true, message: "Đã xoá thuốc" };
     } catch (error) {
       throw new BadRequestError(error.message);

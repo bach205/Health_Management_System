@@ -47,6 +47,7 @@ export default function AppointmentsPage() {
     const [doctorOptions, setDoctorOptions] = useState<{ value: number, label: string }[]>([]);
     const [clinicOptions, setClinicOptions] = useState<{ value: number, label: string }[]>([]);
     // Sắp xếp
+    const [searchSubmitted, setSearchSubmitted] = useState(false);
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>("asc");
 
     const navigate = useNavigate();

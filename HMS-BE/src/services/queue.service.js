@@ -231,8 +231,8 @@ class QueueService {
         { slot_date: "asc" },
         { start_time: "asc" },
       ],
-    });
-
+    }); 
+    console.log("all : ",allAvailableSlots)
     // Lọc slot > now (theo giờ VN)
     const validSlots = allAvailableSlots.filter(slot => {
       const slotDateTime = dayjs(slot.slot_date).tz('Asia/Ho_Chi_Minh');
@@ -382,6 +382,7 @@ class QueueService {
    * @returns {Promise<Object>} Thông tin queue đã cập nhật
    */
   static async updateQueueStatus(queueId, status) {
+    // console.log(queueId, status);
     const updated = await prisma.queue.update({
       where: { id: Number(queueId) },
       data: {

@@ -53,6 +53,8 @@ class QueueController {
     try {
       const { queueId } = req.params;
       const { status } = req.body;
+
+      console.log(queueId, status);
       const queue = await QueueService.updateQueueStatus(queueId, status);
       return new OK({
         message: "Cập nhật trạng thái queue thành công",
