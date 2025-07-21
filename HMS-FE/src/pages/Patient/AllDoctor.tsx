@@ -22,6 +22,8 @@ import Title from "antd/es/typography/Title";
 const AllDoctor: React.FC = () => {
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
+    const specialityQuery = searchParams.get("speciality");
+
     const [doctors, setDoctors] = useState<any[]>([]);
     const {
         users,
@@ -35,20 +37,20 @@ const AllDoctor: React.FC = () => {
         setKeyword,
         reload,
         setReload,
-    } = useDoctorList({ pageSize: 8, current: 1 }, ['all']);
+    } = useDoctorList({ pageSize: 8, current: 1 }, [specialityQuery || "all"]);
 
-    useEffect(() => {
-        setLoading(true);
-        const specialityQuery = searchParams.get("speciality");
-        // console.log('specialityQuery', specialityQuery)
-        if (specialityQuery === "" || specialityQuery === null) {
-            setSpecialty(['all']);
-            return;
-        }
-        if (specialityQuery) {
-            setSpecialty([specialityQuery]);
-        }
-    }, [reload]);
+    // useEffect(() => {
+    //     setLoading(true);
+    //     const specialityQuery = searchParams.get("speciality");
+    //     console.log('specialityQuery', specialityQuery)
+    //     if (specialityQuery === "" || specialityQuery === null) {
+    //         setSpecialty(['all']);git
+    //         return;
+    //     }
+    //     if (specialityQuery) {
+    //         setSpecialty([specialityQuery]);
+    //     }
+    // }, [reload]);
 
     useEffect(() => {
         setDoctors(users);

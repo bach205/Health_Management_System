@@ -12,7 +12,7 @@ import { Plus } from "lucide-react";
 
 interface IProps {
   isVisible: boolean;
-  handleOk: () => void;
+  handleOk: () => void;  
   handleCancel: () => void;
   form: FormInstance;
   role: IUserBase["role"];
