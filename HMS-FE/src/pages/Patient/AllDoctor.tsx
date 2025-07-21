@@ -44,7 +44,7 @@ const AllDoctor: React.FC = () => {
     //     const specialityQuery = searchParams.get("speciality");
     //     console.log('specialityQuery', specialityQuery)
     //     if (specialityQuery === "" || specialityQuery === null) {
-    //         setSpecialty(['all']);
+    //         setSpecialty(['all']);git
     //         return;
     //     }
     //     if (specialityQuery) {
