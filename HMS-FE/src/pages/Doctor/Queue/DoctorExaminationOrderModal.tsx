@@ -39,7 +39,6 @@ const ExaminationOrderModal = ({
   const [isShowOtherPrice, setIsShowOtherPrice] = useState<boolean>(false);
   const [availableDoctors, setAvailableDoctors] = useState<IDoctor[]>([]);
   const [selectedDoctorId, setSelectedDoctorId] = useState<number | null>(null);
-  const [availableSlots, setAvailableSlots] = useState<any[]>([]);
   const to_clinic_id = Form.useWatch("to_clinic_id", form);
 
   const handleClose = () => {
@@ -61,17 +60,16 @@ const ExaminationOrderModal = ({
       const fetchClinicVolumeAndDoctors = async () => {
         try {
           const res = await getClinicService();
+          console.log(res)
 
-          // Sử dụng thời gian hiện tại làm tham chiếu thay vì appointment
-          const now = new Date();
-          const after_date = now.toISOString().slice(0, 10); // YYYY-MM-DD
-          const after_time = now.toTimeString().slice(0, 8); // HH:MM:SS
+          const resDoctors = await getAvailableDoctors(Number(to_clinic_id));
+          console.log(resDoctors.data.metadata)
 
-          // Gọi API lấy bác sĩ rảnh với slot gần nhất lớn hơn thời gian hiện tại
-          const resDoctors = await mainRequest.get(`/api/v1/doctor/nearest-slot/${to_clinic_id}?after_date=${after_date}&after_time=${after_time}`);
-          const doctors = resDoctors.data.data;
+          const doctors = resDoctors.data.metadata;
+          
           // filter doctor không phải là doctor đang làm việc ở phòng khám hiện tại
           const filteredDoctors = doctors.filter((doctor: any) => doctor.doctor.id != doctor_id);
+          
           setAvailableDoctors(filteredDoctors || []);
         } catch (error) {
           console.error("Lỗi khi lấy thông tin phòng khám hoặc bác sĩ:", error);
@@ -84,27 +82,9 @@ const ExaminationOrderModal = ({
     }
   }, [to_clinic_id]);
 
-  useEffect(() => {
-    if (selectedDoctorId && to_clinic_id) {
-      // Lấy ngày hôm nay (hoặc ngày mong muốn)
-      const today = new Date();
-      const yyyy = today.getFullYear();
-      const mm = String(today.getMonth() + 1).padStart(2, '0');
-      const dd = String(today.getDate()).padStart(2, '0');
-      const slot_date = `${yyyy}-${mm}-${dd}`;
-      // Gọi API lấy slot còn trống của bác sĩ/ngày đó
-      fetch(`/api/v1/examination-detail/available-slots/${selectedDoctorId}?slot_date=${slot_date}`)
-        .then(res => res.json())
-        .then(res => {
-          setAvailableSlots(res.metadata || []);
-        });
-    } else {
-      setAvailableSlots([]);
-    }
-  }, [selectedDoctorId, to_clinic_id]);
-
   const handleFinish = async (values: any) => {
     try {
+      // console.log("values", values)
       setLoading(true);
       
       // Kiểm tra xem có chọn phòng khám không
@@ -235,45 +215,11 @@ const ExaminationOrderModal = ({
                     setSelectedDoctorId(value);
                   }}
                 >
-                  {availableDoctors.map((row: any) => {
-                    const slot = row.nearestSlot;
-                    
-                    // Xử lý thời gian - chỉ lấy giờ
-                    let startTime = '';
-                    let endTime = '';
-                    
-                    if (slot?.start_time) {
-                      if (typeof slot.start_time === 'string') {
-                        // Xử lý ISO string format: "1970-01-01T10:00:00.000Z"
-                        if (slot.start_time.includes('T')) {
-                          startTime = slot.start_time.split('T')[1].slice(0, 5); // Lấy HH:mm từ phần sau T
-                        } else {
-                          startTime = slot.start_time.slice(0, 5); // Lấy HH:mm từ string thường
-                        }
-                      } else if (slot.start_time instanceof Date) {
-                        startTime = dayjs(slot.start_time).format('HH:mm');
-                      }
-                    }
-                    
-                    if (slot?.end_time) {
-                      if (typeof slot.end_time === 'string') {
-                        // Xử lý ISO string format: "1970-01-01T10:30:00.000Z"
-                        if (slot.end_time.includes('T')) {
-                          endTime = slot.end_time.split('T')[1].slice(0, 5); // Lấy HH:mm từ phần sau T
-                        } else {
-                          endTime = slot.end_time.slice(0, 5); // Lấy HH:mm từ string thường
-                        }
-                      } else if (slot.end_time instanceof Date) {
-                        endTime = dayjs(slot.end_time).format('HH:mm');
-                      }
-                    }
-                    
-                    return (
-                      <Option key={row.doctor.id} value={row.doctor.id}>
-                        {row.doctor.full_name} {startTime && endTime ? `(${startTime} - ${endTime})` : ''}
-                      </Option>
-                    );
-                  })}
+                  {availableDoctors.map((row: any) => (
+                    <Option key={row.doctor.id} value={row.doctor.id} >
+                      {row.doctor.full_name} - {row.nearestSlot?.slot_date ? new Date(row.nearestSlot.slot_date).toLocaleDateString('vi-VN') : 'N/A'} {row.nearestSlot?.start_time ? new Date(row.nearestSlot.start_time).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : 'N/A'}
+                    </Option>
+                  ))}
                 </Select>
               </Form.Item>
             )
@@ -285,21 +231,6 @@ const ExaminationOrderModal = ({
                 </p>
               </div>
             }
-            {availableSlots.length > 0 && (
-              <Form.Item
-                label="Chọn khung giờ"
-                name="slot"
-                rules={[{ required: true, message: "Vui lòng chọn khung giờ" }]}
-              >
-                <Select placeholder="Chọn khung giờ">
-                  {availableSlots.map((slot: any) => (
-                    <Option key={slot.id} value={slot.id}>
-                      {slot.slot_date} {slot.start_time} - {slot.end_time}
-                    </Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            )}
           </>
         )}
 
