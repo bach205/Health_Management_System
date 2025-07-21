@@ -91,4 +91,11 @@ export interface IBlog {
   image_url?: string;
   published: boolean;
   category?: IBlogCategory;
+  tags?: { id: number; name: string }[]; // Added tags property
+  created_at: Date | string; // Use Date if you want to handle it as a date object
+  updated_at?: Date | string; // Optional, if you want to track updates
+}
+export interface ITag {
+  id: number;
+  name: string;
 }

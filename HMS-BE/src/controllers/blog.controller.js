@@ -24,6 +24,13 @@ class BlogController {
     if (filters.category_id) {
       where.category_id = Number(filters.category_id);
     }
+    if (filters.tag_id) {
+      where.tags = {
+        some: {
+          id: Number(filters.tag_id),
+        },
+      };
+    }
     const result = await BlogService.getBlogs({
       where,
       skip,
@@ -54,5 +61,7 @@ class BlogController {
     return new OK({ message: 'Xóa bài viết thành công', metadata: result }).send(res);
   }
 }
+
+
 
 module.exports = new BlogController(); 

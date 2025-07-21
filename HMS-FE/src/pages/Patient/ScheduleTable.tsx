@@ -48,7 +48,7 @@ const ScheduleTable = ({ data = [], setReload, loading = false, visible, selecte
   const [selectedInvoice, setSelectedInvoice] = useState<any>(null);
 
   const [viewPaymentModalVisible, setViewPaymentModalVisible] = useState(false);
-  const [selectedPaymentRecord, setSelectedPaymentRecord] = useState<any>(null);  
+  const [selectedPaymentRecord, setSelectedPaymentRecord] = useState<any>(null);
 
   const navigate = useNavigate();
 
@@ -126,31 +126,31 @@ const ScheduleTable = ({ data = [], setReload, loading = false, visible, selecte
       if (record?.payment_status === "pending") {
         return (
           <>
-          <Tooltip title="Xem hóa đơn">
-            <Button type="primary" size="small" onClick={() => handleViewPayment(record)}>
-              Xem hóa đơn
-            </Button>
-          </Tooltip>
+            <Tooltip title="Xem hóa đơn">
+              <Button type="primary" size="small" onClick={() => handleViewPayment(record)}>
+                Xem hóa đơn
+              </Button>
+            </Tooltip>
             <Tooltip title="Bạn cần thanh toán trước khi xem kết quả khám">
               <Button type="primary" size="small" disabled>
                 Xem kết quả khám
-            </Button>
-          </Tooltip>
+              </Button>
+            </Tooltip>
           </>
         );
+      } else if (record?.payment_status === "paid") {
+        return (
+          <Tooltip title="Xem kết quả khám">
+            <Button
+              type="primary"
+              size="small"
+              onClick={() => navigate(`record/${record._id || record.id}`)}
+            >
+              Xem kết quả khám
+            </Button>
+          </Tooltip>
+        );
       }
-
-      return (
-        <Tooltip title="Xem kết quả khám">
-          <Button
-            type="primary"
-            size="small"
-            onClick={() => navigate(`record/${record._id || record.id}`)}
-          >
-            Xem kết quả khám
-          </Button>
-        </Tooltip>
-      );
     }
 
     return (
@@ -362,14 +362,14 @@ const ScheduleTable = ({ data = [], setReload, loading = false, visible, selecte
               </Row>
             )}
 
-            {selectedRecord.reason && (
+            {/* {selectedRecord.reason && (
               <Row gutter={[16, 16]}>
                 <Col span={24}>
                   <div className="font-medium text-gray-700">Lý do hủy:</div>
                   <div className="bg-red-50 p-3 rounded text-red-700">{selectedRecord.reason}</div>
                 </Col>
               </Row>
-            )}
+            )} */}
           </div>
         )}
       </Modal>

@@ -36,7 +36,7 @@ def create_chromaDB():
         )
         chromadb_persistent_location = Path(__file__).parent / "vector_store" / "chromadb"
         client = chromadb.PersistentClient(path=str(chromadb_persistent_location))
-        client.create_collection(name="health_care_ai_documents",embedding_function=embedding_fn)
+        client.create_collection(name="health_care_ai_documents",embedding_function=embedding_fn,metadata={"hnsw:space": "cosine"})
         # client.delete_collection("health_care_ai_documents")
     except:
         print ("The chroma collection's name is existed")

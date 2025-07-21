@@ -38,7 +38,6 @@ export default function AppointmentsPage() {
 
     // Filter states
     const [searchText, setSearchText] = useState("");
-    const [searchSubmitted, setSearchSubmitted] = useState("");
     const [statusFilter, setStatusFilter] = useState<string>("");
     const [dateRange, setDateRange] = useState<any>(null);
     const [showFilters, setShowFilters] = useState(false);
@@ -56,6 +55,7 @@ export default function AppointmentsPage() {
             setLoading(true);
             try {
                 const data = await getPatientAppointmentsService(JSON.parse(patientId || "").id);
+                console.log(data.data);
                 setAppointments(Array.isArray(data) ? data : (data?.data ?? []));
             } catch (error) {
                 setAppointments([]);
@@ -267,7 +267,7 @@ export default function AppointmentsPage() {
                             icon={<ReloadOutlined rotate={sortOrder === 'asc' ? 0 : 180} />}
                         >
                             Sắp xếp theo giờ {sortOrder === 'asc' ? '(Tăng dần)' : '(Giảm dần)'}
-                        </Button>
+                    </Button>
                     </Col>
                     <Button className="ml-auto" type="default" onClick={() => navigate("/queue")}>Xem hàng chờ</Button>
                 </Row>

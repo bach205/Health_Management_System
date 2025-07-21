@@ -6,12 +6,32 @@ import { Editor } from '@tinymce/tinymce-react';
 import { createBlog, getBlogCategories } from '../../../services/blog.service';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
+import { getBlogTags } from '../../../services/blog.service';
+import ModalTagManager from '../../../components/modal/ModalTagManager';
+import type { ITag } from '../../../types/index.type';
+import { getAllTags } from '../../../api/tag';
+
 const { Option } = Select;
 
 const CreateBlog: React.FC = () => {
+    const [tags, setTags] = useState<ITag[]>([]);
+    const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
+    const [openTagModal, setOpenTagModal] = useState(false);
     const editorRef = useRef<any>(null);
     const [form] = Form.useForm();
     const [categories, setCategories] = useState<any[]>([]);
+
+    const fetchTags = async () => {
+        try {
+            const res = await getAllTags();
+            setTags(res.data.metadata || []);
+        } catch {
+            message.error('Lỗi khi tải tag');
+        }
+    };
+    useEffect(() => {
+        fetchTags();
+    }, []);
 
     useEffect(() => {
         const fetchCategories = async () => {
@@ -28,6 +48,14 @@ const CreateBlog: React.FC = () => {
             setCategories(res.data.metadata || []);
         });
     }, []);
+
+    useEffect(() => {
+        getBlogTags().then((res) => {
+            setTags(res.data.metadata || []);
+        });
+    }, []);
+
+
 
     const toBase64 = (file: File) =>
         new Promise<string>((resolve, reject) => {
@@ -66,7 +94,8 @@ const CreateBlog: React.FC = () => {
                 ...values,
                 content,
                 image_url: thumbnailUrl,
-                published: false, // Mặc định là chưa xuất bản
+                published: true, // Mặc định là xuất bản
+                tagIds: selectedTagIds, // Gửi danh sách tag đã chọn
             };
             // await axios.post('/blog', payload);
             await createBlog(payload);
@@ -94,6 +123,22 @@ const CreateBlog: React.FC = () => {
                     <Form.Item label="Tiêu đề" name="title" rules={[{ required: true, message: 'Nhập tiêu đề' }]}>
                         <Input />
                     </Form.Item>
+
+                    <Form.Item label="Tag" name="tagIds">
+                        <Select
+                            mode="multiple"
+                            placeholder="Chọn các tag"
+                            value={selectedTagIds}
+                            onChange={setSelectedTagIds}
+                            options={tags.map((tag) => ({
+                                label: tag.name,
+                                value: tag.id,
+                            }))}
+                        />
+                    </Form.Item>
+                    <Button type="link" onClick={() => setOpenTagModal(true)}>
+                        Quản lý Tag
+                    </Button>
 
                     <Form.Item label="Danh mục bài viết" name="category_id" rules={[{ required: false, message: 'Chọn danh mục' }]}>
                         <Select placeholder="Chọn danh mục">
@@ -190,6 +235,11 @@ const CreateBlog: React.FC = () => {
                     </Form.Item>
                 </Form>
             </Card>
+            <ModalTagManager
+                open={openTagModal}
+                onClose={() => setOpenTagModal(false)}
+                onTagUpdate={fetchTags} // reload lại tag list sau khi thêm/sửa
+            />
         </>
     );
 };

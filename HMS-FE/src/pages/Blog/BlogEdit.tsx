@@ -7,7 +7,7 @@ import axios from 'axios';
 import { ChevronLeft } from 'lucide-react';
 import { getBlogById, getBlogCategories, updateBlog } from '../../services/blog.service';
 import BlogDashboard from './BlogDashboard';
-
+import { getBlogTags } from '../../services/blog.service';
 const { Option } = Select;
 
 const EditBlog: React.FC = () => {
@@ -18,21 +18,24 @@ const EditBlog: React.FC = () => {
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
   const [editorInitialValue, setEditorInitialValue] = useState('');
   const { id } = useParams();
+  const [tags, setTags] = useState<any[]>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
     (async () => {
       try {
-        const [catRes, blogRes] = await Promise.all([
+        const [catRes, tagRes, blogRes] = await Promise.all([
           getBlogCategories(),
+          getBlogTags(),
           getBlogById(Number(id)),
         ]);
         setCategories(catRes.data.metadata || []);
+        setTags(tagRes.data.metadata || []);
         const blog = blogRes.data.metadata;
-        console.log(blog)
         form.setFieldsValue({
           title: blog.title,
           category_id: blog.category_id,
+          tagIds: blog.tags?.map((tag: any) => tag.id), // 👈 đặt giá trị tag
         });
         setThumbnailUrl(blog.image_url || null);
         setEditorInitialValue(blog.content || '');
@@ -103,7 +106,17 @@ const EditBlog: React.FC = () => {
           <Form.Item label="Tiêu đề" name="title" rules={[{ required: true, message: 'Nhập tiêu đề' }]}>
             <Input />
           </Form.Item>
-
+          <Form.Item label="Tag" name="tagIds">
+            <Select
+              mode="multiple"
+              allowClear
+              placeholder="Chọn thẻ"
+            >
+              {tags.map((tag) => (
+                <Option key={tag.id} value={tag.id}>{tag.name}</Option>
+              ))}
+            </Select>
+          </Form.Item>
           <Form.Item label="Danh mục bài viết" name="category_id">
             <Select placeholder="Chọn danh mục">
               {categories.map((cat) => (
