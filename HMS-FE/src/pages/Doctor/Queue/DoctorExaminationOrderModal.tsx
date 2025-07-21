@@ -63,9 +63,9 @@ const ExaminationOrderModal = ({
           console.log(res)
 
           const resDoctors = await getAvailableDoctors(Number(to_clinic_id));
-          console.log(resDoctors.data.metadata)
+          console.log(resDoctors)
 
-          const doctors = resDoctors.data.metadata;
+          const doctors = resDoctors.data.data;
           
           // filter doctor không phải là doctor đang làm việc ở phòng khám hiện tại
           const filteredDoctors = doctors.filter((doctor: any) => doctor.doctor.id != doctor_id);
