@@ -25,13 +25,19 @@ class PaymentService {
         description: "Phí khám bác sĩ",
         amount: doctorPrice,
       });
+      const fromClinic = await prisma.clinic.findUnique({
+        where: { id: orders[0].from_clinic_id },
+      });
+      const toClinic = await prisma.clinic.findUnique({
+        where: { id: orders[0].to_clinic_id },
+      });
 
       // 3.2. Thêm từng dịch vụ từ ExaminationOrder
       for (const order of orders) {
         console.log("order", order)
         invoiceItemsData.push({
           record_id: record.id,
-          description: `Chi phí dịch vụ từ phòng khám ${order.from_clinic_id} đến ${order.to_clinic_id}`,
+          description: `Chi phí dịch vụ từ phòng khám ${fromClinic.name} đến ${toClinic.name}`,
           amount: order.extra_cost,
         });
       }
