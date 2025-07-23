@@ -186,12 +186,12 @@ const SIDEBAR_ITEMS = [
         href: "/admin/blog-categories",
       },
 
-      {
-        id: "manage-payments",
-        label: "Quản lý hóa đơn",
-        icon: <Wallet className="w-4 h-4" />,
-        href: "/manage-payments",
-      },
+      // {
+      //   id: "manage-payments",
+      //   label: "Quản lý hóa đơn",
+      //   icon: <Wallet className="w-4 h-4" />,
+      //   href: "/manage-payments",
+      // },
     ],
   },
 

@@ -241,11 +241,13 @@ const PrivateRoutes: PrivateRoute[] = [
   },
   {
     path: "/admin/nurses",
+    allowedRoles: ["admin"],
     element: <AdminNurseDashboard />,
     layout: DashboardLayout,
   },
   {
     path: "/rooms",
+    allowedRoles: ["admin"],
     element: <AdminClinicDashboard />,
     layout: DashboardLayout,
   },
@@ -256,12 +258,14 @@ const PrivateRoutes: PrivateRoute[] = [
   },
   {
     path: "/shift",
+    allowedRoles: ["admin"],
     element: <ShiftManager />,
     layout: DashboardLayout,
   },
 
   {
     path: "/manage-payments",
+    allowedRoles: ["admin", "nurse"],
     element: <PaymentList />,
     layout: DashboardLayout,
   },
@@ -293,12 +297,12 @@ const PrivateRoutes: PrivateRoute[] = [
     allowedRoles: ["patient"],
     layout: MainLayout,
   },
-  {
-    path: "/examination",
-    element: <Examination />,
-    // allowedRoles: ["doctor"],
-    layout: DashboardLayout,
-  },
+  // {
+  //   path: "/examination",
+  //   element: <Examination />,
+  //   // allowedRoles: ["doctor"],
+  //   layout: DashboardLayout,
+  // },
   {
     path: "/doctor-profile",
     element: <DoctorProfile />,
