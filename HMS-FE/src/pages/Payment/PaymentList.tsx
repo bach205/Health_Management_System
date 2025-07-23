@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Button, Modal, Tag, Space, message, Typography, Tooltip, Popconfirm, Input, Select, Spin } from 'antd';
+import { Table, Button, Tag, Space, message, Tooltip, Popconfirm, Input, Select } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { getPendingPayments, getInvoiceDetail, confirmPayment, updatePaymentStatus, getAllPayments } from '../../services/payment.service';
+import { getInvoiceDetail, updateInvoice, updatePaymentStatus, getAllPayments } from '../../services/payment.service';
 import UserListTitle from '../../components/ui/UserListTitle';
-import { BanknoteArrowUp, Eye, ReceiptText, RefreshCcw, X, XCircle } from 'lucide-react';
-import { useSocket } from '../../hooks/socket/useSocket';
+import { BanknoteArrowUp, Edit, ReceiptText, RefreshCcw, XCircle } from 'lucide-react';
+import ModalViewPayment from './ModalViewPayment';
+import ModalEditPayment from './ModalEditPayment';
 
 interface InvoiceItem {
   id: number;
@@ -26,6 +27,7 @@ const PaymentList: React.FC = () => {
   const [data, setData] = useState<InvoiceRecord[]>([]);
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [modalEditVisible, setModalEditVisible] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<InvoiceRecord | null>(null);
   const [invoiceItems, setInvoiceItems] = useState<InvoiceItem[]>([]);
 
@@ -65,6 +67,17 @@ const PaymentList: React.FC = () => {
       message.error('Không lấy được chi tiết hóa đơn');
     }
   };
+  const handleEditInvoice = async (record: InvoiceRecord) => {
+    setSelectedInvoice(record);
+    try {
+      const res = await getInvoiceDetail(record.record_id);
+      // console.log(res)
+      setInvoiceItems(res.data.metadata);
+      setModalEditVisible(true);
+    } catch (err) {
+      message.error('Không lấy được chi tiết hóa đơn');
+    }
+  };
 
   const handleUpdatePayment = async (record: InvoiceRecord, status: 'paid' | 'canceled') => {
     try {
@@ -75,15 +88,6 @@ const PaymentList: React.FC = () => {
       message.error('Không thể cập nhật trạng thái thanh toán');
     }
   };
-
-  // patient mở phòng payment, socket sẽ gửi event payment:statusChanged đến client
-  // useSocket(
-  //   `payment`,
-  //   "payment:statusChanged",
-  //   (data: any) => {
-  //     fetchData();
-  //   }
-  // );
 
   useEffect(() => {
     fetchData();
@@ -136,6 +140,14 @@ const PaymentList: React.FC = () => {
 
           {record.status === 'pending' && (
             <>
+              <Tooltip title="Cập nhật hóa đơn">
+
+                <Button type="default" onClick={() => {
+                  handleEditInvoice(record);
+                }}>
+                  <Edit className="w-4 h-4" />
+                </Button>
+              </Tooltip>
               <Popconfirm
                 placement="bottom"
                 title="Xác nhận thanh toán?"
@@ -178,20 +190,35 @@ const PaymentList: React.FC = () => {
     fetchData(1, 10, '', 'all', 'newest');
   }
 
+  const handleSubmitInvoice = async (items: any[]) => {
+    try {
+      if (!selectedInvoice?.record_id) {
+        message.error("Không tìm thấy hóa đơn");
+        return;
+      }
+      await updateInvoice(selectedInvoice?.record_id, items);
+      message.success("Tạo hóa đơn thành công!");
+      fetchData(); // reload list
+    } catch (err) {
+      message.error("Tạo hóa đơn thất bại!");
+    }
+  };
+
+
   return (
     <>
       <UserListTitle title="hóa đơn" />
 
       <Space style={{ marginBottom: 16 }}>
-      <Tooltip title="Hủy lọc">
-            <Button onClick={() => handleResetFilter()}>
-              <RefreshCcw size={17.5} />
-            </Button>
-          </Tooltip>
+        <Tooltip title="Hủy lọc">
+          <Button onClick={() => handleResetFilter()}>
+            <RefreshCcw size={17.5} />
+          </Button>
+        </Tooltip>
         <Input.Search
           placeholder="Tìm theo tên bệnh nhân"
           allowClear
-          
+
           onSearch={(val) => {
             setSearchName(val);
             fetchData(1, 10, val);
@@ -216,7 +243,7 @@ const PaymentList: React.FC = () => {
           onChange={(val) => {
             setSort(val);
             fetchData(1, 10, searchName, status, val);
-          }}  
+          }}
           style={{ width: 160 }}
         >
           <Select.Option value="newest">Mới nhất</Select.Option>
@@ -243,49 +270,23 @@ const PaymentList: React.FC = () => {
       />
 
 
-      <Modal
-        title={`Chi tiết hóa đơn - ${selectedInvoice?.patient_name}`}
-        open={modalVisible}
-        onCancel={() => setModalVisible(false)}
-        centered
-        footer={null}
-      >
-        <Table
-          dataSource={invoiceItems}
-          rowKey="id"
-          pagination={false}
-          loading={loading}
-          columns={[
-            { title: 'Mô tả', dataIndex: 'description' },
-            {
-              title: 'Số tiền',
-              dataIndex: 'amount',
-              render: (val) => `${val.toLocaleString()}đ`,
-            },
-          ]}
-        />
-        <div style={{ marginTop: 16 }}>
-          <p >
-            <strong>Tổng tiền:</strong> {selectedInvoice?.total_amount.toLocaleString()}đ
+      <ModalViewPayment
+        selectedInvoice={selectedInvoice}
+        modalVisible={modalVisible}
+        setModalVisible={setModalVisible}
+        invoiceItems={invoiceItems}
+        loading={loading}
+      />
+      <ModalEditPayment
+        modalVisible={modalEditVisible}
+        setModalVisible={setModalEditVisible}
+        invoiceItems={invoiceItems}
+        loading={loading}
+        onSubmit={handleSubmitInvoice}
+      />
 
-          </p>
-          <br />
-          {
-            selectedInvoice?.total_amount && selectedInvoice?.total_amount > 0 &&
-            selectedInvoice?.status === 'pending' &&
-            <>
-              <Typography.Title level={5} className='mt-2 text-center'>
-                Thanh toán qua mã QR dưới đây:
-              </Typography.Title>
-              <div className='flex flex-col justify-center mt-4 w-[300px] h-[300px] mx-auto'>
-                <img
-                  src={`https://qr.sepay.vn/img?acc=VQRQADITO0867&bank=MBBank&amount=${selectedInvoice?.total_amount}&des=Thanh%20Toan%20${selectedInvoice?.patient_name}`} alt="" />
 
-              </div>
-            </>
-          }
-        </div>
-      </Modal>
+
     </>
   );
 };

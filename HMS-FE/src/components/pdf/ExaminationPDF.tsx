@@ -42,7 +42,7 @@ const ExaminationPDF = ({ record }: { record: any }) => (
                 src={HEADER_IMAGE}
                 style={{ width: 150, height: 50, marginBottom: 10 }}
             />
-            <Text style={styles.title}>Kết quả khám bệnh</Text>
+            <Text style={styles.title}>KẾT QUẢ KHÁM BỆNH</Text>
             <View style={styles.section}>
                 <View style={{ flexDirection: 'row', marginBottom: 2, alignItems: 'center' }}>
                     <Text style={styles.label}>Họ và tên bệnh nhân: </Text>
