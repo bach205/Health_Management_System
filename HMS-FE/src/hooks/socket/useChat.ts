@@ -108,14 +108,14 @@ export const useChat = () => {
     // Gửi tin nhắn qua socket
     const sendMessage = useCallback((data: ISendMessageData) => {
         if (!user || !selectedConversation) return;
-
+        console.log("📤 Gửi socket:", data);
         const socket = getSocket(user.id);
 
         // 🛠️ nếu là chat 1-1 thì thêm toId
         if (selectedConversation.type === 'direct') {
             const other = selectedConversation.participants.find(p => Number(p.id) !== Number(user.id));
             if (!other) return;
-            data.toId = other.id;
+            data.toId = other.userId;
         }
 
         socket.emit('send_message', data);
