@@ -62,17 +62,6 @@ const Workschedule = () => {
 
       const res = await getWorkSchedulesService();
       const user = await getDoctorService();
-      // const nurse = await getAllNurse();
-      // doctor.data.metadata.map((item : any) => {
-      //     users.push({
-      //       email : item.email,
-      //       full_name : item.full_name,
-      //       gender : item.gender,
-      //       id : item.id,
-      //       phone : item.phone,
-      //     })
-      // })
-      // co
       const clinic = await getClinicService();
       const shift = await getShiftService();
       console.log(user.data.metadata);
@@ -87,7 +76,6 @@ const Workschedule = () => {
         shift_name: shift.data.data.find((s: any) => s.id === item.shift_id)?.name || '',
       }));
       setData(enrichedData);
-
     };
 
     fetchData();
