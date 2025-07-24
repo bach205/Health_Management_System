@@ -1,5 +1,5 @@
 import instance from "./mainRequest";
-import type { IConversation } from "../types/index.type";;
+import type { IConversation } from "../types/index.type";
 
 const BASE_URL = "/api/v1/conversation";
 

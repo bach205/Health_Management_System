@@ -96,7 +96,6 @@ class AppointmentService {
         AND is_available = 1
       LIMIT 1;
     `;
-    console.log(slot);
     slot = slot[0];
     if (!slot)
       throw new BadRequestError("Khung giờ này đã được đặt hoặc không tồn tại!");
@@ -207,8 +206,8 @@ class AppointmentService {
    * @returns {Promise<Array>} Danh sách slot còn trống
    */
   // chạy thành công 
-  async getAvailableSlots({ doctor_id, clinic_id, slot_date }) {
-    console.log(doctor_id, clinic_id, slot_date)
+  async getAvailableSlots() {
+
     let query = `
       SELECT s.*, 
         u.full_name as doctor_name,
@@ -225,21 +224,22 @@ class AppointmentService {
     `;
     const params = [];
 
-    if (doctor_id) {
-      query += " AND s.doctor_id = ?";
-      params.push(doctor_id);
-    }
-    if (clinic_id) {
-      query += " AND s.clinic_id = ?";
-      params.push(clinic_id);
-    }
-    if (slot_date) {
-      query += " AND s.slot_date = ?";
-      params.push(slot_date);
-    }
-    query += " ORDER BY s.start_time ASC";
+    // if (doctor_id) {
+    //   query += " AND s.doctor_id = ?";
+    //   params.push(doctor_id);
+    // }
+    // if (clinic_id) {
+    //   query += " AND s.clinic_id = ?";
+    //   params.push(clinic_id);
+    // }
+    // if (slot_date) {
+    //   query += " AND s.slot_date = ?";
+    //   params.push(slot_date);
+    // }
+    // query += " ORDER BY s.start_time ASC";
 
     const slots = await prisma.$queryRawUnsafe(query, ...params);
+    console.log(slots);
     return slots;
   }
 

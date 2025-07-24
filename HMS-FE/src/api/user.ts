@@ -2,11 +2,11 @@ import instance from "./instance";
 
 const BASE_URL = "user";
 
-export const createUser = (user) => {
+export const createUser = (user: any) => {
   return instance.post(`${BASE_URL}/create`, user);
 };
 
-export const getUsers = async (body) => {
+export const getUsers = async (body: Record<string, any>) => {
 const data = {
   users: [
     {
@@ -159,11 +159,11 @@ const data = {
   return data;
 };
 
-export const updateUser = (user) => {
-  return instance.put(`${BASE_URL}/update/${user._id}`, user);
+export const updateUser = (id: string | number, body: Record<string, any>) => {
+  return instance.put(`${BASE_URL}/update/${id}`, body);
 };
 
-export const getUserById = (id) => {
+export const getUserById = (id: string | number) => {
   return instance.get(`${BASE_URL}/${id}`);
 };
 

@@ -40,8 +40,8 @@ exports.getAvailableSlots = async (req, res, next) => {
     //     message: error.details[0].message
     //   });
     // }
-    console.log(req.query)
-    const slots = await appointmentService.getAvailableSlots(req.query);
+   
+    const slots = await appointmentService.getAvailableSlots();
     res.status(200).json({
       success: true,
       message: "Lấy danh sách slot trống thành công",
@@ -91,7 +91,7 @@ exports.getPatientAppointments = async (req, res, next) => {
 exports.confirmAppointment = async (req, res, next) => {
   try {
     console.log('🔍 [DEBUG] Controller confirmAppointment nhận request:', req.body);
-    
+
     const { error } = confirmAppointmentSchema.validate(req.body);
     if (error) {
       console.log('❌ [DEBUG] Validation error:', error.details[0].message);
@@ -103,7 +103,7 @@ exports.confirmAppointment = async (req, res, next) => {
 
     console.log('✅ [DEBUG] Validation passed, gọi appointmentService.confirmAppointment...');
     const result = await appointmentService.confirmAppointment(req.body);
-    
+
     console.log('✅ [DEBUG] confirmAppointment service hoàn thành, trả về response');
     res.status(200).json({
       success: true,

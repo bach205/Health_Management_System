@@ -29,7 +29,7 @@ const CreateGroupModal: React.FC<Props> = ({ onClose, onCreated }) => {
         await createConversation({
             name,
             type: 'group',
-            participantIds: selectedUsers.map((u) => u.id),
+            participantIds: selectedUsers.map((u) => String(u.id)),
         });
 
         onCreated();
