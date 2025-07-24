@@ -46,7 +46,7 @@ export interface ISendMessageData {
     file_name?: string;
     file_type?: string;
     message_type?: 'text' | 'file' | 'image';
-    toId: number;
+    toId?: number;
     conversationId: number;
 }
 

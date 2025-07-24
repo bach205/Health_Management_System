@@ -4,14 +4,12 @@ import type { ISendMessageData } from '../../types/chat.type';
 interface MessageInputProps {
     onSendMessage: (data: ISendMessageData) => void;
     conversationId: number;
-    toId?: number;
     disabled?: boolean;
 }
 
 const MessageInput: React.FC<MessageInputProps> = ({
     onSendMessage,
     conversationId,
-    toId,
     disabled = false
 }) => {
     const [message, setMessage] = React.useState('');
