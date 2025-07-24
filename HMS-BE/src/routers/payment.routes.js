@@ -4,69 +4,73 @@ const asyncHandler = require('../helper/asyncHandler');
 const { authenticate, authorize } = require('../middlewares/auth');
 
 const paymentController = require("../controllers/payment.controller");
+const checkUserStatus = require("../middlewares/checkUserStatus");
 const paymentRouter = express.Router();
 
 
 //     authenticate,
 //     authorize("admin"),
+paymentRouter.use(authenticate);  
+paymentRouter.use(checkUserStatus());
 paymentRouter.post(
     "/create-payment",
-    // authenticate,
+    
     // authorize("admin"),
     asyncHandler(paymentController.createPayment)
 )
 
 paymentRouter.get(
     "/get-all-payments",
-    // authenticate,
-    // authorize("admin"),
+    
+    authorize("admin", "nurse"),
+
     asyncHandler(paymentController.getAllPayments)
 );
 
 paymentRouter.get(
     "/",
-    // authenticate,
+    
     // authorize("admin"),
     asyncHandler(paymentController.getAllPayments)
 );
 
 paymentRouter.put(
     "/update-payment-status/:id",
-    // authenticate,
-    // authorize("admin"),
+    
+    authorize("admin", "nurse"),
     asyncHandler(paymentController.updatePaymentStatus)
 );
 paymentRouter.patch(
     "/update-status/:id",
-    // authenticate,
-    // authorize("admin"),
+    authenticate,
+    authorize("admin", "nurse"),
     asyncHandler(paymentController.updatePaymentStatus)
 );
 
 paymentRouter.put(
     "/update-payment-medicine-status/:id",
-    // authenticate,
-    // authorize("admin"),
+    
+    authorize("admin", "nurse"),
     asyncHandler(paymentController.updatePaymentMedicineStatus)
 );
 
 paymentRouter.get(
     "/payment-record/:id",
-    // authenticate,
+    
     // authorize("admin"),
     asyncHandler(paymentController.getPaymentByRecordId)
 );
 
 paymentRouter.get(
     "/appointment/:id",
-    // authenticate,
+    
     // authorize("admin"),
     asyncHandler(paymentController.getInvoiceByAppointmentId)
 );
 
 paymentRouter.get(
     "/pending",
-    // authenticate,
+    
     // authorize("admin"),
     asyncHandler(paymentController.getPendingPayments)
 );

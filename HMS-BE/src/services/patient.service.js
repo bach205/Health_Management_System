@@ -151,11 +151,11 @@ class PatientService {
         return newPatient;
     }
 
-    async updatePatient(updateData) {
-       
+    async updatePatient(userId, updateData) {
+
+        console.log("updateData: ", updateData)
         const { id, email, full_name, date_of_birth, gender, phone, address, identity_number, avatar } = updateData;
         // Check if patient exists
-
         //console.log(email, full_name, date_of_birth, gender, phone, address, identity_number)
         const existingPatient = await prisma.user.findUnique({
             where: {
@@ -164,7 +164,7 @@ class PatientService {
             }
         });
 
-      //  console.log("existingPatient: ", existingPatient);
+        //  console.log("existingPatient: ", existingPatient);
         if (!existingPatient) {
             throw new BadRequestError("Bệnh nhân không tồn tại");
         }
@@ -191,17 +191,23 @@ class PatientService {
             }
         }
         */
+        const patientData = {
+            full_name,
+            date_of_birth: date_of_birth ? new Date(date_of_birth) : null,
+            gender,
+            phone,
+            address,
+        }
+        if (avatar) {
+            patientData.avatar = avatar;
+        }
 
         const updatedPatient = await prisma.user.update({
             where: {
                 id: existingPatient.id
             },
             data: {
-                full_name,
-                date_of_birth: date_of_birth ? new Date(date_of_birth) : null,
-                gender,
-                phone,
-                address,
+                ...patientData,
                 patient: {
                     update: {
                         where: { id: userId },
@@ -213,7 +219,7 @@ class PatientService {
                 patient: true
             }
         });
-     console.log("updatedPatient: ", updatedPatient);
+        console.log("updatedPatient: ", updatedPatient);
         return updatedPatient;
     }
 
@@ -295,7 +301,7 @@ class PatientService {
                 //         }
                 //     }
                 // }
-                
+
             }
         });
         if (!patient) {

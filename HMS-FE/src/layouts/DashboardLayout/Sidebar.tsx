@@ -16,9 +16,11 @@ import {
   MessageCircle,
   LetterText,
   Wallet,
+  Tablets,
 } from "lucide-react";
 import type { JSX } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import "./Sidebar.css";
 
 const Sidebar = ({ isCollapsed, role }: { isCollapsed: boolean, role: string }) => {
   const location = useLocation();
@@ -42,7 +44,7 @@ const Sidebar = ({ isCollapsed, role }: { isCollapsed: boolean, role: string }) 
   return (
     <aside
       className={`${isCollapsed ? "w-20" : "w-64"
-        } h-screen bg-white flex-col p-5 overflow-y-auto transition-all duration-300 hidden sm:flex`}
+        } h-screen bg-white flex-col p-5 overflow-y-auto transition-all duration-300 hidden sm:flex sidebar-custom`}
     >
       <div className="flex items-center justify-between mb-8 top-0 bg-white z-10">
         <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
@@ -186,12 +188,12 @@ const SIDEBAR_ITEMS = [
         href: "/admin/blog-categories",
       },
 
-      {
-        id: "manage-payments",
-        label: "Quản lý hóa đơn",
-        icon: <Wallet className="w-4 h-4" />,
-        href: "/manage-payments",
-      },
+      // {
+      //   id: "manage-payments",
+      //   label: "Quản lý hóa đơn",
+      //   icon: <Wallet className="w-4 h-4" />,
+      //   href: "/manage-payments",
+      // },
     ],
   },
 
@@ -218,11 +220,18 @@ const SIDEBAR_ITEMS = [
     label: "Y Tá",
     items: [
       {
+        id: "nurse-manage-medicines",
+        label: "Quản lý thuốc",
+        icon: <Tablets className="w-4 h-4" />,
+        href: "/nurse-manage-medicines",
+      },
+      {
         id: "sale-medicine",
         label: "Bán Thuốc",
-        icon: <ClipboardType className="w-4 h-4" />,
+        icon: <Pill className="w-4 h-4" />,
         href: "/sale-medicine",
       },
+
       {
         id: "nurse-book-appointments",
         label: "Đặt Lịch Hẹn",
@@ -234,6 +243,12 @@ const SIDEBAR_ITEMS = [
         label: "Quản lý lịch hẹn",
         icon: <ClipboardType className="w-4 h-4" />,
         href: "/user-book-appointments",
+      },
+      {
+        id: "nurse-manage-patients",
+        label: "Quản lý bệnh nhân",
+        icon: <User className="w-4 h-4" />,
+        href: "/nurse-manage-patients",
       },
 
       {
@@ -248,6 +263,7 @@ const SIDEBAR_ITEMS = [
         icon: <MessageCircle className="w-4 h-4" />,
         href: "/chat",
       },
+
     ],
   },
   {

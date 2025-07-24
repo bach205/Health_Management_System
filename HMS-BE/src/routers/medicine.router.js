@@ -35,13 +35,13 @@ medicineRouter.post(
 
 medicineRouter.post(
     "/update/:id",
-    authorize("admin"),
+    authorize("admin", "nurse"),
     asyncHandler(medicineController.updateMedicine)
 );
 
 medicineRouter.delete(
     "/delete/:id",
-    authorize("admin"),
+    authorize("admin", "nurse"),
     asyncHandler(medicineController.deleteMedicine)
 );
 

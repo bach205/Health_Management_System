@@ -12,7 +12,7 @@ class StatisticsController {
   }
 
   getPeriodStatistics = async (req, res) => {
-    console.log(req.query)
+    // console.log(req.query)
     const query = req.query;
     const result = await statisticsService.getPeriodStatistics(query);
     return new OK({

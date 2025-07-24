@@ -33,7 +33,7 @@ import DoctorQueue from "./pages/Doctor/Queue/DoctorQueue";
 import AllDoctor from "./pages/Patient/AllDoctor";
 import About from "./pages/Patient/About";
 import Contact from "./pages/Patient/Contact";
-import AdminPatientDashboard from "./pages/Admin/Patient/AdminPatientDashboard";
+import PatientDashboard from "./pages/Admin/Patient/PatientDashboard";
 import StaffProfile from "./pages/Doctor/StaffProfile";
 import ChatUI from "./layouts/MainLayout/ChatUI";
 import DocumnetsManagement from "./pages/Admin/DocumentsManagement";
@@ -198,12 +198,19 @@ const PrivateRoutes: PrivateRoute[] = [
   },
   {
     path: "/nurse-book-appointments",
+    allowedRoles: ["nurse"],
     element: <NurseBookAppointment />,
     layout: DashboardLayout,
   },
   {
     path: "/user-book-appointments",
     element: <NurseManageAppointment />,
+    layout: DashboardLayout,
+  },
+  {
+    path: "/nurse-manage-patients",
+    element: <PatientDashboard />,
+    allowedRoles: ["nurse"],
     layout: DashboardLayout,
   },
   {
@@ -240,11 +247,13 @@ const PrivateRoutes: PrivateRoute[] = [
   },
   {
     path: "/admin/nurses",
+    allowedRoles: ["admin"],
     element: <AdminNurseDashboard />,
     layout: DashboardLayout,
   },
   {
     path: "/rooms",
+    allowedRoles: ["admin"],
     element: <AdminClinicDashboard />,
     layout: DashboardLayout,
   },
@@ -255,12 +264,14 @@ const PrivateRoutes: PrivateRoute[] = [
   },
   {
     path: "/shift",
+    allowedRoles: ["admin"],
     element: <ShiftManager />,
     layout: DashboardLayout,
   },
 
   {
     path: "/manage-payments",
+    allowedRoles: ["admin", "nurse"],
     element: <PaymentList />,
     layout: DashboardLayout,
   },
@@ -292,12 +303,12 @@ const PrivateRoutes: PrivateRoute[] = [
     allowedRoles: ["patient"],
     layout: MainLayout,
   },
-  {
-    path: "/examination",
-    element: <Examination />,
-    // allowedRoles: ["doctor"],
-    layout: DashboardLayout,
-  },
+  // {
+  //   path: "/examination",
+  //   element: <Examination />,
+  //   // allowedRoles: ["doctor"],
+  //   layout: DashboardLayout,
+  // },
   {
     path: "/doctor-profile",
     element: <DoctorProfile />,
@@ -324,7 +335,7 @@ const PrivateRoutes: PrivateRoute[] = [
   },
   {
     path: "/admin/patients",
-    element: <AdminPatientDashboard />,
+    element: <PatientDashboard />,
     layout: DashboardLayout,
     allowedRoles: ["admin"],
   },
@@ -353,6 +364,12 @@ const PrivateRoutes: PrivateRoute[] = [
     element: <MedicineDashboard />,
     layout: DashboardLayout,
     allowedRoles: ["admin"],
+  },
+  {
+    path: "/nurse-manage-medicines",
+    element: <MedicineDashboard />,
+    layout: DashboardLayout,
+    allowedRoles: ["nurse"],
   },
   {
     path: "/chat",

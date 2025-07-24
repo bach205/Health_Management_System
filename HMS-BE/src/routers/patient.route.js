@@ -16,7 +16,7 @@ patientRouter.use(checkUserStatus());
 patientRouter.post(
     "/create",
     authenticate,
-    authorize("admin"),
+    authorize("admin", "nurse"),
     validate({ body: createPatientSchema }),
     asyncHandler(patientController.createPatient)
 );
@@ -25,7 +25,7 @@ patientRouter.post(
 patientRouter.post(
     "/",
     authenticate,
-    authorize("admin"),
+    authorize("admin", "nurse"),
     asyncHandler(patientController.getPatients)
 );
 
@@ -33,7 +33,7 @@ patientRouter.post(
 patientRouter.get(
     "/",
     authenticate,
-    authorize("admin"),
+    authorize("admin", "nurse"),
     asyncHandler(patientController.getAllPatients)
 );
 
@@ -41,7 +41,7 @@ patientRouter.get(
 patientRouter.post(
     "/update",
     authenticate,
-    authorize("admin"),
+    authorize("admin", "nurse"),
     asyncHandler(patientController.updatePatient)
 );
 
@@ -49,7 +49,7 @@ patientRouter.post(
 patientRouter.post(
     "/update-status",
     authenticate,
-    authorize("admin"),
+    authorize("admin", "nurse"),
     asyncHandler(patientController.changeActive)
 );
 
@@ -57,7 +57,7 @@ patientRouter.post(
 patientRouter.post(
     "/update-password",
     authenticate,
-    authorize("admin"),
+    authorize("admin", "nurse"),
     asyncHandler(patientController.updatePassword)
 );
 
@@ -65,7 +65,7 @@ patientRouter.post(
 patientRouter.get(
     "/:id",
     authenticate,
-    authorize("admin"),
+    authorize("admin", "nurse"),
     asyncHandler(patientController.getPatientById)
 );
 

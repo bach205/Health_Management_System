@@ -396,7 +396,7 @@ class NurseService {
                 email: row.email?.trim(),
                 phone: row.phone?.trim() || null,
                 password: row.password?.trim(),
-                gender: row.gender?.trim(),
+                gender: row.gender?.trim() || 'male',
                 date_of_birth: row.date_of_birth || null,
                 address: row.address?.trim() || null,
             };

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { getDoctorComments } from "../../api/feedback";
-import { Button, List, Spin, Avatar, Typography, message, Rate, Card, Space, Select, Row, Col } from "antd";
+import { Button, List, Spin, Avatar, Typography, message, Rate, Card, Space, Select, Row, Col, Flex } from "antd";
 
 interface FeedbackDoctorCommentsProps {
     doctorId: number;
@@ -108,7 +108,7 @@ const FeedbackDoctorComments: React.FC<FeedbackDoctorCommentsProps> = ({ doctorI
                                 style={{ width: "100%", marginBottom: 16, borderRadius: 12, boxShadow: "0 2px 8px #f0f1f2" }}
                                 bodyStyle={{ padding: 16 }}
                             >
-                                <Space align="start" style={{ width: "100%" }}>
+                                <Flex align="start" style={{ width: "100%" }}>
                                     <Avatar
                                         size={48}
                                         src={item.patient.user.avatar || DEFAULT_AVATAR}
@@ -116,7 +116,7 @@ const FeedbackDoctorComments: React.FC<FeedbackDoctorCommentsProps> = ({ doctorI
                                     >
                                         {item.patient.user.full_name?.[0]}
                                     </Avatar>
-                                    <div style={{ flex: 1 }}>
+                                    <div style={{ flex: 1, width: "100%" }}>
                                         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                                             <Typography.Text strong>
                                                 {item.is_anonymous ? "Ẩn danh" : item.patient.user.full_name}
@@ -131,7 +131,7 @@ const FeedbackDoctorComments: React.FC<FeedbackDoctorCommentsProps> = ({ doctorI
                                             {item.comment}
                                         </Typography.Paragraph>
                                     </div>
-                                </Space>
+                                </Flex>
                             </Card>
                         </List.Item>
                     )}
