@@ -1,5 +1,4 @@
 
-import { message } from "antd";
 import instance from "../api/mainRequest";
 import type { IPatient } from "../types/index.type";
 const BASE_URL = "api/v1/patients";
