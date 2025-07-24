@@ -33,7 +33,7 @@ import DoctorQueue from "./pages/Doctor/Queue/DoctorQueue";
 import AllDoctor from "./pages/Patient/AllDoctor";
 import About from "./pages/Patient/About";
 import Contact from "./pages/Patient/Contact";
-import AdminPatientDashboard from "./pages/Admin/Patient/AdminPatientDashboard";
+import PatientDashboard from "./pages/Admin/Patient/PatientDashboard";
 import StaffProfile from "./pages/Doctor/StaffProfile";
 import ChatUI from "./layouts/MainLayout/ChatUI";
 import DocumnetsManagement from "./pages/Admin/DocumentsManagement";
@@ -198,12 +198,19 @@ const PrivateRoutes: PrivateRoute[] = [
   },
   {
     path: "/nurse-book-appointments",
+    allowedRoles: ["nurse"],
     element: <NurseBookAppointment />,
     layout: DashboardLayout,
   },
   {
     path: "/user-book-appointments",
     element: <NurseManageAppointment />,
+    layout: DashboardLayout,
+  },
+  {
+    path: "/nurse-manage-patients",
+    element: <PatientDashboard />,
+    allowedRoles: ["nurse"],
     layout: DashboardLayout,
   },
   {
@@ -328,7 +335,7 @@ const PrivateRoutes: PrivateRoute[] = [
   },
   {
     path: "/admin/patients",
-    element: <AdminPatientDashboard />,
+    element: <PatientDashboard />,
     layout: DashboardLayout,
     allowedRoles: ["admin"],
   },
@@ -357,6 +364,12 @@ const PrivateRoutes: PrivateRoute[] = [
     element: <MedicineDashboard />,
     layout: DashboardLayout,
     allowedRoles: ["admin"],
+  },
+  {
+    path: "/nurse-manage-medicines",
+    element: <MedicineDashboard />,
+    layout: DashboardLayout,
+    allowedRoles: ["nurse"],
   },
   {
     path: "/chat",

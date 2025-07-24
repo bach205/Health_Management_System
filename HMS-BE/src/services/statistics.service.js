@@ -143,7 +143,7 @@ class StatisticsService {
                 },
             },
         });
-        console.log("payment", payments)
+        // console.log("payment", payments)
         const resultMap = new Map();
 
         for (const p of payments) {

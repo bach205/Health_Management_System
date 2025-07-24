@@ -1,0 +1,8 @@
+.sidebar-custom::-webkit-scrollbar {
+    display: none;
+  }
+
+.sidebar-custom::-webkit-scrollbar-thumb {
+    background-color: gold;
+    border-radius: 10px;
+  }

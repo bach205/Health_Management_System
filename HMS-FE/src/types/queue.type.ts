@@ -10,7 +10,7 @@
 //     called_at         DateTime?
 //     created_at        DateTime    @default(now())
 
-import type { IPatient } from "./patient.type";
+import type { Patient } from "./patient.type";
 
 //     patient Patient            @relation(fields: [patient_id], references: [id])
 //     clinic  Clinic             @relation(fields: [clinic_id], references: [id])
@@ -21,7 +21,7 @@ import type { IPatient } from "./patient.type";
 
 export interface IQueue {
   appointment: any;
-  slot_date: ReactNode;
+  // slot_date: ReactNode;
   shift_type: any;
   queue_number: number;
   id: number;
@@ -34,7 +34,7 @@ export interface IQueue {
   qr_code: string;
   called_at: string;
   created_at: string;
-  patient: IPatient;
+  patient: Patient;
 }
 export const getQueueStatus = (status: string) => {
   switch (status) {
