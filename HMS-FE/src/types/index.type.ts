@@ -99,3 +99,6 @@ export interface ITag {
   id: number;
   name: string;
 }
+
+export type { IConversation } from './chat.type';
+export type { IMessage, IChatResponse } from './chat.type';
