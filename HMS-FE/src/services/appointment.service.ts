@@ -44,7 +44,7 @@ export const cancelAppointmentService = async (appointmentId: any) => {
 };
 
 export const bookAppointmentService = async (appointmentData: any) => {
-  const response = await mainRequest.post(`${baseURL}/appointment/book-by-qr`, appointmentData);
+  const response = await mainRequest.post(`${baseURL}/appointment/book`, appointmentData);
   return response;
 };
 

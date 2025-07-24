@@ -1,363 +1,357 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Input, Button, DatePicker, Select, Card, message, TimePicker, Row, Col, Typography, Modal } from 'antd';
+import {
+  Form,
+  Input,
+  Button,
+  DatePicker,
+  Select,
+  Card,
+  message,
+  TimePicker,
+  Row,
+  Col
+} from 'antd';
+import { UserOutlined, PhoneOutlined, MailOutlined, CalendarOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
-import { bookAppointmentByQRService, getAllAvailableSlotsService, getAvailableSlots } from '../../services/appointment.service';
-import { bookAppointmentService } from '../../services/appointment.service';
-import { getClinics } from '../../services/clinic.service';
+import utc from 'dayjs/plugin/utc';
+dayjs.extend(utc);
+import { getAllAvailableSlotsService, nurseBookAppointmentService } from '../../services/appointment.service';
+import { getDoctors } from '../../services/doctor.service';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const { Option } = Select;
 const { TextArea } = Input;
-const { Title, Text } = Typography;
+
+interface Doctor {
+  id: number;
+  name: string;
+  clinics: {
+    id: number;
+    name: string;
+  }[];
+}
+
+interface TimeSlot {
+  value: string;
+  label: string;
+}
+
+interface AvailableSlot {
+  id: number;
+  doctor_id: number;
+  clinic_id: number;
+  slot_date: string;
+  start_time: string;
+  end_time: string;
+  is_available: boolean;
+  doctor_name: string;
+  doctor_role: string;
+  clinic_name: string;
+}
 
 const QRBookAppointmentForm: React.FC = () => {
   const [form] = Form.useForm();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [doctors, setDoctors] = useState<any[]>([]);
-  const [availableSlots, setAvailableSlots] = useState<any[]>([]);
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [availableSlots, setAvailableSlots] = useState<AvailableSlot[]>([]);
   const [selectedDoctor, setSelectedDoctor] = useState<number | null>(null);
   const [selectedClinic, setSelectedClinic] = useState<number | null>(null);
   const [availableDates, setAvailableDates] = useState<string[]>([]);
-  const [availableTimes, setAvailableTimes] = useState<any[]>([]);
+  const [availableTimes, setAvailableTimes] = useState<TimeSlot[]>([]);
   const [clinics, setClinics] = useState<{ id: number, name: string }[]>([]);
-  const [successModal, setSuccessModal] = useState<{ visible: boolean, queueNumber?: string | number }>({ visible: false });
 
   useEffect(() => {
     const fetchDoctorsAndSlots = async () => {
       try {
-        // Sử dụng getAvailableSlots với object rỗng để lấy tất cả slot còn trống
-        const response = await getAvailableSlots({});
-        const slots = response.data || response.metadata || [];
-        setAvailableSlots(slots);
-        console.log('All slots:', slots);
-        // Lấy danh sách bác sĩ và phòng khám từ slot
-        const doctorMap = new Map();
-        slots.forEach((slot: any) => {
-          if (slot.doctor_id && slot.doctor_name) doctorMap.set(slot.doctor_id, { id: slot.doctor_id, name: slot.doctor_name });
-        });
-        setDoctors(Array.from(doctorMap.values()));
-        // Fetch clinics and setClinics
-        const clinicsRes = await getClinics();
-        // Use only clinicsRes.data
-        const clinicsData = clinicsRes.data.metadata.clinics || [];
-        setClinics(clinicsData.map((c: any) => ({ id: c.id, name: c.name })));
-      } catch (err) {
-        message.error('Không thể tải dữ liệu slot hoặc phòng khám');
+        
+        const response = await getAllAvailableSlotsService();
+        
+        if (response.success) {
+          setAvailableSlots(response.data);
+
+          // Build doctors with clinics array
+          const doctorsMap = new Map<number, Doctor>();
+          const clinicsMap = new Map<number, string>();
+
+          response.data.forEach((slot: AvailableSlot) => {
+            // Add to doctors map
+            if (!doctorsMap.has(slot.doctor_id)) {
+              doctorsMap.set(slot.doctor_id, {
+                id: slot.doctor_id,
+                name: slot.doctor_name,
+                clinics: [{ id: slot.clinic_id, name: slot.clinic_name }]
+              });
+            } else {
+              const doctor = doctorsMap.get(slot.doctor_id)!;
+              if (!doctor.clinics.some(c => c.id === slot.clinic_id)) {
+                doctor.clinics.push({ id: slot.clinic_id, name: slot.clinic_name });
+              }
+            }
+
+            // Add to clinics map
+            if (!clinicsMap.has(slot.clinic_id)) {
+              clinicsMap.set(slot.clinic_id, slot.clinic_name);
+            }
+          });
+          setDoctors(Array.from(doctorsMap.values()));
+
+          setClinics(Array.from(clinicsMap.entries()).map(([id, name]) => ({ id, name })));
+        }
+      } catch (error) {
+        message.error('Failed to fetch doctors and slots');
       }
     };
     fetchDoctorsAndSlots();
   }, []);
 
-  // Lọc slot tương lai
-  const today = dayjs().startOf('day');
-  const futureSlots = availableSlots.filter((slot: any) => {
-    const slotDate = dayjs(slot.slot_date);
-    return slotDate.isSameOrAfter(today);
-  });
-
-  // Khi chọn phòng khám, lọc danh sách bác sĩ có slot ở phòng khám đó
-  const handleClinicChange = (clinicId: number) => {
-    setSelectedClinic(clinicId);
-    setSelectedDoctor(null);
-    setSelectedDate(null);
-    setSelectedSlot(null);
-    
-    // Chỉ reset các trường liên quan đến việc chọn bác sĩ và slot
-    const currentValues = form.getFieldsValue();
-    form.setFieldsValue({
-      ...currentValues,
-      clinic_id: clinicId,
-      doctor_id: undefined,
-      slot_date: undefined,
-      start_time: undefined
-    });
-
-    // Log dữ liệu để debug
-    console.log('futureSlots:', futureSlots);
-    console.log('Selected clinic:', clinicId, typeof clinicId);
-    const doctorsOfClinic = Array.from(
-      new Map(
-        futureSlots
-          .filter((slot: any) => Number(slot.clinic_id) === Number(clinicId) && slot.is_available)
-          .map((slot: any) => [slot.doctor_id, { id: slot.doctor_id, name: slot.doctor_name }])
-      ).values()
-    );
-    setDoctors(doctorsOfClinic as { id: number, name: string }[]);
-  };
-
-  // Khi chọn bác sĩ, chỉ reset các trường liên quan đến slot
+  // Update available clinics and dates when doctor is selected
   const handleDoctorChange = (doctorId: number) => {
     setSelectedDoctor(doctorId);
-    setSelectedDate(null);
-    setSelectedSlot(null);
-    
-    // Chỉ reset các trường liên quan đến slot
-    const currentValues = form.getFieldsValue();
+    setSelectedClinic(null);
+
+    // Reset form fields
     form.setFieldsValue({
-      ...currentValues,
-      doctor_id: doctorId,
-      slot_date: undefined,
-      start_time: undefined
+      clinic_id: null,
+      appointment_date: null,
+      appointment_time: null
     });
   };
 
-  // Group slot theo clinic, date (chỉ dùng futureSlots)
-  const clinicsOfDoctor = selectedDoctor
-    ? Array.from(
-      new Map(
-        futureSlots
-          .filter((slot: any) => slot.doctor_id === selectedDoctor && slot.is_available)
-          .map((slot: any) => [slot.clinic_id, { id: slot.clinic_id, name: slot.clinic_name }])
-      ).values()
-    )
-    : [];
-  const filteredSlots = selectedClinic
-    ? futureSlots.filter(
-      (slot: any) => slot.doctor_id === selectedDoctor && slot.clinic_id === selectedClinic && slot.is_available
-    )
-    : [];
-  const slotsByDate = filteredSlots.reduce((acc: Record<string, any[]>, slot: any) => {
-    const dateKey = dayjs(slot.slot_date).format('YYYY-MM-DD');
-    if (!acc[dateKey]) acc[dateKey] = [];
-    acc[dateKey].push(slot);
-    return acc;
-  }, {});
-  const dateOptions = Object.keys(slotsByDate);
+  // Update available dates and times when clinic is selected
+  const handleClinicChange = (clinicId: number) => {
+    setSelectedClinic(clinicId);
+    const doctorSlots = availableSlots.filter(slot =>
+      slot.doctor_id === selectedDoctor &&
+      slot.clinic_id === clinicId
+    );
 
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const [selectedSlot, setSelectedSlot] = useState<any>(null);
+    // Get unique dates
+    const dates = Array.from(new Set(doctorSlots.map(slot =>
+      dayjs(slot.slot_date).format('YYYY-MM-DD')
+    )));
+    setAvailableDates(dates);
 
-  // Reset khi đổi clinic/doctor
-  useEffect(() => {
-    setSelectedDate(null);
-    setSelectedSlot(null);
-  }, [selectedClinic, selectedDoctor]);
+    // Reset form fields
+    form.setFieldsValue({
+      appointment_date: null,
+      appointment_time: null
+    });
+  };
 
-  // Khi chọn ngày, lọc giờ khả dụng
-  const handleDateSelect = (dateKey: string) => {
-    setSelectedDate(dateKey);
-    const filtered = availableSlots.filter(
-      (slot: any) =>
+  // Update available times when date is selected
+  const handleDateChange = (date: dayjs.Dayjs | null) => {
+    if (!selectedClinic || !date) return;
+    const selectedDate = dayjs(date).format('YYYY-MM-DD');
+    const times = availableSlots
+      .filter(slot =>
         slot.doctor_id === selectedDoctor &&
         slot.clinic_id === selectedClinic &&
-        dayjs(slot.slot_date).format('YYYY-MM-DD') === dateKey &&
-        slot.is_available
-    );
-    setAvailableTimes(filtered.map((slot: any) => ({ value: slot.start_time, label: slot.start_time })));
-    setSelectedDate(dateKey);
-    setSelectedSlot(null);
-    form.setFieldsValue({ slot_date: dateKey });
-    form.resetFields(['start_time']);
-  };
+        dayjs(slot.slot_date).format('YYYY-MM-DD') === selectedDate
+      )
+      .map(slot => ({
+        value: dayjs.utc(slot.start_time).format('HH:mm:ss'),
+        label: `${dayjs.utc(slot.start_time).format('HH:mm')} - ${dayjs.utc(slot.end_time).format('HH:mm')}`
+      }));
+    console.log(selectedDate)
+    console.log(selectedDoctor, selectedClinic);
+    setAvailableTimes(times);
 
-  // Khi chọn ngày từ UI (click), cập nhật state và form
-  const handleDateClick = (dateKey: string) => {
-    setSelectedDate(dateKey);
-    setSelectedSlot(null);
-    
-    // Giữ lại các giá trị hiện tại và chỉ cập nhật slot_date
-    const currentValues = form.getFieldsValue();
+    // Reset time field
     form.setFieldsValue({
-      ...currentValues,
-      slot_date: dateKey,
-      start_time: undefined
+      appointment_time: null
     });
-  };
-
-  // Khi chọn giờ khám (slot), cập nhật state và form
-  const handleSlotClick = (slot: any) => {
-    if (slot.is_available) {
-      setSelectedSlot(slot);
-      // Giữ lại tất cả các giá trị hiện tại và chỉ cập nhật start_time
-      const currentValues = form.getFieldsValue();
-      const startTime = new Date(slot.start_time).getUTCHours().toString().padStart(2, '0') + ':' +
-        new Date(slot.start_time).getUTCMinutes().toString().padStart(2, '0');
-      form.setFieldsValue({
-        ...currentValues,
-        start_time: startTime
-      });
-    }
   };
 
   const onFinish = async (values: any) => {
     setLoading(true);
     try {
-      const formData = {
+      const response = await nurseBookAppointmentService({
         ...values,
-        date_of_birth: values.date_of_birth ? dayjs(values.date_of_birth).format('YYYY-MM-DD') : undefined,
-        clinic_id: Number(values.clinic_id),
-        doctor_id: Number(values.doctor_id),
-        start_time: values.start_time ? `${values.start_time}:00` : undefined
-      };
-      
+        doctor_id: selectedDoctor,
+        clinic_id: selectedClinic,
+        appointment_date: dayjs(values.appointment_date).format('YYYY-MM-DD'),
+        appointment_time: values.appointment_time // Ensure HH:mm:ss format
+      });
 
-      const res = await bookAppointmentByQRService(formData);
-      console.log(res.data)
-      message.success(res.data.message);
-      if (res.data && res.data.queue_number) {
-        
-        setSuccessModal({ visible: true, queueNumber: res.data.queue_number });
-        form.resetFields();
-        setSelectedDate(null);
-        setSelectedSlot(null);
-        setSelectedDoctor(null);
-        setSelectedClinic(null);
+      if (response.success) {
+        message.success('Đặt lịch thành công');
+        // navigate('/nurse/appointments');
       }
     } catch (error: any) {
-      message.error(error?.response?.data?.message || 'Đặt lịch thất bại');
+      message.error(error.response?.data?.message || 'Đặt lịch thất bại');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Card title="Điền thông tin đặt lịch khám">
-      <Form form={form} layout="vertical" onFinish={onFinish} autoComplete="off">
-        <Row gutter={16}>
-          <Col span={12}>
-            <Form.Item name="full_name" label="Họ tên" rules={[{ required: true, message: 'Vui lòng nhập họ tên' }]}>
-              <Input />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item name="phone" label="Số điện thoại" rules={[
-              { required: true, message: 'Vui lòng nhập số điện thoại' },
-              { pattern: /^0\d{9,10}$/, message: 'Số điện thoại phải bắt đầu bằng 0 và có 10-11 số' }
-            ]}>
-              <Input />
-            </Form.Item>
-          </Col>
-        </Row>
-        <Row gutter={16}>
-          <Col span={12}>
-            <Form.Item name="gender" label="Giới tính" rules={[{ required: true, message: 'Vui lòng chọn giới tính' }]}>
-              <Select placeholder="Chọn giới tính">
-                <Option value="male">Nam</Option>
-                <Option value="female">Nữ</Option>
-                <Option value="other">Khác</Option>
-              </Select>
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item name="date_of_birth" label="Ngày sinh" rules={[
-              { required: true, message: 'Vui lòng chọn ngày sinh' },
-            ]}>
-              <DatePicker className="w-full" format="YYYY-MM-DD" placeholder="Chọn ngày sinh" />
-            </Form.Item>
-          </Col>
-        </Row>
-        <Row gutter={16}>
-          <Col span={12}>
-            <Form.Item name="identity_number" label="Căn cước công dân" rules={[
-              { required: true, message: 'Vui lòng nhập CCCD' },
-              { pattern: /^\d{12}$/, message: 'CCCD phải đủ 12 số' }
-            ]}>
-              <Input />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item name="address" label="Địa chỉ" rules={[{ required: true, message: 'Vui lòng nhập địa chỉ' }]}>
-              <Input />
-            </Form.Item>
-          </Col>
-        </Row>
-        <Row gutter={16}>
-          <Col span={12}>
-            <Form.Item name="clinic_id" label="Phòng khám" rules={[{ required: false, message: 'Vui lòng chọn phòng khám' }]}>
-              <Select placeholder="Chọn phòng khám" onChange={handleClinicChange} showSearch optionFilterProp="children">
-                {clinics.map(clinic => <Option key={clinic.id} value={clinic.id}>{clinic.name}</Option>)}
-              </Select>
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item name="doctor_id" label="Bác sĩ" rules={[{ required: false, message: 'Vui lòng chọn bác sĩ' }]}>
-              <Select placeholder="Chọn bác sĩ" onChange={handleDoctorChange} showSearch optionFilterProp="children" disabled={!selectedClinic}>
-                {doctors.map(doc => <Option key={doc.id} value={doc.id}>{doc.name}</Option>)}
-              </Select>
-            </Form.Item>
-          </Col>
-        </Row>
-        <Form.Item name="slot_date" hidden>
-          <Input />
-        </Form.Item>
-        <Form.Item name="start_time" hidden>
-          <Input />
-        </Form.Item>
-        <Title level={5} className="!mb-4">Chọn ngày khám</Title>
-        <div className="flex gap-3 items-center w-full overflow-x-auto mb-4">
-          {selectedClinic && dateOptions.map(dateKey => {
-            const dateObj = new Date(dateKey);
-            const weekday = dateObj.toLocaleDateString('vi-VN', { weekday: 'long' });
-            const dateStr = dateObj.toLocaleDateString('vi-VN');
-            return (
-              <div
-                key={dateKey}
-                onClick={() => handleDateClick(dateKey)}
-                className={`text-center py-2 px-4 rounded-lg cursor-pointer transition-colors ${selectedDate === dateKey
-                  ? "bg-primary text-white"
-                  : "border border-gray-200 hover:border-primary"
-                  }`}
+    <div className="w-full flex justify-center">
+      <Card title="Đặt lịch khám bằng QR" className="max-w-3xl mx-auto w-full">
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={onFinish}
+          autoComplete="off"
+        >
+          {/* Thông tin bệnh nhân */}
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                name="patientName"
+                label="Tên bệnh nhân"
+                rules={[{ required: true, message: 'Vui lòng nhập tên bệnh nhân' }]}
               >
-                <Text className={selectedDate === dateKey ? "!text-white" : ""} strong>
-                  {weekday.charAt(0).toUpperCase() + weekday.slice(1)}, {dateStr}
-                </Text>
-              </div>
-            );
-          })}
-          {selectedClinic && dateOptions.length === 0 && (
-            <Text type="secondary">Không có lịch cho phòng khám này</Text>
-          )}
-        </div>
-        <Title level={5} className="!mb-4">Chọn giờ khám</Title>
-        <div className="flex gap-3 items-center w-full overflow-x-auto mb-4">
-          {selectedClinic && !selectedDate && <Text type="secondary">Vui lòng chọn ngày trước</Text>}
-          {selectedClinic && selectedDate && slotsByDate[selectedDate]?.map(slot => {
-            const startTime = new Date(slot.start_time).getUTCHours().toString().padStart(2, '0') + ':' +
-              new Date(slot.start_time).getUTCMinutes().toString().padStart(2, '0');
-            const endTime = new Date(slot.end_time).getUTCHours().toString().padStart(2, '0') + ':' +
-              new Date(slot.end_time).getUTCMinutes().toString().padStart(2, '0');
-            const isAvailable = slot.is_available;
-            return (
-              <Button
-                key={slot.id}
-                type={selectedSlot?.id === slot.id ? "primary" : "default"}
-                onClick={() => handleSlotClick(slot)}
-                className={`rounded-full group ${!isAvailable ? 'cursor-not-allowed' : ''}`}
-                disabled={!isAvailable}
-                title={!isAvailable ? 'Đã được đặt' : ''}
+                <Input prefix={<UserOutlined />} placeholder="Nhập tên bệnh nhân" />
+              </Form.Item>
+            </Col>
+            {/* <Col span={12}>
+              <Form.Item
+                name="phoneNumber"
+                label="Số điện thoại"
+                rules={[
+                  { required: true, message: 'Vui lòng nhập số điện thoại' },
+                  { pattern: /^\d{10}$/, message: 'Số điện thoại không hợp lệ' }
+                ]}
               >
-                <span>{startTime} ~ {endTime}</span>
-                {!isAvailable && (
-                  <span className="invisible group-hover:visible text-xs text-gray-500 ml-1">Đã đặt</span>
-                )}
-              </Button>
-            );
-          })}
-          {selectedClinic && selectedDate && (!slotsByDate[selectedDate] || slotsByDate[selectedDate].length === 0) && (
-            <Text type="secondary">Không có lịch cho ngày này</Text>
-          )}
-        </div>
-        <Form.Item name="reason" label="Lý do khám">
-          <TextArea rows={3} placeholder="Nhập lý do khám" />
-        </Form.Item>
-        <Form.Item name="note" label="Ghi chú">
-          <TextArea rows={2} placeholder="Nhập ghi chú (nếu có)" />
-        </Form.Item>
-        <Button type="primary" htmlType="submit" loading={loading} className="w-full mt-2" disabled={!selectedSlot}>Đặt lịch khám</Button>
-      </Form>
-      <Modal
-        open={successModal.visible}
-        onCancel={() => setSuccessModal({ visible: false })}
-        footer={null}
-        centered
-      >
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-2 text-green-600">Đặt lịch thành công!</h2>
-          <div className="text-lg mb-2">Số thứ tự khám của bạn là:</div>
-          <div className="text-4xl font-bold text-primary mb-4">{successModal.queueNumber}</div>
-        </div>
-      </Modal>
-    </Card>
+                <Input prefix={<PhoneOutlined />} placeholder="Nhập số điện thoại" />
+              </Form.Item>
+            </Col> */}
+            <Col span={12}>
+              <Form.Item
+                name="email"
+                label="Email"
+                rules={[
+                  { required: true, message: 'Vui lòng chọn bác sĩ' },
+                  { type: 'email', message: 'Email không hợp lệ' }
+                ]}
+              >
+                <Input prefix={<MailOutlined />} placeholder="Nhập email" />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          {/* <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                name="email"
+                label="Email"
+                rules={[
+                  { type: 'email', message: 'Email không hợp lệ' }
+                ]}
+              >
+                <Input prefix={<MailOutlined />} placeholder="Nhập email" />
+              </Form.Item>
+            </Col>
+          </Row> */}
+
+          {/* Thông tin lịch hẹn */}
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                name="doctor_id"
+                label="Bác sĩ"
+                rules={[{ required: true, message: 'Vui lòng chọn bác sĩ' }]}
+              >
+                <Select
+                  placeholder="Chọn bác sĩ"
+                  onChange={handleDoctorChange}
+                >
+                  {doctors.map(doctor => (
+                    <Option key={doctor.id} value={doctor.id}>
+                      {doctor.name}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                name="clinic_id"
+                label="Phòng khám"
+                rules={[{ required: true, message: 'Vui lòng chọn phòng khám' }]}
+              >
+                <Select
+                  placeholder="Chọn phòng khám"
+                  onChange={handleClinicChange}
+                  disabled={!selectedDoctor}
+                >
+                  {(() => {
+                    if (!selectedDoctor) return null;
+                    const doctor = doctors.find(d => d.id === selectedDoctor);
+                    return doctor?.clinics.map(clinic => (
+                      <Option key={clinic.id} value={clinic.id}>
+                        {clinic.name}
+                      </Option>
+                    ));
+                  })()}
+                </Select>
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                name="appointment_date"
+                label="Ngày khám"
+                rules={[{ required: true, message: 'Vui lòng chọn ngày khám' }]}
+              >
+                <DatePicker
+                  className="w-full"
+                  disabledDate={(current) => {
+                    return !availableDates.includes(dayjs(current).format('YYYY-MM-DD'));
+                  }}
+                  onChange={handleDateChange}
+                  disabled={!selectedClinic}
+                />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                name="appointment_time"
+                label="Giờ khám"
+                rules={[{ required: true, message: 'Vui lòng chọn giờ khám' }]}
+              >
+                <Select
+                  placeholder="Chọn khung giờ"
+                  disabled={!form.getFieldValue('appointment_date')}
+                >
+                  {availableTimes.map(time => (
+                    <Option key={time.value} value={time.value}>
+                      {time.label}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Form.Item
+            name="reason"
+            label="Lý do khám"
+            rules={[{ required: true, message: 'Vui lòng nhập lý do khám' }]}
+          >
+            <TextArea rows={4} placeholder="Nhập lý do khám" />
+          </Form.Item>
+
+          <Form.Item
+            name="note"
+            label="Ghi chú"
+          >
+            <TextArea rows={2} placeholder="Nhập ghi chú (nếu có)" />
+          </Form.Item>
+
+          <Form.Item>
+            <Button type="primary" htmlType="submit" loading={loading} className="w-full">
+              Đặt lịch khám
+            </Button>
+          </Form.Item>
+        </Form>
+      </Card>
+    </div>
   );
 };
 
-export default QRBookAppointmentForm; 
+export default QRBookAppointmentForm;
