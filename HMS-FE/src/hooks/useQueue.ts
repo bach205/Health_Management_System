@@ -17,6 +17,7 @@ const useQueue = () => {
       }
       console.log("Fetching queue for clinic:", clinicId, "with pagination:", pagination, "and type:", type);
       const response = await getQueueClinic(clinicId, pagination, type);
+      console.log(response)
       setQueues(response.metadata.queueClinic);
       setTotalElements(response.metadata.total);
       setTotalPages(response.metadata.totalPages);

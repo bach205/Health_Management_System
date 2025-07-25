@@ -535,7 +535,7 @@ VALUES
 (10, 3, 14, 4, 'X-quang khớp gối cho thấy thoái hóa độ 2', 'Cần tập vật lý trị liệu', '2025-06-03 08:45:00'),
 (11, 4, 2, 5, 'Xét nghiệm máu dương tính với sốt xuất huyết', 'Theo dõi tiểu cầu', '2025-06-04 11:20:00'),
 (12, 5, 3, 6, 'Test dị ứng dương tính với penicillin', 'Tránh sử dụng nhóm thuốc beta-lactam', '2025-06-05 15:30:00'),
-(13, 6, 14, 7, 'Đo thị lực: 3/10, cần đeo kính -2.5', 'Tái khám sau 3 tháng', '2025-06-06 09:00:00');
+(13, 6, 14, 7, 'Đo thị lực: 3/10, cần đeo kính -2.5', 'Tái khám sau 3 tháng', '2025-06-06 09:00:00'),
 (8, 7, 5, 8, 'Nội soi tai mũi họng phát hiện viêm xoang nhẹ', 'Kê đơn thuốc điều trị 7 ngày', '2025-06-08 13:50:00'),
 (9, 8, 3, 9, 'Chụp CT phát hiện tụ máu dưới màng cứng nhỏ', 'Theo dõi tại nhà, tái khám sau 1 tuần', '2025-06-09 09:30:00'),
 (10, 1, 2, 10, 'Xét nghiệm nước tiểu cho thấy nhiễm trùng nhẹ', 'Uống kháng sinh 5 ngày', '2025-06-10 12:00:00'),
