@@ -1,12 +1,12 @@
 -- Create and use the hospital database
--- create database hospital;
+drop database hospital;
+create database hospital;
 
 USE hospital;
 
 -- Disable safe update mode to allow updates without WHERE clause on key columns
 SET SQL_SAFE_UPDATES = 0;
 
--- drop database hospital;
 
 -- Table for system users
 CREATE TABLE users (
@@ -340,8 +340,8 @@ INSERT INTO users (email, password, full_name, phone, role, date_of_birth, gende
 ('drtranthilan@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Trần Thị Lan', '0987654322', 'doctor', '1988-07-22', 'female', 'TP.HCM', 'local', TRUE),
 ('nurselevanhai@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Lê Văn Hải', '0987654323', 'nurse', '1990-11-10', 'male', 'Đà Nẵng', 'local', TRUE),
 ('nursephamthihong@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Phạm Thị Hồng', '0987654324', 'nurse', '1992-04-05', 'female', 'Hà Nội', 'local', TRUE),
-('receptionhoangvanduc@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Hoàng Văn Đức', '0987654325', 'receptionist', '1995-09-12', 'male', 'TP.HCM', 'local', TRUE),
-('receptionvuthianh@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Vũ Thị Ánh ', '0987654326', 'receptionist', '1993-12-20', 'female', 'Đà Nẵng', 'local', TRUE),
+-- ('receptionhoangvanduc@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Hoàng Văn Đức', '0987654325', 'receptionist', '1995-09-12', 'male', 'TP.HCM', 'local', TRUE),
+-- ('receptionvuthianh@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Vũ Thị Ánh ', '0987654326', 'receptionist', '1993-12-20', 'female', 'Đà Nẵng', 'local', TRUE),
 ('tranvanhung@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Trần Văn Hùng', '0987654328', 'patient', '1998-02-14', 'male', 'TP.HCM', 'local', TRUE),
 ('lethithu@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Lê Thị Thu', '0987654329', 'patient', '1996-08-25', 'female', 'Hà Nội', 'local', TRUE),
 ('phamvantuan@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Phạm Văn Tuấn', '0987654330', 'patient', '1990-05-17', 'male', 'Đà Nẵng', 'facebook', TRUE),
@@ -535,7 +535,7 @@ VALUES
 (10, 3, 14, 4, 'X-quang khớp gối cho thấy thoái hóa độ 2', 'Cần tập vật lý trị liệu', '2025-06-03 08:45:00'),
 (11, 4, 2, 5, 'Xét nghiệm máu dương tính với sốt xuất huyết', 'Theo dõi tiểu cầu', '2025-06-04 11:20:00'),
 (12, 5, 3, 6, 'Test dị ứng dương tính với penicillin', 'Tránh sử dụng nhóm thuốc beta-lactam', '2025-06-05 15:30:00'),
-(13, 6, 14, 7, 'Đo thị lực: 3/10, cần đeo kính -2.5', 'Tái khám sau 3 tháng', '2025-06-06 09:00:00');
+(13, 6, 14, 7, 'Đo thị lực: 3/10, cần đeo kính -2.5', 'Tái khám sau 3 tháng', '2025-06-06 09:00:00'),
 (8, 7, 5, 8, 'Nội soi tai mũi họng phát hiện viêm xoang nhẹ', 'Kê đơn thuốc điều trị 7 ngày', '2025-06-08 13:50:00'),
 (9, 8, 3, 9, 'Chụp CT phát hiện tụ máu dưới màng cứng nhỏ', 'Theo dõi tại nhà, tái khám sau 1 tuần', '2025-06-09 09:30:00'),
 (10, 1, 2, 10, 'Xét nghiệm nước tiểu cho thấy nhiễm trùng nhẹ', 'Uống kháng sinh 5 ngày', '2025-06-10 12:00:00'),
@@ -985,13 +985,18 @@ CREATE TABLE blogs (
     FOREIGN KEY (category_id) REFERENCES blog_categories(id)
 );
 
--- Blog <-> Tag many-to-many
+CREATE TABLE tags (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL UNIQUE
+);
+
+
 CREATE TABLE _BlogTags (
     A INT NOT NULL, -- blog_id
     B INT NOT NULL, -- tag_id
     PRIMARY KEY (A, B),
-    FOREIGN KEY (A) REFERENCES blogs(id) ON DELETE CASCADE,
-    FOREIGN KEY (B) REFERENCES blog_tags(id) ON DELETE CASCADE
+    CONSTRAINT fk_blog FOREIGN KEY (A) REFERENCES blogs(id) ON DELETE CASCADE,
+    CONSTRAINT fk_tag FOREIGN KEY (B) REFERENCES tags(id) ON DELETE CASCADE
 );
 INSERT INTO blog_categories (name) VALUES 
 ('Sức khỏe cộng đồng'),
@@ -1131,17 +1136,3 @@ INSERT INTO doctor_ratings (appointment_id, doctor_id, patient_id, rating, comme
 --   true,
 --   8
 -- );
-
-CREATE TABLE tags (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL UNIQUE
-);
-
-
-CREATE TABLE _BlogTags (
-    A INT NOT NULL, -- blog_id
-    B INT NOT NULL, -- tag_id
-    PRIMARY KEY (A, B),
-    CONSTRAINT fk_blog FOREIGN KEY (A) REFERENCES blogs(id) ON DELETE CASCADE,
-    CONSTRAINT fk_tag FOREIGN KEY (B) REFERENCES tags(id) ON DELETE CASCADE
-);

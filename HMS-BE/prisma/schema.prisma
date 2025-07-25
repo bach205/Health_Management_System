@@ -45,7 +45,6 @@ model User {
 enum Role {
   doctor
   nurse
-  receptionist
   admin
   patient
 }

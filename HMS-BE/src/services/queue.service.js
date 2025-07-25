@@ -164,15 +164,16 @@ class QueueService {
       }
     });
 
-    const newOrder = await prisma.examinationOrder.findFirst({
-      where: {
+    const newOrder = await prisma.examinationOrder.create({
+      data: {
+        note,
         patient_id: newQueue.patient_id,
         clinic_id: newQueue.clinic_id,
         from_clinic_id: currentQueue ? currentQueue.clinic_id : null,
         to_clinic_id: to_clinic_id,
         reason,
+        appointment_id: app,
       },
-      orderBy: { created_at: "desc" }
     });
 
     // 6. Emit socket event để thông báo cho phòng khám mới
