@@ -16,7 +16,7 @@ const shiftTypeOptions = [
 ];
 
 const statusOptions = [
-  { value: "", label: "Tất cả" },
+  { value: "", label: "Trạng Thái" },
   { value: "waiting", label: "Chờ khám" },
   { value: "in_progress", label: "Đang khám" },
   { value: "done", label: "Đã khám" },
@@ -53,7 +53,7 @@ const Monitor: React.FC = () => {
   const [doctor, setDoctor] = useState("");
   const [queueNumber, setQueueNumber] = useState("");
   const [search, setSearch] = useState("");
-  const [selectedDate, setSelectedDate] = useState(dayjs());
+  const [selectedDate, setSelectedDate] = useState(null);
 
   // Fetch clinics
   useEffect(() => {
@@ -81,12 +81,12 @@ const Monitor: React.FC = () => {
 
       // Filter by selected date on frontend
       let filteredQueue = res.metadata.queueClinic || [];
-      // if (date) {
-      //   filteredQueue = filteredQueue.filter((item: IQueue) => {
-      //     const itemDate = dayjs(item.slot_date);
-      //     return itemDate.isSame(date, 'day');
-      //   });
-      // }
+      if (date) {
+        filteredQueue = filteredQueue.filter((item: IQueue) => {
+          const itemDate = dayjs(item.slot_date);
+          return itemDate.isSame(date, 'day');
+        });
+      }
 
       setQueueData(filteredQueue);
       setPagination({
@@ -254,7 +254,7 @@ const Monitor: React.FC = () => {
               style={{ width: 120 }}
               value={shiftType}
               onChange={val => setShiftType(val)}
-              options={[{ value: "", label: "Tất cả" }, ...shiftTypeOptions]}
+              options={[{ value: "", label: "Ca Làm Việc" }, ...shiftTypeOptions]}
               allowClear
               disabled={!selectedClinic}
             />
@@ -264,26 +264,26 @@ const Monitor: React.FC = () => {
               style={{ width: 180 }}
               value={doctor}
               onChange={val => setDoctor(val)}
-              options={[{ value: "", label: "Tất cả" }, ...doctorOptions]}
+              options={[{ value: "", label: "Bác Sĩ" }, ...doctorOptions]}
               allowClear
               disabled={!selectedClinic}
               filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
             />
-            <Input
+            {/* <Input
               placeholder="Số thứ tự"
               value={queueNumber}
               onChange={e => setQueueNumber(e.target.value)}
               style={{ width: 120 }}
               disabled={!selectedClinic}
-            />
-            <Input
+            /> */}
+            {/* <Input
               placeholder="Tìm kiếm nhanh"
               value={search}
               onChange={e => setSearch(e.target.value)}
               prefix={<SearchOutlined />}
               style={{ width: 180 }}
               disabled={!selectedClinic}
-            />
+            /> */}
             <Button icon={<ReloadOutlined />} onClick={resetFilters} disabled={!selectedClinic}>
               Đặt lại
             </Button>

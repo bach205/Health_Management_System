@@ -267,13 +267,15 @@ const NurseManageAppointment: React.FC = () => {
             Xác nhận
           </Button>
           {record.status === "cancelled" ? (
-            <Button
-              type="primary"
-              onClick={() => showRescheduleModal(record)}
-              block
-            >
-              Đổi lịch khám
-            </Button>
+            <></>
+            // <Button
+            //   type="primary"
+            //   onClick={() => showRescheduleModal(record)}
+            //   block
+            //   disabled
+            // >
+            //   Đổi lịch khám
+            // </Button>
           ) : record.status === "pending" ? (
             <Button danger onClick={() => showRejectModal(record)} block>
               Hủy
