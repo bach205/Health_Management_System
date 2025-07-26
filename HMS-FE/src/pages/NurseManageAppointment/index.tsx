@@ -69,7 +69,7 @@ const NurseManageAppointment: React.FC = () => {
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [filters, setFilters] = useState<Filters>({
     status: 'all',
-    dateRange: null,
+    dateRange: [dayjs(), dayjs().add(1, 'day')],
     search: '',
   });
   const [rescheduleModalVisible, setRescheduleModalVisible] = useState(false);
@@ -102,7 +102,7 @@ const NurseManageAppointment: React.FC = () => {
         const endDate = dayjs(filters.dateRange[1]).endOf('day');
         filteredData = filteredData.filter((appointment: Appointment) => {
           const appointmentDate = dayjs(appointment.formatted_date);
-          return appointmentDate.isAfter(startDate) && appointmentDate.isBefore(endDate);
+          return !appointmentDate.isBefore(startDate) && !appointmentDate.isAfter(endDate);
         });
       }
 
@@ -330,7 +330,7 @@ const NurseManageAppointment: React.FC = () => {
           </Select>
           <RangePicker
             value={filters.dateRange}
-            onChange={(dates) => setFilters(prev => ({ ...prev, dateRange: dates }))}
+            onChange={(dates) => { console.log(filters.dateRange); return setFilters(prev => ({ ...prev, dateRange: dates })) }}
             format="DD/MM/YYYY"
             allowClear
             className="w-full sm:w-auto"
