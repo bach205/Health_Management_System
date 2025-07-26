@@ -626,7 +626,6 @@ class DoctorService {
                 gender: row.gender || 'male',
                 date_of_birth: row.date_of_birth,
                 address: row.address?.trim() || '',
-                password: row.password?.trim(),
                 // specialty_id: row.specialty_id || null,
                 price: parseInt(row.price, 10),
                 bio: row.bio?.trim() || '',
@@ -645,10 +644,10 @@ class DoctorService {
             if (row.avatar && row.avatar !== null && row.avatar !== "NULL" && row.avatar !== undefined) {
                 doctorData.avatar = row.avatar
             }
-
+            const randomPassword = this.#createRandomPassword().toString()
             // Tự tạo password nếu chưa có
             if (!doctorData.password) {
-                doctorData.password = this.#createRandomPassword().toString();
+                doctorData.password = randomPassword;
             }
 
             // Validate bằng Joi schema
@@ -691,6 +690,9 @@ class DoctorService {
                     bio: value.bio,
                     price: value.price,
                 },
+                randomPassword
+
+                
             });
         }
 
@@ -712,9 +714,9 @@ class DoctorService {
         );
 
         // Send email
-        data.forEach((doctor, index) => {
-            const rawPassword = data[index].password;
-            sendStaffNewPasswordEmail(doctor.email, rawPassword);
+        preparedData.forEach((doctor, index) => {
+            const rawPassword = doctor.randomPassword;
+            sendStaffNewPasswordEmail(doctor.user.email, rawPassword);
         });
 
         return result;

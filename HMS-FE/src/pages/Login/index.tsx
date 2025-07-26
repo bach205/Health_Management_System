@@ -4,6 +4,8 @@ import { useState } from "react";
 import { GoogleLogin } from "@react-oauth/google"
 import { GoogleOAuthProvider } from '@react-oauth/google'
 import data from "../../assets/googleClientID/ClientIDGoolge.json" with {type: "json"}
+
+const VITE_FRONTEND_SERVER = import.meta.env.VITE_FRONTEND_SERVER;
 const Login = () => {
   const client = data.web.client_id;
   let navigate = useNavigate();
@@ -17,8 +19,8 @@ const Login = () => {
   const handlePasswordChange = (e: any) => {
     setPassword(e.target.value);
   };
-  const handleWindowOpenLocation = (sub_link:string) => {
-    window.location.href=`http://localhost:5173/${sub_link}`;
+  const handleWindowOpenLocation = (sub_link: string) => {
+    window.location.href = `${VITE_FRONTEND_SERVER}/${sub_link}`;
   };
   const onSubmitHandler = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,7 +32,7 @@ const Login = () => {
     if (data === "patient") handleWindowOpenLocation("");
     if (data === "nurse") handleWindowOpenLocation("sale-medicine");
     if (data === "doctor") handleWindowOpenLocation("doctor/queue");
-    if (data === "admin") handleWindowOpenLocation("admin");
+    if (data === "admin") handleWindowOpenLocation("admin/dashboard");
 
   };
 
@@ -38,7 +40,7 @@ const Login = () => {
     const datax = await auth.handleGoogleLogin(data);
 
     if (datax === "patient") navigate("/");
-    if (datax === "admin") navigate("/admin");
+
   };
 
   return (
