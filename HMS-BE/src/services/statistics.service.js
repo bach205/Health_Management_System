@@ -178,6 +178,7 @@ class StatisticsService {
                 }
             }
         })
+        console.log(appointments)
 
         // console.log("appointments", appointments)
 
