@@ -102,7 +102,7 @@ const NurseManageAppointment: React.FC = () => {
         const endDate = dayjs(filters.dateRange[1]).endOf('day');
         filteredData = filteredData.filter((appointment: Appointment) => {
           const appointmentDate = dayjs(appointment.formatted_date);
-          return appointmentDate.isAfter(startDate) && appointmentDate.isBefore(endDate);
+          return !appointmentDate.isBefore(startDate) && !appointmentDate.isAfter(endDate);
         });
       }
 
