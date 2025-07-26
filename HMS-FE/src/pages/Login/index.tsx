@@ -4,6 +4,7 @@ import { useState } from "react";
 import { GoogleLogin } from "@react-oauth/google"
 import { GoogleOAuthProvider } from '@react-oauth/google'
 import data from "../../assets/googleClientID/ClientIDGoolge.json" with {type: "json"}
+
 const Login = () => {
   const client = data.web.client_id;
   let navigate = useNavigate();
@@ -18,7 +19,7 @@ const Login = () => {
     setPassword(e.target.value);
   };
   const handleWindowOpenLocation = (sub_link:string) => {
-    window.location.href=`http://localhost:5173/${sub_link}`;
+    window.location.href=`https://swp391-hms.vercel.app/${sub_link}`;
   };
   const onSubmitHandler = async (e: React.FormEvent) => {
     e.preventDefault();

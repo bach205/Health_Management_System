@@ -159,7 +159,7 @@ const handleSocketConnected = (socket, io) => {
 function initSocket(server) {
   const io = socketIO(server, {
     cors: {
-      origin: "http://localhost:5173",
+      origin: "https://swp391-hms.vercel.app/",
       credentials: true,
     },
   });
