@@ -178,6 +178,7 @@ class StatisticsService {
                 }
             }
         })
+        console.log(appointments)
 
         // console.log("appointments", appointments)
 
@@ -200,7 +201,7 @@ class StatisticsService {
         const totalAppointmentsInWeek = []
         for (let i = 0; i < 7; i++) {
             const totalAppointmentsInDay = appointments.filter(appointment => {
-                const day = this.getdayinweek(appointment.appointment_date.getday)
+                const day = this.getdayinweek(appointment.appointment_date)
                 // console.log(day, i)
                 return day === i
             })

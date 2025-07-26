@@ -342,8 +342,8 @@ INSERT INTO users (email, password, full_name, phone, role, date_of_birth, gende
 ('drtranthilan@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Trần Thị Lan', '0987654322', 'doctor', '1988-07-22', 'female', 'TP.HCM', 'local', TRUE),
 ('nurselevanhai@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Lê Văn Hải', '0987654323', 'nurse', '1990-11-10', 'male', 'Đà Nẵng', 'local', TRUE),
 ('nursephamthihong@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Phạm Thị Hồng', '0987654324', 'nurse', '1992-04-05', 'female', 'Hà Nội', 'local', TRUE),
--- ('receptionhoangvanduc@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Hoàng Văn Đức', '0987654325', 'receptionist', '1995-09-12', 'male', 'TP.HCM', 'local', TRUE),
--- ('receptionvuthianh@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Vũ Thị Ánh ', '0987654326', 'receptionist', '1993-12-20', 'female', 'Đà Nẵng', 'local', TRUE),
+('receptionhoangvanduc@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Hoàng Văn Đức', '0987654325', 'nurse', '1995-09-12', 'male', 'TP.HCM', 'local', TRUE),
+('receptionvuthianh@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Vũ Thị Ánh ', '0987654326', 'nurse', '1993-12-20', 'female', 'Đà Nẵng', 'local', TRUE),
 ('tranvanhung@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Trần Văn Hùng', '0987654328', 'patient', '1998-02-14', 'male', 'TP.HCM', 'local', TRUE),
 ('lethithu@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Lê Thị Thu', '0987654329', 'patient', '1996-08-25', 'female', 'Hà Nội', 'local', TRUE),
 ('phamvantuan@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Phạm Văn Tuấn', '0987654330', 'patient', '1990-05-17', 'male', 'Đà Nẵng', 'facebook', TRUE),
@@ -443,8 +443,8 @@ INSERT INTO doctors (user_id, specialty, bio) VALUES
 (25, 'Chẩn đoán hình ảnh', 'Chuyên gia về đọc và phân tích hình ảnh y khoa.');
 
 
--- INSERT INTO appointments (patient_id, clinic_id, doctor_id, appointment_date, appointment_time, status, priority, reason, note) VALUES
--- (8, 1, 2, '2025-06-10', '09:00:00', 'pending', 0, 'Đau ngực, khó thở', 'Bệnh nhân có tiền sử bệnh tim'),
+
+
 -- (9, 2, 3, '2025-06-11', '14:00:00', 'pending', 0, 'Đau đầu, chóng mặt', 'Bệnh nhân bị stress nhiều'),
 -- (10, 3, 14, '2025-06-12', '08:30:00', 'confirmed', 0, 'Đau khớp gối', 'Cần chụp X-quang'),
 -- (11, 4, 2, '2025-06-13', '10:00:00', 'confirmed', 0, 'Sốt cao, phát ban', 'Cần xét nghiệm máu'),
@@ -528,20 +528,20 @@ INSERT INTO work_schedules (user_id, clinic_id, work_date, shift_id) VALUES
 (6, 4, '2025-07-17', 5),
 (6, 5, '2025-07-17', 2);
 
-INSERT INTO examination_records 
-(patient_id, clinic_id, doctor_id, appointment_id, result, note, examined_at)
-VALUES
-(8, 1, 2, 1, 'Phổi có dấu hiệu viêm, cần chụp X-quang', 'Bệnh nhân cần nhập viện điều trị', '2025-06-01 09:30:00'),
-(8, 9, 2, 2, 'X-quang phổi cho thấy viêm phổi thùy dưới', 'Cần điều trị kháng sinh', '2025-06-01 10:15:00'),
-(9, 2, 3, 3, 'Đau vùng hố chậu phải, dấu hiệu McBurney dương tính', 'Cần phẫu thuật cấp cứu', '2025-06-02 14:00:00'),
-(10, 3, 14, 4, 'X-quang khớp gối cho thấy thoái hóa độ 2', 'Cần tập vật lý trị liệu', '2025-06-03 08:45:00'),
-(11, 4, 2, 5, 'Xét nghiệm máu dương tính với sốt xuất huyết', 'Theo dõi tiểu cầu', '2025-06-04 11:20:00'),
-(12, 5, 3, 6, 'Test dị ứng dương tính với penicillin', 'Tránh sử dụng nhóm thuốc beta-lactam', '2025-06-05 15:30:00'),
-(13, 6, 14, 7, 'Đo thị lực: 3/10, cần đeo kính -2.5', 'Tái khám sau 3 tháng', '2025-06-06 09:00:00'),
-(8, 7, 5, 8, 'Nội soi tai mũi họng phát hiện viêm xoang nhẹ', 'Kê đơn thuốc điều trị 7 ngày', '2025-06-08 13:50:00'),
-(9, 8, 3, 9, 'Chụp CT phát hiện tụ máu dưới màng cứng nhỏ', 'Theo dõi tại nhà, tái khám sau 1 tuần', '2025-06-09 09:30:00'),
-(10, 1, 2, 10, 'Xét nghiệm nước tiểu cho thấy nhiễm trùng nhẹ', 'Uống kháng sinh 5 ngày', '2025-06-10 12:00:00'),
-(11, 2, 14, 11, 'Siêu âm tuyến giáp phát hiện nhân nhỏ', 'Theo dõi định kỳ mỗi 6 tháng', '2025-06-11 10:40:00');
+-- INSERT INTO examination_records 
+-- (patient_id, clinic_id, doctor_id, appointment_id, result, note, examined_at)
+-- VALUES
+-- (8, 1, 2, 1, 'Phổi có dấu hiệu viêm, cần chụp X-quang', 'Bệnh nhân cần nhập viện điều trị', '2025-06-01 09:30:00'),
+-- (8, 9, 2, 2, 'X-quang phổi cho thấy viêm phổi thùy dưới', 'Cần điều trị kháng sinh', '2025-06-01 10:15:00'),
+-- (9, 2, 3, 3, 'Đau vùng hố chậu phải, dấu hiệu McBurney dương tính', 'Cần phẫu thuật cấp cứu', '2025-06-02 14:00:00'),
+-- (10, 3, 14, 4, 'X-quang khớp gối cho thấy thoái hóa độ 2', 'Cần tập vật lý trị liệu', '2025-06-03 08:45:00'),
+-- (11, 4, 2, 5, 'Xét nghiệm máu dương tính với sốt xuất huyết', 'Theo dõi tiểu cầu', '2025-06-04 11:20:00'),
+-- (12, 5, 3, 6, 'Test dị ứng dương tính với penicillin', 'Tránh sử dụng nhóm thuốc beta-lactam', '2025-06-05 15:30:00'),
+-- (13, 6, 14, 7, 'Đo thị lực: 3/10, cần đeo kính -2.5', 'Tái khám sau 3 tháng', '2025-06-06 09:00:00'),
+-- (8, 7, 5, 8, 'Nội soi tai mũi họng phát hiện viêm xoang nhẹ', 'Kê đơn thuốc điều trị 7 ngày', '2025-06-08 13:50:00'),
+-- (9, 8, 3, 9, 'Chụp CT phát hiện tụ máu dưới màng cứng nhỏ', 'Theo dõi tại nhà, tái khám sau 1 tuần', '2025-06-09 09:30:00'),
+-- (10, 1, 2, 10, 'Xét nghiệm nước tiểu cho thấy nhiễm trùng nhẹ', 'Uống kháng sinh 5 ngày', '2025-06-10 12:00:00'),
+-- (11, 2, 14, 11, 'Siêu âm tuyến giáp phát hiện nhân nhỏ', 'Theo dõi định kỳ mỗi 6 tháng', '2025-06-11 10:40:00');
 
 -- INSERT INTO examination_orders 
 -- (doctor_id, patient_id, appointment_id, from_clinic_id, to_clinic_id, reason,note, extra_cost)
@@ -581,56 +581,56 @@ VALUES
 -- (5, 'Loratadine 10mg', '1 viên', '1 lần/ngày', '7 ngày', 'Uống buổi tối'),
 -- (6, 'Atropin 1%', '1 giọt', '2 lần/ngày', '7 ngày', 'Nhỏ mắt');
 
-INSERT INTO prescription_items 
-(record_id, dosage, frequency, duration, note, quantity)
-VALUES
-(1, '1 viên', '3 lần/ngày', '7 ngày', 'Uống sau ăn' ,   10),
-(1, '1 viên', '4 lần/ngày', '5 ngày', 'Khi sốt trên 38.5 độ', 5),
-(2, '1 lọ', '2 lần/ngày', '5 ngày', 'Tiêm tĩnh mạch' ,  10),
-(3, '1 viên', '2 lần/ngày', '3 tháng', 'Uống sau ăn',10),
-(4, '1 viên', '4 lần/ngày', '5 ngày', 'Khi sốt trên 38.5 độ',10),
-(5, '1 viên', '1 lần/ngày', '7 ngày', 'Uống buổi tối',10),
-(6, '1 giọt', '2 lần/ngày', '7 ngày', 'Nhỏ mắt',10  );
+-- INSERT INTO prescription_items 
+-- (record_id, dosage, frequency, duration, note, quantity)
+-- VALUES
+-- (1, '1 viên', '3 lần/ngày', '7 ngày', 'Uống sau ăn' ,   10),
+-- (1, '1 viên', '4 lần/ngày', '5 ngày', 'Khi sốt trên 38.5 độ', 5),
+-- (2, '1 lọ', '2 lần/ngày', '5 ngày', 'Tiêm tĩnh mạch' ,  10),
+-- (3, '1 viên', '2 lần/ngày', '3 tháng', 'Uống sau ăn',10),
+-- (4, '1 viên', '4 lần/ngày', '5 ngày', 'Khi sốt trên 38.5 độ',10),
+-- (5, '1 viên', '1 lần/ngày', '7 ngày', 'Uống buổi tối',10),
+-- (6, '1 giọt', '2 lần/ngày', '7 ngày', 'Nhỏ mắt',10  );
 
 
 -- Insert sample data into payments
-INSERT INTO payments (patient_id, record_id, amount, method, payment_time, note, status) VALUES
-(8, 1, 1500000.00, 'card', '2025-07-01 11:00:00', 'Thanh toán lần 1', 'paid'),
-(9, 2, 2500000.00, 'cash', '2025-07-02 15:00:00', 'Thanh toán toàn bộ', 'paid'),
-(10, 3, 800000.00, 'bank_transfer', '2025-07-03 10:00:00', 'Thanh toán lần 1', 'paid'),
-(11, 4, 1200000.00, 'e_wallet', '2025-07-04 12:00:00', 'Thanh toán toàn bộ', 'paid'),
-(12, 5, 500000.00, 'card', '2025-07-05 16:00:00', 'Thanh toán lần 1', 'paid'),
-(8, 6, 300000.00, 'cash', '2025-07-06 10:00:00', 'Thanh toán toàn bộ', 'paid'),
-(9, 7, 1000000.00, 'cash', '2025-07-07 09:00:00', 'Thanh toán toàn bộ', 'paid'),
-(10, 8, 950000.00, 'card', '2025-07-08 14:30:00', 'Thanh toán lần 1', 'paid'),
-(11, 9, 2200000.00, 'bank_transfer', '2025-07-09 10:45:00', 'Thanh toán toàn bộ', 'paid'),
-(11, 10, 1100000.00, 'e_wallet', '2025-07-10 13:15:00', 'Thanh toán lần 1', 'paid'),
-(11, 11, 1300000.00, 'cash', '2025-07-11 11:50:00', 'Thanh toán toàn bộ', 'paid');
+-- INSERT INTO payments (patient_id, record_id, amount, method, payment_time, note, status) VALUES
+-- (8, 1, 1500000.00, 'card', '2025-07-01 11:00:00', 'Thanh toán lần 1', 'paid'),
+-- (9, 2, 2500000.00, 'cash', '2025-07-02 15:00:00', 'Thanh toán toàn bộ', 'paid'),
+-- (10, 3, 800000.00, 'bank_transfer', '2025-07-03 10:00:00', 'Thanh toán lần 1', 'paid'),
+-- (11, 4, 1200000.00, 'e_wallet', '2025-07-04 12:00:00', 'Thanh toán toàn bộ', 'paid'),
+-- (12, 5, 500000.00, 'card', '2025-07-05 16:00:00', 'Thanh toán lần 1', 'paid'),
+-- (8, 6, 300000.00, 'cash', '2025-07-06 10:00:00', 'Thanh toán toàn bộ', 'paid'),
+-- (9, 7, 1000000.00, 'cash', '2025-07-07 09:00:00', 'Thanh toán toàn bộ', 'paid'),
+-- (10, 8, 950000.00, 'card', '2025-07-08 14:30:00', 'Thanh toán lần 1', 'paid'),
+-- (11, 9, 2200000.00, 'bank_transfer', '2025-07-09 10:45:00', 'Thanh toán toàn bộ', 'paid'),
+-- (11, 10, 1100000.00, 'e_wallet', '2025-07-10 13:15:00', 'Thanh toán lần 1', 'paid'),
+-- (11, 11, 1300000.00, 'cash', '2025-07-11 11:50:00', 'Thanh toán toàn bộ', 'paid');
 
--- Insert sample data into invoice_items
-INSERT INTO invoice_items (record_id, description, amount) VALUES
-(1, 'Khám bệnh', 300000.00),
-(1, 'Chụp X-quang phổi', 500000.00),
-(2, 'Khám bệnh', 300000.00),
-(2, 'Phẫu thuật ruột thừa', 2000000.00),
-(3, 'Khám bệnh', 300000.00),
-(3, 'Chụp X-quang khớp', 400000.00),
-(4, 'Khám bệnh', 300000.00),
-(4, 'Xét nghiệm máu', 400000.00),
-(5, 'Khám bệnh', 300000.00),
-(5, 'Test dị ứng', 100000.00),
-(6, 'Khám bệnh', 300000.00),
-(6, 'Đo thị lực', 0.00),
-(7, 'Khám bệnh', 300000.00),
-(7, 'Siêu âm bụng', 700000.00),
-(8, 'Khám bệnh', 300000.00),
-(8, 'Nội soi tai mũi họng', 650000.00),
-(9, 'Khám bệnh', 300000.00),
-(9, 'Chụp CT sọ não', 1900000.00),
-(10, 'Khám bệnh', 300000.00),
-(10, 'Xét nghiệm nước tiểu', 800000.00),
-(11, 'Khám bệnh', 300000.00),
-(11, 'Siêu âm tuyến giáp', 1000000.00);
+-- -- Insert sample data into invoice_items
+-- INSERT INTO invoice_items (record_id, description, amount) VALUES
+-- (1, 'Khám bệnh', 300000.00),
+-- (1, 'Chụp X-quang phổi', 500000.00),
+-- (2, 'Khám bệnh', 300000.00),
+-- (2, 'Phẫu thuật ruột thừa', 2000000.00),
+-- (3, 'Khám bệnh', 300000.00),
+-- (3, 'Chụp X-quang khớp', 400000.00),
+-- (4, 'Khám bệnh', 300000.00),
+-- (4, 'Xét nghiệm máu', 400000.00),
+-- (5, 'Khám bệnh', 300000.00),
+-- (5, 'Test dị ứng', 100000.00),
+-- (6, 'Khám bệnh', 300000.00),
+-- (6, 'Đo thị lực', 0.00),
+-- (7, 'Khám bệnh', 300000.00),
+-- (7, 'Siêu âm bụng', 700000.00),
+-- (8, 'Khám bệnh', 300000.00),
+-- (8, 'Nội soi tai mũi họng', 650000.00),
+-- (9, 'Khám bệnh', 300000.00),
+-- (9, 'Chụp CT sọ não', 1900000.00),
+-- (10, 'Khám bệnh', 300000.00),
+-- (10, 'Xét nghiệm nước tiểu', 800000.00),
+-- (11, 'Khám bệnh', 300000.00),
+-- (11, 'Siêu âm tuyến giáp', 1000000.00);
 
 
 -- Xóa dữ liệu cũ (nếu muốn làm sạch bảng)
@@ -794,35 +794,35 @@ UPDATE doctors SET price = 380000 WHERE user_id = 25; -- Chẩn đoán hình ả
 -- (12, 13, 24, '2025-07-19', '13:30:00', 'confirmed', 0, 'Kiểm tra đường huyết', 'Tiền sử tiểu đường');
 
 -- Insert additional sample data into queues
-INSERT INTO queues (patient_id, clinic_id, record_id, appointment_id, status, priority, registered_online, qr_code, queue_number, shift_type, slot_date) VALUES
--- Queue cho các appointment đã confirmed/completed (ID 1-25)
-(10, 3, NULL, 3, 'waiting', 0, TRUE, 'QR001', 100, 'afternoon', '2025-07-17'), -- Appointment confirmed: patient 10, clinic 3, doctor 14, 13:00:00
-(11, 4, NULL, 4, 'waiting', 0, TRUE, 'QR002', 100, 'morning', '2025-07-17'), -- Appointment confirmed: patient 11, clinic 4, doctor 2, 10:30:00
-(13, 6, NULL, 6, 'done', 0, TRUE, 'QR003', 100, 'morning', '2025-07-19'), -- Appointment completed: patient 13, clinic 6, doctor 14, 09:30:00
-(8, 1, NULL, 7, 'waiting', 0, TRUE, 'QR004', 100, 'morning', '2025-07-17'), -- Appointment confirmed: patient 8, clinic 1, doctor 2, 08:00:00
-(10, 3, NULL, 9, 'waiting', 0, TRUE, 'QR005', 101, 'afternoon', '2025-07-17'), -- Appointment confirmed: patient 10, clinic 3, doctor 14, 15:00:00
-(12, 11, NULL, 11, 'waiting', 0, TRUE, 'QR006', 100, 'afternoon', '2025-07-18'), -- Appointment confirmed: patient 12, clinic 11, doctor 2, 15:30:00
-(8, 9, NULL, 13, 'waiting', 0, TRUE, 'QR007', 100, 'morning', '2025-07-19'), -- Appointment confirmed: patient 8, clinic 9, doctor 2, 10:15:00
-(10, 13, NULL, 15, 'waiting', 0, TRUE, 'QR008', 100, 'morning', '2025-07-19'), -- Appointment confirmed: patient 10, clinic 13, doctor 14, 09:00:00
-(11, 1, NULL, 16, 'waiting', 0, TRUE, 'QR009', 101, 'morning', '2025-07-17'), -- Appointment confirmed: patient 11, clinic 1, doctor 2, 09:30:00
-(13, 4, NULL, 18, 'waiting', 0, TRUE, 'QR010', 101, 'morning', '2025-07-19'), -- Appointment confirmed: patient 13, clinic 4, doctor 14, 10:00:00
-(11, 8, NULL, 21, 'done', 0, TRUE, 'QR011', 100, 'morning', '2025-07-19'), -- Appointment completed: patient 11, clinic 8, doctor 2, 08:30:00
-(12, 9, NULL, 22, 'done', 0, TRUE, 'QR012', 101, 'afternoon', '2025-07-18'), -- Appointment completed: patient 12, clinic 9, doctor 3, 14:30:00
-(13, 10, NULL, 23, 'done', 0, TRUE, 'QR013', 100, 'morning', '2025-07-19'), -- Appointment completed: patient 13, clinic 10, doctor 14, 09:30:00
-(8, 8, NULL, 24, 'done', 2, TRUE, 'QR014', 101, 'morning', '2025-07-19'), -- Appointment completed: patient 8, clinic 8, doctor 2, 07:30:00
-(9, 1, NULL, 25, 'done', 2, TRUE, 'QR015', 102, 'night', '2025-07-18'), -- Appointment completed: patient 9, clinic 1, doctor 3, 20:00:00
+-- INSERT INTO queues (patient_id, clinic_id, record_id, appointment_id, status, priority, registered_online, qr_code, queue_number, shift_type, slot_date) VALUES
+-- -- Queue cho các appointment đã confirmed/completed (ID 1-25)
+-- (10, 3, NULL, 3, 'waiting', 0, TRUE, 'QR001', 100, 'afternoon', '2025-07-17'), -- Appointment confirmed: patient 10, clinic 3, doctor 14, 13:00:00
+-- (11, 4, NULL, 4, 'waiting', 0, TRUE, 'QR002', 100, 'morning', '2025-07-17'), -- Appointment confirmed: patient 11, clinic 4, doctor 2, 10:30:00
+-- (13, 6, NULL, 6, 'done', 0, TRUE, 'QR003', 100, 'morning', '2025-07-19'), -- Appointment completed: patient 13, clinic 6, doctor 14, 09:30:00
+-- (8, 1, NULL, 7, 'waiting', 0, TRUE, 'QR004', 100, 'morning', '2025-07-17'), -- Appointment confirmed: patient 8, clinic 1, doctor 2, 08:00:00
+-- (10, 3, NULL, 9, 'waiting', 0, TRUE, 'QR005', 101, 'afternoon', '2025-07-17'), -- Appointment confirmed: patient 10, clinic 3, doctor 14, 15:00:00
+-- (12, 11, NULL, 11, 'waiting', 0, TRUE, 'QR006', 100, 'afternoon', '2025-07-18'), -- Appointment confirmed: patient 12, clinic 11, doctor 2, 15:30:00
+-- (8, 9, NULL, 13, 'waiting', 0, TRUE, 'QR007', 100, 'morning', '2025-07-19'), -- Appointment confirmed: patient 8, clinic 9, doctor 2, 10:15:00
+-- (10, 13, NULL, 15, 'waiting', 0, TRUE, 'QR008', 100, 'morning', '2025-07-19'), -- Appointment confirmed: patient 10, clinic 13, doctor 14, 09:00:00
+-- (11, 1, NULL, 16, 'waiting', 0, TRUE, 'QR009', 101, 'morning', '2025-07-17'), -- Appointment confirmed: patient 11, clinic 1, doctor 2, 09:30:00
+-- (13, 4, NULL, 18, 'waiting', 0, TRUE, 'QR010', 101, 'morning', '2025-07-19'), -- Appointment confirmed: patient 13, clinic 4, doctor 14, 10:00:00
+-- (11, 8, NULL, 21, 'done', 0, TRUE, 'QR011', 100, 'morning', '2025-07-19'), -- Appointment completed: patient 11, clinic 8, doctor 2, 08:30:00
+-- (12, 9, NULL, 22, 'done', 0, TRUE, 'QR012', 101, 'afternoon', '2025-07-18'), -- Appointment completed: patient 12, clinic 9, doctor 3, 14:30:00
+-- (13, 10, NULL, 23, 'done', 0, TRUE, 'QR013', 100, 'morning', '2025-07-19'), -- Appointment completed: patient 13, clinic 10, doctor 14, 09:30:00
+-- (8, 8, NULL, 24, 'done', 2, TRUE, 'QR014', 101, 'morning', '2025-07-19'), -- Appointment completed: patient 8, clinic 8, doctor 2, 07:30:00
+-- (9, 1, NULL, 25, 'done', 2, TRUE, 'QR015', 102, 'night', '2025-07-18'), -- Appointment completed: patient 9, clinic 1, doctor 3, 20:00:00
 
--- Thêm queue cho các appointment confirmed mới (ID 26-40)
-(8, 2, NULL, 26, 'waiting', 0, TRUE, 'QR051', 100, 'morning', '2025-07-17'), -- Appointment confirmed: patient 8, clinic 2, doctor 3, 09:00:00
-(8, 7, NULL, 28, 'waiting', 0, TRUE, 'QR053', 100, 'morning', '2025-07-19'), -- Appointment confirmed: patient 8, clinic 7, doctor 20, 10:00:00
-(9, 3, NULL, 29, 'waiting', 0, TRUE, 'QR054', 102, 'afternoon', '2025-07-17'), -- Appointment confirmed: patient 9, clinic 3, doctor 14, 15:00:00
-(9, 11, NULL, 31, 'waiting', 0, TRUE, 'QR056', 101, 'afternoon', '2025-07-18'), -- Appointment confirmed: patient 9, clinic 11, doctor 18, 14:00:00
-(10, 1, NULL, 32, 'waiting', 0, TRUE, 'QR057', 103, 'afternoon', '2025-07-17'), -- Appointment confirmed: patient 10, clinic 1, doctor 2, 13:00:00
-(10, 8, NULL, 34, 'waiting', 0, TRUE, 'QR059', 101, 'morning', '2025-07-19'), -- Appointment confirmed: patient 10, clinic 8, doctor 16, 09:00:00
-(11, 2, NULL, 35, 'waiting', 0, TRUE, 'QR060', 101, 'morning', '2025-07-17'), -- Appointment confirmed: patient 11, clinic 2, doctor 3, 10:30:00
-(11, 12, NULL, 37, 'waiting', 0, TRUE, 'QR062', 100, 'afternoon', '2025-07-19'), -- Appointment confirmed: patient 11, clinic 12, doctor 23, 15:30:00
-(12, 1, NULL, 38, 'waiting', 0, TRUE, 'QR063', 104, 'morning', '2025-07-17'), -- Appointment confirmed: patient 12, clinic 1, doctor 2, 08:00:00
-(12, 13, NULL, 40, 'waiting', 0, TRUE, 'QR065', 101, 'afternoon', '2025-07-19'); -- Appointment confirmed: patient 12, clinic 13, doctor 24, 13:30:00
+-- -- Thêm queue cho các appointment confirmed mới (ID 26-40)
+-- (8, 2, NULL, 26, 'waiting', 0, TRUE, 'QR051', 100, 'morning', '2025-07-17'), -- Appointment confirmed: patient 8, clinic 2, doctor 3, 09:00:00
+-- (8, 7, NULL, 28, 'waiting', 0, TRUE, 'QR053', 100, 'morning', '2025-07-19'), -- Appointment confirmed: patient 8, clinic 7, doctor 20, 10:00:00
+-- (9, 3, NULL, 29, 'waiting', 0, TRUE, 'QR054', 102, 'afternoon', '2025-07-17'), -- Appointment confirmed: patient 9, clinic 3, doctor 14, 15:00:00
+-- (9, 11, NULL, 31, 'waiting', 0, TRUE, 'QR056', 101, 'afternoon', '2025-07-18'), -- Appointment confirmed: patient 9, clinic 11, doctor 18, 14:00:00
+-- (10, 1, NULL, 32, 'waiting', 0, TRUE, 'QR057', 103, 'afternoon', '2025-07-17'), -- Appointment confirmed: patient 10, clinic 1, doctor 2, 13:00:00
+-- (10, 8, NULL, 34, 'waiting', 0, TRUE, 'QR059', 101, 'morning', '2025-07-19'), -- Appointment confirmed: patient 10, clinic 8, doctor 16, 09:00:00
+-- (11, 2, NULL, 35, 'waiting', 0, TRUE, 'QR060', 101, 'morning', '2025-07-17'), -- Appointment confirmed: patient 11, clinic 2, doctor 3, 10:30:00
+-- (11, 12, NULL, 37, 'waiting', 0, TRUE, 'QR062', 100, 'afternoon', '2025-07-19'), -- Appointment confirmed: patient 11, clinic 12, doctor 23, 15:30:00
+-- (12, 1, NULL, 38, 'waiting', 0, TRUE, 'QR063', 104, 'morning', '2025-07-17'), -- Appointment confirmed: patient 12, clinic 1, doctor 2, 08:00:00
+-- (12, 13, NULL, 40, 'waiting', 0, TRUE, 'QR065', 101, 'afternoon', '2025-07-19'); -- Appointment confirmed: patient 12, clinic 13, doctor 24, 13:30:00
 
 
 -- SET SQL_SAFE_UPDATES = 1;
@@ -1048,14 +1048,14 @@ VALUES (
   1
 );
 
-INSERT INTO doctor_ratings (appointment_id, doctor_id, patient_id, rating, comment, is_anonymous)
-VALUES
-(6, 14, 13, 5.0, 'Khám mắt rất tốt, bác sĩ tận tâm.', false),
-(22, 2, 11, 4.0, 'Bác sĩ rất nhẹ nhàng, hướng dẫn kỹ.', true),
-(23, 3, 12, 4.0, 'Khám kỹ nhưng hơi đông bệnh nhân.', false),
-(24, 14, 13, 5.0, 'Tư vấn phòng chống ung thư rất hữu ích.', false),
-(25, 2, 8, 5.0, 'Khám cấp cứu nhanh chóng, xử lý tốt.', false),
-(26, 3, 9, 5.0, 'Rất hài lòng với cách tư vấn.', true);
+-- INSERT INTO doctor_ratings (appointment_id, doctor_id, patient_id, rating, comment, is_anonymous)
+-- VALUES
+-- (6, 14, 13, 5.0, 'Khám mắt rất tốt, bác sĩ tận tâm.', false),
+-- (22, 2, 11, 4.0, 'Bác sĩ rất nhẹ nhàng, hướng dẫn kỹ.', true),
+-- (23, 3, 12, 4.0, 'Khám kỹ nhưng hơi đông bệnh nhân.', false),
+-- (24, 14, 13, 5.0, 'Tư vấn phòng chống ung thư rất hữu ích.', false),
+-- (25, 2, 8, 5.0, 'Khám cấp cứu nhanh chóng, xử lý tốt.', false),
+-- (26, 3, 9, 5.0, 'Rất hài lòng với cách tư vấn.', true);
 
 -- INSERT INTO appointments (patient_id, clinic_id, doctor_id, appointment_date, appointment_time, status, priority, reason, note)
 -- VALUES
@@ -1074,27 +1074,27 @@ VALUES
 -- (8, 1, 2, '2025-07-13', '08:00:00', 'completed', 0, 'Kết quả xét nghiệm', 'Bình thường'),
 -- (9, 1, 2, '2025-07-14', '09:00:00', 'completed', 0, 'Kiểm tra nhịp tim', 'Ổn định'),
 -- (10, 1, 2, '2025-07-15', '10:00:00', 'completed', 0, 'Khám tim theo yêu cầu công ty', 'Không phát hiện bất thường');
-INSERT INTO doctor_ratings (appointment_id, doctor_id, patient_id, rating, comment) VALUES
-(1, 2, 8, 5, 'Bác sĩ rất tận tình, giải thích dễ hiểu'),
-(7, 2, 8, 4, 'Dịch vụ tốt, nhưng thời gian chờ hơi lâu'),
-(8, 2, 9, 5, 'Bác sĩ thân thiện và chuyên môn cao'),
-(9, 2, 10, 3, 'Ổn nhưng cần theo dõi thêm'),
-(11, 2, 11, 4, 'Tư vấn rõ ràng, cẩn thận'),
-(12, 2, 12, 5, 'Bác sĩ dễ gần và nhiệt tình'),
-(13, 2, 13, 5, 'Thăm khám kỹ lưỡng'),
-(26, 2, 8, 5, 'Cảm thấy yên tâm khi khám bác sĩ này'),
-(27, 2, 9, 4, 'Thái độ chuyên nghiệp'),
-(28, 2, 10, 5, 'Lắng nghe bệnh nhân và hướng dẫn kỹ'),
-(29, 2, 11, 4, 'Ổn định, chẩn đoán hợp lý'),
-(30, 2, 12, 5, 'Tư vấn thuốc rõ ràng'),
-(31, 2, 13, 4, 'Cảm ơn bác sĩ đã giúp đỡ'),
-(32, 2, 8, 5, 'Tái khám thấy tốt hơn nhiều'),
-(33, 2, 9, 5, 'Hẹn lần sau chắc chắn quay lại'),
-(34, 2, 10, 5, 'Không còn lo ngại về sức khỏe tim mạch'),
-(35, 2, 11, 4, 'Giải đáp mọi thắc mắc rõ ràng'),
-(36, 2, 12, 3, 'Bác sĩ ổn nhưng phòng khám hơi đông'),
-(37, 2, 13, 5, 'Cảm giác rất chuyên nghiệp và nhẹ nhàng'),
-(38, 2, 8, 5, 'Thật sự tin tưởng bác sĩ này');
+-- INSERT INTO doctor_ratings (appointment_id, doctor_id, patient_id, rating, comment) VALUES
+-- (1, 2, 8, 5, 'Bác sĩ rất tận tình, giải thích dễ hiểu'),
+-- (7, 2, 8, 4, 'Dịch vụ tốt, nhưng thời gian chờ hơi lâu'),
+-- (8, 2, 9, 5, 'Bác sĩ thân thiện và chuyên môn cao'),
+-- (9, 2, 10, 3, 'Ổn nhưng cần theo dõi thêm'),
+-- (11, 2, 11, 4, 'Tư vấn rõ ràng, cẩn thận'),
+-- (12, 2, 12, 5, 'Bác sĩ dễ gần và nhiệt tình'),
+-- (13, 2, 13, 5, 'Thăm khám kỹ lưỡng'),
+-- (26, 2, 8, 5, 'Cảm thấy yên tâm khi khám bác sĩ này'),
+-- (27, 2, 9, 4, 'Thái độ chuyên nghiệp'),
+-- (28, 2, 10, 5, 'Lắng nghe bệnh nhân và hướng dẫn kỹ'),
+-- (29, 2, 11, 4, 'Ổn định, chẩn đoán hợp lý'),
+-- (30, 2, 12, 5, 'Tư vấn thuốc rõ ràng'),
+-- (31, 2, 13, 4, 'Cảm ơn bác sĩ đã giúp đỡ'),
+-- (32, 2, 8, 5, 'Tái khám thấy tốt hơn nhiều'),
+-- (33, 2, 9, 5, 'Hẹn lần sau chắc chắn quay lại'),
+-- (34, 2, 10, 5, 'Không còn lo ngại về sức khỏe tim mạch'),
+-- (35, 2, 11, 4, 'Giải đáp mọi thắc mắc rõ ràng'),
+-- (36, 2, 12, 3, 'Bác sĩ ổn nhưng phòng khám hơi đông'),
+-- (37, 2, 13, 5, 'Cảm giác rất chuyên nghiệp và nhẹ nhàng'),
+-- (38, 2, 8, 5, 'Thật sự tin tưởng bác sĩ này');
 
 
 -- INSERT INTO blogs (title, content, image_url, published, category_id)
@@ -1138,3 +1138,70 @@ INSERT INTO doctor_ratings (appointment_id, doctor_id, patient_id, rating, comme
 --   true,
 --   8
 -- );
+-- Appointments
+INSERT INTO appointments (id, patient_id, clinic_id, doctor_id, appointment_date, appointment_time, status, priority, reason, note, created_at, updated_at) VALUES
+(1, 8, 2, 3, '2025-07-17', '09:00:00', 'completed', 0, 'Đau ngực, khó thở', 'Bệnh nhân có tiền sử bệnh phổi', '2025-07-16 09:00:00', '2025-07-16 09:00:00'),
+(2, 9, 1, 2, '2025-07-22', '14:00:00', 'completed', 1, 'Đau tim nhẹ', 'Cần theo dõi thêm', '2025-07-21 14:00:00', '2025-07-21 14:00:00'),
+(3, 10, 4, 17, '2025-07-21', '10:30:00', 'completed', 0, 'Sốt và ho', 'Có dấu hiệu viêm họng', '2025-07-20 10:30:00', '2025-07-20 10:30:00'),
+(5, 12, 5, 19, '2025-07-23', '15:15:00', 'completed', 0, 'Ngứa da, nổi mẩn', 'Có thể do dị ứng thời tiết', '2025-07-22 15:15:00', '2025-07-22 15:15:00');
+
+-- Queues
+INSERT INTO queues (patient_id, clinic_id, record_id, appointment_id, status, priority, registered_online, qr_code, queue_number, shift_type, slot_date) VALUES
+(8, 2, NULL, 1, 'done', 0, TRUE, 'QR001', 1, 'morning', '2025-07-17'),
+(9, 1, NULL, 2, 'done', 1, TRUE, 'QR002', 1, 'afternoon', '2025-07-22'),
+(10, 4, NULL, 3, 'done', 0, FALSE, 'QR003', 2, 'morning', '2025-07-21'),
+(12, 5, NULL, 5, 'done', 0, TRUE, 'QR005', 3, 'afternoon', '2025-07-23');
+
+-- Examination Records
+INSERT INTO examination_records (id, patient_id, clinic_id, doctor_id, appointment_id, result, note, examined_at) VALUES
+(1, 8, 2, 3, 1, 'X-quang phổi cho thấy viêm phổi thùy dưới', 'Cần điều trị kháng sinh', '2025-07-17 09:00:00'),
+(2, 9, 1, 2, 2, 'Điện tâm đồ cho thấy nhịp tim bất thường', 'Yêu cầu theo dõi ECG định kỳ', '2025-07-22 14:30:00'),
+(3, 10, 4, 17, 3, 'Chẩn đoán viêm họng cấp', 'Chỉ định kháng sinh và nghỉ ngơi', '2025-07-21 11:00:00'),
+(4, 12, 5, 19, 5, 'Viêm da dị ứng do tiếp xúc', 'Kê đơn thuốc kháng histamin', '2025-07-23 15:45:00');
+
+-- Invoice Items
+INSERT INTO invoice_items (record_id, description, amount) VALUES
+(1, 'Khám bác sĩ', 300000.00),
+(2, 'Khám bác sĩ', 400000.00),
+(3, 'Khám bác sĩ', 250000.00),
+(4, 'Khám bác sĩ', 200000.00);
+
+-- Payments
+INSERT INTO payments (patient_id, record_id, amount, payment_time, note, status) VALUES
+(8, 1, 300000.00, '2025-07-17 10:00:00', 'Thanh toán', 'paid'),
+(9, 2, 400000.00, '2025-07-22 15:00:00', 'Thanh toán tiền khám tim', 'paid'),
+(10, 3, 250000.00, '2025-07-21 11:30:00', 'Thanh toán khám nhi', 'paid'),
+(12, 4, 200000.00, '2025-07-23 16:00:00', 'Thanh toán khám da', 'paid');
+
+-- Doctor Ratings
+INSERT INTO doctor_ratings (appointment_id, doctor_id, patient_id, rating, comment, is_anonymous) VALUES
+(1, 3, 8, 5.0, 'Khám rất tốt, bác sĩ tận tâm.', false),
+(2, 2, 9, 4.5, 'Bác sĩ tư vấn kỹ, tận tình.', false),
+(3, 17, 10, 5.0, 'Bác sĩ rất nhẹ nhàng với trẻ.', true),
+(5, 19, 12, 4.0, 'Khám nhanh, kê đơn hiệu quả.', false);
+
+
+INSERT INTO appointments (id, patient_id, clinic_id, doctor_id, appointment_date, appointment_time, status, priority, reason, note, created_at, updated_at) VALUES
+(6, 8, 2, 3, '2025-06-10', '08:30:00', 'completed', 1, 'Khó ngủ, mệt mỏi', 'Cần kiểm tra giấc ngủ', '2025-06-09 10:00:00', '2025-06-09 10:00:00'),
+(7, 9, 1, 2, '2025-06-15', '13:00:00', 'completed', 0, 'Đau bụng nhẹ', 'Không ăn sáng, kiểm tra dạ dày', '2025-06-14 11:30:00', '2025-06-14 11:30:00'),
+(8, 10, 4, 17, '2025-06-20', '10:00:00', 'completed', 0, 'Cảm cúm', 'Khám tổng quát', '2025-06-19 08:00:00', '2025-06-19 08:00:00');
+INSERT INTO queues (patient_id, clinic_id, record_id, appointment_id, status, priority, registered_online, qr_code, queue_number, shift_type, slot_date) VALUES
+(8, 2, NULL, 6, 'done', 1, TRUE, 'QR006', 4, 'morning', '2025-06-10'),
+(9, 1, NULL, 7, 'done', 0, FALSE, 'QR007', 5, 'afternoon', '2025-06-15'),
+(10, 4, NULL, 8, 'done', 0, TRUE, 'QR008', 6, 'morning', '2025-06-20');
+INSERT INTO examination_records (id, patient_id, clinic_id, doctor_id, appointment_id, result, note, examined_at) VALUES
+(5, 8, 2, 3, 6, 'Được đề nghị thay đổi lối sống và theo dõi giấc ngủ', 'Tư vấn về giấc ngủ khoa học', '2025-06-10 08:45:00'),
+(6, 9, 1, 2, 7, 'Không phát hiện vấn đề nghiêm trọng', 'Khuyên ăn uống đều đặn', '2025-06-15 13:20:00'),
+(7, 10, 4, 17, 8, 'Cảm nhẹ, không cần kháng sinh', 'Khuyến khích nghỉ ngơi và uống nước nhiều', '2025-06-20 10:15:00');
+INSERT INTO invoice_items (record_id, description, amount) VALUES
+(5, 'Khám bác sĩ', 350000.00),
+(6, 'Khám bác sĩ', 200000.00),
+(7, 'Khám bác sĩ', 250000.00);
+INSERT INTO payments (patient_id, record_id, amount, payment_time, note, status) VALUES
+(8, 5, 350000.00, '2025-06-10 09:30:00', 'Khám giấc ngủ', 'paid'),
+(9, 6, 200000.00, '2025-06-15 14:00:00', 'Thanh toán khám dạ dày', 'paid'),
+(10, 7, 250000.00, '2025-06-20 11:00:00', 'Khám cảm cúm', 'paid');
+INSERT INTO doctor_ratings (appointment_id, doctor_id, patient_id, rating, comment, is_anonymous) VALUES
+(6, 3, 8, 4.5, 'Bác sĩ giải thích rất kỹ lưỡng.', false),
+(7, 2, 9, 4.0, 'Khám nhanh, dễ hiểu.', false),
+(8, 17, 10, 5.0, 'Thái độ thân thiện và chuyên nghiệp.', true);
