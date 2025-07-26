@@ -11,6 +11,41 @@ dayjs.extend(utc);
 
 const { Option } = Select;
 
+// 1. Define DoctorSlot and DoctorRow interfaces
+interface DoctorSlot {
+  id: number;
+  doctor_id: number;
+  clinic_id: number;
+  slot_date: string;
+  start_time: string;
+  end_time: string;
+  is_available: boolean;
+  created_at: string;
+  doctor: {
+    id: number;
+    full_name: string;
+  };
+  clinic: {
+    id: number;
+    name: string;
+  };
+}
+
+interface DoctorRow {
+  doctor: {
+    id: number;
+    full_name: string;
+  };
+  nearestSlot?: DoctorSlot;
+  clinic?: {
+    id: number;
+    name: string;
+  };
+}
+
+
+
+
 interface ExaminationOrderModalProps {
   open: boolean;
   onClose: () => void;
@@ -37,16 +72,15 @@ const ExaminationOrderModal = ({
   const [clinics, setClinics] = useState<any[]>([]);
   // const [clinicVolume, setClinicVolume] = useState<number>(0);
   const [isShowOtherPrice, setIsShowOtherPrice] = useState<boolean>(false);
-  const [availableDoctors, setAvailableDoctors] = useState<IDoctor[]>([]);
+  const [availableDoctors, setAvailableDoctors] = useState<DoctorRow[]>([]);
   const [selectedDoctorId, setSelectedDoctorId] = useState<number | null>(null);
+  const [selectDoctor, setSelectDoctor] = useState<DoctorRow | null>(null);
   const to_clinic_id = Form.useWatch("to_clinic_id", form);
-
   const handleClose = () => {
     form.resetFields();
     onClose();
 
   };
-
   useEffect(() => {
     if (open) {
       getClinicService().then((res) => {
@@ -60,16 +94,15 @@ const ExaminationOrderModal = ({
       const fetchClinicVolumeAndDoctors = async () => {
         try {
           const res = await getClinicService();
-          console.log(res)
+      
 
           const resDoctors = await getAvailableDoctors(Number(to_clinic_id));
-          console.log(resDoctors)
+         
 
           const doctors = resDoctors.data.data;
-          
           // filter doctor không phải là doctor đang làm việc ở phòng khám hiện tại
           const filteredDoctors = doctors.filter((doctor: any) => doctor.doctor.id != doctor_id);
-          
+          console.log(filteredDoctors)
           setAvailableDoctors(filteredDoctors || []);
         } catch (error) {
           console.error("Lỗi khi lấy thông tin phòng khám hoặc bác sĩ:", error);
@@ -108,10 +141,11 @@ const ExaminationOrderModal = ({
       await mainRequest.post("/api/v1/queue/assign-clinic", {
         ...values,
         patient_id: patient_id,
-        clinic_id: clinic_id,
-        doctor_id: doctor_id,
+        clinic_id: clinic_id,     
+        doctor_id: selectedDoctorId,
         from_clinic_id: clinic_id,
-        
+        appointment_date: selectDoctor?.nearestSlot?.slot_date,
+        appointment_time: selectDoctor?.nearestSlot?.start_time,
         appointment_id: appointment_id,
         reason: values.reason || "",
         note: values.note || "",
@@ -135,6 +169,7 @@ const ExaminationOrderModal = ({
   const clinicSelected = clinics.find((c) => c.id === Number(to_clinic_id));
 
   const handleChangeClinic = (value: any) => {
+    
     form.setFieldsValue({
       to_clinic_id: value,
       to_doctor_id: null
@@ -210,14 +245,16 @@ const ExaminationOrderModal = ({
                 <Select
                   placeholder="Chọn bác sĩ rảnh"
                   optionFilterProp="children"
-                  onChange={(value) => {
+                  onChange={(value: number) => {
                     form.setFieldsValue({ slot: undefined }); // Reset slot when changing doctor
+                    const selected = availableDoctors.find(item => item.doctor.id === value) || null;
+                    setSelectDoctor(selected);
                     setSelectedDoctorId(value);
                   }}
                 >
-                  {availableDoctors.map((row: any) => (
-                    <Option key={row.doctor.id} value={row.doctor.id} >
-                      {row.doctor.full_name} - {row.nearestSlot?.slot_date ? new Date(row.nearestSlot.slot_date).toLocaleDateString('vi-VN') : 'N/A'} {row.nearestSlot?.start_time ? new Date(row.nearestSlot.start_time).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : 'N/A'}
+                  {availableDoctors.map((row: DoctorRow) => (
+                    <Option key={row.doctor.id} value={row.doctor.id}>
+                      {row.doctor.full_name} - {row.nearestSlot?.slot_date ? new Date(row.nearestSlot.slot_date).toLocaleDateString('vi-VN') : 'N/A'} {row.nearestSlot?.start_time.slice(11,19)}
                     </Option>
                   ))}
                 </Select>

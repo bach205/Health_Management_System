@@ -68,7 +68,7 @@ const AddMedicine = ({ selectedMedicine, setSelectedMedicine, isCreate, handleAd
                                         <InputNumber
                                             style={{ width: '50%' }}
                                             min={1}
-                                            max={selectedMedicine?.stock || 1000}
+                                            max={selectedMedicine?.quantity || 1000}
                                             placeholder="Số viên"
                                             value={selectedMedicine?.dosageAmount}
                                             onChange={(value) =>
@@ -85,7 +85,7 @@ const AddMedicine = ({ selectedMedicine, setSelectedMedicine, isCreate, handleAd
                                     <InputNumber
                                         min={1}
                                         placeholder="Số lần"
-                                        max={selectedMedicine?.stock || 1000}
+                                        max={Math.floor((selectedMedicine?.quantity || 1000) / (selectedMedicine?.dosageAmount || 1))}
                                         value={selectedMedicine?.frequencyAmount}
                                         onChange={(value) =>
                                             setSelectedMedicine({ ...selectedMedicine, frequencyAmount: value || 1 })

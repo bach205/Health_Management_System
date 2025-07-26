@@ -96,7 +96,7 @@ const CSVImportModal = ({ role, reload, setReload }: IProps) => {
                             setConfirming(false);
                             return;
                         }
-                        if (item.specialty_id === "") {
+                        if (item.specialty_name === "") {
                             message.error("Dòng " + (index + 1) + " Chuyên khoa không được để trống.");
                             setConfirming(false);
                             return;
@@ -160,14 +160,24 @@ const CSVImportModal = ({ role, reload, setReload }: IProps) => {
                 {
                     role === 'doctor' && (
                         <p className='mb-3'>
-                            <span className='text-red-500'>*</span> Lưu ý: File phải có các cột: <b>email, full_name, specialty_id, price</b>
+                            <span className='text-red-500'>*</span> Lưu ý: File phải có các cột:
+                            <ul className='list-disc list-inside'>
+                                <li><b>email</b>: Email của bác sĩ</li>
+                                <li><b>full_name</b>: Tên bác sĩ</li>
+                                <li><b>specialty_name</b>: Tên chuyên khoa</li>
+                                <li><b>price</b>: Giá khám</li>
+                            </ul>
                         </p>
                     )
                 }
                 {
                     role === 'nurse' && (
                         <p className='mb-3'>
-                            <span className='text-red-500'>*</span> Lưu ý: File phải có các cột: <b>email, full_name</b>
+                            <span className='text-red-500'>*</span> Lưu ý: File phải có các cột:
+                            <ul className='list-disc list-inside'>
+                                <li><b>email</b>: Email của y tá</li>
+                                <li><b>full_name</b>: Tên y tá</li>
+                            </ul>
                         </p>
                     )
                 }

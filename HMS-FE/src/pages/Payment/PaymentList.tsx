@@ -3,7 +3,7 @@ import { Table, Button, Tag, Space, message, Tooltip, Popconfirm, Input, Select 
 import type { ColumnsType } from 'antd/es/table';
 import { getInvoiceDetail, updateInvoice, updatePaymentStatus, getAllPayments } from '../../services/payment.service';
 import UserListTitle from '../../components/ui/UserListTitle';
-import { BanknoteArrowUp, Edit, ReceiptText, RefreshCcw, XCircle } from 'lucide-react';
+import { BanknoteArrowUp, Edit, ReceiptText, RefreshCcw, StepForward, XCircle } from 'lucide-react';
 import ModalViewPayment from './ModalViewPayment';
 import ModalEditPayment from './ModalEditPayment';
 
@@ -79,7 +79,7 @@ const PaymentList: React.FC = () => {
     }
   };
 
-  const handleUpdatePayment = async (record: InvoiceRecord, status: 'paid' | 'canceled') => {
+  const handleUpdatePayment = async (record: InvoiceRecord, status: 'paid' | 'canceled' | 'pending') => {
     try {
       await updatePaymentStatus(record.id, status);
       message.success('Cập nhật trạng thái thanh toán thành công');
@@ -137,6 +137,20 @@ const PaymentList: React.FC = () => {
               <ReceiptText className="w-4 h-4" />
             </Button>
           </Tooltip>
+          {record.status === 'canceled' && (
+            <>
+              <Tooltip title="Tiếp tục thanh toán">
+
+                <Button type="default" onClick={() => {
+                  handleUpdatePayment(record, 'pending');
+                }}>
+                  <StepForward className="w-4 h-4" />
+                </Button>
+              </Tooltip>
+            </>
+          )}
+    
+  
 
           {record.status === 'pending' && (
             <>

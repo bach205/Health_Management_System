@@ -71,6 +71,16 @@ class PaymentController {
     }).send(res);
   };
 
+  cancelPayment = async (req, res) => {
+    const { id } = req.params;
+    const { status } = req.body;
+    const result = await paymentService.cancelPayment(id, status);
+    return new OK({
+      message: "Hủy thanh toán thành công",
+      metadata: result, 
+    }).send(res);
+  };
+
   webhook = async (req, res) => {
     try {
       const {

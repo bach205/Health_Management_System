@@ -126,12 +126,12 @@ const SIDEBAR_ITEMS = [
     id: 2,
     label: "Quản lý",
     items: [
-      {
-        id: "patients",
-        label: "Quản lý bệnh nhân",
-        icon: <FileUser className="w-4 h-4" />,
-        href: "/admin/patients",
-      },
+      // {
+      //   id: "patients",
+      //   label: "Quản lý bệnh nhân",
+      //   icon: <FileUser className="w-4 h-4" />,
+      //   href: "/admin/patients",
+      // },
       {
         id: "workschedule",
         label: "Lịch làm việc",
@@ -157,12 +157,12 @@ const SIDEBAR_ITEMS = [
         icon: <Users className="w-4 h-4" />,
         href: "/admin/nurses",
       },
-      {
-        id: "medicines",
-        label: "Quản lý thuốc",
-        icon: <Pill className="w-4 h-4" />,
-        href: "/admin/medicines",
-      },
+      // {
+      //   id: "medicines",
+      //   label: "Quản lý thuốc",
+      //   icon: <Pill className="w-4 h-4" />,
+      //   href: "/admin/medicines",
+      // },
       {
         id: "specialties",
         label: "Quản lý chuyên khoa",

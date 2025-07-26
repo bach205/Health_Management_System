@@ -50,28 +50,10 @@ const QueueTable = () => {
             return queues.filter((q: any) =>
                 dayjs.utc(q.appointment?.appointment_date).format("YYYY-MM-DD") === selectedDate
             );
-        } else {
-            // Nếu không chọn ngày, lấy ngày khám gần nhất hiện tại (>= hôm nay)
-            const today = dayjs().startOf('day');
-            // Lấy các ngày khám >= hôm nay
-            const futureDates = Array.from(new Set(
-                queues
-                    .filter((q: any) => dayjs.utc(q.appointment?.appointment_date).isSameOrAfter(today))
-                    .map((q: any) => dayjs.utc(q.appointment?.appointment_date).format("YYYY-MM-DD"))
-            ));
-            // Sắp xếp tăng dần
-            futureDates.sort();
-            const nearestDate = futureDates[0];
-            if (nearestDate) {
-                return queues.filter((q: any) =>
-                    dayjs.utc(q.appointment?.appointment_date).format("YYYY-MM-DD") === nearestDate
-                );
-            }
-            // Nếu không có ngày >= hôm nay, trả về tất cả queues
+        } else {  // Nếu không chọn ngày, hiển thị tất cả queues
             return queues;
         }
     })();
-
     // // Cập nhật xử lý socket cho queue:statusChanged
     useSocket(
         `clinic_${selectedClinic}`,
@@ -106,20 +88,21 @@ const QueueTable = () => {
     );
     const handleStatusUpdate = async (queueId: string, newStatus: string) => {
         const queue: any = queues.find((queue: any) => queue.id === queueId);
-        console.log(queue)
-        console.log(" appointmentTime", dayjs.utc(queue.appointment.appointment_time).hour(), "now", dayjs().hour())
-        console.log("not time", dayjs.utc(queue.appointment.appointment_time).hour() > dayjs().hour())
-        console.log(" time", dayjs.utc(queue.appointment.appointment_date), "now", dayjs())
 
         if (queue) {
             const appointmentTime = dayjs.utc(queue.appointment.appointment_time);
             const appointmentDate = dayjs.utc(queue.appointment.appointment_date);
 
             // Kiểm tra xem giờ khám, ngày khám có đã qua hay không
-            if (appointmentDate > dayjs() && appointmentTime.hour() > dayjs().hour() && appointmentTime.minute() > dayjs().minute()) {
-                message.error("Chưa đến giờ khám");
-                return;
-            }
+            // if (appointmentDate.utc().date() > dayjs().utc().date()
+            //     ||
+            //     (appointmentDate.utc().date() === dayjs().utc().date() && appointmentTime.utc().hour() > dayjs().utc().hour())
+            //     ||
+            //     (appointmentDate.utc().date() === dayjs().utc().date() && appointmentTime.utc().hour() === dayjs().utc().hour() && appointmentTime.utc().minute() > dayjs().utc().minute())
+            // ) {
+            //     message.error("Chưa đến giờ khám");
+            //     return;
+            // }
         }
         try {
             await updateQueueStatus(queueId, newStatus);
@@ -135,9 +118,6 @@ const QueueTable = () => {
                 const res = await getClinicService();
                 const fetchedClinics = res.data?.metadata.clinics || [];
                 setClinics(fetchedClinics);
-                // if (fetchedClinics.length > 0) {
-                //   setSelectedClinic(fetchedClinics[0].id.toString());
-                // }
             } catch (error: any) {
                 toast.error(
                     error?.response?.data?.message || "Lỗi khi lấy danh sách phòng khám"
@@ -157,15 +137,13 @@ const QueueTable = () => {
         setSelectedAppointmentId(record.appointment_id);
         setSelectedPatient(record.patient);
         setShowRecordModal(true);
-        console.log("selectedAppointmentId, selectedPatient", selectedAppointmentId, selectedPatient);
     };
     const handleAssignClinic = (record: any) => {
         setSelectedPatient(record.patient);
         setSelectedAppointmentId(record.appointment_id);
         setShowDoctorExaminationOrderModal(true);
         // setShowResultModal(true);
-        console.log("handleAssignClinic", record);
-        console.log("selectedAppointmentId, selectedPatient", selectedAppointmentId, selectedPatient);
+
     };
 
     const handleViewExaminationOrder = (patient: any) => {
@@ -246,7 +224,7 @@ const QueueTable = () => {
                 console.log(record);
                 return (
                     <Space wrap size={'small'}>
-                        {record.status === "waiting" && (
+                        {record.status === "waiting" && record.appointment?.doctor?.id === currentDoctorId && (
                             <>
                                 <Tooltip title="Bắt đầu khám">
                                     <Button
@@ -268,7 +246,7 @@ const QueueTable = () => {
                                 </Tooltip>
                             </>
                         )}
-                        {record.status === "in_progress" && (
+                        {record.status === "in_progress" && record.appointment?.doctor?.id === currentDoctorId && (
                             <>
                                 <Tooltip title="Hoàn thành khám">
                                     <Button

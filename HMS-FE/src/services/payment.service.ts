@@ -24,6 +24,11 @@ export const confirmPayment = async (record_id: number) => {
   return instance.patch(`/api/v1/payment/update-status/${record_id}`);
 };
 
+// Hủy hóa đơn
+export const cancelPayment = async (record_id: number, status: string) => {
+  return instance.patch(`/api/v1/payment/cancel/${record_id}`, { status });
+};
+
 export const getPaymentByRecordId = async (record_id: number) => {
   return instance.get(`/api/v1/payment/payment-record/${record_id}`);
 };

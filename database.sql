@@ -593,17 +593,17 @@ VALUES
 
 -- Insert sample data into payments
 INSERT INTO payments (patient_id, record_id, amount, method, payment_time, note, status) VALUES
-(8, 1, 1500000.00, 'card', '2025-06-01 11:00:00', 'Thanh toán lần 1', 'paid'),
-(9, 2, 2500000.00, 'cash', '2025-06-02 15:00:00', 'Thanh toán toàn bộ', 'paid'),
-(10, 3, 800000.00, 'bank_transfer', '2025-06-03 10:00:00', 'Thanh toán lần 1', 'paid'),
-(11, 4, 1200000.00, 'e_wallet', '2025-06-04 12:00:00', 'Thanh toán toàn bộ', 'paid'),
-(12, 5, 500000.00, 'card', '2025-06-05 16:00:00', 'Thanh toán lần 1', 'paid'),
-(8, 6, 300000.00, 'cash', '2025-06-06 10:00:00', 'Thanh toán toàn bộ', 'paid'),
-(9, 7, 1000000.00, 'cash', '2025-06-07 09:00:00', 'Thanh toán toàn bộ', 'paid'),
-(10, 8, 950000.00, 'card', '2025-06-08 14:30:00', 'Thanh toán lần 1', 'paid'),
-(11, 9, 2200000.00, 'bank_transfer', '2025-06-09 10:45:00', 'Thanh toán toàn bộ', 'paid'),
-(11, 10, 1100000.00, 'e_wallet', '2025-06-10 13:15:00', 'Thanh toán lần 1', 'paid'),
-(11, 11, 1300000.00, 'cash', '2025-06-11 11:50:00', 'Thanh toán toàn bộ', 'paid');
+(8, 1, 1500000.00, 'card', '2025-07-01 11:00:00', 'Thanh toán lần 1', 'paid'),
+(9, 2, 2500000.00, 'cash', '2025-07-02 15:00:00', 'Thanh toán toàn bộ', 'paid'),
+(10, 3, 800000.00, 'bank_transfer', '2025-07-03 10:00:00', 'Thanh toán lần 1', 'paid'),
+(11, 4, 1200000.00, 'e_wallet', '2025-07-04 12:00:00', 'Thanh toán toàn bộ', 'paid'),
+(12, 5, 500000.00, 'card', '2025-07-05 16:00:00', 'Thanh toán lần 1', 'paid'),
+(8, 6, 300000.00, 'cash', '2025-07-06 10:00:00', 'Thanh toán toàn bộ', 'paid'),
+(9, 7, 1000000.00, 'cash', '2025-07-07 09:00:00', 'Thanh toán toàn bộ', 'paid'),
+(10, 8, 950000.00, 'card', '2025-07-08 14:30:00', 'Thanh toán lần 1', 'paid'),
+(11, 9, 2200000.00, 'bank_transfer', '2025-07-09 10:45:00', 'Thanh toán toàn bộ', 'paid'),
+(11, 10, 1100000.00, 'e_wallet', '2025-07-10 13:15:00', 'Thanh toán lần 1', 'paid'),
+(11, 11, 1300000.00, 'cash', '2025-07-11 11:50:00', 'Thanh toán toàn bộ', 'paid');
 
 -- Insert sample data into invoice_items
 INSERT INTO invoice_items (record_id, description, amount) VALUES
