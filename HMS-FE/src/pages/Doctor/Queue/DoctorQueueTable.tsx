@@ -89,21 +89,21 @@ const QueueTable = () => {
     const handleStatusUpdate = async (queueId: string, newStatus: string) => {
         const queue: any = queues.find((queue: any) => queue.id === queueId);
 
-        if (queue) {
-            const appointmentTime = dayjs.utc(queue.appointment.appointment_time);
-            const appointmentDate = dayjs.utc(queue.appointment.appointment_date);
+        // if (queue) {
+        //     const appointmentTime = dayjs.utc(queue.appointment.appointment_time);
+        //     const appointmentDate = dayjs.utc(queue.appointment.appointment_date);
 
-            // Kiểm tra xem giờ khám, ngày khám có đã qua hay không
-            if (appointmentDate.utc().date() > dayjs().utc().date()
-                ||
-                (appointmentDate.utc().date() === dayjs().utc().date() && appointmentTime.utc().hour() > dayjs().utc().hour())
-                ||
-                (appointmentDate.utc().date() === dayjs().utc().date() && appointmentTime.utc().hour() === dayjs().utc().hour() && appointmentTime.utc().minute() > dayjs().utc().minute())
-            ) {
-                message.error("Chưa đến giờ khám");
-                return;
-            }
-        }
+        //     // Kiểm tra xem giờ khám, ngày khám có đã qua hay không
+        //     if (appointmentDate.utc().date() > dayjs().utc().date()
+        //         ||
+        //         (appointmentDate.utc().date() === dayjs().utc().date() && appointmentTime.utc().hour() > dayjs().utc().hour())
+        //         ||
+        //         (appointmentDate.utc().date() === dayjs().utc().date() && appointmentTime.utc().hour() === dayjs().utc().hour() && appointmentTime.utc().minute() > dayjs().utc().minute())
+        //     ) {
+        //         message.error("Chưa đến giờ khám");
+        //         return;
+        //     }
+        // }
         try {
             await updateQueueStatus(queueId, newStatus);
             // Không cần fetchQueue nữa vì socket sẽ handle việc update UI
