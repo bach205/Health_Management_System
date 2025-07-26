@@ -1,5 +1,8 @@
 
+<<<<<<< HEAD
+=======
 // import { message } from "antd";
+>>>>>>> 900852be3cd26e01821d7ac00bc19b775044404b
 import instance from "../api/mainRequest";
 import type { IPatient } from "../types/index.type";
 const BASE_URL = "api/v1/patients";

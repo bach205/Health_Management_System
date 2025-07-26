@@ -3,7 +3,6 @@ import { create } from "zustand";
 
 export type Role = "admin" | "nurse" | "doctor" | "customer" | "patient";
 
-const isAuth = localStorage.getItem("isAuth") === "true" ? true : false;
 const userD = localStorage.getItem("user");
 
 let parsedUser = null;
