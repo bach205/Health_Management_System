@@ -565,7 +565,6 @@ class QueueService {
       to_doctor_id
     });
     // ====== END LOG ======
-    console.log("haweh",from_clinic_id)
     // 1. Nếu đã có queue cũ của bệnh nhân ở phòng khám này (chưa done/skipped), cập nhật status thành 'done'
     const oldQueue = await prisma.queue.findFirst({
       where: {
@@ -606,7 +605,6 @@ class QueueService {
 
     // Đảm bảo slot_time có đủ 3 phần
 
- console.log(slotTimeVN)
     const shift = this.getShiftTypeAndRange(slotTimeVN);
     if (!shift) throw new Error(`Giờ khám không thuộc ca nào! slot_time: ${slotTimeVN}`);
     const { type, min, max } = shift;
@@ -675,8 +673,25 @@ class QueueService {
           appointment_date: new Date(slotDateVN),
           appointment_time: slot_time,
           doctor_id: to_doctor_id || undefined,
+          clinic_id : clinic_id,
         },
       });
+      const data = await prisma.availableSlot.findFirst({
+        where : {
+          doctor_id : to_doctor_id,
+          clinic_id : clinic_id,
+        },
+      })
+      await prisma.availableSlot.update({
+        where : {
+          doctor_id : to_doctor_id,
+          clinic_id : clinic_id,
+          id : data.id,
+        },
+        data : {
+          is_available : false,
+        }
+      })
     }
 
     // Gửi email nếu có email
