@@ -17,20 +17,20 @@ export const getWorkSchedulesService = async () => {
 
 export const createWorkScheduleService = async (body: object) => {
   const data = JSON.stringify(body);
-  const response = await mainRequest.post(`${baseURL}`, data);
+  const response = await mainRequest.post(`${baseURL}work-schedules`, data);
 
   return response;
 };
 
 export const updateWorkScheduleService = async (body: object, id: string | undefined) => {
   const data = JSON.stringify(body);
-  const response = await mainRequest.put(`${baseURL}/${id}`, data);
+  const response = await mainRequest.put(`${baseURL}work-schedules/${id}`, data);
 
   return response;
 };
 
 export const deleteWorkScheduleService = async (id: string | undefined) => {
-  const response = await mainRequest.delete(`${baseURL}/${id}`);
+  const response = await mainRequest.delete(`${baseURL}work-schedules/${id}`);
 
   return response;
 };
