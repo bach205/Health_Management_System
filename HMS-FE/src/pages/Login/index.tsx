@@ -31,7 +31,7 @@ const Login = () => {
     if (data === "patient") handleWindowOpenLocation("");
     if (data === "nurse") handleWindowOpenLocation("sale-medicine");
     if (data === "doctor") handleWindowOpenLocation("doctor/queue");
-    if (data === "admin") handleWindowOpenLocation("admin");
+    if (data === "admin") handleWindowOpenLocation("admin/dashboard");
 
   };
 
@@ -39,7 +39,7 @@ const Login = () => {
     const datax = await auth.handleGoogleLogin(data);
 
     if (datax === "patient") navigate("/");
-    if (datax === "admin") navigate("/admin");
+
   };
 
   return (
