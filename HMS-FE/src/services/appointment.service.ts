@@ -49,12 +49,12 @@ export const bookAppointmentService = async (appointmentData: any) => {
 };
 
 export const getPatientAppointmentsService = async (patientId: string | number) => {
-  const response = await mainRequest.get(`/api/v1/appointment/patient/${patientId}`);
+  const response = await mainRequest.get(`${baseURL}/appointment/patient/${patientId}`);
   return response.data;
 };
 
 export const updateAppointmentService = async (appointmentId: string | number, data: any) => {
-  return mainRequest.put(`/api/v1/appointment/${appointmentId}`, data);
+  return mainRequest.put(`${baseURL}/appointment/${appointmentId}`, data);
 };
 
 export const nurseBookAppointmentService = async (appointmentData: any) => {
@@ -64,7 +64,7 @@ export const nurseBookAppointmentService = async (appointmentData: any) => {
 };
 
 export const getAllAvailableSlotsService = async () => {
-  const response = await mainRequest.get(`/api/v1/appointment/slots`);
+  const response = await mainRequest.get(`${baseURL}/appointment/slots`);
   return response.data;
 };
 
@@ -86,12 +86,12 @@ export const getAppointmentByIdService = async (id: string) => {
 
 export const nurseRescheduleAppointmentService = async (data: any) => {
   const { cancel_reason, ...rest } = data;
-  const response = await mainRequest.post("/api/v1/appointment/nurse/reschedule", rest);
+  const response = await mainRequest.post(`${baseURL}/appointment/nurse/reschedule`, rest);
   return response.data;
 };
 
 export const getAvailableTimeSlotsBySpecialtyService = async (specialty: string) => {
-  const response = await mainRequest.get(`/api/v1/appointment/slots-by-specialty?specialty=${encodeURIComponent(specialty)}`);
+  const response = await mainRequest.get(`${baseURL}/appointment/slots-by-specialty?specialty=${encodeURIComponent(specialty)}`);
   return response.data;
 };
 
@@ -110,16 +110,16 @@ export const getAvailableSlots = async ({
   if (clinic_id) params.append("clinic_id", clinic_id.toString());
   if (slot_date) params.append("slot_date", slot_date);
 
-  const res = await mainRequest.get(`/api/v1/appointment/slots?${params.toString()}`);
+  const res = await mainRequest.get(`${baseURL}/appointment/slots?${params.toString()}`);
   console.log("res", res)
   return res.data;
 }
 
 export const deleteAppointmentService = async (appointmentId: string | number) => {
-  const response = await mainRequest.delete(`/api/v1/appointment/${appointmentId}`);
+  const response = await mainRequest.delete(`${baseURL}/appointment/${appointmentId}`);
   return response.data;
 };
 
 export const bookAppointmentByQRService = (data: any) => {
-  return mainRequest.post('/api/v1/appointment/book-by-qr', data);
+  return mainRequest.post(`${baseURL}/appointment/book-by-qr`, data);
 };
