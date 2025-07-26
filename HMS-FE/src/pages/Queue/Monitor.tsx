@@ -254,7 +254,7 @@ const Monitor: React.FC = () => {
               style={{ width: 120 }}
               value={shiftType}
               onChange={val => setShiftType(val)}
-              options={[{ value: "", label: "Ca Làm Việc" }, ...shiftTypeOptions]}
+              options={[{ value: "", label: "Ca Khám" }, ...shiftTypeOptions]}
               allowClear
               disabled={!selectedClinic}
             />
