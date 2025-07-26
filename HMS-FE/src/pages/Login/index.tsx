@@ -5,7 +5,7 @@ import { GoogleLogin } from "@react-oauth/google"
 import { GoogleOAuthProvider } from '@react-oauth/google'
 import data from "../../assets/googleClientID/ClientIDGoolge.json" with {type: "json"}
 
-const API_URL = import.meta.env.VITE_API_URL;
+const VITE_FRONTEND_SERVER = import.meta.env.VITE_FRONTEND_SERVER;
 const Login = () => {
   const client = data.web.client_id;
   let navigate = useNavigate();
@@ -20,7 +20,7 @@ const Login = () => {
     setPassword(e.target.value);
   };
   const handleWindowOpenLocation = (sub_link: string) => {
-    window.location.href = `${API_URL}/${sub_link}`;
+    window.location.href = `${VITE_FRONTEND_SERVER}/${sub_link}`;
   };
   const onSubmitHandler = async (e: React.FormEvent) => {
     e.preventDefault();
