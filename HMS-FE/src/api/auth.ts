@@ -1,6 +1,6 @@
 import  mainRequest from "./mainRequest";
 
-const baseURL = `http://localhost:8080/api/v1/auth`;
+const baseURL = `/api/v1/`;
 
 export const register = async (body : object) => {
   const data = JSON.stringify(body);  
