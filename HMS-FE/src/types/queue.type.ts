@@ -11,6 +11,7 @@
 //     created_at        DateTime    @default(now())
 
 import type { Patient } from "./patient.type";
+import type { ReactNode } from 'react';
 
 //     patient Patient            @relation(fields: [patient_id], references: [id])
 //     clinic  Clinic             @relation(fields: [clinic_id], references: [id])

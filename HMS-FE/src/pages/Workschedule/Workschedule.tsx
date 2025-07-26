@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Table,
   Tag,
@@ -27,7 +27,6 @@ import {
 import { getClinicService } from '../../services/clinic.service';
 import { getShiftService } from '../../services/shift.service';
 import { Delete, PenLine, View } from 'lucide-react';
-import { getAllNurse } from '../../services/nurse.service';
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -41,14 +40,6 @@ export type WorkSchedule = {
   shift_id: number;
   shift_name: string;
 };
-
-type Staff = {
-  email : string,
-  full_name : string,
-  gender : string,
-  id : number,
-  phone : string,
-}
 
 const Workschedule = () => {
   const [data, setData] = useState<WorkSchedule[]>([]);

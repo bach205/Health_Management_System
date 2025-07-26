@@ -267,6 +267,7 @@ class QueueService {
     });
 
     if (validSameDaySlots.length > 0) {
+      console.log(validSameDaySlots)
       slot = validSameDaySlots[0];
     } else {
       // Ưu tiên 2: Tìm slot trong tương lai (ngày khác)
@@ -283,7 +284,6 @@ class QueueService {
         ],
       });
     }
-
     if (!slot) {
       throw new Error("Bác sĩ được chọn không có ca khám nào rảnh sau thời gian appointment hiện tại.");
     }

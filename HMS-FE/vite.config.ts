@@ -15,4 +15,16 @@ export default defineConfig({
       "@": path.resolve("./src"),
     },
   },
+  build: {
+    outDir: 'dist',
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          ui: ['antd'],
+        },
+      },
+    },
+  },
 });
