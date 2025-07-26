@@ -10,6 +10,10 @@ import {
   DatePicker,
   Popconfirm,
   message,
+  Input,
+  Row,
+  Col,
+  Card,
 } from 'antd';
 import dayjs from 'dayjs';
 
@@ -57,6 +61,68 @@ const Workschedule = () => {
   const [selectedRecord, setSelectedRecord] = useState<WorkSchedule | null>(null);
   const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
   const [change, setChange] = useState(true);
+  
+  // Filter states
+  const [filters, setFilters] = useState({
+    dateRange: null as any,
+    shiftId: null as any,
+    clinicId: null as any,
+    searchName: '',
+  });
+
+  // Helper function to filter shifts based on current time
+  const getAvailableShifts = (allShifts: any[]) => {
+    const now = new Date();
+    const currentTime = now.getHours().toString().padStart(2, '0') + ':' + 
+                       now.getMinutes().toString().padStart(2, '0');
+    
+    return allShifts.filter(shift => {
+      if (!shift.start_time) return false;
+      // If editing, always include the current shift
+      if(editingRecord && editingRecord.shift_id === shift.id) {
+        return true;
+      }
+      // Parse start_time from ISO format (e.g., '1970-01-01T08:00:00.000')
+      const shiftDate = new Date(shift.start_time);
+      const shiftTimeOnly = shiftDate.getUTCHours().toString().padStart(2, '0') + ':' + 
+                           shiftDate.getUTCMinutes().toString().padStart(2, '0');
+      // Compare with current time
+      return shiftTimeOnly > currentTime;
+    });
+  };
+
+  // Helper function to filter data based on filters
+  const getFilteredData = (allData: WorkSchedule[]) => {
+    return allData.filter(item => {
+      // Filter by date range
+      if (filters.dateRange && filters.dateRange.length === 2) {
+        const itemDate = dayjs(item.work_date);
+        const startDate = filters.dateRange[0];
+        const endDate = filters.dateRange[1];
+        if (!itemDate.isBetween(startDate, endDate, 'day', '[]')) {
+          return false;
+        }
+      }
+
+      // Filter by shift
+      if (filters.shiftId && item.shift_id !== filters.shiftId) {
+        return false;
+      }
+
+      // Filter by clinic
+      if (filters.clinicId && item.clinic_id !== filters.clinicId) {
+        return false;
+      }
+
+      // Filter by employee name
+      if (filters.searchName && !item.user_name.toLowerCase().includes(filters.searchName.toLowerCase())) {
+        return false;
+      }
+
+      return true;
+    });
+  };
+
   useEffect(() => {
     const fetchData = async () => {
 
@@ -64,7 +130,6 @@ const Workschedule = () => {
       const user = await getDoctorService();
       const clinic = await getClinicService();
       const shift = await getShiftService();
-      console.log(user.data.metadata);
       //       console.log(clinic);
       //     console.log(user.data.metadata);
       setShifts(shift.data.data);
@@ -80,7 +145,7 @@ const Workschedule = () => {
 
     fetchData();
   }, [change]);
-
+  console.log(shifts)
   const handleView = (record: WorkSchedule) => {
     setSelectedRecord(record);
     setIsDetailModalVisible(true);
@@ -111,6 +176,32 @@ const Workschedule = () => {
     }
   };
 
+  // Filter handlers
+  const handleDateRangeChange = (dates: any) => {
+    setFilters(prev => ({ ...prev, dateRange: dates }));
+  };
+
+  const handleShiftChange = (value: any) => {
+    setFilters(prev => ({ ...prev, shiftId: value }));
+  };
+
+  const handleClinicChange = (value: any) => {
+    setFilters(prev => ({ ...prev, clinicId: value }));
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFilters(prev => ({ ...prev, searchName: e.target.value }));
+  };
+
+  const handleClearFilters = () => {
+    setFilters({
+      dateRange: null,
+      shiftId: null,
+      clinicId: null,
+      searchName: '',
+    });
+  };
+
   const handleSubmit = async (values: any) => {
     const payload = {
       user_id: values.user_id,
@@ -118,7 +209,6 @@ const Workschedule = () => {
       work_date: dayjs(values.work_date).format('YYYY-MM-DD'),
       shift_id: values.shift_id,
     };
-    console.log(payload);
     try {
       if (editingRecord) {
         await updateWorkScheduleService(payload, editingRecord.id.toString());
@@ -193,31 +283,116 @@ const Workschedule = () => {
     {
       title: 'Hành động',
       key: 'actions',
-      render: (_: any, record: WorkSchedule) => (
-        <>
-          <Button onClick={() => handleView(record)} size="small" className="mr-2"><View size={15} /></Button>
-          <Button onClick={() => handleEdit(record)} size="small">
-            <PenLine size={15} />
-          </Button>
-          <Popconfirm title="Xoá?" onConfirm={() => handleDelete(record.id)}>
-            <Button danger size="small" className="ml-2">
-              <Delete size={15} />
+      render: (_: any, record: WorkSchedule) => {
+        const today = dayjs().startOf('day');
+        const workDate = dayjs(record.work_date);
+        const isPastDate = workDate.isBefore(today);
+        
+        return (
+          <>
+            <Button onClick={() => handleView(record)} size="small" className="mr-2">
+              <View size={15} />
             </Button>
-          </Popconfirm>
-        </>
-      ),
+            {!isPastDate && (
+              <>
+                <Button onClick={() => handleEdit(record)} size="small">
+                  <PenLine size={15} />
+                </Button>
+                <Popconfirm title="Xoá?" onConfirm={() => handleDelete(record.id)}>
+                  <Button danger size="small" className="ml-2">
+                    <Delete size={15} />
+                  </Button>
+                </Popconfirm>
+              </>
+            )}
+          </>
+        );
+      },
     },
   ];
 
   return (
     <div style={{ padding: 24 }}>
       <Title level={3}>Lịch Làm Việc</Title>
-      <Button type="primary" onClick={handleCreate} className="mb-4">
-        Thêm Lịch
-      </Button>
+      
+      {/* Filter Section */}
+      <Card style={{ marginBottom: 16 }}>
+        <Row gutter={[16, 16]}>
+          <Col xs={24} sm={12} md={6}>
+            <div>
+              <div style={{ marginBottom: 8, fontWeight: 500 }}>Khoảng thời gian:</div>
+              <DatePicker.RangePicker
+                style={{ width: '100%' }}
+                format="DD/MM/YYYY"
+                placeholder={['Từ ngày', 'Đến ngày']}
+                value={filters.dateRange}
+                onChange={handleDateRangeChange}
+              />
+            </div>
+          </Col>
+          <Col xs={24} sm={12} md={6}>
+            <div>
+              <div style={{ marginBottom: 8, fontWeight: 500 }}>Ca làm việc:</div>
+              <Select
+                placeholder="Chọn ca làm"
+                style={{ width: '100%' }}
+                allowClear
+                value={filters.shiftId}
+                onChange={handleShiftChange}
+              >
+                {shifts.map(shift => (
+                  <Option key={shift.id} value={shift.id}>
+                    {shift.name}
+                  </Option>
+                ))}
+              </Select>
+            </div>
+          </Col>
+          <Col xs={24} sm={12} md={6}>
+            <div>
+              <div style={{ marginBottom: 8, fontWeight: 500 }}>Phòng khám:</div>
+              <Select
+                placeholder="Chọn phòng khám"
+                style={{ width: '100%' }}
+                allowClear
+                value={filters.clinicId}
+                onChange={handleClinicChange}
+              >
+                {clinics.map(clinic => (
+                  <Option key={clinic.id} value={clinic.id}>
+                    {clinic.name}
+                  </Option>
+                ))}
+              </Select>
+            </div>
+          </Col>
+          <Col xs={24} sm={12} md={6}>
+            <div>
+              <div style={{ marginBottom: 8, fontWeight: 500 }}>Tìm kiếm nhân viên:</div>
+              <Input
+                placeholder="Nhập tên nhân viên"
+                value={filters.searchName}
+                onChange={handleSearchChange}
+                allowClear
+              />
+            </div>
+          </Col>
+        </Row>
+        <Row style={{ marginTop: 16 }}>
+          <Col>
+            <Button onClick={handleClearFilters} style={{ marginRight: 8 }}>
+              Xóa bộ lọc
+            </Button>
+            <Button type="primary" onClick={handleCreate}>
+              Thêm Lịch
+            </Button>
+          </Col>
+        </Row>
+      </Card>
+
       <Table
         columns={columns}
-        dataSource={data}
+        dataSource={getFilteredData(data)}
         rowKey="id"
         bordered
         pagination={{ pageSize: 10 }}
@@ -268,7 +443,7 @@ const Workschedule = () => {
           </Form.Item>
           <Form.Item name="shift_id" label="Ca làm" rules={[{ required: true }]}>
             <Select placeholder="Chọn ca làm">
-              {shifts.map(shift => (
+              {getAvailableShifts(shifts).map(shift => (
                 <Option key={shift.id} value={shift.id}>
                   {shift.name}
                 </Option>

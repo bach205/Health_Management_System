@@ -247,32 +247,70 @@ const PatientBookAppointment: React.FC = () => {
         <div className="flex flex-wrap gap-3 mb-6">
           {!selectedClinic && <Text type="secondary">Vui lòng chọn phòng khám trước</Text>}
           {selectedClinic && !selectedDate && <Text type="secondary">Vui lòng chọn ngày trước</Text>}
-          {selectedClinic && selectedDate && slotsByDate[selectedDate]?.map(slot => {
-            const startTime = new Date(slot.start_time).getUTCHours().toString().padStart(2, '0') + ':' +
-              new Date(slot.start_time).getUTCMinutes().toString().padStart(2, '0');
-            const endTime = new Date(slot.end_time).getUTCHours().toString().padStart(2, '0') + ':' +
-              new Date(slot.end_time).getUTCMinutes().toString().padStart(2, '0');
+          {selectedClinic && selectedDate && slotsByDate[selectedDate]
+            ?.filter((item) => {
+              if (!item.start_time) return false;
+              const now = new Date();
+              const slotDate = new Date(item.slot_date);
+              // So sánh ngày theo UTC
+              if (
+                slotDate.getUTCFullYear() === now.getUTCFullYear() &&
+                slotDate.getUTCMonth() === now.getUTCMonth() &&
+                slotDate.getUTCDate() === now.getUTCDate()
+              ) {
+                // slot hôm nay, chỉ hiện nếu giờ bắt đầu > giờ hiện tại
+                const slotStart = new Date(item.start_time);
+                return slotStart.getUTCHours() >= now.getHours() ||
+                  (slotStart.getUTCHours() === now.getHours() && slotStart.getUTCMinutes() > now.getMinutes());
+              }
+              // slot ngày khác, luôn hiện
+              return true;
+            })
+            .map(slot => {
+              const startTime = new Date(slot.start_time).getUTCHours().toString().padStart(2, '0') + ':' +
+                new Date(slot.start_time).getUTCMinutes().toString().padStart(2, '0');
+              const endTime = new Date(slot.end_time).getUTCHours().toString().padStart(2, '0') + ':' +
+                new Date(slot.end_time).getUTCMinutes().toString().padStart(2, '0');
 
-            // Kiểm tra slot có còn trống không
-            const isAvailable = slot.is_available;
+              // Kiểm tra slot có còn trống không
+              const isAvailable = slot.is_available;
 
-            return (
-              <Button
-                key={slot.id}
-                type={selectedSlot?.id === slot.id ? "primary" : "default"}
-                onClick={() => isAvailable && setSelectedSlot(slot)}
-                className={`rounded-full group ${!isAvailable ? 'cursor-not-allowed' : ''}`}
-                disabled={!isAvailable}
-                title={!isAvailable ? 'Đã được đặt' : ''}
-              >
-                <span>{startTime} ~ {endTime}</span>
-                {!isAvailable && (
-                  <span className="invisible group-hover:visible text-xs text-gray-500 ml-1">Đã đặt</span>
-                )}
-              </Button>
-            );
-          })}
-          {selectedClinic && selectedDate && (!slotsByDate[selectedDate] || slotsByDate[selectedDate].length === 0) && (
+              return (
+                <Button
+                  key={slot.id}
+                  type={selectedSlot?.id === slot.id ? "primary" : "default"}
+                  onClick={() => isAvailable && setSelectedSlot(slot)}
+                  className={`rounded-full group ${!isAvailable ? 'cursor-not-allowed' : ''}`}
+                  disabled={!isAvailable}
+                  title={!isAvailable ? 'Đã được đặt' : ''}
+                >
+                  <span>{startTime} ~ {endTime}</span>
+                  {!isAvailable && (
+                    <span className="invisible group-hover:visible text-xs text-gray-500 ml-1">Đã đặt</span>
+                  )}
+                </Button>
+              );
+            })}
+          {selectedClinic && selectedDate && (!slotsByDate[selectedDate] || 
+          slotsByDate[selectedDate]
+          ?.filter((item) => {
+            if (!item.start_time) return false;
+            const now = new Date();
+            const slotDate = new Date(item.slot_date);
+            // So sánh ngày theo UTC
+            if (
+              slotDate.getUTCFullYear() === now.getUTCFullYear() &&
+              slotDate.getUTCMonth() === now.getUTCMonth() &&
+              slotDate.getUTCDate() === now.getUTCDate()
+            ) {
+              // slot hôm nay, chỉ hiện nếu giờ bắt đầu > giờ hiện tại
+              const slotStart = new Date(item.start_time);
+              return slotStart.getUTCHours() >= now.getHours() ||
+                (slotStart.getUTCHours() === now.getHours() && slotStart.getUTCMinutes() > now.getMinutes());
+            }
+            // slot ngày khác, luôn hiện
+            return true;
+          }).length === 0) && (
             <Text type="secondary">Không có lịch cho ngày này</Text>
           )}
         </div>
