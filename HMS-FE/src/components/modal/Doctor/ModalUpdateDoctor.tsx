@@ -89,6 +89,14 @@ const ModalUpdateDoctor = ({ role, isVisible, handleOk, handleCancel, form, user
   const { specialties, loading: specialtyLoading, reload: specialtyReload, handleTableChange: specialtyTableChange } = useSpecialtyList(undefined, true);
   console.log("specialties", specialties)
 
+  const handleCancelModal = () => {
+    handleCancel();
+    setFileList([]);
+    setPreviewImage('');
+    setPreviewOpen(false);
+  }
+  
+
   return (
     <Modal
       open={isVisible}
@@ -96,7 +104,7 @@ const ModalUpdateDoctor = ({ role, isVisible, handleOk, handleCancel, form, user
       onOk={handleOk}
       okText={"Cập nhật"}
       cancelText="Hủy"
-      onCancel={handleCancel}
+      onCancel={handleCancelModal}
       destroyOnHidden
       centered
 

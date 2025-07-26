@@ -85,6 +85,13 @@ const ModalCreateDoctor = ({ role, isVisible, handleOk, handleCancel, form }: IP
   );
   const { specialties, loading: specialtyLoading, reload: specialtyReload, handleTableChange: specialtyTableChange } = useSpecialtyList(undefined, true);
 
+  const handleCancelModal = () => {
+    handleCancel();
+    setFileList([]);
+    setPreviewImage('');
+    setPreviewOpen(false);
+  }
+
 
   return (
     <Modal
@@ -93,7 +100,7 @@ const ModalCreateDoctor = ({ role, isVisible, handleOk, handleCancel, form }: IP
       onOk={handleOk}
       okText="Thêm"
       cancelText="Hủy"
-      onCancel={handleCancel}
+      onCancel={handleCancelModal}
       destroyOnHidden
       centered
     >

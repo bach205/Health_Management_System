@@ -395,15 +395,14 @@ class NurseService {
                 full_name: row.full_name?.trim(),
                 email: row.email?.trim(),
                 phone: row.phone?.trim() || null,
-                password: row.password?.trim(),
                 gender: row.gender?.trim() || 'male',
                 date_of_birth: row.date_of_birth || null,
                 address: row.address?.trim() || null,
             };
-
+            const randomPassword = generateRandomPassword(10);
             // Tạo password nếu chưa có
             if (!nurseData.password) {
-                nurseData.password = generateRandomPassword(10);
+                nurseData.password = randomPassword;
             }
 
             // Validate với Joi
@@ -440,6 +439,7 @@ class NurseService {
                 date_of_birth: value.date_of_birth,
                 address: value.address,
                 rawPassword: nurseData.password, // để gửi email sau
+                randomPassword: randomPassword,
             });
         }
 
@@ -464,9 +464,9 @@ class NurseService {
         );
 
         // Gửi email sau khi tạo thành công
-        data.forEach((nurse, index) => {
-            const rawPassword = data[index].rawPassword;
-            sendStaffNewPasswordEmail(nurse.email, rawPassword);
+        preparedData.forEach((nurse, index) => {
+            const randomPassword = nurse.randomPassword;
+            sendStaffNewPasswordEmail(nurse.email, randomPassword);
         });
 
         return nurses;
