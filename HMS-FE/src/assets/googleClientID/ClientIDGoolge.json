@@ -1,1 +1,13 @@
-{"web":{"client_id":"66651917748-rderokjfbf94ghbj87vl6hr1o4sp2i67.apps.googleusercontent.com","project_id":"causal-binder-419716","auth_uri":"https://accounts.google.com/o/oauth2/auth","token_uri":"https://oauth2.googleapis.com/token","auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs","client_secret":"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","javascript_origins":["https://swp391-hms.vercel.app"]}}
+{
+    "web": {
+        "client_id": "380830785328-snbq817ls7d4oahfdg5emftc4ci04s0i.apps.googleusercontent.com",
+        "project_id": "hms-swp391",
+        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+        "token_uri": "https://oauth2.googleapis.com/token",
+        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+        "client_secret": "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",
+        "javascript_origins": [
+            "https://swp391-hms.vercel.app"
+        ]
+    }
+}
