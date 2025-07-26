@@ -51,6 +51,8 @@ const QueueTable = () => {
                 dayjs.utc(q.appointment?.appointment_date).format("YYYY-MM-DD") === selectedDate
             );
         } else {  // Nếu không chọn ngày, hiển thị tất cả queues
+            console.log("ádsad")
+            console.log(queues[0])
             return queues;
         }
     })();
@@ -209,10 +211,14 @@ const QueueTable = () => {
 
         {
             title: "Trạng thái",
-            dataIndex: "status",
             key: "status",
             width: 100,
-            render: (status: string) => <Tag color={getQueueStatusColor(status)}>{getQueueStatus(status)}</Tag>,
+            render: (record: any) => <Space direction="vertical">
+                <Tag color={getQueueStatusColor(record.status)}>{getQueueStatus(record.status)}</Tag>
+                {record.priority === -1 && (
+                    <Tag color={"red"}>{"Đến muộn"}</Tag>
+                )}
+            </Space>
         },
         {
             title: "Thao tác",

@@ -561,7 +561,8 @@ class QueueService {
     slot_date,
     slot_time,
     registered_online = true,
-    to_doctor_id // optional, for updating doctor_id if needed
+    to_doctor_id, // optional, for updating doctor_id if needed
+    priority = 0
   }) {
     // ====== LOG DEBUG ======
     console.log('🔍 [DEBUG] assignQueueNumber được gọi với params:', {
@@ -572,7 +573,8 @@ class QueueService {
       slot_date,
       slot_time,
       registered_online,
-      to_doctor_id
+      to_doctor_id,
+      priority
     });
     // ====== END LOG ======
     // 1. Nếu đã có queue cũ của bệnh nhân ở phòng khám này (chưa done/skipped), cập nhật status thành 'done'
@@ -635,10 +637,10 @@ class QueueService {
     // Tạo queue mới bằng raw query để tránh lỗi date parsing
     const insertResult = await prisma.$executeRaw`
       INSERT INTO queues (
-        appointment_id, patient_id, clinic_id, status, registered_online, 
+        appointment_id, patient_id, clinic_id, status,priority, registered_online, 
         queue_number, shift_type, slot_date, created_at
       ) VALUES (
-        ${appointment_id}, ${patient_id}, ${clinic_id}, 'waiting', ${registered_online},
+        ${appointment_id}, ${patient_id}, ${clinic_id}, 'waiting',${priority}, ${registered_online},
         ${nextStt}, ${type}, ${slotDateVN}, NOW()
       )
     `;
@@ -671,7 +673,8 @@ class QueueService {
       queue_number: newQueue.queue_number,
       shift_type: newQueue.shift_type,
       patient_email: newQueue.patient_email,
-      patient_name: newQueue.patient_name
+      patient_name: newQueue.patient_name,
+      priority: newQueue.priority
     });
     // ====== END LOG ======
 

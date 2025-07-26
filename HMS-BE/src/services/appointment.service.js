@@ -316,16 +316,42 @@ class AppointmentService {
         slotTimeStr = `${hours}:${minutes}:${seconds}`;
       }
 
+      const date = new Date(appointment.appointment_date); // e.g. 2025-07-27
+      const [hours, minutes, seconds] = slotTimeStr.split(':').map(Number);
+
+      const appointmentDateTime = new Date(Date.UTC(
+        date.getUTCFullYear(),
+        date.getUTCMonth(),
+        date.getUTCDate(),
+        hours,
+        minutes,
+        seconds
+      ));
+      const now = new Date().getUTCHours()
+
       console.log('🕐 [DEBUG] slotTimeStr được xử lý:', slotTimeStr);
 
-      queueResult = await QueueService.assignQueueNumber({
-        appointment_id: appointment.id,
-        patient_id: appointment.patient_id,
-        clinic_id: appointment.clinic_id,
-        slot_date: appointment.appointment_date,
-        slot_time: slotTimeStr,
-        registered_online: true // 1: online, 0: walk-in
-      });
+      //Muộn thì cho priority = -1
+      if (now > appointmentDateTime) {
+        queueResult = await QueueService.assignQueueNumber({
+          appointment_id: appointment.id,
+          patient_id: appointment.patient_id,
+          clinic_id: appointment.clinic_id,
+          slot_date: appointment.appointment_date,
+          slot_time: slotTimeStr,
+          registered_online: true, // 1: online, 0: walk-in
+          priority: -1
+        });
+      } else {
+        queueResult = await QueueService.assignQueueNumber({
+          appointment_id: appointment.id,
+          patient_id: appointment.patient_id,
+          clinic_id: appointment.clinic_id,
+          slot_date: appointment.appointment_date,
+          slot_time: slotTimeStr,
+          registered_online: true // 1: online, 0: walk-in
+        });
+      }
       console.log('✅ [DEBUG] assignQueueNumber đã được gọi thành công!');
     } catch (err) {
 
