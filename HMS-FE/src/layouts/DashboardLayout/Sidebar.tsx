@@ -116,7 +116,7 @@ const SIDEBAR_ITEMS = [
     items: [
       {
         id: "dashboard",
-        label: "Dashboard",
+        label: "Thống kê",
         icon: <LayoutDashboard className="w-4 h-4" />,
         href: "/admin/dashboard",
       },

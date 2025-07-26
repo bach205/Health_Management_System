@@ -2,15 +2,18 @@ const prisma = require("../config/prisma");
 
 class PaymentService {
 
-  async createInvoiceAndPaymentAfterExamination(record, appointment_id, doctor_id, patient_id) {
+  async createInvoiceAndPaymentAfterExamination(record, appointment_id, doctor_ids, patient_id) {
     // 1. Lấy giá bác sĩ
-    console.log("record", record, "appointment_id", appointment_id, "doctor_id", doctor_id, "patient_id", patient_id)
+    console.log("record", record, "appointment_id", appointment_id, "doctor_ids", doctor_ids, "patient_id", patient_id)
     try {
-      const doctor = await prisma.doctor.findUnique({
-        where: { user_id: doctor_id },
+      const doctors = await prisma.doctor.findMany({
+        where: { user_id: { in: doctor_ids } },
+        include: {
+          user: true
+        }
       });
 
-      const doctorPrice = doctor?.price ?? 0;
+      const doctorPrice = doctors?.reduce((sum, item) => sum + Number(item.price), 0) ?? 0;
 
       // 2. Lấy danh sách ExaminationOrder liên quan đến appointment
       const orders = await prisma.examinationOrder.findMany({
@@ -21,11 +24,13 @@ class PaymentService {
       const invoiceItemsData = [];
 
       // 3.1. Thêm phí bác sĩ
-      invoiceItemsData.push({
-        record_id: record.id,
-        description: "Phí khám bác sĩ",
-        amount: doctorPrice,
-      });
+      for (const doctor of doctors) {
+        invoiceItemsData.push({
+          record_id: record.id,
+          description: `Phí bác sĩ ${doctor.user.full_name}`,
+          amount: doctor.price,
+        });
+      }
       // const fromClinic = await prisma.clinic.findUnique({
       //   where: { id: orders[0].from_clinic_id },
       // });
@@ -44,7 +49,7 @@ class PaymentService {
         console.log("order", order, "fromClinic", fromClinic, "toClinic", toClinic)
         invoiceItemsData.push({
           record_id: record.id,
-          description: `Chi phí dịch vụ từ phòng khám ${fromClinic.name} đến ${toClinic.name}`,
+          description: `Chi phí phụ từ phòng khám ${fromClinic.name} đến ${toClinic.name}`,
           amount: order.extra_cost,
         });
       }
@@ -178,28 +183,28 @@ class PaymentService {
     if (id == null || !status) {
       throw new Error("ID và trạng thái không được để trống");
     }
-  
+
     const paymentData = await prisma.payment.findFirst({
       where: { record_id: Number(id) }
     });
-  //  console.log(paymentData)
-    if (!paymentData) throw new Error("Không tìm thấy payment");  
+    //  console.log(paymentData)
+    if (!paymentData) throw new Error("Không tìm thấy payment");
     console.log(paymentData)
     const payment = await prisma.payment.update({
       where: { id: paymentData.id },
-      data: { 
-        status : status,
-        method:"bank_transfer",
-        note : "thank toán tiền thuốc chữa trị"
+      data: {
+        status: status,
+        method: "bank_transfer",
+        note: "thank toán tiền thuốc chữa trị"
       }
     });
-    
+
     return payment;
   }
 
   getPaymentByRecordId = async (id) => {
     const payment = await prisma.payment.findFirst({
-      where:{record_id : Number(id)}
+      where: { record_id: Number(id) }
     })
     return payment;
   }
@@ -240,22 +245,22 @@ class PaymentService {
     if (id == null || !status) {
       throw new Error("ID và trạng thái không được để trống");
     }
-  
+
     const paymentData = await prisma.payment.findFirst({
       where: { record_id: Number(id) }
     });
-  //  console.log(paymentData)
-    if (!paymentData) throw new Error("Không tìm thấy payment");  
+    //  console.log(paymentData)
+    if (!paymentData) throw new Error("Không tìm thấy payment");
     console.log(paymentData)
     const payment = await prisma.payment.update({
       where: { id: paymentData.id },
-      data: { 
-        status : status,
-        method:"bank_transfer",
-        note : "thank toán tiền thuốc chữa trị"
+      data: {
+        status: status,
+        method: "bank_transfer",
+        note: "thank toán tiền thuốc chữa trị"
       }
     });
-    
+
     return payment;
   }
 

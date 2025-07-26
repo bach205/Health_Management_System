@@ -309,7 +309,7 @@ const AdminDashboard = () => {
           </Skeleton>
         </Col>
 
-        <Col xs={24} sm={24} md={12}>
+        {/* <Col xs={24} sm={24} md={12}>
           <Skeleton loading={loading} active round>
             <Card
               title={`Biểu đồ tổng ca đặt lịch, khám trực tiếp, hủy lịch`}
@@ -330,8 +330,8 @@ const AdminDashboard = () => {
               }} />
             </Card>
           </Skeleton>
-        </Col>
-        <Col xs={24} sm={24} md={12}>
+        </Col> */}
+        {/* <Col xs={24} sm={24} md={12}>
           <Skeleton loading={loading} active round>
             <Card
             title={`Biểu đồ tổng bệnh nhân theo tuổi`}
@@ -339,7 +339,7 @@ const AdminDashboard = () => {
               <Pie data={pieChartPatientsData} />
             </Card>
           </Skeleton>
-        </Col>
+        </Col> */}
       </Row>
     </div>
   );
