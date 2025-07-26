@@ -1,1 +1,1 @@
-export const API_URL = 'https://swp391-swp391hms.up.railway.app/api/v1'; 
+export const API_URL = 'https://swp391-swp391hms-production.up.railway.app/api/v1'; 
