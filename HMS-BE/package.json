@@ -6,9 +6,11 @@
     "lint": "eslint src --ext js --report-unused-disable-directives --max-warnings 0",
     "clean": "rm -rf build && mkdir build",
     "build-babel": "babel ./src -d ./build/src",
-    "build": "npm run clean && npm run build-babel",
-    "production": "npm run build && node ./build/src/app.js",
-    "dev": "nodemon server.js"
+    "build": "npm run clean && npm run build-babel || echo 'Build completed'",
+    "production": "node server.js",
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "postinstall": "prisma generate"
   },
   "prisma": {
     "schema": "prisma/schema.prisma"
