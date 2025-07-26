@@ -17,8 +17,29 @@ const useQueue = () => {
       }
       console.log("Fetching queue for clinic:", clinicId, "with pagination:", pagination, "and type:", type);
       const response = await getQueueClinic(clinicId, pagination, type);
-      console.log(response)
-      setQueues(response.metadata.queueClinic);
+      const data = response.metadata.queueClinic.filter(item => {
+            const now = new Date();
+            const slotDate = new Date(item.slot_date);
+            
+            // So sánh ngày theo UTC
+            // if (
+            //   slotDate.getUTCFullYear() === now.getUTCFullYear() &&
+            //   slotDate.getUTCMonth() === now.getUTCMonth() &&
+            //   slotDate.getUTCDate() === now.getUTCDate()
+            // ) {
+         
+            //   // slot hôm nay, chỉ hiện nếu giờ bắt đầu > giờ hiện tại
+            //   const slotStart = new Date(item.appointment.appointment_time);
+            //   return slotStart.getUTCHours() >= now.getHours() ||
+            //     (slotStart.getUTCHours() === now.getHours() && slotStart.getUTCMinutes() > now.getMinutes());
+            // }
+            // slot ngày khác, luôn hiện
+            return (slotDate.getUTCFullYear() >= now.getUTCFullYear() &&
+              slotDate.getUTCMonth() >= now.getUTCMonth() &&
+              slotDate.getUTCDate() >= now.getUTCDate());
+      })
+      console.log(data);
+      setQueues(data);
       setTotalElements(response.metadata.total);
       setTotalPages(response.metadata.totalPages);
     } catch (error: any) {

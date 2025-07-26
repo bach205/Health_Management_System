@@ -20,7 +20,7 @@ const { Header, Sider, Content } = Layout;
 const StaffLayoutPage = () => {
 
     const user = {}
-    const menuSidebars = []
+    const menuSidebars: any[] = []
     const { phone, userType, fullName, photo } = {}
 
     const [collapsed, setCollapsed] = useState(false);

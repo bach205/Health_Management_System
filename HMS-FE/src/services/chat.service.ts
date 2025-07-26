@@ -3,8 +3,7 @@ import type {
     IMessage,
     IConversation,
     ISendMessageData,
-    IUpdateMessageData,
-    IChatResponse
+    IUpdateMessageData
 } from '../types/chat.type';
 const BASE_URL = `/api/v1`
 
