@@ -52,20 +52,20 @@ const NurseRescheduleAppointment: React.FC<Props> = ({ appointment, onSuccess })
           setLoading(false);
           return;
         }
-        
+
         // Lấy tất cả slot trống theo chuyên môn
         const slotsRes = await getAllAvailableSlotsService();
         const allSlots = slotsRes.data || slotsRes.metadata || [];
-        
+
         // Lọc chỉ lấy slot của cùng chuyên môn với lịch hẹn cũ và từ hôm nay trở đi
         const today = dayjs().startOf('day');
         const filteredSlots = allSlots.filter((slot: AvailableSlot) => {
           const slotDate = dayjs(slot.slot_date);
           return slot.doctor_specialty === specialty && slotDate.isSameOrAfter(today);
         });
-        
+
         setSlots(filteredSlots);
-        
+
         // Không tự động set phòng khám, để người dùng chọn
         setSelectedClinic(null);
       } catch (err) {
@@ -136,7 +136,7 @@ const NurseRescheduleAppointment: React.FC<Props> = ({ appointment, onSuccess })
           <br />
           <Text>Phòng khám: {appointment.clinic_name}</Text>
           <br />
-          <Text>Ngày khám: {appointment.formatted_date}</Text>
+          <Text>Ngày Đặt Lịch: {appointment.formatted_date}</Text>
           <br />
           <Text>Giờ khám: {appointment.formatted_time}</Text>
           <br />
@@ -171,8 +171,8 @@ const NurseRescheduleAppointment: React.FC<Props> = ({ appointment, onSuccess })
                 setSelectedSlot(null);
               }}
               className={`text-center py-2 px-4 rounded-lg cursor-pointer transition-colors ${selectedClinic === clinic.id
-                  ? "bg-primary text-white"
-                  : "border border-gray-200 hover:border-primary"
+                ? "bg-primary text-white"
+                : "border border-gray-200 hover:border-primary"
                 }`}
             >
               <Text className={selectedClinic === clinic.id ? "!text-white" : ""} strong>
@@ -184,7 +184,7 @@ const NurseRescheduleAppointment: React.FC<Props> = ({ appointment, onSuccess })
 
         {clinics.length > 0 && (
           <>
-            <Title level={5} className="!mb-2">Chọn ngày khám</Title>
+            <Title level={5} className="!mb-2">Chọn Ngày Đặt Lịch</Title>
             <div className="flex gap-2 items-center w-full overflow-x-auto mb-2">
               {!selectedClinic && <Text type="secondary">Vui lòng chọn phòng khám trước</Text>}
               {selectedClinic && dateOptions.map(dateKey => {
@@ -199,8 +199,8 @@ const NurseRescheduleAppointment: React.FC<Props> = ({ appointment, onSuccess })
                       setSelectedSlot(null);
                     }}
                     className={`text-center py-2 px-4 rounded-lg cursor-pointer transition-colors ${selectedDate === dateKey
-                        ? "bg-primary text-white"
-                        : "border border-gray-200 hover:border-primary"
+                      ? "bg-primary text-white"
+                      : "border border-gray-200 hover:border-primary"
                       }`}
                   >
                     <Text className={selectedDate === dateKey ? "!text-white" : ""} strong>

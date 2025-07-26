@@ -384,14 +384,14 @@ const DoctorExaminationRecordModal = ({
                   <Empty description="Không còn lịch khám" />
               }
 
-              {/* Chọn ngày khám */}
+              {/* Chọn Ngày Đặt Lịch */}
               {selectedClinic && (
                 <Form.Item label="Chọn ngày tái khám">
                   <div className="flex gap-2 flex-wrap">
                     {Object.keys(slotsByDate).map(date => {
                       const weekday = dayjs(date).locale('vi').format("dddd");
                       const dateStr = dayjs(date).format("DD/MM/YYYY");
-                      // Kiểm tra nếu ngày khám <= hôm nay thì bỏ qua chỉ được chọn những ngày tiếp theo
+                      // Kiểm tra nếu Ngày Đặt Lịch <= hôm nay thì bỏ qua chỉ được chọn những ngày tiếp theo
                       // console.log(weekday, dateStr)
                       console.log(dayjs(date).utc().date())
                       if (dayjs(date).utc().date() <= dayjs().utc().date()) {
@@ -434,10 +434,10 @@ const DoctorExaminationRecordModal = ({
 
                       const isAvailable = slot.is_available;
 
-                      // Kiểm tra nếu giờ kết thúc <= lúc hiện tại thì bỏ qua và ngày khám là quá khứ thì bỏ qua
+                      // Kiểm tra nếu giờ kết thúc <= lúc hiện tại thì bỏ qua và Ngày Đặt Lịch là quá khứ thì bỏ qua
                       // chỉ được chọn những ngày tiếp theo
                       if (dayjs().utc().date() > endDate.getUTCDate() && dayjs().utc().hour() > endDate.getUTCHours()) {
-                        return null; // Nếu ngày khám là quá khứ thì bỏ qua
+                        return null; // Nếu Ngày Đặt Lịch là quá khứ thì bỏ qua
                       }
 
                       return (

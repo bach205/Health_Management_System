@@ -1,23 +1,23 @@
 const nodemailer = require('nodemailer');
 
 const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false,
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD,
-    }
+  host: 'smtp.gmail.com',
+  port: 587,
+  secure: false,
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASSWORD,
+  }
 });
 
 
 const sendStaffNewPasswordEmail = async (staffEmail, newPassword) => {
-    try {
-        const mailOptions = {
-            from: process.env.EMAIL_USER,
-            to: staffEmail,
-            subject: 'HMS - Mật khẩu đăng nhập',
-            html: `
+  try {
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: staffEmail,
+      subject: 'HMS - Mật khẩu đăng nhập',
+      html: `
         <h2>Mật khẩu đăng nhập</h2>
         <p>Mật khẩu đăng nhập của bạn là: ${newPassword}</p>
         <p>Vui lòng đổi mật khẩu sau khi đăng nhập.</p>
@@ -25,38 +25,38 @@ const sendStaffNewPasswordEmail = async (staffEmail, newPassword) => {
         <p>Link đăng nhập: <a href="${process.env.FRONTEND_URL}/login">${process.env.FRONTEND_URL}/login</a></p>
         <p>Chúc bạn một ngày tốt lành,<br>HMS Team</p>
       `
-        }
-
-        const info = await transporter.sendMail(mailOptions);
-        console.log('Email sent:', info.response);
-        return true;
-    } catch (error) {
-        console.error('Error sending email:', error);
-        throw error;
     }
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log('Email sent:', info.response);
+    return true;
+  } catch (error) {
+    console.error('Error sending email:', error);
+    throw error;
+  }
 }
 
 const sendPatientNewPasswordEmail = async (staffEmail, newPassword) => {
-    try {
-        const mailOptions = {
-            from: process.env.EMAIL_USER,
-            to: staffEmail, 
-            subject: 'HMS - Mật khẩu đăng nhập',
-            html: `
+  try {
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: staffEmail,
+      subject: 'HMS - Mật khẩu đăng nhập',
+      html: `
         <h2>Mật khẩu đăng nhập</h2>
         <p>Mật khẩu đăng nhập của bạn là: ${newPassword}</p>
         <p>Vui lòng đổi mật khẩu sau khi đăng nhập.</p>
         <p>Chúc bạn một ngày tốt lành,<br>HMS Team</p>
       `
-        }
-
-        const info = await transporter.sendMail(mailOptions);
-        console.log('Email sent:', info.response);
-        return true;
-    } catch (error) {
-        console.error('Error sending email:', error);
-        throw error;
     }
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log('Email sent:', info.response);
+    return true;
+  } catch (error) {
+    console.error('Error sending email:', error);
+    throw error;
+  }
 }
 
 /**
@@ -86,7 +86,7 @@ const sendPatientAppointmentConfirmationEmail = async (
         <p>Bạn đã đặt lịch khám thành công trên hệ thống HMS.</p>
         <h3>Thông tin lịch hẹn:</h3>
         <ul>
-          <li><b>Ngày khám:</b> ${appointmentDate}</li>
+          <li><b>Ngày Đặt Lịch:</b> ${appointmentDate}</li>
           <li><b>Giờ khám:</b> ${appointmentTime}</li>
           <li><b>Bác sĩ:</b> ${doctorName}</li>
           <li><b>Phòng khám:</b> ${clinicName}</li>
@@ -129,7 +129,7 @@ const sendPatientQueueNumberEmail = async (
     // Chuyển đổi shiftType sang tiếng Việt
     const shiftTypeText = {
       'morning': 'Sáng',
-      'afternoon': 'Chiều', 
+      'afternoon': 'Chiều',
       'night': 'Tối'
     }[shiftType] || shiftType;
 
@@ -144,7 +144,7 @@ const sendPatientQueueNumberEmail = async (
         <ul>
           <li><b>Số thứ tự:</b> <span style="font-size: 18px; font-weight: bold; color: #1890ff;">${queueNumber}</span></li>
           <li><b>Ca khám:</b> ${shiftTypeText}</li>
-          <li><b>Ngày khám:</b> ${appointmentDate}</li>
+          <li><b>Ngày Đặt Lịch:</b> ${appointmentDate}</li>
           <li><b>Giờ khám:</b> ${appointmentTime}</li>
           <li><b>Bác sĩ:</b> ${doctorName}</li>
           <li><b>Phòng khám:</b> ${clinicName}</li>
@@ -168,8 +168,8 @@ const sendPatientQueueNumberEmail = async (
 };
 
 module.exports = {
-    sendStaffNewPasswordEmail,
-    sendPatientNewPasswordEmail,
-    sendPatientAppointmentConfirmationEmail,
-    sendPatientQueueNumberEmail
+  sendStaffNewPasswordEmail,
+  sendPatientNewPasswordEmail,
+  sendPatientAppointmentConfirmationEmail,
+  sendPatientQueueNumberEmail
 };

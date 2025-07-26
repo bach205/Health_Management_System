@@ -65,9 +65,9 @@ const QRBookAppointmentForm: React.FC = () => {
   useEffect(() => {
     const fetchDoctorsAndSlots = async () => {
       try {
-        
+
         const response = await getAllAvailableSlotsService();
-        
+
         if (response.success) {
           setAvailableSlots(response.data);
 
@@ -295,8 +295,8 @@ const QRBookAppointmentForm: React.FC = () => {
             <Col span={12}>
               <Form.Item
                 name="appointment_date"
-                label="Ngày khám"
-                rules={[{ required: true, message: 'Vui lòng chọn ngày khám' }]}
+                label="Ngày Đặt Lịch"
+                rules={[{ required: true, message: 'Vui lòng chọn Ngày Đặt Lịch' }]}
               >
                 <DatePicker
                   className="w-full"

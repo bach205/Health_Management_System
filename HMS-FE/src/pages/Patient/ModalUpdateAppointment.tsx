@@ -95,7 +95,7 @@ const ModalUpdateAppointment = ({ role, isVisible, handleOk, handleCancel, form,
         }
         // Lọc giờ từ slot
         const times = allSlots.filter(slot => slot.doctor_id === selectedDoctor && slot.clinic_id === selectedClinic && slot.slot_date === date);
-        setTimeOptions(times.map((slot: any) => ({ value: slot.start_time, label: slot.start_time.slice(11,16) })));
+        setTimeOptions(times.map((slot: any) => ({ value: slot.start_time, label: slot.start_time.slice(11, 16) })));
     };
 
     // Set initial values when modal opens
@@ -113,7 +113,7 @@ const ModalUpdateAppointment = ({ role, isVisible, handleOk, handleCancel, form,
             setSelectedDate(selectedAppointment.formatted_date);
             // Filter times for the selected doctor, clinic, and date
             const times = allSlots.filter(slot => slot.doctor_id === selectedAppointment.doctor_id && slot.clinic_id === selectedAppointment.clinic_id && slot.slot_date === selectedAppointment.formatted_date);
-            setTimeOptions(times.map((slot: any) => ({ value: slot.start_time, label: slot.start_time.slice(11,16) })));
+            setTimeOptions(times.map((slot: any) => ({ value: slot.start_time, label: slot.start_time.slice(11, 16) })));
             // Set form fields
             form.setFieldsValue({
                 clinic_id: selectedAppointment.clinic_id,
@@ -134,7 +134,7 @@ const ModalUpdateAppointment = ({ role, isVisible, handleOk, handleCancel, form,
         try {
             setLoading(true);
             const values = await form.validateFields();
-            
+
             const updateData = {
                 clinic_id: values.clinic_id,
                 doctor_id: values.doctor_id,
@@ -207,12 +207,12 @@ const ModalUpdateAppointment = ({ role, isVisible, handleOk, handleCancel, form,
                     />
                 </Form.Item>
                 <Form.Item
-                    label="Ngày khám"
+                    label="Ngày Đặt Lịch"
                     name="appointment_date"
-                    rules={[{ required: true, message: "Vui lòng chọn ngày khám!" }]}
+                    rules={[{ required: true, message: "Vui lòng chọn Ngày Đặt Lịch!" }]}
                 >
                     <Select
-                        placeholder="Chọn ngày khám"
+                        placeholder="Chọn Ngày Đặt Lịch"
                         options={dateOptions}
                         onChange={(value) => handleDateChange(value as string)}
                         showSearch
@@ -245,7 +245,7 @@ const ModalUpdateAppointment = ({ role, isVisible, handleOk, handleCancel, form,
                         <div className="space-y-2 text-sm">
                             <div><span className="font-medium">Bác sĩ:</span> {selectedAppointment.doctor_id || "Chưa xác định"}</div>
                             <div><span className="font-medium">Chuyên khoa:</span> {selectedAppointment.clinic_name || "Chưa xác định"}</div>
-                            <div><span className="font-medium">Trạng thái:</span> 
+                            <div><span className="font-medium">Trạng thái:</span>
                                 {(() => {
                                     let color = "default";
                                     let text = selectedAppointment.status;

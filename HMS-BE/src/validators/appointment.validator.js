@@ -159,9 +159,9 @@ const nurseRescheduleAppointmentSchema = Joi.object({
     'any.required': 'ID phòng khám là bắt buộc'
   }),
   slot_date: Joi.date().iso().required().messages({
-    'date.base': 'Ngày khám không hợp lệ',
-    'date.format': 'Ngày khám phải theo định dạng ISO',
-    'any.required': 'Ngày khám là bắt buộc'
+    'date.base': 'Ngày Đặt Lịch không hợp lệ',
+    'date.format': 'Ngày Đặt Lịch phải theo định dạng ISO',
+    'any.required': 'Ngày Đặt Lịch là bắt buộc'
   }),
   start_time: Joi.string().pattern(/^([01]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/).required().messages({
     'string.pattern.base': 'Giờ khám phải theo định dạng HH:mm:ss',

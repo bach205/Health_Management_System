@@ -152,7 +152,7 @@ const NurseBookAppointment: React.FC = () => {
         value: dayjs.utc(slot.start_time).format('HH:mm:ss'),
         label: `${dayjs.utc(slot.start_time).format('HH:mm')} - ${dayjs.utc(slot.end_time).format('HH:mm')}`
       }));
-      console.log(selectedDate)
+    console.log(selectedDate)
     console.log(selectedDoctor, selectedClinic);
     setAvailableTimes(times);
 
@@ -293,8 +293,8 @@ const NurseBookAppointment: React.FC = () => {
             <Col span={12}>
               <Form.Item
                 name="appointment_date"
-                label="Ngày khám"
-                rules={[{ required: true, message: 'Vui lòng chọn ngày khám' }]}
+                label="Ngày Đặt Lịch"
+                rules={[{ required: true, message: 'Vui lòng chọn Ngày Đặt Lịch' }]}
               >
                 <DatePicker
                   className="w-full"

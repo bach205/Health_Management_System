@@ -219,7 +219,7 @@ const ScheduleTable = ({ data = [], setReload, loading = false, visible, selecte
       render: (created_at: any) => dayjs(created_at).format("HH:mm:ss DD/MM/YYYY"),
     },
     {
-      title: "Ngày khám",
+      title: "Ngày Đặt Lịch",
       dataIndex: "formatted_date",
       key: "formatted_date",
       width: 120,
@@ -320,7 +320,7 @@ const ScheduleTable = ({ data = [], setReload, loading = false, visible, selecte
                 <div>{dayjs(selectedRecord.created_at).format("HH:mm:ss DD/MM/YYYY")}</div>
               </Col>
               <Col span={12}>
-                <div className="font-medium text-gray-700">Ngày khám:</div>
+                <div className="font-medium text-gray-700">Ngày Đặt Lịch:</div>
                 <div>{dayjs(selectedRecord.formatted_date).format("DD/MM/YYYY")}</div>
               </Col>
             </Row>

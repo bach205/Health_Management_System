@@ -67,7 +67,7 @@ const PaymentPDF = ({ record }: { record: any }) => (
             <View style={styles.section}>
                 <Text><Text style={styles.label}>Tại phòng khám: </Text>{record.clinic?.name || 'Chưa rõ'}</Text>
                 <Text><Text style={styles.label}>Bác sĩ: </Text>{record.doctor?.user?.full_name || 'Chưa rõ'}</Text>
-                <Text><Text style={styles.label}>Ngày khám: </Text>{dayjs(record.examined_at).format("HH:mm DD/MM/YYYY")}</Text>
+                <Text><Text style={styles.label}>Ngày Đặt Lịch: </Text>{dayjs(record.examined_at).format("HH:mm DD/MM/YYYY")}</Text>
             </View>
 
             <View style={styles.section}>

@@ -28,7 +28,7 @@ const ModalPatientExaminationHistory = ({ open, onClose, patient }: { open: bool
 
     const columns = [
         {
-            title: "Ngày khám",
+            title: "Ngày Đặt Lịch",
             dataIndex: "examined_at",
             key: "examined_at",
             width: 120,

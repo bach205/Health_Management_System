@@ -137,7 +137,7 @@ const ExaminationResult = () => {
                 <Descriptions bordered column={1} style={{ marginTop: 20 }}>
                     <Descriptions.Item label="Tại phòng khám">{record.clinic?.name || "Chưa rõ"}</Descriptions.Item>
                     <Descriptions.Item label="Bác sĩ">{record.doctor?.user?.full_name || "Chưa rõ"}</Descriptions.Item>
-                    <Descriptions.Item label="Ngày khám">{dayjs(record.examined_at).format("HH:mm DD/MM/YYYY")}</Descriptions.Item>
+                    <Descriptions.Item label="Ngày Đặt Lịch">{dayjs(record.examined_at).format("HH:mm DD/MM/YYYY")}</Descriptions.Item>
                     <Descriptions.Item label="Kết quả khám">
                         <div style={{ whiteSpace: "pre-line" }}>{record.result}</div>
                     </Descriptions.Item>

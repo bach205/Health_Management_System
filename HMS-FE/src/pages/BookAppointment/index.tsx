@@ -173,7 +173,7 @@ const PatientBookAppointment: React.FC = () => {
               {doctor?.metadata?.doctor?.bio && (
                 <Text type="secondary">Tiểu sử: {doctor.metadata.doctor.bio}</Text>
               )}
-              
+
               {doctor?.metadata?.doctor?.price && (
                 <Text type="secondary" ><b>Giá khám:</b> {doctor.metadata.doctor.price}đ</Text>
 
@@ -209,16 +209,16 @@ const PatientBookAppointment: React.FC = () => {
             <Text type="secondary">Không có phòng khám khả dụng</Text>
           )}
         </div>
-        <Title level={5} className="!mb-4">Chọn ngày khám</Title>
+        <Title level={5} className="!mb-4">Chọn Ngày Đặt Lịch</Title>
         <div className="flex gap-3 items-center w-full overflow-x-auto mb-4">
           {!selectedClinic && <Text type="secondary">Vui lòng chọn phòng khám trước</Text>}
           {selectedClinic && dateOptions.map(dateKey => {
             const dateObj = new Date(dateKey);
             const weekday = dateObj.toLocaleDateString('vi-VN', { weekday: 'long' });
             const dateStr = dateObj.toLocaleDateString('vi-VN');
-            
+
             // if (dayjs(dateKey).isBefore(dayjs(), 'day')) {
-            //   return null; // Nếu ngày khám đã qua, không hiển thị
+            //   return null; // Nếu Ngày Đặt Lịch đã qua, không hiển thị
             // }
 
             return (
@@ -291,28 +291,28 @@ const PatientBookAppointment: React.FC = () => {
                 </Button>
               );
             })}
-          {selectedClinic && selectedDate && (!slotsByDate[selectedDate] || 
-          slotsByDate[selectedDate]
-          ?.filter((item) => {
-            if (!item.start_time) return false;
-            const now = new Date();
-            const slotDate = new Date(item.slot_date);
-            // So sánh ngày theo UTC
-            if (
-              slotDate.getUTCFullYear() === now.getUTCFullYear() &&
-              slotDate.getUTCMonth() === now.getUTCMonth() &&
-              slotDate.getUTCDate() === now.getUTCDate()
-            ) {
-              // slot hôm nay, chỉ hiện nếu giờ bắt đầu > giờ hiện tại
-              const slotStart = new Date(item.start_time);
-              return slotStart.getUTCHours() >= now.getHours() ||
-                (slotStart.getUTCHours() === now.getHours() && slotStart.getUTCMinutes() > now.getMinutes());
-            }
-            // slot ngày khác, luôn hiện
-            return true;
-          }).length === 0) && (
-            <Text type="secondary">Không có lịch cho ngày này</Text>
-          )}
+          {selectedClinic && selectedDate && (!slotsByDate[selectedDate] ||
+            slotsByDate[selectedDate]
+              ?.filter((item) => {
+                if (!item.start_time) return false;
+                const now = new Date();
+                const slotDate = new Date(item.slot_date);
+                // So sánh ngày theo UTC
+                if (
+                  slotDate.getUTCFullYear() === now.getUTCFullYear() &&
+                  slotDate.getUTCMonth() === now.getUTCMonth() &&
+                  slotDate.getUTCDate() === now.getUTCDate()
+                ) {
+                  // slot hôm nay, chỉ hiện nếu giờ bắt đầu > giờ hiện tại
+                  const slotStart = new Date(item.start_time);
+                  return slotStart.getUTCHours() >= now.getHours() ||
+                    (slotStart.getUTCHours() === now.getHours() && slotStart.getUTCMinutes() > now.getMinutes());
+                }
+                // slot ngày khác, luôn hiện
+                return true;
+              }).length === 0) && (
+              <Text type="secondary">Không có lịch cho ngày này</Text>
+            )}
         </div>
         <Form
           form={form}

@@ -52,7 +52,7 @@ const Workschedule = () => {
   const [selectedRecord, setSelectedRecord] = useState<WorkSchedule | null>(null);
   const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
   const [change, setChange] = useState(true);
-  
+
   // Filter states
   const [filters, setFilters] = useState({
     dateRange: null as any,
@@ -64,21 +64,21 @@ const Workschedule = () => {
   // Helper function to filter shifts based on current time
   const getAvailableShifts = (allShifts: any[]) => {
     const now = new Date();
-    const currentTime = now.getHours().toString().padStart(2, '0') + ':' + 
-                       now.getMinutes().toString().padStart(2, '0');
-    
+    const currentTime = now.getHours().toString().padStart(2, '0') + ':' +
+      now.getMinutes().toString().padStart(2, '0');
     return allShifts.filter(shift => {
-      if (!shift.start_time) return false;
-      // If editing, always include the current shift
-      if(editingRecord && editingRecord.shift_id === shift.id) {
-        return true;
-      }
-      // Parse start_time from ISO format (e.g., '1970-01-01T08:00:00.000')
-      const shiftDate = new Date(shift.start_time);
-      const shiftTimeOnly = shiftDate.getUTCHours().toString().padStart(2, '0') + ':' + 
-                           shiftDate.getUTCMinutes().toString().padStart(2, '0');
-      // Compare with current time
-      return shiftTimeOnly > currentTime;
+      // if (!shift.start_time) return false;
+      // // If editing, always include the current shift
+      // if (editingRecord && editingRecord.shift_id === shift.id) {
+      //   return true;
+      // }
+      // // Parse start_time from ISO format (e.g., '1970-01-01T08:00:00.000')
+      // const shiftDate = new Date(shift.start_time);
+      // const shiftTimeOnly = shiftDate.getUTCHours().toString().padStart(2, '0') + ':' +
+      //   shiftDate.getUTCMinutes().toString().padStart(2, '0');
+      // // Compare with current time
+      // return shiftTimeOnly > currentTime;
+      return true;
     });
   };
 
@@ -278,7 +278,7 @@ const Workschedule = () => {
         const today = dayjs().startOf('day');
         const workDate = dayjs(record.work_date);
         const isPastDate = workDate.isBefore(today);
-        
+
         return (
           <>
             <Button onClick={() => handleView(record)} size="small" className="mr-2">
@@ -305,7 +305,7 @@ const Workschedule = () => {
   return (
     <div style={{ padding: 24 }}>
       <Title level={3}>Lịch Làm Việc</Title>
-      
+
       {/* Filter Section */}
       <Card style={{ marginBottom: 16 }}>
         <Row gutter={[16, 16]}>

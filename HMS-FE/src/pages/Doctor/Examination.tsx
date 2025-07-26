@@ -41,9 +41,9 @@ const Examination = () => {
         setIsEditExaminationModalVisible(false);
     }
 
-    const roomColumns = [   
+    const roomColumns = [
         {
-            title: "Ngày khám",
+            title: "Ngày Đặt Lịch",
             dataIndex: "createdAt",
             key: "createdAt",
         },
@@ -66,7 +66,7 @@ const Examination = () => {
 
     const examinationColumns = [
         {
-            title: "Ngày khám",
+            title: "Ngày Đặt Lịch",
             dataIndex: "createdAt",
             key: "createdAt",
             width: 160,
@@ -145,7 +145,7 @@ const Examination = () => {
             clinicId: "Phòng A",
             note: "Amidan sưng to, có mủ, xét nghiệm liên cầu dương tính",
         }
-    ]   
+    ]
 
     const examinationHistory = [
         {

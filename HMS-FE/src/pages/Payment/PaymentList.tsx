@@ -99,7 +99,7 @@ const PaymentList: React.FC = () => {
       dataIndex: 'patient_name',
     },
     {
-      title: 'Ngày khám',
+      title: 'Ngày Đặt Lịch',
       dataIndex: 'examined_at',
       render: (val) => new Date(val).toLocaleDateString('vi-VN', {
         year: 'numeric',
@@ -149,8 +149,8 @@ const PaymentList: React.FC = () => {
               </Tooltip>
             </>
           )}
-    
-  
+
+
 
           {record.status === 'pending' && (
             <>

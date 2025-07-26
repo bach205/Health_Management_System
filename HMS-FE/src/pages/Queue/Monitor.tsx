@@ -81,12 +81,12 @@ const Monitor: React.FC = () => {
 
       // Filter by selected date on frontend
       let filteredQueue = res.metadata.queueClinic || [];
-      if (date) {
-        filteredQueue = filteredQueue.filter((item: IQueue) => {
-          const itemDate = dayjs(item.slot_date);
-          return itemDate.isSame(date, 'day');
-        });
-      }
+      // if (date) {
+      //   filteredQueue = filteredQueue.filter((item: IQueue) => {
+      //     const itemDate = dayjs(item.slot_date);
+      //     return itemDate.isSame(date, 'day');
+      //   });
+      // }
 
       setQueueData(filteredQueue);
       setPagination({
@@ -153,7 +153,7 @@ const Monitor: React.FC = () => {
       render: (val: string) => getShiftTypeText(val),
     },
     {
-      title: "Ngày khám",
+      title: "Ngày Đặt Lịch",
       dataIndex: "slot_date",
       key: "slot_date",
       align: "center" as const,

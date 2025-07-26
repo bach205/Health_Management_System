@@ -33,7 +33,7 @@ const ExaminationHistory: React.FC = () => {
 
     const columns = [
         {
-            title: 'Ngày khám',
+            title: 'Ngày Đặt Lịch',
             dataIndex: 'examined_at',
             key: 'examined_at',
             width: 120,
@@ -151,7 +151,7 @@ const ExaminationHistory: React.FC = () => {
             >
                 {selectedRecord && (
                     <Descriptions bordered column={1}>
-                        <Descriptions.Item label="Ngày khám">
+                        <Descriptions.Item label="Ngày Đặt Lịch">
                             {dayjs(selectedRecord.examined_at).format('DD/MM/YYYY HH:mm')}
                         </Descriptions.Item>
                         <Descriptions.Item label="Bác sĩ">

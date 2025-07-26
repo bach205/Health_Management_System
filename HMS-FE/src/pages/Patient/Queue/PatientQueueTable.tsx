@@ -134,7 +134,7 @@ const PatientQueueTable = () => {
         },
 
         {
-            title: "Ngày khám",
+            title: "Ngày Đặt Lịch",
             dataIndex: ["appointment"],
             key: "appointment",
             width: 100,
