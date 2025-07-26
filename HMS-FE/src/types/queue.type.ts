@@ -11,7 +11,10 @@
 //     created_at        DateTime    @default(now())
 
 import type { Patient } from "./patient.type";
+<<<<<<< HEAD
 import type { ReactNode } from 'react';
+=======
+>>>>>>> 900852be3cd26e01821d7ac00bc19b775044404b
 
 //     patient Patient            @relation(fields: [patient_id], references: [id])
 //     clinic  Clinic             @relation(fields: [clinic_id], references: [id])
@@ -22,7 +25,7 @@ import type { ReactNode } from 'react';
 
 export interface IQueue {
   appointment: any;
-  slot_date: ReactNode;
+  // slot_date: ReactNode;
   shift_type: any;
   queue_number: number;
   id: number;

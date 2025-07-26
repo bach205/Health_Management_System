@@ -17,7 +17,6 @@ class QueueService {
    */
   static async getQueueClinic(clinicId, query) {
     const { pageNumber = 1, pageSize = 10, type } = query;
-    console.log(query)
     if (!clinicId) {
       throw new Error("Clinic ID is required");
     }
@@ -102,6 +101,8 @@ class QueueService {
   static async assignAdditionalClinic({
     patient_id,
     to_clinic_id,
+    appointment_id, // add appointment_id
+    to_doctor_id,   // add to_doctor_id
     // record_id, // khong can record_id o day
     reason = "",
     note = "",
@@ -128,8 +129,6 @@ class QueueService {
       });
     }
 
-    // ?? Chưa có tạo queue mới 
-
     // 3. Kiểm tra bệnh nhân đã có trong hàng đợi phòng mới chưa
     const existing = await prisma.queue.findFirst({
       where: {
@@ -147,7 +146,7 @@ class QueueService {
 
     // 4. Tạo mới bản ghi queue ở phòng khám mới bằng assignQueueNumber
     const newQueue = await QueueService.assignQueueNumber({
-      appointment_id: null,
+      appointment_id: appointment_id || null,
       patient_id,
       clinic_id: to_clinic_id,
       slot_date,
@@ -163,6 +162,19 @@ class QueueService {
         priority
       }
     });
+
+    // 5.1. Nếu có appointment_id thì cập nhật appointment
+    if (appointment_id) {
+      // Cập nhật appointment_date, appointment_time, doctor_id
+      await prisma.appointment.update({
+        where: { id: Number(appointment_id) },
+        data: {
+          appointment_date: slot_date,
+          appointment_time: slot_time,
+          doctor_id: to_doctor_id || undefined,
+        },
+      });
+    }
 
     const newOrder = await prisma.examinationOrder.findFirst({
       where: {
@@ -201,6 +213,8 @@ class QueueService {
     from_clinic_id, // chuyển từ phòng khám này
     to_clinic_id, // sang phòng khám khác
     to_doctor_id, // bác sĩ ở phòng khám mới
+    appointment_date,
+    appointment_time,
     reason = "", // lý do chuyển phòng
     note = "", // ghi chú
     extra_cost = 0, // chi phí chuyển phòng
@@ -295,8 +309,6 @@ class QueueService {
       },
     });
 
-    // console.log("order created:", order);
-
     // 3. Kiểm tra xem bệnh nhân đã có trong hàng đợi chưa
     const existingQueue = await prisma.queue.findFirst({
       where: {
@@ -314,14 +326,15 @@ class QueueService {
 
     const slotTimeStr = this.formatTimeToString(slot.start_time); // Ví dụ: "10:00:00"
 
-
     // 4. Tạo queue mới bằng assignQueueNumber
     const queue = await QueueService.assignQueueNumber({
       appointment_id,
       patient_id,
+      from_clinic_id: from_clinic_id,
       clinic_id: to_clinic_id,
+      to_doctor_id,
       slot_date: slot.slot_date,
-      slot_time: slotTimeStr,
+      slot_time: slot.start_time,
       registered_online: false,
     });
 
@@ -534,20 +547,38 @@ class QueueService {
     appointment_id,
     patient_id,
     clinic_id,
+    from_clinic_id,
     slot_date,
     slot_time,
-    registered_online = true
+    registered_online = true,
+    to_doctor_id // optional, for updating doctor_id if needed
   }) {
     // ====== LOG DEBUG ======
     console.log('🔍 [DEBUG] assignQueueNumber được gọi với params:', {
       appointment_id,
       patient_id, 
       clinic_id,
+      from_clinic_id,
       slot_date,
       slot_time,
-      registered_online
+      registered_online,
+      to_doctor_id
     });
     // ====== END LOG ======
+    // 1. Nếu đã có queue cũ của bệnh nhân ở phòng khám này (chưa done/skipped), cập nhật status thành 'done'
+    const oldQueue = await prisma.queue.findFirst({
+      where: {
+        patient_id,
+        clinic_id : from_clinic_id,
+        status: { in: ["waiting", "in_progress"] },
+      },
+    });
+    if (oldQueue) {
+      await prisma.queue.update({
+        where: { id: oldQueue.id },
+        data: { status: "done" },
+      });
+    }
 
     // Xử lý slot_date và slot_time để tránh lỗi date parsing
     let slotDateVN = '';
@@ -561,20 +592,18 @@ class QueueService {
     } else {
       throw new Error('slot_date không hợp lệ');
     }
-
+    
     // Xử lý slot_time
     if (typeof slot_time === 'string') {
       slotTimeVN = slot_time.trim();
     } else if (slot_time instanceof Date) {
-      slotTimeVN = slot_time.toTimeString().slice(0, 8); // Lấy HH:mm:ss
+      slotTimeVN = slot_time.toUTCString().slice(16, 25); // Lấy HH:mm:ss
+      
     } else {
       throw new Error('slot_time không hợp lệ');
     }
 
     // Đảm bảo slot_time có đủ 3 phần
-    if (/^\d{2}:\d{2}$/.test(slotTimeVN)) {
-      slotTimeVN += ':00';
-    }
 
     const shift = this.getShiftTypeAndRange(slotTimeVN);
     if (!shift) throw new Error(`Giờ khám không thuộc ca nào! slot_time: ${slotTimeVN}`);
@@ -625,7 +654,7 @@ class QueueService {
       ORDER BY q.id DESC
       LIMIT 1
     `;
-
+  
     // ====== LOG DEBUG ======
     console.log('✅ [DEBUG] Queue được tạo thành công:', {
       id: newQueue.id,
@@ -635,6 +664,35 @@ class QueueService {
       patient_name: newQueue.patient_name
     });
     // ====== END LOG ======
+
+    // Nếu có appointment_id thì cập nhật appointment
+    if (appointment_id) {
+      await prisma.appointment.update({
+        where: { id: Number(appointment_id) },
+        data: {
+          appointment_date: new Date(slotDateVN),
+          appointment_time: slot_time,
+          doctor_id: to_doctor_id || undefined,
+          clinic_id : clinic_id,
+        },
+      });
+      const data = await prisma.availableSlot.findFirst({
+        where : {
+          doctor_id : to_doctor_id,
+          clinic_id : clinic_id,
+        },
+      })
+      await prisma.availableSlot.update({
+        where : {
+          doctor_id : to_doctor_id,
+          clinic_id : clinic_id,
+          id : data.id,
+        },
+        data : {
+          is_available : false,
+        }
+      })
+    }
 
     // Gửi email nếu có email
     try {

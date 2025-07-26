@@ -623,7 +623,7 @@ class DoctorService {
                 full_name: row.full_name?.trim(),
                 email: row.email?.trim(),
                 phone: row.phone?.trim() || '',
-                gender: row.gender,
+                gender: row.gender || 'male',
                 date_of_birth: row.date_of_birth,
                 address: row.address?.trim() || '',
                 password: row.password?.trim(),

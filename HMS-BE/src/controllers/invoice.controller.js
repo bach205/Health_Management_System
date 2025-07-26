@@ -21,6 +21,13 @@ class InvoiceController {
       metadata: result,
     }).send(res);
   };
+
+  updateInvoice = async (req, res) => {
+    const { record_id } = req.params;
+    const { items } = req.body;
+    const data = await InvoiceService.updateInvoice(record_id, items);
+    return new OK({ message: "Cập nhật hóa đơn thành công", metadata: data }).send(res);
+  };
 }
 
 module.exports = new InvoiceController();

@@ -13,6 +13,11 @@ export const getInvoiceDetailByAppointmentId = async (appointment_id: number) =>
   return instance.get(`/api/v1/invoice/appointment/${appointment_id}`);
 };
 
+// Cập nhật hóa đơn
+export const updateInvoice = async (record_id: number | undefined, items: any[]) => {
+ 
+  return instance.patch(`/api/v1/invoice/${record_id}`, { items });
+};
 
 // Xác nhận thanh toán cho một hóa đơn
 export const confirmPayment = async (record_id: number) => {

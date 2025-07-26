@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Upload, Modal, Button, message, notification } from 'antd';
+import { useState } from 'react';
+import { Upload, Modal, Button, message, notification, Typography } from 'antd';
 import { InboxOutlined } from '@ant-design/icons';
 import Papa from 'papaparse';
 import { createDoctorsFromCSV } from '../../services/doctor.service';
@@ -84,11 +84,35 @@ const CSVImportModal = ({ role, reload, setReload }: IProps) => {
                         setConfirming(false);
                         return;
                     }
-                    setCsvData((parseData || []).map((item, index) => ({
-                        ...item,
-                        date_of_birth: item.date_of_birth ? new Date(item.date_of_birth) : null,
+                    const data = (parseData || []).map((item, index) => {
+                        // message.error("File CSV không chứa dữ liệu hợp lệ.");
+                        if (item.email === "") {
+                            message.error("Dòng " + (index + 1) + " Email không được để trống.");
+                            setConfirming(false);
+                            return;
+                        }
+                        if (item.full_name === "") {
+                            message.error("Dòng " + (index + 1) + " Tên không được để trống.");
+                            setConfirming(false);
+                            return;
+                        }
+                        if (item.specialty_id === "") {
+                            message.error("Dòng " + (index + 1) + " Chuyên khoa không được để trống.");
+                            setConfirming(false);
+                            return;
+                        }
+                        if (item.price === "") {
+                            message.error("Dòng " + (index + 1) + " Giá khám không được để trống.");
+                            setConfirming(false);
+                            return;
+                        }
 
-                    })));
+                        return ({
+                            ...item,
+
+                        })
+                    });
+                    setCsvData(data);
                     setConfirming(false);
                 },
                 error: function () {
@@ -104,13 +128,13 @@ const CSVImportModal = ({ role, reload, setReload }: IProps) => {
         },
         fileList,
     };
-    console.log(csvData);
+    // console.log(csvData);
 
 
     return (
         <>
             <Button type="default" onClick={showModal}>
-            <FileSpreadsheet className='w-4 h-4' />Tạo nhanh với CSV
+                <FileSpreadsheet className='w-4 h-4' />Tạo nhanh với CSV
             </Button>
 
             <Modal
@@ -133,6 +157,20 @@ const CSVImportModal = ({ role, reload, setReload }: IProps) => {
                     </Button>,
                 ]}
             >
+                {
+                    role === 'doctor' && (
+                        <p className='mb-3'>
+                            <span className='text-red-500'>*</span> Lưu ý: File phải có các cột: <b>email, full_name, specialty_id, price</b>
+                        </p>
+                    )
+                }
+                {
+                    role === 'nurse' && (
+                        <p className='mb-3'>
+                            <span className='text-red-500'>*</span> Lưu ý: File phải có các cột: <b>email, full_name</b>
+                        </p>
+                    )
+                }
                 <Dragger {...uploadProps} style={{ padding: 16 }}>
                     <p className="ant-upload-drag-icon">
                         <InboxOutlined />
@@ -141,11 +179,19 @@ const CSVImportModal = ({ role, reload, setReload }: IProps) => {
                     <p className="ant-upload-hint">Chỉ chấp nhận file có định dạng .csv</p>
                 </Dragger>
 
-                {/* {csvData.length > 0 && (
-                    <pre style={{ marginTop: 20, maxHeight: 300, overflowY: 'auto', background: '#f6f6f6', padding: 10 }}>
-                        {JSON.stringify(csvData, null, 2)}
-                    </pre>
-                )} */}
+                {csvData.length > 0 && (
+                    <>
+                        <Typography.Title level={5} className='mt-3'>Những tài khoản sau sẽ được tạo, mật khẩu sẽ được gửi về mail:</Typography.Title>
+                        <pre style={{ marginTop: 20, maxHeight: 300, overflowY: 'auto', background: '#f6f6f6', padding: 10 }}>
+                            {csvData.map((item: any) => {
+                                console.log(item);
+                                return (
+                                    <p key={item.id}>{item.email} - {item.full_name}</p>
+                                )
+                            })}
+                        </pre>
+                    </>
+                )}
             </Modal>
         </>
     );

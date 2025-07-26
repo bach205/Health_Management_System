@@ -18,8 +18,6 @@ statisticsRouter.get(
 
 statisticsRouter.get(
   "/period-statistics",
-  // authenticate,
-  // checkUserStatus(),
   authorize("admin"),
   asyncHandler(statisticsController.getPeriodStatistics),
   statisticsController.getPeriodStatistics
@@ -27,8 +25,6 @@ statisticsRouter.get(
 
 statisticsRouter.get(
   "/revenue-days",
-  // authenticate,
-  // checkUserStatus(),
   authorize("admin"),
   // validate("getRevenuePerDayInMonth"),
   asyncHandler(statisticsController.getRevenuePerDayInMonth),
@@ -37,8 +33,6 @@ statisticsRouter.get(
 
 statisticsRouter.get(
   "/revenue-months",
-  // authenticate,
-  // checkUserStatus(),
   authorize("admin"),
   // validate("getRevenuePerMonthInYear"),
   asyncHandler(statisticsController.getRevenuePerMonthInYear),
@@ -47,8 +41,6 @@ statisticsRouter.get(
 
 statisticsRouter.get(
   "/total-statistics",
-  // authenticate,
-  // checkUserStatus(),
   authorize("admin"),
   asyncHandler(statisticsController.getTotalStatistics),
   statisticsController.getTotalStatistics

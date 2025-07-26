@@ -7,9 +7,9 @@ class InvoiceService {
     const records = await prisma.examinationRecord.findMany({
       include: {
         patient: {
-            include: {
-                user: true
-            },
+          include: {
+            user: true
+          },
         },
         invoiceItems: true,
         payments: {
@@ -17,16 +17,16 @@ class InvoiceService {
             status: true,
           },
         },
-  
+
 
       },
     });
 
-    const data =  records.map((r) => {
+    const data = records.map((r) => {
       console.log(r.payments[0]?.status)
       if (r.payments[0]?.status === 'canceled' || r.payments[0]?.status === 'paid') {
         return null; // Bỏ qua các record đã hủy thanh toán
-        
+
       }
       return {
         record_id: r.id,
@@ -73,6 +73,36 @@ class InvoiceService {
       },
     });
     return invoice;
+  }
+
+  // Cập nhật hóa đơn
+  updateInvoice = async (record_id, items) => {
+    const invoice = await prisma.invoiceItem.deleteMany({
+      where: { record_id: Number(record_id) },
+    });
+    const invoiceItems = await prisma.invoiceItem.createMany({
+      data: items.map(item => ({
+        record_id: Number(record_id),
+        description: item.description,
+        amount: item.amount,
+      })),
+    });
+    // console.log(invoiceItems)
+    const total_amount = items.reduce((sum, item) => sum + Number(item.amount), 0);
+    const payment = await prisma.payment.findFirst({
+      where: { record_id: Number(record_id) },
+    });
+    if (!payment) {
+      return new Error("Không tìm thấy thanh toán");
+    }
+
+    await prisma.payment.update({
+      where: { id: payment.id },
+      data: {
+        amount: total_amount,
+      },
+    });
+    return invoiceItems;
   }
 }
 

@@ -1,8 +1,7 @@
-import { Button, DatePicker, Form, Input, Modal, Select, type FormInstance, type UploadProps, type UploadFile, message, Upload, Image } from "antd";
+import { DatePicker, Form, Input, Modal, Select, type FormInstance, type UploadProps, type UploadFile, message, Upload, Image } from "antd";
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import { TYPE_EMPLOYEE_STR } from "../../../constants/user.const";
-import Uploader from "../../../pages/Profile/Uploader";
 import type { IUserBase } from "../../../types/index.type";
 import { getBase64 } from "../../../utils";
 import imageCompression from "browser-image-compression";
@@ -20,14 +19,13 @@ interface IProps {
 }
 
 const ModalUpdatePatient = ({ role, isVisible, handleOk, handleCancel, form, user, reload, setReload }: IProps) => {
-  const handleReload = () => {
-    handleCancel();
-    setReload(!reload);
-  }
+
 
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [previewImage, setPreviewImage] = useState("");
   const [previewOpen, setPreviewOpen] = useState(false);
+
+
 
   useEffect(() => {
     if (user?.avatar) {
@@ -82,6 +80,12 @@ const ModalUpdatePatient = ({ role, isVisible, handleOk, handleCancel, form, use
   };
 
   const [identityType, setIdentityType] = useState<string>("citizen");
+
+  const handleModalCancel = () => {
+    handleCancel();
+    setFileList([]);
+    setPreviewImage("");
+  }
   return (
     <Modal
       open={isVisible}
@@ -89,7 +93,7 @@ const ModalUpdatePatient = ({ role, isVisible, handleOk, handleCancel, form, use
       onOk={handleOk}
       okText={"Cập nhật"}
       cancelText="Hủy"
-      onCancel={handleCancel}
+      onCancel={handleModalCancel}
       destroyOnHidden
       centered
 

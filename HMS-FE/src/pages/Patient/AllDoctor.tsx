@@ -59,7 +59,7 @@ const AllDoctor: React.FC = () => {
     const { specialties } = useSpecialtyList({ pageSize: 8, current: 1 }, true);
 
     return (
-        <div style={{ padding: '24px' }} className="flex flex-col gap-4 w-full min-h-[200px] overflow-hidden">
+        <div style={{ padding: '24px' }} className="flex flex-col gap-4 w-full min-h-[250px] overflow-hidden">
             <Title level={3} style={{ borderLeft: '4px solid #1890ff', paddingLeft: 12 }}>
                 Danh sách bác sĩ theo chuyên khoa
             </Title>

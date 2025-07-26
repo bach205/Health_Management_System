@@ -1,4 +1,8 @@
 
+<<<<<<< HEAD
+=======
+// import { message } from "antd";
+>>>>>>> 900852be3cd26e01821d7ac00bc19b775044404b
 import instance from "../api/mainRequest";
 import type { IPatient } from "../types/index.type";
 const BASE_URL = "api/v1/patients";
@@ -52,8 +56,8 @@ export const getDoctors = async (searchOptions: any) => {
     return instance.post(`${patientURL}`, searchOptions);
 };
 
-export const updatePatient = (patient: IPatient) => {
-    return instance.post(`${patientURL}/update`, patient);
+export const updatePatient = (id: number, updateData: IPatient) => {
+    return instance.post(`${patientURL}/update`, { userId: id, updateData });
 };
 
 export const getDoctorById = (id: number) => {

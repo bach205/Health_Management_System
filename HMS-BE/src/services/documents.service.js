@@ -1,6 +1,6 @@
 const FormData = require("form-data");
 const axios = require("axios");
-const RAG_SERVER_URL = process.env.RAG_SERVER_URL || "http://localhost:8000"; // chỉnh lại nếu cần
+const RAG_SERVER_URL = process.env.RAG_SERVER_URL || "http://localhost:8000/api/v1"; // chỉnh lại nếu cần
 
 class DocumentsService {
     async getAllDocuments() {
@@ -13,7 +13,6 @@ class DocumentsService {
         });
     }
     async createDocument(file, user_id) {
-        console.log(file)
         const form = new FormData();
         form.append("file", file.buffer, file.originalname);
         form.append("user_id", user_id);

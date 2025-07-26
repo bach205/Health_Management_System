@@ -105,6 +105,8 @@ class AppointmentService {
       where: { phone: data.phone },
       include: { patient: true }
     });
+
+    console.log(">>>>> patient ", patient)
     if (!patient) {
       // Tạo user và patient mới
       const hashedPassword = await bcrypt.hash(
@@ -123,7 +125,7 @@ class AppointmentService {
             is_active: true,
             gender: data.gender,
             address: data.address,
-            date_of_birth: data.date_of_birth,
+            date_of_birth: new Date(data.date_of_birth),
             email: `${data.phone}@gmail.com`,
           },
         });
@@ -153,7 +155,7 @@ class AppointmentService {
     });
     if (exist)
       throw new BadRequestError("Bệnh nhân đã có lịch hẹn vào khung giờ này!");
-
+    console.log("patient", patient)
     // 4. Tạo lịch hẹn
     const appointment = await prisma.appointment.create({
       data: {

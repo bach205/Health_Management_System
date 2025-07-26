@@ -111,7 +111,7 @@ export const getAvailableSlots = async ({
   if (slot_date) params.append("slot_date", slot_date);
 
   const res = await mainRequest.get(`/api/v1/appointment/slots?${params.toString()}`);
-  console.log("res",res)
+  console.log("res", res)
   return res.data;
 }
 
