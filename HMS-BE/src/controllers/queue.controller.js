@@ -213,6 +213,7 @@ class QueueController {
         extra_cost,
         appointment_id,
         priority,
+        doctor_id,
       });
       return new OK({
         message: "Chuyển phòng và thêm vào hàng đợi thành công",

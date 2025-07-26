@@ -351,28 +351,28 @@ class AppointmentService {
     }
 
     // Sau khi gọi assignQueueNumber thành công
-    const io = getIO();
+    // const io = getIO();
 
     // Giả sử bạn có thể lấy lại queue vừa tạo hoặc cập nhật từ DB (tùy vào implement)
-    const latestQueue = await prisma.queue.findFirst({
-      where: {
-        appointment_id: appointment.id,
-        clinic_id: appointment.clinic_id
-      },
-      include: {
-        appointment: true,
-        patient: true
-      }
-    });
+    // const latestQueue = await prisma.queue.findFirst({
+    //   where: {
+    //     appointment_id: appointment.id,
+    //     clinic_id: appointment.clinic_id
+    //   },
+    //   include: {
+    //     appointment: true,
+    //     patient: true
+    //   }
+    // });
 
-    if (latestQueue) {
-      io.to(`clinic_${appointment.clinic_id}`).emit("queue:statusChanged", {
-        queue: latestQueue,
-        clinicId: appointment.clinic_id
-      });
+    // if (latestQueue) {
+    //   io.to(`clinic_${appointment.clinic_id}`).emit("queue:statusChanged", {
+    //     queue: latestQueue,
+    //     clinicId: appointment.clinic_id
+    //   });
 
-      console.log("📢 [SOCKET] Đã emit queue:statusChanged sau khi confirmAppointment");
-    }
+    //   console.log("📢 [SOCKET] Đã emit queue:statusChanged sau khi confirmAppointment");
+    // }
 
 
     // ====== END ======

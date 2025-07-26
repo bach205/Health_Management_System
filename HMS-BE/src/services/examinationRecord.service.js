@@ -82,8 +82,21 @@ class ExaminationRecordService {
         } catch (error) {
             console.log(error);
         }
+        let doctor_ids = [];
+        doctor_ids.push(doctor_id);
+        // kiểm tra xem bệnh nhân có được chuyển phòng không, giá sẽ cộng dồn
+        const orders = await prisma.examinationOrder.findMany({
+            where: { appointment_id },
+        });
+        console.log("orders", orders)
+        if (orders) {
+            doctor_ids = [...orders.map(item => item.doctor_id), doctor_id];
+        }
+        console.log("doctor_id", doctor_id)
+        console.log("doctor_ids", doctor_ids)
+
         try {
-            await paymentService.createInvoiceAndPaymentAfterExamination(record, appointment_id, doctor_id, patient_id);
+            await paymentService.createInvoiceAndPaymentAfterExamination(record, appointment_id, doctor_ids, patient_id);
         } catch (error) {
             console.error("Error creating invoice and payment:", error);
             throw new Error("Lỗi khi tạo hóa đơn và thanh toán: " + error.message);

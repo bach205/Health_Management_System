@@ -7,15 +7,17 @@ import { X } from "lucide-react";
 const ViewPayment = ({ record, modalVisible, setModalVisible, setReload, reload }: any) => {
     const [invoiceItems, setInvoiceItems] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
-    console.log(record)
+    const [patient, setPatient] = useState<any>(null);
+    // console.log(record)
 
     useEffect(() => {
         const fetchInvoice = async () => {
-            console.log(record)
+            console.log("record", record)
             if (record) {
                 const res = await getInvoiceDetailByAppointmentId(record.id);
                 console.log(res)
                 setInvoiceItems(res.data.metadata.invoiceItems);
+                setPatient(res.data.metadata.patient);
             }
         }
         fetchInvoice();
@@ -81,7 +83,7 @@ const ViewPayment = ({ record, modalVisible, setModalVisible, setReload, reload 
                         </Typography.Title>
                         <div className='flex flex-col justify-center mt-4 w-[300px] h-[300px] mx-auto'>
                             <img
-                                src={`https://qr.sepay.vn/img?acc=VQRQADITO0867&bank=MBBank&amount=${totalAmount}&des=Thanh%20Toan%20${record?.patient?.user?.full_name}`} alt="" />
+                                src={`https://qr.sepay.vn/img?acc=VQRQADITO0867&bank=MBBank&amount=${totalAmount}&des=Thanh%20Toan%20${patient?.user?.full_name}`} alt="" />
 
                         </div>
                     </>

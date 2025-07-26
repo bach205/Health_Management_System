@@ -133,7 +133,8 @@ CREATE TABLE examination_records (
 
   CREATE TABLE examination_orders (
       id INT AUTO_INCREMENT PRIMARY KEY,
-      doctor_id INT NOT NULL COMMENT 'Referring doctor',
+      doctor_id INT NOT NULL COMMENT 'From doctor',
+      to_doctor_id INT NOT NULL COMMENT 'To doctor',
       patient_id INT NOT NULL COMMENT 'Patient',
       appointment_id INT NOT NULL COMMENT 'Linked appointment',
       from_clinic_id INT NOT NULL COMMENT 'Current clinic',
@@ -144,6 +145,7 @@ CREATE TABLE examination_records (
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
       FOREIGN KEY (doctor_id) REFERENCES users(id) ON DELETE CASCADE,
+      FOREIGN KEY (to_doctor_id) REFERENCES users(id) ON DELETE CASCADE,
       FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
       FOREIGN KEY (appointment_id) REFERENCES appointments(id) ON DELETE CASCADE,
       FOREIGN KEY (from_clinic_id) REFERENCES clinics(id) ON DELETE CASCADE,
@@ -541,18 +543,18 @@ VALUES
 (10, 1, 2, 10, 'Xét nghiệm nước tiểu cho thấy nhiễm trùng nhẹ', 'Uống kháng sinh 5 ngày', '2025-06-10 12:00:00'),
 (11, 2, 14, 11, 'Siêu âm tuyến giáp phát hiện nhân nhỏ', 'Theo dõi định kỳ mỗi 6 tháng', '2025-06-11 10:40:00');
 
-INSERT INTO examination_orders 
-(doctor_id, patient_id, appointment_id, from_clinic_id, to_clinic_id, reason,note, extra_cost)
-VALUES
-(2, 8, 1, 1, 9, 'Cần chuyển sang phòng chụp X-quang', 'Chuyển phòng khẩn cấp', 50000),
+-- INSERT INTO examination_orders 
+-- (doctor_id, patient_id, appointment_id, from_clinic_id, to_clinic_id, reason,note, extra_cost)
+-- VALUES
+-- (2, 8, 1, 1, 9, 'Cần chuyển sang phòng chụp X-quang', 'Chuyển phòng khẩn cấp', 50000),
 
-(3, 9, 3, 2, 10, 'Cần phẫu thuật cấp cứu, chuyển phòng mổ', 'Chuyển phòng khẩn cấp', 2000000),
+-- (3, 9, 3, 2, 10, 'Cần phẫu thuật cấp cứu, chuyển phòng mổ', 'Chuyển phòng khẩn cấp', 2000000),
 
-(14, 10, 4, 3, 11, 'Chuyển sang vật lý trị liệu', 'Chuyển phòng khẩn cấp', 150000),
+-- (14, 10, 4, 3, 11, 'Chuyển sang vật lý trị liệu', 'Chuyển phòng khẩn cấp', 150000),
 
-(2, 11, 5, 4, 12, 'Chuyển sang phòng nội trú theo dõi sốt xuất huyết', 'Chuyển phòng khẩn cấp', 0),
+-- (2, 11, 5, 4, 12, 'Chuyển sang phòng nội trú theo dõi sốt xuất huyết', 'Chuyển phòng khẩn cấp', 0),
 
-(3, 12, 6, 5, 13, 'Chuyển sang khoa miễn dịch tư vấn thêm', 'Tạm chuyển phòng', 100000);
+-- (3, 12, 6, 5, 13, 'Chuyển sang khoa miễn dịch tư vấn thêm', 'Tạm chuyển phòng', 100000);
 
 
 -- Insert sample data into examination_details

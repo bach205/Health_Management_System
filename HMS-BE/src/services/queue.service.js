@@ -220,6 +220,7 @@ class QueueService {
     extra_cost = 0, // chi phí chuyển phòng
     appointment_id, // lịch hẹn khám
     priority = 2, // ưu tiên chuyển phòng
+    doctor_id, // bác sĩ chuyển phòng
   }) {
 
 
@@ -258,13 +259,21 @@ class QueueService {
       ],
     });
 
+    console.log("sameDaySlots", sameDaySlots)
+
     // Lọc slot cùng ngày có thời gian sau appointment (xử lý ở application level)
-    const appointmentTimeSec = this.timeToSeconds(new Date(`1970-01-01T${appointmentTime}Z`));
+
+    // Thái sửa phần này
+    const appointmentTimeCheck = appointment.appointment_time.toTimeString().slice(0, 8); // "20:00:00"
 
     const validSameDaySlots = sameDaySlots.filter(slot => {
-      const slotTimeSec = this.timeToSeconds(new Date(slot.start_time));
-      return slotTimeSec > appointmentTimeSec;
+      const slotTime = slot.start_time.toTimeString().slice(0, 8); // Cắt thành "20:30:00"
+      return slotTime > appointmentTimeCheck;
     });
+    // Thái sửa phần này
+    
+
+    console.log("validSameDaySlots", validSameDaySlots)
 
     if (validSameDaySlots.length > 0) {
       slot = validSameDaySlots[0];
@@ -291,7 +300,8 @@ class QueueService {
     // 2. Tạo đơn chuyển khám
     const order = await prisma.examinationOrder.create({
       data: {
-        doctor_id: to_doctor_id,
+        doctor_id,
+        to_doctor_id,
         patient_id,
         from_clinic_id,
         to_clinic_id,
