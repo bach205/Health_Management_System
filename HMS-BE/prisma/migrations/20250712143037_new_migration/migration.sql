@@ -5,7 +5,7 @@ CREATE TABLE `users` (
     `password` VARCHAR(191) NULL,
     `full_name` VARCHAR(191) NULL,
     `phone` VARCHAR(191) NULL,
-    `role` ENUM('doctor', 'nurse', 'receptionist', 'admin', 'patient') NOT NULL,
+    `role` ENUM('doctor', 'nurse', 'admin', 'patient') NOT NULL,
     `address` TEXT NULL,
     `date_of_birth` DATE NULL,
     `gender` ENUM('male', 'female', 'other') NULL,

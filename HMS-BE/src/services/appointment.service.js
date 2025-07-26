@@ -4,6 +4,7 @@ const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 const QueueService = require("./queue.service");
 const { sendStaffNewPasswordEmail, sendPatientNewPasswordEmail, sendPatientAppointmentConfirmationEmail } = require("../utils/staff.email");
+const { getIO } = require("../config/socket");
 
 class AppointmentService {
   /**
@@ -348,6 +349,32 @@ class AppointmentService {
     } catch (err) {
       console.error('❌ [DEBUG] Lỗi khi gửi mail xác nhận lịch hẹn:', err.message);
     }
+
+    // Sau khi gọi assignQueueNumber thành công
+    // const io = getIO();
+
+    // Giả sử bạn có thể lấy lại queue vừa tạo hoặc cập nhật từ DB (tùy vào implement)
+    // const latestQueue = await prisma.queue.findFirst({
+    //   where: {
+    //     appointment_id: appointment.id,
+    //     clinic_id: appointment.clinic_id
+    //   },
+    //   include: {
+    //     appointment: true,
+    //     patient: true
+    //   }
+    // });
+
+    // if (latestQueue) {
+    //   io.to(`clinic_${appointment.clinic_id}`).emit("queue:statusChanged", {
+    //     queue: latestQueue,
+    //     clinicId: appointment.clinic_id
+    //   });
+
+    //   console.log("📢 [SOCKET] Đã emit queue:statusChanged sau khi confirmAppointment");
+    // }
+
+
     // ====== END ======
     return appointment;
   }

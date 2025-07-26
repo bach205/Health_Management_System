@@ -57,7 +57,7 @@ const ModalViewPayment = ({ selectedInvoice, modalVisible, setModalVisible, invo
                     selectedInvoice?.status === 'pending' &&
                     <>
                         <Typography.Title level={5} className='mt-2 text-center'>
-                            Thanh toán qua mã QR dưới đây:
+                        Nếu chuyển khoản qua ngân hàng, vui lòng thanh toán qua mã QR dưới đây:
                         </Typography.Title>
                         <div className='flex flex-col justify-center mt-4 w-[300px] h-[300px] mx-auto'>
                             <img
