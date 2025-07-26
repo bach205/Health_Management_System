@@ -23,7 +23,7 @@ const AllDoctor: React.FC = () => {
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
     const specialityQuery = searchParams.get("speciality");
-
+    console.log(specialityQuery)
     const [doctors, setDoctors] = useState<any[]>([]);
     const {
         users,

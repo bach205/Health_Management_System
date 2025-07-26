@@ -443,33 +443,33 @@ INSERT INTO doctors (user_id, specialty, bio) VALUES
 (25, 'Chẩn đoán hình ảnh', 'Chuyên gia về đọc và phân tích hình ảnh y khoa.');
 
 
-INSERT INTO appointments (patient_id, clinic_id, doctor_id, appointment_date, appointment_time, status, priority, reason, note) VALUES
-(8, 1, 2, '2025-06-10', '09:00:00', 'pending', 0, 'Đau ngực, khó thở', 'Bệnh nhân có tiền sử bệnh tim'),
-(9, 2, 3, '2025-06-11', '14:00:00', 'pending', 0, 'Đau đầu, chóng mặt', 'Bệnh nhân bị stress nhiều'),
-(10, 3, 14, '2025-06-12', '08:30:00', 'confirmed', 0, 'Đau khớp gối', 'Cần chụp X-quang'),
-(11, 4, 2, '2025-06-13', '10:00:00', 'confirmed', 0, 'Sốt cao, phát ban', 'Cần xét nghiệm máu'),
-(12, 5, 3, '2025-06-14', '15:00:00', 'cancelled', 0, 'Dị ứng da', 'Bệnh nhân hủy do bận việc'),
-(13, 6, 14, '2025-06-15', '09:30:00', 'completed', 0, 'Khám mắt định kỳ', 'Đã đeo kính cận'),
-(8, 1, 2, '2025-06-20', '08:30:00', 'confirmed', 0, 'Tái khám sau điều trị viêm phổi', 'Kiểm tra phục hồi sau 3 tuần điều trị'),
-(9, 8, 2, '2025-06-18', '10:00:00', 'pending', 0, 'Khám tổng quát định kỳ', 'Bệnh nhân có tiền sử phẫu thuật ruột thừa'),
-(10, 3, 14, '2025-06-25', '14:30:00', 'confirmed', 0, 'Tái khám khớp gối', 'Đánh giá hiệu quả vật lý trị liệu'),
-(11, 7, 3, '2025-06-16', '09:00:00', 'pending', 0, 'Đau tai, nghe kém', 'Triệu chứng xuất hiện sau cảm lạnh'),
-(12, 11, 2, '2025-06-17', '15:30:00', 'confirmed', 0, 'Đau bụng, khó tiêu', 'Bệnh nhân có tiền sử dị ứng thuốc'),
-(13, 12, 14, '2025-06-19', '11:00:00', 'pending', 0, 'Khám tuyến tiền liệt', 'Nam giới trên 50 tuổi, khám định kỳ'),
-(8, 9, 2, '2025-06-22', '08:00:00', 'confirmed', 0, 'Chụp CT ngực kiểm tra', 'Theo dõi sau điều trị viêm phổi'),
-(9, 10, 3, '2025-06-23', '13:30:00', 'pending', 0, 'Tư vấn dinh dưỡng ung thư', 'Phòng ngừa ung thư đại tràng'),
-(10, 13, 14, '2025-06-24', '10:30:00', 'confirmed', 0, 'Khám tiểu đường', 'Kiểm tra đường huyết định kỳ'),
-(11, 1, 2, '2025-06-21', '09:30:00', 'confirmed', 0, 'Khám tim định kỳ', 'Bệnh nhân có gia đình bị bệnh tim'),
-(12, 2, 3, '2025-06-21', '14:00:00', 'pending', 0, 'Đau đầu mãn tính', 'Stress công việc, cần tư vấn'),
-(13, 4, 14, '2025-06-22', '10:00:00', 'confirmed', 0, 'Khám sức khỏe trẻ em', 'Tiêm chủng định kỳ'),
-(8, 5, 2, '2025-06-15', '16:00:00', 'cancelled', 0, 'Khám da dị ứng', 'Bệnh nhân đã khỏi, không cần khám'),
-(9, 6, 3, '2025-06-16', '11:30:00', 'cancelled', 0, 'Khám mắt', 'Xung đột lịch trình, sẽ đặt lại'),
-(10, 7, 14, '2025-06-17', '15:00:00', 'cancelled', 0, 'Khám tai mũi họng', 'Triệu chứng đã thuyên giảm'),
-(11, 8, 2, '2025-06-02', '08:30:00', 'completed', 0, 'Khám tổng quát', 'Đã hoàn thành, kết quả bình thường'),
-(12, 9, 3, '2025-06-03', '14:30:00', 'completed', 0, 'Chụp X-quang lưng', 'Phát hiện thoái hóa cột sống nhẹ'),
-(13, 10, 14, '2025-06-04', '16:00:00', 'completed', 0, 'Tư vấn phòng chống ung thư', 'Đã tư vấn lối sống lành mạnh'),
-(8, 8, 2, '2025-06-09', '07:30:00', 'completed', 2, 'Cấp cứu đau bụng', 'Đã xử lý, không nghiêm trọng'),
-(9, 1, 3, '2025-06-08', '20:00:00', 'completed', 2, 'Đau ngực cấp', 'Tim bình thường, do căng thẳng');
+-- INSERT INTO appointments (patient_id, clinic_id, doctor_id, appointment_date, appointment_time, status, priority, reason, note) VALUES
+-- (8, 1, 2, '2025-06-10', '09:00:00', 'pending', 0, 'Đau ngực, khó thở', 'Bệnh nhân có tiền sử bệnh tim'),
+-- (9, 2, 3, '2025-06-11', '14:00:00', 'pending', 0, 'Đau đầu, chóng mặt', 'Bệnh nhân bị stress nhiều'),
+-- (10, 3, 14, '2025-06-12', '08:30:00', 'confirmed', 0, 'Đau khớp gối', 'Cần chụp X-quang'),
+-- (11, 4, 2, '2025-06-13', '10:00:00', 'confirmed', 0, 'Sốt cao, phát ban', 'Cần xét nghiệm máu'),
+-- (12, 5, 3, '2025-06-14', '15:00:00', 'cancelled', 0, 'Dị ứng da', 'Bệnh nhân hủy do bận việc'),
+-- (13, 6, 14, '2025-06-15', '09:30:00', 'completed', 0, 'Khám mắt định kỳ', 'Đã đeo kính cận'),
+-- (8, 1, 2, '2025-06-20', '08:30:00', 'confirmed', 0, 'Tái khám sau điều trị viêm phổi', 'Kiểm tra phục hồi sau 3 tuần điều trị'),
+-- (9, 8, 2, '2025-06-18', '10:00:00', 'pending', 0, 'Khám tổng quát định kỳ', 'Bệnh nhân có tiền sử phẫu thuật ruột thừa'),
+-- (10, 3, 14, '2025-06-25', '14:30:00', 'confirmed', 0, 'Tái khám khớp gối', 'Đánh giá hiệu quả vật lý trị liệu'),
+-- (11, 7, 3, '2025-06-16', '09:00:00', 'pending', 0, 'Đau tai, nghe kém', 'Triệu chứng xuất hiện sau cảm lạnh'),
+-- (12, 11, 2, '2025-06-17', '15:30:00', 'confirmed', 0, 'Đau bụng, khó tiêu', 'Bệnh nhân có tiền sử dị ứng thuốc'),
+-- (13, 12, 14, '2025-06-19', '11:00:00', 'pending', 0, 'Khám tuyến tiền liệt', 'Nam giới trên 50 tuổi, khám định kỳ'),
+-- (8, 9, 2, '2025-06-22', '08:00:00', 'confirmed', 0, 'Chụp CT ngực kiểm tra', 'Theo dõi sau điều trị viêm phổi'),
+-- (9, 10, 3, '2025-06-23', '13:30:00', 'pending', 0, 'Tư vấn dinh dưỡng ung thư', 'Phòng ngừa ung thư đại tràng'),
+-- (10, 13, 14, '2025-06-24', '10:30:00', 'confirmed', 0, 'Khám tiểu đường', 'Kiểm tra đường huyết định kỳ'),
+-- (11, 1, 2, '2025-06-21', '09:30:00', 'confirmed', 0, 'Khám tim định kỳ', 'Bệnh nhân có gia đình bị bệnh tim'),
+-- (12, 2, 3, '2025-06-21', '14:00:00', 'pending', 0, 'Đau đầu mãn tính', 'Stress công việc, cần tư vấn'),
+-- (13, 4, 14, '2025-06-22', '10:00:00', 'confirmed', 0, 'Khám sức khỏe trẻ em', 'Tiêm chủng định kỳ'),
+-- (8, 5, 2, '2025-06-15', '16:00:00', 'cancelled', 0, 'Khám da dị ứng', 'Bệnh nhân đã khỏi, không cần khám'),
+-- (9, 6, 3, '2025-06-16', '11:30:00', 'cancelled', 0, 'Khám mắt', 'Xung đột lịch trình, sẽ đặt lại'),
+-- (10, 7, 14, '2025-06-17', '15:00:00', 'cancelled', 0, 'Khám tai mũi họng', 'Triệu chứng đã thuyên giảm'),
+-- (11, 8, 2, '2025-06-02', '08:30:00', 'completed', 0, 'Khám tổng quát', 'Đã hoàn thành, kết quả bình thường'),
+-- (12, 9, 3, '2025-06-03', '14:30:00', 'completed', 0, 'Chụp X-quang lưng', 'Phát hiện thoái hóa cột sống nhẹ'),
+-- (13, 10, 14, '2025-06-04', '16:00:00', 'completed', 0, 'Tư vấn phòng chống ung thư', 'Đã tư vấn lối sống lành mạnh'),
+-- (8, 8, 2, '2025-06-09', '07:30:00', 'completed', 2, 'Cấp cứu đau bụng', 'Đã xử lý, không nghiêm trọng'),
+-- (9, 1, 3, '2025-06-08', '20:00:00', 'completed', 2, 'Đau ngực cấp', 'Tim bình thường, do căng thẳng');
 
 
 -- Update queues with appointment_id where possible
@@ -767,31 +767,31 @@ UPDATE doctors SET price = 320000 WHERE user_id = 23; -- Tiết niệu
 UPDATE doctors SET price = 270000 WHERE user_id = 24; -- Nội tiết
 UPDATE doctors SET price = 380000 WHERE user_id = 25; -- Chẩn đoán hình ảnh
 -- Thêm 15 appointments mới
-INSERT INTO appointments (patient_id, clinic_id, doctor_id, appointment_date, appointment_time, status, priority, reason, note) VALUES
+-- INSERT INTO appointments (patient_id, clinic_id, doctor_id, appointment_date, appointment_time, status, priority, reason, note) VALUES
 -- Patient 8 - Các khoa khác nhau
-(8, 2, 3, '2025-07-17', '09:00:00', 'confirmed', 0, 'Đau đầu, chóng mặt', 'Triệu chứng xuất hiện sau khi làm việc nhiều'),
-(8, 5, 19, '2025-07-18', '14:30:00', 'pending', 0, 'Nổi mẩn đỏ trên da', 'Có thể do dị ứng thời tiết'),
-(8, 7, 20, '2025-07-19', '10:00:00', 'confirmed', 0, 'Đau họng, khó nuốt', 'Triệu chứng kéo dài 3 ngày'),
+-- (8, 2, 3, '2025-07-17', '09:00:00', 'confirmed', 0, 'Đau đầu, chóng mặt', 'Triệu chứng xuất hiện sau khi làm việc nhiều'),
+-- (8, 5, 19, '2025-07-18', '14:30:00', 'pending', 0, 'Nổi mẩn đỏ trên da', 'Có thể do dị ứng thời tiết'),
+-- (8, 7, 20, '2025-07-19', '10:00:00', 'confirmed', 0, 'Đau họng, khó nuốt', 'Triệu chứng kéo dài 3 ngày'),
 
--- Patient 9 - Các khoa khác nhau
-(9, 3, 14, '2025-07-17', '15:00:00', 'confirmed', 0, 'Đau lưng, khó vận động', 'Sau khi nâng vật nặng'),
-(9, 6, 21, '2025-07-18', '08:30:00', 'pending', 0, 'Mờ mắt, nhức mắt', 'Làm việc nhiều với máy tính'),
-(9, 11, 18, '2025-07-19', '11:30:00', 'confirmed', 0, 'Đau bụng, buồn nôn', 'Sau khi ăn đồ cay'),
+-- -- Patient 9 - Các khoa khác nhau
+-- (9, 3, 14, '2025-07-17', '15:00:00', 'confirmed', 0, 'Đau lưng, khó vận động', 'Sau khi nâng vật nặng'),
+-- (9, 6, 21, '2025-07-18', '08:30:00', 'pending', 0, 'Mờ mắt, nhức mắt', 'Làm việc nhiều với máy tính'),
+-- (9, 11, 18, '2025-07-19', '11:30:00', 'confirmed', 0, 'Đau bụng, buồn nôn', 'Sau khi ăn đồ cay'),
 
--- Patient 10 - Các khoa khác nhau
-(10, 1, 2, '2025-07-17', '13:00:00', 'confirmed', 0, 'Đau ngực, khó thở', 'Khi leo cầu thang'),
-(10, 4, 17, '2025-07-18', '16:00:00', 'pending', 0, 'Sốt cao, ho nhiều', 'Trẻ em 5 tuổi'),
-(10, 8, 16, '2025-07-19', '09:00:00', 'confirmed', 0, 'Khám tổng quát định kỳ', 'Kiểm tra sức khỏe hàng năm'),
+-- -- Patient 10 - Các khoa khác nhau
+-- (10, 1, 2, '2025-07-17', '13:00:00', 'confirmed', 0, 'Đau ngực, khó thở', 'Khi leo cầu thang'),
+-- (10, 4, 17, '2025-07-18', '16:00:00', 'pending', 0, 'Sốt cao, ho nhiều', 'Trẻ em 5 tuổi'),
+-- (10, 8, 16, '2025-07-19', '09:00:00', 'confirmed', 0, 'Khám tổng quát định kỳ', 'Kiểm tra sức khỏe hàng năm'),
 
--- Patient 11 - Các khoa khác nhau
-(11, 2, 3, '2025-07-17', '10:30:00', 'confirmed', 0, 'Mất ngủ, stress', 'Công việc áp lực cao'),
-(11, 9, 25, '2025-07-18', '14:00:00', 'pending', 0, 'Chụp CT bụng', 'Theo dõi sau phẫu thuật'),
-(11, 12, 23, '2025-07-19', '15:30:00', 'confirmed', 0, 'Đau vùng thắt lưng', 'Nam giới 45 tuổi'),
+-- -- Patient 11 - Các khoa khác nhau
+-- (11, 2, 3, '2025-07-17', '10:30:00', 'confirmed', 0, 'Mất ngủ, stress', 'Công việc áp lực cao'),
+-- (11, 9, 25, '2025-07-18', '14:00:00', 'pending', 0, 'Chụp CT bụng', 'Theo dõi sau phẫu thuật'),
+-- (11, 12, 23, '2025-07-19', '15:30:00', 'confirmed', 0, 'Đau vùng thắt lưng', 'Nam giới 45 tuổi'),
 
--- Patient 12 - Các khoa khác nhau
-(12, 1, 2, '2025-07-17', '08:00:00', 'confirmed', 0, 'Tăng huyết áp', 'Có tiền sử gia đình'),
-(12, 10, 22, '2025-07-18', '11:00:00', 'pending', 0, 'Tư vấn phòng chống ung thư', 'Người thân bị ung thư'),
-(12, 13, 24, '2025-07-19', '13:30:00', 'confirmed', 0, 'Kiểm tra đường huyết', 'Tiền sử tiểu đường');
+-- -- Patient 12 - Các khoa khác nhau
+-- (12, 1, 2, '2025-07-17', '08:00:00', 'confirmed', 0, 'Tăng huyết áp', 'Có tiền sử gia đình'),
+-- (12, 10, 22, '2025-07-18', '11:00:00', 'pending', 0, 'Tư vấn phòng chống ung thư', 'Người thân bị ung thư'),
+-- (12, 13, 24, '2025-07-19', '13:30:00', 'confirmed', 0, 'Kiểm tra đường huyết', 'Tiền sử tiểu đường');
 
 -- Insert additional sample data into queues
 INSERT INTO queues (patient_id, clinic_id, record_id, appointment_id, status, priority, registered_online, qr_code, queue_number, shift_type, slot_date) VALUES
@@ -1057,23 +1057,23 @@ VALUES
 (25, 2, 8, 5.0, 'Khám cấp cứu nhanh chóng, xử lý tốt.', false),
 (26, 3, 9, 5.0, 'Rất hài lòng với cách tư vấn.', true);
 
-INSERT INTO appointments (patient_id, clinic_id, doctor_id, appointment_date, appointment_time, status, priority, reason, note)
-VALUES
-(8, 1, 2, '2025-07-01', '08:00:00', 'completed', 0, 'Khám tim định kỳ', 'Đã khám, kết quả tốt'),
-(9, 1, 2, '2025-07-02', '09:00:00', 'completed', 0, 'Tái khám sau điều trị', 'Ổn định'),
-(10, 1, 2, '2025-07-03', '10:00:00', 'completed', 0, 'Đau ngực nhẹ', 'Không phát hiện vấn đề nghiêm trọng'),
-(11, 1, 2, '2025-07-04', '08:30:00', 'completed', 0, 'Khám tim mạch lần đầu', 'Chỉ định xét nghiệm máu'),
-(12, 1, 2, '2025-07-05', '09:15:00', 'completed', 0, 'Mệt mỏi khi vận động', 'Khuyên theo dõi thêm'),
-(13, 1, 2, '2025-07-06', '10:45:00', 'completed', 0, 'Đau tức ngực', 'Chỉ định chụp CT'),
-(8, 1, 2, '2025-07-07', '08:00:00', 'completed', 0, 'Tái khám sau chụp CT', 'Kết quả bình thường'),
-(9, 1, 2, '2025-07-08', '09:00:00', 'completed', 0, 'Đo điện tim', 'Không có bất thường'),
-(10, 1, 2, '2025-07-09', '10:00:00', 'completed', 0, 'Khó thở khi ngủ', 'Có thể do căng thẳng'),
-(11, 1, 2, '2025-07-10', '11:00:00', 'completed', 0, 'Theo dõi cao huyết áp', 'Điều chỉnh thuốc'),
-(12, 1, 2, '2025-07-11', '08:30:00', 'completed', 0, 'Khám tim định kỳ', 'Không có vấn đề'),
-(13, 1, 2, '2025-07-12', '09:15:00', 'completed', 0, 'Đau ngực khi chạy bộ', 'Chỉ định xét nghiệm'),
-(8, 1, 2, '2025-07-13', '08:00:00', 'completed', 0, 'Kết quả xét nghiệm', 'Bình thường'),
-(9, 1, 2, '2025-07-14', '09:00:00', 'completed', 0, 'Kiểm tra nhịp tim', 'Ổn định'),
-(10, 1, 2, '2025-07-15', '10:00:00', 'completed', 0, 'Khám tim theo yêu cầu công ty', 'Không phát hiện bất thường');
+-- INSERT INTO appointments (patient_id, clinic_id, doctor_id, appointment_date, appointment_time, status, priority, reason, note)
+-- VALUES
+-- (8, 1, 2, '2025-07-01', '08:00:00', 'completed', 0, 'Khám tim định kỳ', 'Đã khám, kết quả tốt'),
+-- (9, 1, 2, '2025-07-02', '09:00:00', 'completed', 0, 'Tái khám sau điều trị', 'Ổn định'),
+-- (10, 1, 2, '2025-07-03', '10:00:00', 'completed', 0, 'Đau ngực nhẹ', 'Không phát hiện vấn đề nghiêm trọng'),
+-- (11, 1, 2, '2025-07-04', '08:30:00', 'completed', 0, 'Khám tim mạch lần đầu', 'Chỉ định xét nghiệm máu'),
+-- (12, 1, 2, '2025-07-05', '09:15:00', 'completed', 0, 'Mệt mỏi khi vận động', 'Khuyên theo dõi thêm'),
+-- (13, 1, 2, '2025-07-06', '10:45:00', 'completed', 0, 'Đau tức ngực', 'Chỉ định chụp CT'),
+-- (8, 1, 2, '2025-07-07', '08:00:00', 'completed', 0, 'Tái khám sau chụp CT', 'Kết quả bình thường'),
+-- (9, 1, 2, '2025-07-08', '09:00:00', 'completed', 0, 'Đo điện tim', 'Không có bất thường'),
+-- (10, 1, 2, '2025-07-09', '10:00:00', 'completed', 0, 'Khó thở khi ngủ', 'Có thể do căng thẳng'),
+-- (11, 1, 2, '2025-07-10', '11:00:00', 'completed', 0, 'Theo dõi cao huyết áp', 'Điều chỉnh thuốc'),
+-- (12, 1, 2, '2025-07-11', '08:30:00', 'completed', 0, 'Khám tim định kỳ', 'Không có vấn đề'),
+-- (13, 1, 2, '2025-07-12', '09:15:00', 'completed', 0, 'Đau ngực khi chạy bộ', 'Chỉ định xét nghiệm'),
+-- (8, 1, 2, '2025-07-13', '08:00:00', 'completed', 0, 'Kết quả xét nghiệm', 'Bình thường'),
+-- (9, 1, 2, '2025-07-14', '09:00:00', 'completed', 0, 'Kiểm tra nhịp tim', 'Ổn định'),
+-- (10, 1, 2, '2025-07-15', '10:00:00', 'completed', 0, 'Khám tim theo yêu cầu công ty', 'Không phát hiện bất thường');
 INSERT INTO doctor_ratings (appointment_id, doctor_id, patient_id, rating, comment) VALUES
 (1, 2, 8, 5, 'Bác sĩ rất tận tình, giải thích dễ hiểu'),
 (7, 2, 8, 4, 'Dịch vụ tốt, nhưng thời gian chờ hơi lâu'),

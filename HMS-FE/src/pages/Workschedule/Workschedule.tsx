@@ -52,11 +52,7 @@ const Workschedule = () => {
   const [selectedRecord, setSelectedRecord] = useState<WorkSchedule | null>(null);
   const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
   const [change, setChange] = useState(true);
-<<<<<<< HEAD
-
-=======
   const [date, setDate] = useState<any>(null);
->>>>>>> 97c9bae0cba091498ba789d057a39e8356129e4f
   // Filter states
   const [filters, setFilters] = useState({
     dateRange: null as any,
