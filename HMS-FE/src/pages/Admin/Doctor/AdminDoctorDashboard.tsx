@@ -257,6 +257,7 @@ const AdminDoctorDashboard = () => {
       delete createValue.confirm_password;
       await createDoctor(createValue);
       notification.success({ message: "Tạo tài khoản thành công" });
+      formCreate.resetFields();
       setReload(!reload);
       setIsCreateVisible(false);
     } catch (error: any) {
@@ -275,6 +276,7 @@ const AdminDoctorDashboard = () => {
   const handleUpdateOk = async () => {
     try {
       const values = await formUpdate.validateFields();
+      // console.log("values", values)
       if (!currentUser?.id) {
         notification.error({ message: "Không tìm thấy thông tin bác sĩ" });
         return;
@@ -301,6 +303,7 @@ const AdminDoctorDashboard = () => {
       await updateDoctor(updatedDoctor);
       setReload(!reload);
       notification.success({ message: "Cập nhật tài khoản thành công" });
+      formUpdate.resetFields();
 
       setIsUpdateVisible(false);
     } catch (error: any) {

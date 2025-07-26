@@ -31,8 +31,8 @@ specialtyRouter.get(
 // POST tạo mới chuyên khoa (admin)
 specialtyRouter.post(
   "/create",
-  authorize("admin"),
   authenticate,
+  authorize("admin"),
   checkUserStatus(),
   asyncHandler(specialtyController.createSpecialty)
 );

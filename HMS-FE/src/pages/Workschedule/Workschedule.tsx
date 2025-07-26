@@ -52,7 +52,11 @@ const Workschedule = () => {
   const [selectedRecord, setSelectedRecord] = useState<WorkSchedule | null>(null);
   const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
   const [change, setChange] = useState(true);
+<<<<<<< HEAD
 
+=======
+  const [date, setDate] = useState<any>(null);
+>>>>>>> 97c9bae0cba091498ba789d057a39e8356129e4f
   // Filter states
   const [filters, setFilters] = useState({
     dateRange: null as any,
@@ -62,24 +66,27 @@ const Workschedule = () => {
   });
 
   // Helper function to filter shifts based on current time
-  const getAvailableShifts = (allShifts: any[]) => {
+  const getAvailableShifts = (allShifts: any[], shiftdate: any) => {
+
     const now = new Date();
+    const currentDate = now.getFullYear().toString() + '-' + (now.getMonth() + 1).toString().padStart(2, '0') + '-' + now.getDate().toString().padStart(2, '0');
     const currentTime = now.getHours().toString().padStart(2, '0') + ':' +
       now.getMinutes().toString().padStart(2, '0');
-    return allShifts.filter(shift => {
-      // if (!shift.start_time) return false;
-      // // If editing, always include the current shift
-      // if (editingRecord && editingRecord.shift_id === shift.id) {
-      //   return true;
-      // }
-      // // Parse start_time from ISO format (e.g., '1970-01-01T08:00:00.000')
-      // const shiftDate = new Date(shift.start_time);
-      // const shiftTimeOnly = shiftDate.getUTCHours().toString().padStart(2, '0') + ':' +
-      //   shiftDate.getUTCMinutes().toString().padStart(2, '0');
-      // // Compare with current time
-      // return shiftTimeOnly > currentTime;
-      return true;
-    });
+    if (shiftdate == currentDate)
+      return allShifts.filter(shift => {
+        if (!shift.start_time) return false;
+        // If editing, always include the current shift
+        if (editingRecord && editingRecord.shift_id === shift.id) {
+          return true;
+        }
+        // Parse start_time from ISO format (e.g., '1970-01-01T08:00:00.000')
+        const shiftDate = new Date(shift.start_time);
+        const shiftTimeOnly = shiftDate.getUTCHours().toString().padStart(2, '0') + ':' +
+          shiftDate.getUTCMinutes().toString().padStart(2, '0');
+        // Compare with current time
+        return shiftTimeOnly > currentTime;
+      });
+    else return allShifts;
   };
 
   // Helper function to filter data based on filters
@@ -430,11 +437,12 @@ const Workschedule = () => {
               style={{ width: '100%' }}
               format="DD/MM/YYYY"
               disabledDate={current => current && current.isBefore(dayjs().startOf('day'))}
+              onChange={() => setDate(form.getFieldValue('work_date').format('YYYY-MM-DD'))}
             />
           </Form.Item>
           <Form.Item name="shift_id" label="Ca làm" rules={[{ required: true }]}>
             <Select placeholder="Chọn ca làm">
-              {getAvailableShifts(shifts).map(shift => (
+              {getAvailableShifts(shifts, date).map(shift => (
                 <Option key={shift.id} value={shift.id}>
                   {shift.name}
                 </Option>
@@ -463,3 +471,4 @@ const Workschedule = () => {
 };
 
 export default Workschedule;
+

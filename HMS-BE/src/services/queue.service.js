@@ -279,6 +279,7 @@ class QueueService {
       slot = validSameDaySlots[0];
     } else {
       // Ưu tiên 2: Tìm slot trong tương lai (ngày khác)
+      console.log("Ưu tiên 2: Tìm slot trong tương lai (ngày khác)",appointmentDate)
       slot = await prisma.availableSlot.findFirst({
         where: {
           doctor_id: to_doctor_id,
@@ -292,8 +293,6 @@ class QueueService {
         ],
       });
     }
-    console.log("slot", slot)
-
     if (!slot) {
       throw new Error("Bác sĩ được chọn không có ca khám nào rảnh sau thời gian appointment hiện tại.");
     }

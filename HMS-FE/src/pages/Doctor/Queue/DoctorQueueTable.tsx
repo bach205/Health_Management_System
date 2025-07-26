@@ -94,15 +94,15 @@ const QueueTable = () => {
             const appointmentDate = dayjs.utc(queue.appointment.appointment_date);
 
             // Kiểm tra xem giờ khám, ngày khám có đã qua hay không
-            // if (appointmentDate.utc().date() > dayjs().utc().date()
-            //     ||
-            //     (appointmentDate.utc().date() === dayjs().utc().date() && appointmentTime.utc().hour() > dayjs().utc().hour())
-            //     ||
-            //     (appointmentDate.utc().date() === dayjs().utc().date() && appointmentTime.utc().hour() === dayjs().utc().hour() && appointmentTime.utc().minute() > dayjs().utc().minute())
-            // ) {
-            //     message.error("Chưa đến giờ khám");
-            //     return;
-            // }
+            if (appointmentDate.utc().date() > dayjs().utc().date()
+                ||
+                (appointmentDate.utc().date() === dayjs().utc().date() && appointmentTime.utc().hour() > dayjs().utc().hour())
+                ||
+                (appointmentDate.utc().date() === dayjs().utc().date() && appointmentTime.utc().hour() === dayjs().utc().hour() && appointmentTime.utc().minute() > dayjs().utc().minute())
+            ) {
+                message.error("Chưa đến giờ khám");
+                return;
+            }
         }
         try {
             await updateQueueStatus(queueId, newStatus);
