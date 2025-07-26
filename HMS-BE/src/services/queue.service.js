@@ -267,10 +267,10 @@ class QueueService {
     });
 
     if (validSameDaySlots.length > 0) {
-      console.log(validSameDaySlots)
       slot = validSameDaySlots[0];
     } else {
       // Ưu tiên 2: Tìm slot trong tương lai (ngày khác)
+      console.log("Ưu tiên 2: Tìm slot trong tương lai (ngày khác)",appointmentDate)
       slot = await prisma.availableSlot.findFirst({
         where: {
           doctor_id: to_doctor_id,
