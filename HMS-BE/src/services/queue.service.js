@@ -271,7 +271,7 @@ class QueueService {
       return slotTime > appointmentTimeCheck;
     });
     // Thái sửa phần này
-    
+
 
     console.log("validSameDaySlots", validSameDaySlots)
 
@@ -567,7 +567,7 @@ class QueueService {
     // ====== LOG DEBUG ======
     console.log('🔍 [DEBUG] assignQueueNumber được gọi với params:', {
       appointment_id,
-      patient_id, 
+      patient_id,
       clinic_id,
       from_clinic_id,
       slot_date,
@@ -580,7 +580,7 @@ class QueueService {
     const oldQueue = await prisma.queue.findFirst({
       where: {
         patient_id,
-        clinic_id : from_clinic_id,
+        clinic_id: from_clinic_id,
         status: { in: ["waiting", "in_progress"] },
       },
     });
@@ -603,13 +603,13 @@ class QueueService {
     } else {
       throw new Error('slot_date không hợp lệ');
     }
-    
+
     // Xử lý slot_time
     if (typeof slot_time === 'string') {
       slotTimeVN = slot_time.trim();
     } else if (slot_time instanceof Date) {
       slotTimeVN = slot_time.toUTCString().slice(16, 25); // Lấy HH:mm:ss
-      
+
     } else {
       throw new Error('slot_time không hợp lệ');
     }
@@ -665,7 +665,7 @@ class QueueService {
       ORDER BY q.id DESC
       LIMIT 1
     `;
-  
+
     // ====== LOG DEBUG ======
     console.log('✅ [DEBUG] Queue được tạo thành công:', {
       id: newQueue.id,
@@ -677,30 +677,30 @@ class QueueService {
     // ====== END LOG ======
 
     // Nếu có appointment_id thì cập nhật appointment
-    if (appointment_id) {
+    if (appointment_id && to_doctor_id) {
       await prisma.appointment.update({
         where: { id: Number(appointment_id) },
         data: {
           appointment_date: new Date(slotDateVN),
           appointment_time: slot_time,
           doctor_id: to_doctor_id || undefined,
-          clinic_id : clinic_id,
+          clinic_id: clinic_id,
         },
       });
       const data = await prisma.availableSlot.findFirst({
-        where : {
-          doctor_id : to_doctor_id,
-          clinic_id : clinic_id,
+        where: {
+          doctor_id: to_doctor_id,
+          clinic_id: clinic_id,
         },
       })
       await prisma.availableSlot.update({
-        where : {
-          doctor_id : to_doctor_id,
-          clinic_id : clinic_id,
-          id : data.id,
+        where: {
+          doctor_id: to_doctor_id,
+          clinic_id: clinic_id,
+          id: data.id,
         },
-        data : {
-          is_available : false,
+        data: {
+          is_available: false,
         }
       })
     }
@@ -729,6 +729,23 @@ class QueueService {
       console.error('❌ [DEBUG] Lỗi khi gửi email:', err.message);
     }
     return newQueue;
+  }
+
+  static async getQueueNumbers(clinicId) {
+    const queues = await prisma.queue.findMany({
+      where: {
+        clinicId,
+      },
+      select: {
+        queue_number: true,
+        appointment_id: true,
+      },
+      orderBy: {
+        created_at: 'desc',
+      },
+    });
+
+    return queues;
   }
 
   /**

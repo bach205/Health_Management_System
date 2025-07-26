@@ -128,9 +128,16 @@ const NurseManageAppointment: React.FC = () => {
   const handleConfirmAppointment = async (appointment: Appointment) => {
     try {
       setLoading(true);
-      await confirmAppointmentService(appointment);
+      const result = await confirmAppointmentService(appointment);
+      setAppointments(prev =>
+        prev.map(app =>
+          app.id === result.data.appointment_id
+            ? { ...app, queueNumber: result.data.queue_number, status: 'confirmed' }
+            : app
+        )
+      );
       message.success('Xác nhận lịch hẹn thành công');
-      fetchAppointments();
+      // fetchAppointments();
     } catch (error) {
       message.error('Không thể xác nhận lịch hẹn');
     } finally {
@@ -247,10 +254,12 @@ const NurseManageAppointment: React.FC = () => {
     },
     {
       title: 'Trạng thái',
-      dataIndex: 'status',
       key: 'status',
       sorter: (a: Appointment, b: Appointment) => a.status.localeCompare(b.status),
-      render: (status: Appointment['status']) => getStatusTag(status),
+      render: (record: Appointment) => <Space direction="vertical" size="small">
+        <div>{getStatusTag(record.status)}</div>
+        <div>{record.queueNumber ? "Số Khám:" + record.queueNumber : ''}</div>
+      </Space>,
       className: 'whitespace-nowrap',
     },
     {
@@ -324,7 +333,7 @@ const NurseManageAppointment: React.FC = () => {
             allowClear
             size="large"
           >
-            <Option value="all">Tất cả</Option>
+            <Option value="all">Trạng thái</Option>
             <Option value="pending">Chờ xác nhận</Option>
             <Option value="confirmed">Đã xác nhận</Option>
             <Option value="cancelled">Đã hủy</Option>

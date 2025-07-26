@@ -40,6 +40,15 @@ queueRouter.post(
   asyncHandler(QueueController.checkInFromAppointment)
 );
 
+// Lấy số theo clinic_id
+queueRouter.get(
+  "/get_queue_number",
+  authenticate,
+  checkUserStatus(),
+  authorize("admin", "doctor", "nurse"),
+  asyncHandler(QueueController.GetAllQueuesNumberByClinicId)
+);
+
 // Hủy queue khi hủy appointment
 queueRouter.post(
   "/cancel",

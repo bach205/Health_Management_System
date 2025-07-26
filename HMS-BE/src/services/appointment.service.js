@@ -280,7 +280,7 @@ class AppointmentService {
   //chạy thành công
   async confirmAppointment({ appointment_id }) {
     console.log('🔍 [DEBUG] confirmAppointment được gọi với appointment_id:', appointment_id);
-
+    let queueResult = null;
     const appointment = await prisma.appointment.update({
       where: { id: parseInt(appointment_id) },
       data: { status: "confirmed" },
@@ -318,7 +318,7 @@ class AppointmentService {
 
       console.log('🕐 [DEBUG] slotTimeStr được xử lý:', slotTimeStr);
 
-      await QueueService.assignQueueNumber({
+      queueResult = await QueueService.assignQueueNumber({
         appointment_id: appointment.id,
         patient_id: appointment.patient_id,
         clinic_id: appointment.clinic_id,
@@ -328,13 +328,15 @@ class AppointmentService {
       });
       console.log('✅ [DEBUG] assignQueueNumber đã được gọi thành công!');
     } catch (err) {
+
       console.error('❌ [DEBUG] Lỗi khi gọi assignQueueNumber:', err.message);
+      throw new Error(err.message)
     }
     // ====== GỬI MAIL XÁC NHẬN LỊCH HẸN ======
     try {
       if (appointment.patient && appointment.patient.email) {
         console.log('📧 [DEBUG] Bắt đầu gửi email xác nhận lịch hẹn cho:', appointment.patient.email);
-        await sendPatientAppointmentConfirmationEmail(
+        sendPatientAppointmentConfirmationEmail(
           appointment.patient.email,
           appointment.patient.full_name || "Bệnh nhân",
           appointment.appointment_date instanceof Date ? appointment.appointment_date.toISOString().slice(0, 10) : appointment.appointment_date,
@@ -376,7 +378,7 @@ class AppointmentService {
 
 
     // ====== END ======
-    return appointment;
+    return queueResult;
   }
 
   /**

@@ -41,3 +41,8 @@ export const assignAdditionalClinic = async (data: {
   const response = await mainRequest.post("/queues/queue-clinic/assign", data);
   return response.data;
 };
+
+export const getAllQueueNumber = async (clinic_id: number) => {
+  const response = await mainRequest.get(`${BASE_URL}/get_queue_number?clinic_id=${clinic_id}`);
+  return response.data;
+}

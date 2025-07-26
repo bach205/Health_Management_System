@@ -200,7 +200,7 @@ const QueueTable = () => {
         },
 
         {
-            title: "Ngày khám",
+            title: "Ngày Đặt Lịch",
             dataIndex: "slot_date",
             key: "slot_date",
             width: 100,
@@ -318,7 +318,7 @@ const QueueTable = () => {
                     {/* Filter ngày khám */}
                     <DatePicker
                         allowClear
-                        placeholder="Lọc theo ngày khám"
+                        placeholder="Lọc theo ngày đặt lịch"
                         format="YYYY-MM-DD"
                         value={selectedDate ? dayjs(selectedDate) : null}
                         onChange={d => setSelectedDate(d ? d.format("YYYY-MM-DD") : null)}

@@ -83,6 +83,20 @@ class QueueController {
       next(error);
     }
   }
+  static async GetAllQueuesNumberByClinicId(req, res, next) {
+    try {
+      const { clinic_id } = req.query;
+      const queue = await QueueService.getQueueNumbers({
+        clinic_id,
+      });
+      return new OK({
+        message: "Lấy queue_number thành công",
+        metadata: queue,
+      }).send(res);
+    } catch (error) {
+      next(error);
+    }
+  }
 
   /**
    * Hủy queue khi hủy appointment
@@ -187,12 +201,12 @@ class QueueController {
         extra_cost = 0,
         priority = 2,
       } = req.body;
-      console.log("new clinic",req.body)
+      console.log("new clinic", req.body)
       // Nếu không có to_doctor_id mà có doctor_id thì dùng doctor_id
       if (!to_doctor_id && doctor_id) {
         to_doctor_id = doctor_id;
       }
-   
+
       // Validate các trường bắt buộc
       if (!to_doctor_id || !to_clinic_id || !from_clinic_id || !patient_id || !appointment_id) {
         return res.status(400).json({
@@ -200,7 +214,7 @@ class QueueController {
           message: "Thiếu thông tin chuyển phòng khám (bác sĩ, phòng khám, bệnh nhân, lịch hẹn)!"
         });
       }
-   
+
       const result = await QueueService.createOrderAndAssignToDoctorQueue({
         patient_id,
         from_clinic_id,
