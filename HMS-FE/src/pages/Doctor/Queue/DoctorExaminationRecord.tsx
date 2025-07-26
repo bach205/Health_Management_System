@@ -152,6 +152,7 @@ const DoctorExaminationRecordModal = ({
           medicine_id: med.id,
           note: med.note ?? null,
           dosage: med.dosage ?? null,
+          frequency: med.frequency ?? null,
           quantity: med.quantity ?? 0,
         }))
       });
@@ -248,6 +249,16 @@ const DoctorExaminationRecordModal = ({
     }
   };
 
+  const handleCheckDate = () => {
+
+    // Nếu không chọn phòng khám hoặc giờ khám thì bỏ qua
+    if (!isFollowUp || !selectedClinic || !selectedSlotId) {
+      setIsFollowUp(false)
+      setSelectedClinic(null)
+      setSelectedSlotId(null)
+    }
+  }
+
 
 
 
@@ -269,6 +280,7 @@ const DoctorExaminationRecordModal = ({
         setSelectedSlotId(null);
         setSelectedMedicine(null);
         setIsFormDisabled(false);
+        setIsReadyToSubmit(false);
         setIsSaved(false);
         onClose();
       }}
@@ -287,6 +299,7 @@ const DoctorExaminationRecordModal = ({
             onClick={() => {
               setIsFormDisabled(true);
               setIsReadyToSubmit(true);
+              handleCheckDate()
               setSelectedMedicine(null)
             }}
           >
@@ -321,7 +334,7 @@ const DoctorExaminationRecordModal = ({
         <Form.Item
           label="Kết quả khám chuyên khoa"
           name="result"
-          rules={[{ required: true, message: "Vui lòng nhập kết quả khám" }]}
+          rules={[{ required: true, message: "Vui lòng nhập kết quả khám", whitespace: true }]}
         >
           <Input.TextArea rows={3} placeholder="Nhập kết quả khám..." />
         </Form.Item>
@@ -378,10 +391,12 @@ const DoctorExaminationRecordModal = ({
                     {Object.keys(slotsByDate).map(date => {
                       const weekday = dayjs(date).locale('vi').format("dddd");
                       const dateStr = dayjs(date).format("DD/MM/YYYY");
-                      // Kiểm tra nếu ngày khám <= hôm nay thì bỏ qua
-                      // if (dayjs(date).isBefore(dayjs(), 'day')) {
-                      //   return null; // Nếu ngày khám là quá khứ thì bỏ qua
-                      // }
+                      // Kiểm tra nếu ngày khám <= hôm nay thì bỏ qua chỉ được chọn những ngày tiếp theo
+                      // console.log(weekday, dateStr)
+                      console.log(dayjs(date).utc().date())
+                      if (dayjs(date).utc().date() <= dayjs().utc().date()) {
+                        return <span className="text-gray-500">Không còn lịch khám của những ngày tiếp theo</span>;
+                      }
                       return (
                         <Button
                           key={date}
@@ -419,8 +434,9 @@ const DoctorExaminationRecordModal = ({
 
                       const isAvailable = slot.is_available;
 
-                      // Kiểm tra nếu giờ kết thúc <= lúc hiện tại thì bỏ qua
-                      if (dayjs().get("hour") > endDate.getUTCHours()) {
+                      // Kiểm tra nếu giờ kết thúc <= lúc hiện tại thì bỏ qua và ngày khám là quá khứ thì bỏ qua
+                      // chỉ được chọn những ngày tiếp theo
+                      if (dayjs().utc().date() > endDate.getUTCDate() && dayjs().utc().hour() > endDate.getUTCHours()) {
                         return null; // Nếu ngày khám là quá khứ thì bỏ qua
                       }
 

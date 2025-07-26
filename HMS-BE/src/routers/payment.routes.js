@@ -47,6 +47,13 @@ paymentRouter.patch(
     asyncHandler(paymentController.updatePaymentStatus)
 );
 
+paymentRouter.patch(
+    "/cancel/:id",
+    authenticate,
+    authorize("admin", "nurse", 'patient'),
+    asyncHandler(paymentController.cancelPayment)
+);
+
 paymentRouter.put(
     "/update-payment-medicine-status/:id",
     

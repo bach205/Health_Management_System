@@ -183,8 +183,8 @@ class QueueService {
         from_clinic_id: currentQueue ? currentQueue.clinic_id : null,
         to_clinic_id: to_clinic_id,
         reason,
+        appointment_id: app,
       },
-      orderBy: { created_at: "desc" }
     });
 
     // 6. Emit socket event để thông báo cho phòng khám mới

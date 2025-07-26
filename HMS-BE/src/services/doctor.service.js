@@ -627,11 +627,19 @@ class DoctorService {
                 date_of_birth: row.date_of_birth,
                 address: row.address?.trim() || '',
                 password: row.password?.trim(),
-                specialty_id: row.specialty_id || null,
+                // specialty_id: row.specialty_id || null,
                 price: parseInt(row.price, 10),
                 bio: row.bio?.trim() || '',
             };
-
+            const specialty = await prisma.specialty.findUnique({
+                where: {
+                    name: row.specialty_name
+                }
+            });
+            if (!specialty) {
+                throw new BadRequestError(`Dòng ${i + 1}: Chuyên khoa ${row.specialty_name} không tồn tại`);
+            }
+            doctorData.specialty_id = specialty.id;
 
 
             if (row.avatar && row.avatar !== null && row.avatar !== "NULL" && row.avatar !== undefined) {

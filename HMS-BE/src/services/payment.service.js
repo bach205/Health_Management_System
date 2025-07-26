@@ -35,10 +35,16 @@ class PaymentService {
 
       // 3.2. Thêm từng dịch vụ từ ExaminationOrder
       for (const order of orders) {
-        console.log("order", order)
+        const fromClinic = await prisma.clinic.findUnique({
+          where: { id: order.from_clinic_id },
+        });
+        const toClinic = await prisma.clinic.findUnique({
+          where: { id: order.to_clinic_id },
+        });
+        console.log("order", order, "fromClinic", fromClinic, "toClinic", toClinic)
         invoiceItemsData.push({
           record_id: record.id,
-          description: `Chi phí dịch vụ từ phòng khám ${order.from_clinic_id} đến ${order.to_clinic_id}`,
+          description: `Chi phí dịch vụ từ phòng khám ${fromClinic.name} đến ${toClinic.name}`,
           amount: order.extra_cost,
         });
       }
@@ -229,6 +235,29 @@ class PaymentService {
     // console.log(">>>>>>>>data", data)
     return data
   };
+
+  cancelPayment = async (id, status) => {
+    if (id == null || !status) {
+      throw new Error("ID và trạng thái không được để trống");
+    }
+  
+    const paymentData = await prisma.payment.findFirst({
+      where: { record_id: Number(id) }
+    });
+  //  console.log(paymentData)
+    if (!paymentData) throw new Error("Không tìm thấy payment");  
+    console.log(paymentData)
+    const payment = await prisma.payment.update({
+      where: { id: paymentData.id },
+      data: { 
+        status : status,
+        method:"bank_transfer",
+        note : "thank toán tiền thuốc chữa trị"
+      }
+    });
+    
+    return payment;
+  }
 
   webhook = async (data) => {
     const {

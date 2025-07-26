@@ -149,7 +149,11 @@ const ScheduleTable = ({ data = [], setReload, loading = false, visible, selecte
               Xem kết quả khám
             </Button>
           </Tooltip>
-        );
+        )
+      } else if (record?.payment_status === "canceled") {
+        return (
+          <p className="text-red-500">Bạn đã hủy hóa đơn</p>
+        )
       }
     }
 
@@ -377,6 +381,8 @@ const ScheduleTable = ({ data = [], setReload, loading = false, visible, selecte
         record={selectedPaymentRecord}
         modalVisible={viewPaymentModalVisible}
         setModalVisible={handleViewPaymentModalCancel}
+        setReload={setReload}
+        reload={reload}
       />
     </ConfigProvider>
   )

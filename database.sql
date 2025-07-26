@@ -1,12 +1,12 @@
 -- Create and use the hospital database
--- create database hospital;
+drop database hospital;
+create database hospital;
 
 USE hospital;
 
 -- Disable safe update mode to allow updates without WHERE clause on key columns
 SET SQL_SAFE_UPDATES = 0;
 
--- drop database hospital;
 
 -- Table for system users
 CREATE TABLE users (
@@ -340,8 +340,8 @@ INSERT INTO users (email, password, full_name, phone, role, date_of_birth, gende
 ('drtranthilan@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Trần Thị Lan', '0987654322', 'doctor', '1988-07-22', 'female', 'TP.HCM', 'local', TRUE),
 ('nurselevanhai@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Lê Văn Hải', '0987654323', 'nurse', '1990-11-10', 'male', 'Đà Nẵng', 'local', TRUE),
 ('nursephamthihong@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Phạm Thị Hồng', '0987654324', 'nurse', '1992-04-05', 'female', 'Hà Nội', 'local', TRUE),
-('receptionhoangvanduc@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Hoàng Văn Đức', '0987654325', 'receptionist', '1995-09-12', 'male', 'TP.HCM', 'local', TRUE),
-('receptionvuthianh@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Vũ Thị Ánh ', '0987654326', 'receptionist', '1993-12-20', 'female', 'Đà Nẵng', 'local', TRUE),
+-- ('receptionhoangvanduc@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Hoàng Văn Đức', '0987654325', 'receptionist', '1995-09-12', 'male', 'TP.HCM', 'local', TRUE),
+-- ('receptionvuthianh@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Vũ Thị Ánh ', '0987654326', 'receptionist', '1993-12-20', 'female', 'Đà Nẵng', 'local', TRUE),
 ('tranvanhung@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Trần Văn Hùng', '0987654328', 'patient', '1998-02-14', 'male', 'TP.HCM', 'local', TRUE),
 ('lethithu@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Lê Thị Thu', '0987654329', 'patient', '1996-08-25', 'female', 'Hà Nội', 'local', TRUE),
 ('phamvantuan@gmail.com', '$2b$10$EM75hze8S5jL76D88ozXOekeWhZIFxiS8s8UqOT3l6PHaqqwU5hh2', 'Phạm Văn Tuấn', '0987654330', 'patient', '1990-05-17', 'male', 'Đà Nẵng', 'facebook', TRUE),
@@ -593,17 +593,17 @@ VALUES
 
 -- Insert sample data into payments
 INSERT INTO payments (patient_id, record_id, amount, method, payment_time, note, status) VALUES
-(8, 1, 1500000.00, 'card', '2025-06-01 11:00:00', 'Thanh toán lần 1', 'paid'),
-(9, 2, 2500000.00, 'cash', '2025-06-02 15:00:00', 'Thanh toán toàn bộ', 'paid'),
-(10, 3, 800000.00, 'bank_transfer', '2025-06-03 10:00:00', 'Thanh toán lần 1', 'paid'),
-(11, 4, 1200000.00, 'e_wallet', '2025-06-04 12:00:00', 'Thanh toán toàn bộ', 'paid'),
-(12, 5, 500000.00, 'card', '2025-06-05 16:00:00', 'Thanh toán lần 1', 'paid'),
-(8, 6, 300000.00, 'cash', '2025-06-06 10:00:00', 'Thanh toán toàn bộ', 'paid'),
-(9, 7, 1000000.00, 'cash', '2025-06-07 09:00:00', 'Thanh toán toàn bộ', 'paid'),
-(10, 8, 950000.00, 'card', '2025-06-08 14:30:00', 'Thanh toán lần 1', 'paid'),
-(11, 9, 2200000.00, 'bank_transfer', '2025-06-09 10:45:00', 'Thanh toán toàn bộ', 'paid'),
-(11, 10, 1100000.00, 'e_wallet', '2025-06-10 13:15:00', 'Thanh toán lần 1', 'paid'),
-(11, 11, 1300000.00, 'cash', '2025-06-11 11:50:00', 'Thanh toán toàn bộ', 'paid');
+(8, 1, 1500000.00, 'card', '2025-07-01 11:00:00', 'Thanh toán lần 1', 'paid'),
+(9, 2, 2500000.00, 'cash', '2025-07-02 15:00:00', 'Thanh toán toàn bộ', 'paid'),
+(10, 3, 800000.00, 'bank_transfer', '2025-07-03 10:00:00', 'Thanh toán lần 1', 'paid'),
+(11, 4, 1200000.00, 'e_wallet', '2025-07-04 12:00:00', 'Thanh toán toàn bộ', 'paid'),
+(12, 5, 500000.00, 'card', '2025-07-05 16:00:00', 'Thanh toán lần 1', 'paid'),
+(8, 6, 300000.00, 'cash', '2025-07-06 10:00:00', 'Thanh toán toàn bộ', 'paid'),
+(9, 7, 1000000.00, 'cash', '2025-07-07 09:00:00', 'Thanh toán toàn bộ', 'paid'),
+(10, 8, 950000.00, 'card', '2025-07-08 14:30:00', 'Thanh toán lần 1', 'paid'),
+(11, 9, 2200000.00, 'bank_transfer', '2025-07-09 10:45:00', 'Thanh toán toàn bộ', 'paid'),
+(11, 10, 1100000.00, 'e_wallet', '2025-07-10 13:15:00', 'Thanh toán lần 1', 'paid'),
+(11, 11, 1300000.00, 'cash', '2025-07-11 11:50:00', 'Thanh toán toàn bộ', 'paid');
 
 -- Insert sample data into invoice_items
 INSERT INTO invoice_items (record_id, description, amount) VALUES
@@ -985,13 +985,18 @@ CREATE TABLE blogs (
     FOREIGN KEY (category_id) REFERENCES blog_categories(id)
 );
 
--- Blog <-> Tag many-to-many
+CREATE TABLE tags (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL UNIQUE
+);
+
+
 CREATE TABLE _BlogTags (
     A INT NOT NULL, -- blog_id
     B INT NOT NULL, -- tag_id
     PRIMARY KEY (A, B),
-    FOREIGN KEY (A) REFERENCES blogs(id) ON DELETE CASCADE,
-    FOREIGN KEY (B) REFERENCES blog_tags(id) ON DELETE CASCADE
+    CONSTRAINT fk_blog FOREIGN KEY (A) REFERENCES blogs(id) ON DELETE CASCADE,
+    CONSTRAINT fk_tag FOREIGN KEY (B) REFERENCES tags(id) ON DELETE CASCADE
 );
 INSERT INTO blog_categories (name) VALUES 
 ('Sức khỏe cộng đồng'),
@@ -1131,17 +1136,3 @@ INSERT INTO doctor_ratings (appointment_id, doctor_id, patient_id, rating, comme
 --   true,
 --   8
 -- );
-
-CREATE TABLE tags (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL UNIQUE
-);
-
-
-CREATE TABLE _BlogTags (
-    A INT NOT NULL, -- blog_id
-    B INT NOT NULL, -- tag_id
-    PRIMARY KEY (A, B),
-    CONSTRAINT fk_blog FOREIGN KEY (A) REFERENCES blogs(id) ON DELETE CASCADE,
-    CONSTRAINT fk_tag FOREIGN KEY (B) REFERENCES tags(id) ON DELETE CASCADE
-);

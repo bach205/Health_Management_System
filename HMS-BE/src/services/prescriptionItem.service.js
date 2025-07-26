@@ -6,6 +6,7 @@ class PrescriptionItemService {
   // Tạo nhiều prescription items
   // record_id: ID của bản ghi kê đơn
   static async createMany(record_id, items = []) {
+    console.log(items)
     if (!record_id) throw new BadRequestError("Thiếu record_id");
     if (!Array.isArray(items)) throw new BadRequestError("Danh sách thuốc không hợp lệ");
 
