@@ -1,3 +1,111 @@
+# Functional Requirements Screenshots
+
+## User Authentication
+
+### User Register
+![User Register](images/user_register.png)
+
+### User Login
+![User Login](images/user_login.png)
+
+### Change Password
+![Change Password](images/change_password.png)
+
+### User Profile Updating
+![User Profile Updating](images/user_profile_updating.png)
+
+### Login with Google
+![Login with Google](images/login_google.png)
+
+### Reset Password
+![Reset Password](images/reset_password.png)
+
+---
+
+## System Administration
+
+### Doctor Management
+![Doctor Management](images/doctor_management.png)
+
+### Nurse Management
+![Nurse Management](images/nurse_management.png)
+
+### Specialty Management
+![Specialty Management](images/specialty_management.png)
+
+### Medicine Management
+![Medicine Management](images/medicine_management.png)
+
+### Dashboard
+![Dashboard](images/dashboard.png)
+
+
+---
+
+## Appointment Management
+
+### Patient Search Doctor
+![Patient Search Doctor](images/patient_search_doctor.png)
+
+
+### Booking Appointment
+![Booking Appointment](images/booking_appointment.png)
+
+### Appointment Management
+![Appointment Management](images/appointment_management.png)
+
+### System Send Queue Number to Patient via Email
+![System Send Queue Number](images/system_send_queue.png)
+
+### Appointment history
+![Patient view all their appointment ](images/Patient_history_of_appointment.png)
+
+---
+
+## Customer Support
+
+### Chatbot for Customer Support
+![Chatbot for Customer Support](images/chatbot_support.png)
+
+---
+
+## Communication & Document
+
+### Conversation Management
+![Conversation Management](images/conversation_management.png)
+
+### Document Management
+![Document Management](images/document_management.png)
+
+---
+
+## Examination
+
+### Queue Management
+![Queue Management](images/queue_management.png)
+
+### Examination Chain
+![Examination Chain](images/examination_chain.png)
+
+### Notification
+![Notification](images/notification.png)
+
+### Examination Result and Feedback
+![Examination Result and Feedback](images/exam_result_feedback.png)
+
+### Payment
+![Payment](images/payment.png)
+
+---
+
+## Blog
+
+### Blog Category Management
+![Blog Category Management](images/blog_category.png)
+
+### Blog Management
+![Blog Management](images/blog_management.png)
+
 # Hospital Management System (HMS)
 
 Hệ thống quản lý bệnh viện gồm 3 thành phần chính:
