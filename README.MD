@@ -84,14 +84,15 @@
 ### Queue Management
 ![Queue Management](images/queue_management.png)
 
-### Examination Chain
-![Examination Chain](images/examination_chain.png)
+### Clinic Monitor
+![Clinic Monitor](images/clinic_monitor.png)
 
 ### Notification
 ![Notification](images/notification.png)
 
 ### Examination Result and Feedback
-![Examination Result and Feedback](images/exam_result_feedback.png)
+![Examination Feedback](images/exam_result_feedback.png)
+![Examination Result](images/exam_result.png)
 
 ### Payment
 ![Payment](images/payment.png)
